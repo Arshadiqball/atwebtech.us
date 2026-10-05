@@ -1,0 +1,15 @@
+RewriteEngine On
+
+# Keep passwords, messages, and the server program off the public web.
+RewriteRule ^data/ - [F,L]
+RewriteRule ^(server\.py|package\.json)$ - [F,L]
+
+# The admin and the contact form call /api/...
+RewriteRule ^api(?:/.*)?$ api.php [L,QSA]
+
+# Service and journal pages that are not real files.
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^services(?:/.*)?$ service/index.html [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^blog/.+ blog/index.html [L]
