@@ -1,0 +1,40 @@
+{
+  "contact": {
+    "email": "info@atwebtechnologies.com",
+    "phone": "+1 (480) 743-4017",
+    "phoneHref": "tel:+14807434017",
+    "address": "Tucson, Arizona, United States"
+  },
+  "posts": [
+    {
+      "id": "a1agent01",
+      "slug": "what-you-should-hand-an-ai-agent",
+      "title": "What you should hand an AI agent",
+      "excerpt": "An agent is useful when it owns a bounded job, a small set of tools, and a person who reviews the exceptions.",
+      "category": "Agents",
+      "date": "2026-09-18",
+      "published": true,
+      "body": "Most agent projects start with a model and a long prompt. The ones that stay in production start with a job description.\n\nGive the agent one outcome, the systems it may touch, and the cases it must hand back to a person. A support agent that can read an order, draft a reply, and open a ticket is easier to trust than an agent that is allowed to do anything in the inbox.\n\nThe review step is part of the product. Exceptions, refunds, and anything that changes money or access should land in a queue with the source material attached. That is how a team learns where the agent is confident and where the process is still unclear.\n\nATwebTech builds these as systems: the model, the tools, the logs, and the handoff. If the job cannot be explained in a few sentences, it is not ready to be automated."
+    },
+    {
+      "id": "b2chat02",
+      "slug": "chatbots-stall-after-the-demo",
+      "title": "Chatbots stall after the demo",
+      "excerpt": "A polished demo answers the happy path. A working chatbot has to survive the questions your team did not script.",
+      "category": "Chatbots",
+      "date": "2026-08-27",
+      "published": true,
+      "body": "The demo conversation is usually the one everyone rehearsed. The real traffic is shorter, messier, and full of questions that belong to another department.\n\nBefore a chatbot goes on a site, write down the handful of jobs it is allowed to finish. Checking an order, booking a call, and explaining a plan are finishable. Open-ended advice about a contract is not, unless a person is on the other side of that path.\n\nKeep the transcript, the source it used, and the point where it escalated. Those three records tell you what to teach next. Without them, every improvement is a guess.\n\nThe interface can be quiet. The work is in the boundaries: what the bot knows, when it should stop, and how a person picks the conversation up without asking the customer to start over."
+    },
+    {
+      "id": "c3auto03",
+      "slug": "automate-the-workflow-you-already-trust",
+      "title": "Automate the workflow you already trust",
+      "excerpt": "Start with the process your team can already explain. Automation should shorten that path, not invent a new one.",
+      "category": "Automation",
+      "date": "2026-08-04",
+      "published": true,
+      "body": "A workflow is ready for automation when someone can walk it from the first email to the last handoff. If the steps change depending on who is in the office, the model will copy that confusion.\n\nPick a process with a clear input and a clear done state. Intake, qualification, document collection, and status updates are common places to begin. The system should do the repetitive reading and routing, then leave a record a person can audit.\n\nMeasure the queue, not the model. Did the work move faster? Did fewer items come back? Did the team stop retyping the same details into a second tool?\n\nThat is the standard we use with clients. The technology can be ambitious. The first release should be a process the business already believes in."
+    }
+  ]
+}
