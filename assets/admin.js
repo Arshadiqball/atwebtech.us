@@ -3,6 +3,7 @@
   var content = null;
   var view = "contact";
   var editing = null;
+  var serviceEditing = null;
   var message = "";
   var error = "";
 
@@ -28,6 +29,7 @@
     app.innerHTML =
       '<header class="top"><a href="/"><img src="/image/logolight.png" alt="ATwebTech"></a>' +
       '<nav><a href="#contact" data-view="contact"' + (view === "contact" ? ' aria-current="page"' : "") + ">Contact</a>" +
+      '<a href="#services" data-view="services"' + (view === "services" || view === "service-edit" ? ' aria-current="page"' : "") + ">Services</a>" +
       '<a href="#journal" data-view="journal"' + (view === "journal" || view === "edit" ? ' aria-current="page"' : "") + ">Journal</a>" +
       '<a href="#messages" data-view="messages"' + (view === "messages" ? ' aria-current="page"' : "") + ">Messages</a>" +
       '<a href="#mail" data-view="mail"' + (view === "mail" ? ' aria-current="page"' : "") + ">Mail</a>" +
@@ -40,6 +42,7 @@
         event.preventDefault();
         view = link.getAttribute("data-view");
         editing = null;
+        serviceEditing = null;
         message = "";
         error = "";
         render();
@@ -100,6 +103,121 @@
           render();
         }).catch(function (err) {
           error = err.message;
+          render();
+        });
+      });
+      return;
+    }
+    if (view === "service-edit") {
+      var service = serviceEditing || { title: "", slug: "", summary: "", image: "/services/", accent: "#67e8f9", order: (content.services || []).length + 1, points: [], body: "", published: true };
+      var pointText = Array.isArray(service.points) ? service.points.join("\n") : "";
+      shell(
+        "<h1>" + (service.id ? "Edit service" : "New service") + "</h1>" +
+        '<p class="sub">This is the page that opens when someone clicks the service. One point per line.</p>' +
+        showError(error) +
+        '<form id="service-form" class="card">' +
+        '<label for="title">Name</label><input id="title" name="title" required value="' + escapeHtml(service.title) + '">' +
+        '<div class="row"><div><label for="slug">Link slug</label><input id="slug" name="slug" value="' + escapeHtml(service.slug || "") + '"></div>' +
+        '<div><label for="order">Order</label><input id="order" name="order" type="number" value="' + escapeHtml(service.order) + '"></div></div>' +
+        '<label for="summary">Summary</label><input id="summary" name="summary" required value="' + escapeHtml(service.summary) + '">' +
+        '<div class="row"><div><label for="image">Image path</label><input id="image" name="image" required value="' + escapeHtml(service.image) + '"></div>' +
+        '<div><label for="accent">Accent</label><input id="accent" name="accent" value="' + escapeHtml(service.accent || "#67e8f9") + '"></div></div>' +
+        '<label for="points">What it includes</label><textarea id="points" name="points" class="short">' + escapeHtml(pointText) + "</textarea>" +
+        '<label for="body">Detail</label><textarea id="body" name="body" required>' + escapeHtml(service.body) + "</textarea>" +
+        '<label class="check"><input type="checkbox" name="published"' + (service.published !== false ? " checked" : "") + "> Show on the site</label>" +
+        '<div class="actions"><button class="primary" type="submit">Save service</button>' +
+        '<button class="quiet" type="button" id="cancel">Cancel</button>' +
+        (service.id ? '<a class="quiet" href="/services/' + encodeURIComponent(service.slug) + '/" target="_blank" rel="noopener">View page</a>' : "") +
+        (service.id ? '<button class="danger" type="button" id="remove">Delete</button>' : "") +
+        "</div></form>"
+      );
+      document.getElementById("cancel").addEventListener("click", function () {
+        view = "services";
+        serviceEditing = null;
+        error = "";
+        render();
+      });
+      var removeService = document.getElementById("remove");
+      if (removeService) {
+        removeService.addEventListener("click", function () {
+          if (!window.confirm("Delete this service?")) return;
+          api("/api/admin/services/" + service.id, { method: "DELETE" }).then(function () {
+            message = "Service deleted.";
+            return api("/api/admin/content");
+          }).then(function (body) {
+            content = body;
+            view = "services";
+            serviceEditing = null;
+            render();
+          }).catch(function (err) {
+            error = err.message;
+            render();
+          });
+        });
+      }
+      document.getElementById("service-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        var form = event.target;
+        var payload = {
+          title: form.title.value,
+          slug: form.slug.value,
+          summary: form.summary.value,
+          image: form.image.value,
+          accent: form.accent.value,
+          order: Number(form.order.value),
+          points: form.points.value,
+          body: form.body.value,
+          published: form.published.checked
+        };
+        var request = service.id
+          ? api("/api/admin/services/" + service.id, { method: "PUT", body: JSON.stringify(payload) })
+          : api("/api/admin/services", { method: "POST", body: JSON.stringify(payload) });
+        request.then(function () {
+          message = "Service saved.";
+          return api("/api/admin/content");
+        }).then(function (body) {
+          content = body;
+          view = "services";
+          serviceEditing = null;
+          error = "";
+          render();
+        }).catch(function (err) {
+          error = err.message;
+          serviceEditing = Object.assign({}, service, payload, { points: form.points.value.split("\n").filter(Boolean) });
+          render();
+        });
+      });
+      return;
+    }
+    if (view === "services") {
+      var services = content.services || [];
+      shell(
+        '<div class="actions" style="justify-content:space-between"><div><h1>Services</h1><p class="sub">Each one opens as its own page from the homepage cards.</p></div>' +
+        '<button class="primary" type="button" id="new-service">New service</button></div>' +
+        (message ? '<p class="ok">' + escapeHtml(message) + "</p>" : "") +
+        (services.length ? '<div class="list">' + services.map(function (item) {
+          return '<a class="item" href="#service" data-id="' + escapeHtml(item.id) + '"><span><strong>' + escapeHtml(item.title) +
+            "</strong><span>/" + escapeHtml(item.slug) + "</span></span>" +
+            '<span class="status">' + (item.published === false ? "Hidden" : "Live") + "</span></a>";
+        }).join("") + "</div>" : "<p class=\"sub\">No services yet.</p>")
+      );
+      var addService = document.getElementById("new-service");
+      if (addService) {
+        addService.addEventListener("click", function () {
+          serviceEditing = null;
+          view = "service-edit";
+          error = "";
+          message = "";
+          render();
+        });
+      }
+      app.querySelectorAll("[data-id]").forEach(function (row) {
+        row.addEventListener("click", function (event) {
+          event.preventDefault();
+          serviceEditing = services.find(function (item) { return item.id === row.getAttribute("data-id"); });
+          view = "service-edit";
+          error = "";
+          message = "";
           render();
         });
       });

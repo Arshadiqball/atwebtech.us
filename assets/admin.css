@@ -82,6 +82,7 @@ input, textarea, select {
 }
 
 textarea { min-height: 280px; resize: vertical; line-height: 1.55; }
+textarea.short { min-height: 120px; }
 
 .row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.8rem; }
 

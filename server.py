@@ -269,7 +269,16 @@ def normalize_message(raw):
 def public_content(content):
     posts = [post for post in content.get("posts", []) if post.get("published")]
     posts.sort(key=lambda post: post.get("date", ""), reverse=True)
-    return {"contact": content.get("contact", {}), "posts": posts}
+    services = [service for service in content.get("services", []) if service.get("published", True)]
+    services.sort(key=lambda service: (service.get("order", 0), service.get("title", "")))
+    return {"contact": content.get("contact", {}), "posts": posts, "services": services}
+
+
+def services_of(content):
+    services = content.get("services")
+    if not isinstance(services, list):
+        content["services"] = []
+    return content["services"]
 
 
 def slugify(text):
@@ -317,6 +326,55 @@ def normalize_post(raw, posts, existing=None):
         "excerpt": excerpt,
         "category": category,
         "date": date,
+        "body": body,
+        "published": bool(raw.get("published", True)),
+    }
+
+
+def normalize_service(raw, services, existing=None):
+    title = clean_text(raw.get("title"), 80)
+    if not title:
+        raise ValueError("Add a service name.")
+    summary = clean_text(raw.get("summary"), 320)
+    if len(summary) < 12:
+        raise ValueError("Add a short summary.")
+    body = str(raw.get("body") or "").replace("\r\n", "\n").strip()
+    if len(body) < 20:
+        raise ValueError("Write a little more in the detail.")
+    if len(body) > 20000:
+        raise ValueError("That service page is too long.")
+    image = clean_text(raw.get("image"), 180)
+    if not re.fullmatch(r"/[A-Za-z0-9_./-]+", image) or ".." in image:
+        raise ValueError("Use an image path like /services/ai_chatbots.jpg.")
+    accent = clean_text(raw.get("accent"), 7) or "#67e8f9"
+    if not re.fullmatch(r"#[0-9A-Fa-f]{6}", accent):
+        raise ValueError("Use a color like #67e8f9.")
+    try:
+        order = int(raw.get("order") if raw.get("order") not in ("", None) else (existing or {}).get("order", len(services) + 1))
+    except (TypeError, ValueError):
+        raise ValueError("Order should be a number.")
+    source = raw.get("points")
+    if isinstance(source, list):
+        lines = source
+    else:
+        lines = str(source or "").splitlines()
+    points = []
+    for line in lines:
+        point = clean_text(line, 160)
+        if point:
+            points.append(point)
+    if len(points) > 8:
+        raise ValueError("Keep the list to 8 points.")
+    slug = unique_slug(services, slugify(raw.get("slug") or title), None if existing is None else existing.get("id"))
+    return {
+        "id": existing["id"] if existing else secrets.token_hex(8),
+        "slug": slug,
+        "title": title,
+        "summary": summary,
+        "image": image,
+        "accent": accent.lower(),
+        "order": order,
+        "points": points,
         "body": body,
         "published": bool(raw.get("published", True)),
     }
@@ -419,7 +477,8 @@ class Handler(BaseHTTPRequestHandler):
                 return
             content = load_content()
             posts = sorted(content.get("posts", []), key=lambda post: post.get("date", ""), reverse=True)
-            self.send_json(200, {"contact": content.get("contact", {}), "posts": posts})
+            services = sorted(services_of(content), key=lambda service: (service.get("order", 0), service.get("title", "")))
+            self.send_json(200, {"contact": content.get("contact", {}), "posts": posts, "services": services})
             return
         self.serve_static(path)
 
@@ -449,6 +508,17 @@ class Handler(BaseHTTPRequestHandler):
                 if token:
                     sessions.pop(token, None)
                 self.send_json(200, {"ok": True}, [("Set-Cookie", "at_session=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0")])
+                return
+            if path == "/api/admin/services":
+                if not self.require_admin():
+                    return
+                raw = self.read_json()
+                with write_lock:
+                    content = load_content()
+                    service = normalize_service(raw, services_of(content))
+                    content["services"].append(service)
+                    save_content(content)
+                self.send_json(201, {"service": service})
                 return
             if path == "/api/admin/posts":
                 if not self.require_admin():
@@ -503,6 +573,23 @@ class Handler(BaseHTTPRequestHandler):
                     save_content(content)
                 self.send_json(200, {"contact": contact})
                 return
+            service_prefix = "/api/admin/services/"
+            if path.startswith(service_prefix):
+                if not self.require_admin():
+                    return
+                service_id = path[len(service_prefix):]
+                raw = self.read_json()
+                with write_lock:
+                    content = load_content()
+                    existing = next((service for service in services_of(content) if service["id"] == service_id), None)
+                    if not existing:
+                        self.send_json(404, {"error": "That service is gone."})
+                        return
+                    updated = normalize_service(raw, content["services"], existing)
+                    content["services"] = [updated if service["id"] == service_id else service for service in content["services"]]
+                    save_content(content)
+                self.send_json(200, {"service": updated})
+                return
             prefix = "/api/admin/posts/"
             if path.startswith(prefix):
                 if not self.require_admin():
@@ -527,6 +614,21 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         path = unquote(urlparse(self.path).path)
+        service_prefix = "/api/admin/services/"
+        if path.startswith(service_prefix):
+            if not self.require_admin():
+                return
+            service_id = path[len(service_prefix):]
+            with write_lock:
+                content = load_content()
+                before = len(services_of(content))
+                content["services"] = [service for service in content["services"] if service["id"] != service_id]
+                if len(content["services"]) == before:
+                    self.send_json(404, {"error": "That service is gone."})
+                    return
+                save_content(content)
+            self.send_json(200, {"ok": True})
+            return
         prefix = "/api/admin/posts/"
         if not path.startswith(prefix):
             self.send_json(404, {"error": "Not found."})
@@ -564,6 +666,17 @@ class Handler(BaseHTTPRequestHandler):
     def serve_static(self, path):
         if path != "/" and any(path == item.rstrip("/") or path.startswith(item) for item in BLOCKED_PREFIXES):
             self.send_error(404)
+            return
+        if path in ("/services", "/services/") or (
+            path.startswith("/services/") and not (ROOT / path.lstrip("/")).resolve().is_file()
+        ):
+            candidate = (ROOT / path.lstrip("/")).resolve()
+            try:
+                candidate.relative_to(ROOT)
+            except ValueError:
+                self.send_error(404)
+                return
+            self._send_file(ROOT / "service" / "index.html")
             return
         if path in ("/blog", "/blog/"):
             self._send_file(ROOT / "blog" / "index.html")

@@ -261,6 +261,183 @@ body.journal-page .empty {
 
 #at-journal .all:hover { color: var(--ink); }
 
+#services [data-at-extra-wrap] { display: contents; }
+
+#services [data-at-extra] {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 320px;
+  border-radius: 1rem;
+  overflow: hidden;
+  color: #fff;
+  text-decoration: none;
+}
+
+#services [data-at-extra] img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+#services [data-at-extra] strong {
+  position: relative;
+  z-index: 1;
+  margin: 1rem;
+  padding: 0.75rem 0.9rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.72);
+}
+
+.service-grid {
+  margin-top: 2.8rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+}
+
+.service-card {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  min-height: 340px;
+  border-radius: 22px;
+  overflow: hidden;
+  text-decoration: none;
+  color: #fff;
+  isolation: isolate;
+}
+
+.service-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.45s ease;
+}
+
+.service-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05) 20%, rgba(0, 0, 0, 0.82) 100%);
+}
+
+.service-card:hover img { transform: scale(1.05); }
+
+.service-card-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 0.4rem;
+  padding: 1.1rem;
+}
+
+.service-card-copy strong {
+  font-family: var(--font-heading), "Plus Jakarta Sans", sans-serif;
+  font-size: 1.25rem;
+  letter-spacing: -0.03em;
+}
+
+.service-card-copy span {
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+.service-detail { max-width: 920px; }
+
+.service-detail h1 {
+  margin-top: 1rem;
+  font-size: clamp(2.8rem, 6vw, 4.8rem);
+  max-width: 14ch;
+}
+
+.service-hero {
+  position: relative;
+  margin: 2rem 0 0;
+  border-radius: 28px;
+  overflow: hidden;
+  min-height: 280px;
+}
+
+.service-hero img {
+  display: block;
+  width: 100%;
+  height: min(460px, 58vw);
+  object-fit: cover;
+}
+
+.service-hero span {
+  position: absolute;
+  left: 1.2rem;
+  bottom: 1.2rem;
+  width: 72px;
+  height: 4px;
+  border-radius: 999px;
+}
+
+.service-points {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.service-points li {
+  padding: 0.95rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  line-height: 1.45;
+}
+
+.service-cta {
+  display: inline-flex;
+  margin-top: 0.6rem;
+  padding: 0.9rem 1.25rem;
+  border-radius: 999px;
+  text-decoration: none;
+  color: #041018;
+  background: linear-gradient(90deg, #67e8f9, #818cf8);
+  font-weight: 700;
+}
+
+.service-cta:hover { filter: brightness(1.05); }
+
+.service-more { margin-top: 3.5rem; }
+
+.service-more h2 {
+  font-size: 1.6rem;
+  margin-bottom: 1rem;
+}
+
+.service-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.service-links a {
+  text-decoration: none;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  color: var(--muted);
+}
+
+.service-links a:hover { color: var(--ink); }
+
+@media (max-width: 700px) {
+  .service-points { grid-template-columns: 1fr; }
+  .service-hero img { height: 220px; }
+}
+
 body.journal-page :focus-visible,
 #at-journal :focus-visible {
   outline: 2px solid #00b7d4;

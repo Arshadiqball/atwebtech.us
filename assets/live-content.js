@@ -1,6 +1,7 @@
 (function () {
   var state = null;
   var applying = false;
+  var servicesByImage = {};
 
   function ensureStyle() {
     if (document.getElementById("at-editorial")) return;
@@ -138,6 +139,64 @@
     target.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 
+  function serviceFrom(node) {
+    var card = node && node.closest && node.closest(".group");
+    if (!card) return null;
+    var img = card.querySelector("img");
+    if (!img) return null;
+    return servicesByImage[img.getAttribute("src") || ""] || null;
+  }
+
+  function openService(service) {
+    location.href = "/services/" + encodeURIComponent(service.slug) + "/";
+  }
+
+  function bindServiceCards(services) {
+    servicesByImage = {};
+    (services || []).forEach(function (service) {
+      if (service.image) servicesByImage[service.image] = service;
+    });
+    var grid = document.querySelector("#services .grid");
+    if (grid) {
+      var present = {};
+      grid.querySelectorAll("img").forEach(function (img) {
+        if (img.closest("[data-at-extra]")) return;
+        present[img.getAttribute("src") || ""] = true;
+      });
+      var extras = (services || []).filter(function (service) {
+        return service.image && !present[service.image];
+      }).map(function (service) {
+        return '<a class="at-service-extra" data-at-extra href="/services/' + encodeURIComponent(service.slug) + '/">' +
+          '<img src="' + escapeHtml(service.image) + '" alt="">' +
+          "<strong>" + escapeHtml(service.title) + "</strong></a>";
+      }).join("");
+      var holder = grid.querySelector("[data-at-extra-wrap]");
+      if (!extras) {
+        if (holder) holder.remove();
+      } else if (!holder || holder.getAttribute("data-markup") !== extras) {
+        if (!holder) {
+          holder = document.createElement("div");
+          holder.setAttribute("data-at-extra-wrap", "");
+          grid.appendChild(holder);
+        }
+        holder.setAttribute("data-markup", extras);
+        holder.innerHTML = extras;
+      }
+    }
+    document.querySelectorAll("#services .group").forEach(function (card) {
+      var img = card.querySelector("img");
+      var service = img && servicesByImage[img.getAttribute("src") || ""];
+      if (!service) return;
+      if (card.getAttribute("tabindex") !== "0") card.setAttribute("tabindex", "0");
+      card.setAttribute("role", "link");
+      card.setAttribute("aria-label", service.title);
+      var heading = card.querySelector("h3");
+      if (heading && heading.textContent.trim() !== service.title) heading.textContent = service.title;
+      var blurb = card.querySelector("p");
+      if (blurb && blurb.textContent.trim() !== service.summary) blurb.textContent = service.summary;
+    });
+  }
+
   function paint() {
     if (!state || applying) return;
     applying = true;
@@ -147,10 +206,28 @@
       ensureJournal(state.posts || []);
       ensureNav();
       ensureAnchors();
+      bindServiceCards(state.services || []);
     } finally {
       applying = false;
     }
   }
+
+  document.addEventListener("click", function (event) {
+    var service = serviceFrom(event.target);
+    if (!service) return;
+    event.preventDefault();
+    openService(service);
+  }, true);
+
+  document.addEventListener("keydown", function (event) {
+    if (event.key !== "Enter" && event.key !== " ") return;
+    var card = event.target.closest && event.target.closest(".group");
+    if (!card || document.activeElement !== card) return;
+    var service = serviceFrom(card);
+    if (!service) return;
+    event.preventDefault();
+    openService(service);
+  });
 
   document.addEventListener("click", function (event) {
     var link = event.target.closest && event.target.closest("a");

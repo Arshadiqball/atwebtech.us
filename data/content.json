@@ -36,5 +36,143 @@
       "published": true,
       "body": "A workflow is ready for automation when someone can walk it from the first email to the last handoff. If the steps change depending on who is in the office, the model will copy that confusion.\n\nPick a process with a clear input and a clear done state. Intake, qualification, document collection, and status updates are common places to begin. The system should do the repetitive reading and routing, then leave a record a person can audit.\n\nMeasure the queue, not the model. Did the work move faster? Did fewer items come back? Did the team stop retyping the same details into a second tool?\n\nThat is the standard we use with clients. The technology can be ambitious. The first release should be a process the business already believes in."
     }
+  ],
+  "services": [
+    {
+      "id": "svcchat01",
+      "slug": "ai-chatbots",
+      "title": "AI Chatbots",
+      "summary": "Conversational AI that understands context, handles complex queries, and integrates with your existing platforms \u2014 24/7 without human overhead.",
+      "image": "/services/ai_chatbots.jpg",
+      "accent": "#a78bfa",
+      "order": 1,
+      "published": true,
+      "points": [
+        "Answers from your own site, docs, and product data",
+        "Hands the hard cases to a person with the transcript attached",
+        "Books calls, checks orders, and explains plans",
+        "Works on the site, and in the inboxes your team already uses"
+      ],
+      "body": "A chatbot is useful when it can finish a small set of jobs. Checking an order, booking a consultation, and explaining a plan are finishable. Open-ended advice about a contract is not, unless someone on your team is ready to take that conversation.\n\nATwebTech builds the bot around those jobs. It reads the material you already trust, answers in your voice, and stops when the question is outside its lane. The customer does not start over. The person who picks it up sees the question, the source, and what the bot already said.\n\nU.S. teams usually want this on a marketing site, a client portal, or a support inbox. The first release covers the questions that already fill the queue. Later releases add the next job only after the first one is steady."
+    },
+    {
+      "id": "svcauto02",
+      "slug": "ai-automation",
+      "title": "AI Automation",
+      "summary": "Eliminate repetitive tasks with intelligent, self-healing workflows. From data pipelines to approval chains \u2014 automated end-to-end.",
+      "image": "/services/ai_automation.jpg",
+      "accent": "#fb923c",
+      "order": 2,
+      "published": true,
+      "points": [
+        "Intake, routing, and status updates your team can already explain",
+        "A record of what moved, what waited, and what came back",
+        "Connections to the CRM, inbox, and files you use now",
+        "A first release small enough to trust in a week of real work"
+      ],
+      "body": "Automation should shorten a process the business already believes in. If the steps change depending on who is in the office, a workflow will copy that confusion.\n\nWe start with a clear input and a clear done state. A lead arrives, a file is requested, a status is updated, an approval is recorded. The system does the repetitive reading and routing. A person still sees the exceptions.\n\nFor U.S. companies this usually sits between a website form, a CRM, and the inbox. The measure is the queue: did the work move faster, and did the team stop retyping the same details into a second tool?"
+    },
+    {
+      "id": "svcagent03",
+      "slug": "ai-agents",
+      "title": "AI Agents",
+      "summary": "Autonomous agents that plan multi-step tasks, reason over documents, and execute actions in real-time \u2014 no human-in-the-loop required.",
+      "image": "/services/ai_agents.jpg",
+      "accent": "#fb7185",
+      "order": 3,
+      "published": true,
+      "points": [
+        "One outcome, a short list of tools, and a person for exceptions",
+        "Actions limited to the systems you choose",
+        "Logs for every step the agent took",
+        "A review queue for refunds, access, and anything that moves money"
+      ],
+      "body": "An agent is a worker with a job description, not a chat window with extra permissions. It should own one outcome, the systems it may touch, and the cases it must hand back.\n\nA support agent that can read an order, draft a reply, and open a ticket is easier to trust than an agent allowed to do anything in the inbox. Refunds, access changes, and anything that moves money stay in a queue with the source material attached.\n\nATwebTech builds the model, the tools, the logs, and the handoff together. If the job cannot be explained in a few sentences, it is not ready to run on its own."
+    },
+    {
+      "id": "svcml04",
+      "slug": "machine-learning",
+      "title": "Machine Learning",
+      "summary": "Custom ML models trained on your proprietary data. Predictive, adaptive, and continuously improving as your business grows.",
+      "image": "/services/machine_learning.jpg",
+      "accent": "#93c5fd",
+      "order": 4,
+      "published": true,
+      "points": [
+        "A model tied to a decision your team already makes",
+        "Training data you are allowed to use",
+        "A way to see when the model is unsure",
+        "A path to retrain when the business changes"
+      ],
+      "body": "A model is worth building when it changes a decision you already make: which lead to call, which order looks wrong, which ticket should go first.\n\nWe use the records you already keep, and we say plainly when those records are too thin. The output is a score or a label a person can check, not a black box dropped into the business.\n\nThe work includes the first model, the place it shows up in the product, and the habit of looking at the misses. That is how it stays useful after the launch week."
+    },
+    {
+      "id": "svccv05",
+      "slug": "computer-vision",
+      "title": "Computer Vision",
+      "summary": "Real-time image and video analysis \u2014 object detection, quality inspection, facial recognition, and automated visual reporting at scale.",
+      "image": "/services/computer_vision.jpg",
+      "accent": "#5eead4",
+      "order": 5,
+      "published": true,
+      "points": [
+        "Inspection, counting, and document capture",
+        "A human review step for anything that affects a person",
+        "Photos and video from the cameras or phones you already have",
+        "A report your operators can read without a data team"
+      ],
+      "body": "Vision projects work when the camera is looking at a job a person can already describe. A scratch on a part, a missing label, a form that needs the fields pulled out.\n\nWe are careful with anything that identifies a person. If a use case needs that, it is scoped with the review and the retention rules up front, not added after the demo.\n\nThe result is a check on the line or in the upload flow, plus a record of what the system saw. Operators can override it. That override is how the next version gets better."
+    },
+    {
+      "id": "svcnlp06",
+      "slug": "nlp-solutions",
+      "title": "NLP Solutions",
+      "summary": "Extract meaning, sentiment, and structured insights from unstructured text. Summarization, classification, translation \u2014 all unified.",
+      "image": "/services/nlp_solutions.jpg",
+      "accent": "#6ee7b7",
+      "order": 6,
+      "published": true,
+      "points": [
+        "Sort incoming mail, tickets, and reviews",
+        "Summaries that keep the source attached",
+        "Fields pulled out of contracts, forms, and notes",
+        "Language support for the customers you actually serve"
+      ],
+      "body": "Most companies already have the text. It sits in inboxes, tickets, call notes, and reviews. The useful step is turning that pile into a queue someone can act on.\n\nWe classify, summarize, and pull out the fields your process needs. Every summary points back to the sentence it came from, so a person can check it before it changes a record.\n\nFor U.S. teams this often starts with support email or sales notes. Translation is added when you have a real second audience, not as a feature nobody asked to maintain."
+    },
+    {
+      "id": "svccon07",
+      "slug": "ai-consulting",
+      "title": "AI Consulting",
+      "summary": "Strategic AI roadmaps tailored to your industry. We audit your current stack, identify high-ROI opportunities, and guide implementation.",
+      "image": "/services/ai_consulting.jpg",
+      "accent": "#a5b4fc",
+      "order": 7,
+      "published": true,
+      "points": [
+        "A look at the tools and the process, not just the model",
+        "A short list of jobs worth doing first",
+        "A build plan with owners and a review step",
+        "A recommendation to wait, when the data is not ready"
+      ],
+      "body": "Consulting here is a decision about what to build, and what to leave alone. We sit with the people who do the work, map the path from the first request to the last handoff, and name the step that is slow for a boring reason.\n\nThe output is a short plan: the job, the systems it touches, the person who reviews exceptions, and the first release. If the records are too messy to support a model, we say so.\n\nU.S. companies usually use this before a build, or when a pilot stalled after the demo. The point is a next step the team can start, not a slide about the future of AI."
+    },
+    {
+      "id": "svcanl08",
+      "slug": "predictive-analytics",
+      "title": "Predictive Analytics",
+      "summary": "Forecast customer behavior, supply chain demand, and market trends with precision models built on your historical and real-time data.",
+      "image": "/services/predictive_analytics.jpg",
+      "accent": "#d8b4fe",
+      "order": 8,
+      "published": true,
+      "points": [
+        "Forecasts tied to a decision, such as staffing or inventory",
+        "History you can actually trust",
+        "A plain explanation of what moved the number",
+        "A check against what happened last month"
+      ],
+      "body": "A forecast is only useful if someone will do something different because of it. Order more, staff the afternoon, call the accounts that are about to go quiet.\n\nWe build that from the history you have: orders, seasons, pipeline, and the exceptions your team already knows about. The page shows the number and the few factors behind it, so a manager can disagree with the model using their own knowledge.\n\nWe do not promise a perfect read of the market. We build a forecast you can compare with what actually happened, and we adjust it when the business changes."
+    }
   ]
 }
