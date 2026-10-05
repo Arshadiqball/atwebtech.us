@@ -17,7 +17,17 @@
     options = options || {};
     options.credentials = "same-origin";
     options.headers = Object.assign({ "Content-Type": "application/json" }, options.headers || {});
-    return fetch(path, options).then(function (response) {
+    function request(target) {
+      return fetch(target, options);
+    }
+    var primary = request(path);
+    if (path.indexOf("/api/") === 0) {
+      primary = primary.then(function (response) {
+        if (response.status !== 404) return response;
+        return request("/api.php?r=" + encodeURIComponent(path.slice(5)));
+      });
+    }
+    return primary.then(function (response) {
       return response.json().catch(function () { return {}; }).then(function (body) {
         if (!response.ok) throw new Error(body.error || "Something went wrong.");
         return body;

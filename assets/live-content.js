@@ -1,3 +1,10 @@
+function fetchApi(path, options) {
+  return fetch(path, options).then(function (response) {
+    if (response.status !== 404 || path.indexOf("/api/") !== 0) return response;
+    return fetch("/api.php?r=" + encodeURIComponent(path.slice(5)), options);
+  });
+}
+
 (function () {
   var state = null;
   var applying = false;
@@ -268,7 +275,7 @@
       note.style.fontSize = "14px";
       form.appendChild(note);
     }
-    fetch("/api/messages", {
+    fetchApi("/api/messages", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -285,7 +292,7 @@
     });
   }, true);
 
-  fetch("/api/content")
+  fetchApi("/api/content")
     .then(function (response) { return response.json(); })
     .then(function (data) {
       state = data;

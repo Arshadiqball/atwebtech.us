@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="dark plus_jakarta_sans_7fb69205-module__KKMSJW__variable inter_fbdc5002-module__JJo7gW__variable space_grotesk_69f201a1-module__Cfcaxq__variable">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -7,19 +7,55 @@
     <meta name="description" content="Tell ATwebTech in Tucson about your project. The team replies within a few hours on business days." />
     <link rel="icon" href="/favicon.ico" sizes="any" />
     <link rel="stylesheet" href="/_next/static/chunks/0c5j64uvu9pve.css" />
+    <link rel="stylesheet" href="/_next/static/chunks/2icpak-wrrcec.css" />
     <link rel="stylesheet" href="/assets/contact.css" />
+    <script>
+      (function () {
+        if (localStorage.getItem("alphaai-theme") === "light") document.documentElement.classList.remove("dark");
+      })();
+    </script>
   </head>
   <body>
-    <header class="top">
-      <a class="brand" href="/"><img src="/image/logolight.png" alt="ATwebTech" /></a>
-      <nav aria-label="Primary">
-        <a href="/">Home</a>
-        <a href="/#services">Services</a>
-        <a href="/#features">Industries</a>
-        <a href="/#projects">Portfolio</a>
-      </nav>
-      <a class="quote" href="#quote">Get A Quote</a>
+    <header class="site-nav" id="site-nav">
+      <div class="max-w-7xl mx-auto px-6 flex items-center justify-between">
+        <a class="brand" href="/" aria-label="ATwebTech home">
+          <img class="logo-on-dark" src="/image/logo.png" alt="ATwebTech" />
+          <img class="logo-on-light" src="/image/logolight.png" alt="" />
+        </a>
+        <div class="flex items-center gap-3">
+          <button class="theme" type="button" aria-label="Toggle Theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"></path></svg>
+          </button>
+          <button class="burger" type="button" aria-label="Open Menu" aria-expanded="false" aria-controls="site-menu">
+            <span></span><span></span><span></span>
+          </button>
+        </div>
+      </div>
     </header>
+    <div class="menu-backdrop" hidden></div>
+    <div class="menu" id="site-menu" hidden>
+      <div class="menu-head">
+        <img src="/image/logo.png" alt="ATwebTech" />
+        <button class="menu-close" type="button" aria-label="Close menu">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+        </button>
+      </div>
+      <nav aria-label="Primary">
+        <a href="/#services">Services <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"></path></svg></a>
+        <a href="/#projects">Projects <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"></path></svg></a>
+        <a href="/#products">Products <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"></path></svg></a>
+        <a href="/#process">Process <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"></path></svg></a>
+        <a href="/#pricing">Pricing <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"></path></svg></a>
+        <a href="/#contact">Contact <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h10v10M7 17 17 7"></path></svg></a>
+      </nav>
+      <div class="menu-contact">
+        <p>Get in touch</p>
+        <a href="mailto:info@atwebtechnologies.com">info@atwebtechnologies.com</a>
+        <a href="tel:+14807434017">+1 (480) 743-4017</a>
+        <span>Tucson, Arizona, United States</span>
+      </div>
+    </div>
     <main>
       <section class="stage">
         <div class="copy">

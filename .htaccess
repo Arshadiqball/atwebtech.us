@@ -5,7 +5,7 @@ RewriteRule ^data/ - [F,L]
 RewriteRule ^(server\.py|package\.json)$ - [F,L]
 
 # The admin and the contact form call /api/...
-RewriteRule ^api(?:/.*)?$ api.php [L,QSA]
+RewriteRule ^api(?:/(.*))?$ api.php?r=$1 [L,QSA]
 
 # Service and journal pages that are not real files.
 RewriteCond %{REQUEST_FILENAME} !-f
