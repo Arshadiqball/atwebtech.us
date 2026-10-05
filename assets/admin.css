@@ -18,7 +18,7 @@ body {
   font-family: var(--font-sans), Inter, sans-serif;
 }
 
-button, input, textarea { font: inherit; color: inherit; }
+button, input, textarea, select { font: inherit; color: inherit; }
 
 a { color: inherit; }
 
@@ -73,7 +73,7 @@ h1 {
 
 label { display: block; font-size: 0.85rem; margin: 0.9rem 0 0.35rem; }
 
-input, textarea {
+input, textarea, select {
   width: 100%;
   border: 1px solid var(--line);
   background: #fff;

@@ -48,6 +48,7 @@
       "<div>" + escapeHtml(contact.address || "") + "</div>" +
       '<div><a href="mailto:' + escapeHtml(contact.email || "") + '">' + escapeHtml(contact.email || "") + "</a></div>" +
       '<div><a href="' + escapeHtml(contact.phoneHref || "#") + '">' + escapeHtml(contact.phone || "") + "</a></div>" +
+      '<div><a href="/privacy/">Privacy</a> · <a href="/terms/">Terms</a></div>' +
       "</div></div></footer>"
     );
   }

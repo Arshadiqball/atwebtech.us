@@ -1,11 +1,18 @@
 #!/usr/bin/env python3
 """Local site server: static files plus a small admin API for contact details and journal posts."""
 
+import datetime
 import hashlib
 import json
+import os
 import re
 import secrets
+import smtplib
+import ssl
 import threading
+from email.message import EmailMessage
+from email.utils import formataddr
+from zoneinfo import ZoneInfo
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import unquote, urlparse
@@ -14,6 +21,8 @@ ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
 CONTENT_PATH = DATA / "content.json"
 AUTH_PATH = DATA / "auth.json"
+MESSAGES_PATH = DATA / "messages.json"
+MAIL_PATH = DATA / "mail.json"
 HOST = "127.0.0.1"
 PORT = 4173
 DEFAULT_PASSWORD = "atwebtech"
@@ -53,6 +62,208 @@ def save_content(content):
     tmp = CONTENT_PATH.with_suffix(".json.tmp")
     tmp.write_text(json.dumps(content, indent=2) + "\n")
     tmp.replace(CONTENT_PATH)
+
+
+def load_messages():
+    if not MESSAGES_PATH.exists():
+        return []
+    return json.loads(MESSAGES_PATH.read_text())
+
+
+def save_messages(messages):
+    DATA.mkdir(exist_ok=True)
+    MESSAGES_PATH.write_text(json.dumps(messages, indent=2) + "\n")
+
+
+EMAIL_RE = re.compile(r"[^@\s]+@[^@\s]+\.[^@\s]+")
+TUCSON = ZoneInfo("America/Phoenix")
+
+
+def mail_defaults():
+    return {
+        "host": "",
+        "port": 587,
+        "user": "",
+        "password": "",
+        "from": "arshad@atwebtechnologies.com",
+        "fromName": "At Web Technologies",
+        "to": "arshadiqbal.d@gmail.com, aisal@atwebtechnologies.com",
+        "tls": "starttls",
+    }
+
+
+def split_emails(value):
+    parts = []
+    for piece in str(value or "").replace(";", ",").split(","):
+        email = piece.strip()
+        if email:
+            parts.append(email)
+    return parts
+
+
+def tucson_now():
+    now = datetime.datetime.now(TUCSON)
+    hour = now.strftime("%I").lstrip("0") or "12"
+    return f"{now.strftime('%B')} {now.day}, {now.year}, {hour}:{now.strftime('%M %p')} MST"
+
+
+def load_mail():
+    settings = mail_defaults()
+    if MAIL_PATH.exists():
+        stored = json.loads(MAIL_PATH.read_text())
+        if isinstance(stored, dict):
+            settings.update(stored)
+    env_map = {
+        "host": "SMTP_HOST",
+        "port": "SMTP_PORT",
+        "user": "SMTP_USER",
+        "password": "SMTP_PASSWORD",
+        "from": "SMTP_FROM",
+        "to": "SMTP_TO",
+        "tls": "SMTP_TLS",
+    }
+    for key, name in env_map.items():
+        value = os.environ.get(name)
+        if value:
+            settings[key] = int(value) if key == "port" else value
+    return settings
+
+
+def public_mail(settings):
+    shown = {key: settings.get(key) for key in ("host", "port", "user", "from", "fromName", "to", "tls")}
+    shown["passwordSet"] = bool(settings.get("password"))
+    return shown
+
+
+def normalize_mail(raw, previous):
+    host = clean_text(raw.get("host"), 200)
+    user = clean_text(raw.get("user"), 200)
+    sender = clean_text(raw.get("from") or raw.get("sender"), 200)
+    from_name = clean_text(raw.get("fromName") or raw.get("from_name") or previous.get("fromName"), 80)
+    recipients = split_emails(clean_text(raw.get("to"), 400))
+    tls = clean_text(raw.get("tls") or raw.get("encryption"), 20) or "starttls"
+    if tls not in ("starttls", "ssl"):
+        raise ValueError("Choose STARTTLS or SSL.")
+    try:
+        port = int(raw.get("port") or 587)
+    except (TypeError, ValueError):
+        raise ValueError("Enter a mail port.")
+    if port < 1 or port > 65535:
+        raise ValueError("Enter a mail port.")
+    if host and not re.fullmatch(r"[A-Za-z0-9.-]+", host):
+        raise ValueError("Enter the mail server host.")
+    if sender and not EMAIL_RE.fullmatch(sender):
+        raise ValueError("Enter a valid From address.")
+    if not recipients or any(not EMAIL_RE.fullmatch(email) for email in recipients):
+        raise ValueError("Enter the addresses that should receive requests.")
+    password = str(raw.get("password") or raw.get("pass") or "")
+    if not password:
+        password = previous.get("password", "")
+    if len(password) > 200:
+        raise ValueError("That mail password is too long.")
+    tls_name = clean_text(raw.get("tlsName") or previous.get("tlsName"), 200)
+    if tls_name and not re.fullmatch(r"[A-Za-z0-9.-]+", tls_name):
+        raise ValueError("Enter the certificate host.")
+    saved = {
+        "host": host,
+        "port": port,
+        "user": user,
+        "password": password,
+        "from": sender or "arshad@atwebtechnologies.com",
+        "fromName": from_name or "At Web Technologies",
+        "to": ", ".join(recipients),
+        "tls": tls,
+    }
+    if tls_name:
+        saved["tlsName"] = tls_name
+    return saved
+
+
+def send_consultation(entry):
+    if entry.get("kind") != "contact":
+        return False, ""
+    settings = load_mail()
+    if not settings.get("host") or not settings.get("password"):
+        return False, "Add the mailbox under Admin → Mail."
+    recipients = split_emails(settings.get("to"))
+    if not recipients:
+        return False, "Add at least one address under Admin → Mail."
+    name = " ".join(part for part in (entry.get("firstName"), entry.get("lastName")) if part).strip()
+    message = EmailMessage()
+    message["Subject"] = f"New project inquiry from {name or entry['email']}"
+    message["From"] = formataddr((settings.get("fromName") or "At Web Technologies", settings["from"]))
+    message["To"] = ", ".join(recipients)
+    message["Reply-To"] = formataddr((name, entry["email"])) if name else entry["email"]
+    message.set_content(
+        "\n".join([
+            "New consultation request",
+            "ATwebTech · Tucson, Arizona",
+            "",
+            f"Name: {name or '—'}",
+            f"Email: {entry['email']}",
+            f"Phone: {entry.get('phone') or '—'}",
+            f"Received: {entry['at']}",
+            "",
+            "Project",
+            entry.get("message") or "",
+            "",
+            "Reply to this email to reach the sender.",
+        ])
+    )
+    try:
+        if settings.get("tls") == "ssl":
+            with smtplib.SMTP_SSL(settings["host"], int(settings["port"]), timeout=20, context=ssl.create_default_context()) as smtp:
+                if settings.get("user"):
+                    smtp.login(settings["user"], settings["password"])
+                smtp.send_message(message)
+        else:
+            with smtplib.SMTP(settings["host"], int(settings["port"]), timeout=20) as smtp:
+                smtp.ehlo()
+                # The host certificate is issued to tlsName, not the mail hostname.
+                if settings.get("tlsName"):
+                    smtp._host = settings["tlsName"]
+                smtp.starttls(context=ssl.create_default_context())
+                smtp.ehlo()
+                if settings.get("user"):
+                    smtp.login(settings["user"], settings["password"])
+                smtp.send_message(message)
+    except (OSError, smtplib.SMTPException) as exc:
+        detail = str(exc).strip() or "The mail server refused the message."
+        return False, detail[:180]
+    return True, ""
+
+
+def normalize_message(raw):
+    kind = raw.get("kind")
+    email = clean_text(raw.get("email"), 120)
+    if kind not in ("contact", "newsletter"):
+        raise ValueError("That form could not be read.")
+    if not EMAIL_RE.fullmatch(email):
+        raise ValueError("Enter a valid email address.")
+    entry = {
+        "id": secrets.token_hex(6),
+        "kind": kind,
+        "email": email,
+        "at": tucson_now(),
+    }
+    if kind == "contact":
+        first = clean_text(raw.get("firstName"), 80)
+        last = clean_text(raw.get("lastName"), 80)
+        phone = clean_text(raw.get("phone"), 40)
+        message = " ".join(str(raw.get("message") or "").split())
+        if not first:
+            raise ValueError("Add your first name.")
+        digits = re.sub(r"\D", "", phone)
+        if phone and not (len(digits) == 10 or (len(digits) == 11 and digits.startswith("1"))):
+            raise ValueError("Enter a US phone number with the area code.")
+        if "privacy" in raw and raw.get("privacy") is not True:
+            raise ValueError("Agree to the privacy policy to continue.")
+        if len(message) < 5:
+            raise ValueError("Describe the project in a sentence or two.")
+        if len(message) > 4000:
+            raise ValueError("That message is too long.")
+        entry.update({"firstName": first, "lastName": last, "phone": phone, "message": message})
+    return entry
 
 
 def public_content(content):
@@ -193,6 +404,16 @@ class Handler(BaseHTTPRequestHandler):
         if path == "/api/session":
             self.send_json(200, {"ok": bool(self.session_token())})
             return
+        if path == "/api/admin/messages":
+            if not self.require_admin():
+                return
+            self.send_json(200, {"messages": list(reversed(load_messages()))})
+            return
+        if path == "/api/admin/mail":
+            if not self.require_admin():
+                return
+            self.send_json(200, {"mail": public_mail(load_mail())})
+            return
         if path == "/api/admin/content":
             if not self.require_admin():
                 return
@@ -205,6 +426,21 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         path = unquote(urlparse(self.path).path)
         try:
+            if path == "/api/messages":
+                if not self.same_origin():
+                    self.send_json(403, {"error": "Open the site on this computer."})
+                    return
+                entry = normalize_message(self.read_json())
+                emailed, mail_error = send_consultation(entry)
+                entry["emailed"] = emailed
+                if mail_error:
+                    entry["mailError"] = mail_error
+                with write_lock:
+                    messages = load_messages()
+                    messages.append(entry)
+                    save_messages(messages[-200:])
+                self.send_json(201, {"ok": True, "emailed": emailed, "mailError": mail_error})
+                return
             if path == "/api/login":
                 self.login()
                 return
@@ -249,6 +485,14 @@ class Handler(BaseHTTPRequestHandler):
     def do_PUT(self):
         path = unquote(urlparse(self.path).path)
         try:
+            if path == "/api/admin/mail":
+                if not self.require_admin():
+                    return
+                with write_lock:
+                    settings = normalize_mail(self.read_json(), load_mail())
+                    MAIL_PATH.write_text(json.dumps(settings, indent=2) + "\n")
+                self.send_json(200, {"mail": public_mail(settings)})
+                return
             if path == "/api/admin/contact":
                 if not self.require_admin():
                     return
@@ -330,6 +574,15 @@ class Handler(BaseHTTPRequestHandler):
         if path in ("/admin", "/admin/"):
             self._send_file(ROOT / "admin" / "index.html")
             return
+        if path in ("/contact", "/contact/"):
+            self._send_file(ROOT / "contact" / "index.html")
+            return
+        if path in ("/privacy", "/privacy/"):
+            self._send_file(ROOT / "privacy" / "index.html")
+            return
+        if path in ("/terms", "/terms/"):
+            self._send_file(ROOT / "terms" / "index.html")
+            return
         rel = "index.html" if path == "/" else path.lstrip("/")
         file_path = (ROOT / rel).resolve()
         try:
@@ -340,11 +593,15 @@ class Handler(BaseHTTPRequestHandler):
         if file_path.is_dir():
             file_path = file_path / "index.html"
         if not file_path.is_file():
-            self.send_error(404)
+            missing = ROOT / "404.html"
+            if missing.is_file():
+                self._send_file(missing, 404)
+            else:
+                self.send_error(404)
             return
         self._send_file(file_path)
 
-    def _send_file(self, file_path):
+    def _send_file(self, file_path, status=200):
         data = file_path.read_bytes()
         content_type = {
             ".html": "text/html; charset=utf-8",
@@ -360,7 +617,7 @@ class Handler(BaseHTTPRequestHandler):
             ".ico": "image/x-icon",
             ".woff2": "font/woff2",
         }.get(file_path.suffix.lower(), "application/octet-stream")
-        self.send_response(200)
+        self.send_response(status)
         self.send_header("Content-Type", content_type)
         self.send_header("Content-Length", str(len(data)))
         if file_path.suffix.lower() in {".html", ".js", ".css"} or "blog" in str(file_path) or "admin" in str(file_path):
@@ -376,6 +633,7 @@ def main():
     httpd = ThreadingHTTPServer((HOST, PORT), Handler)
     print(f"ATwebTech site  http://{HOST}:{PORT}/")
     print(f"Journal         http://{HOST}:{PORT}/blog/")
+    print(f"Contact         http://{HOST}:{PORT}/contact/")
     print(f"Admin           http://{HOST}:{PORT}/admin/")
     httpd.serve_forever()
 

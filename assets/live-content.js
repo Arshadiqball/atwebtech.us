@@ -106,6 +106,38 @@
     });
   }
 
+  function ensureAnchors() {
+    if (!document.getElementById("process")) {
+      var processLabel = Array.prototype.find.call(document.querySelectorAll("span, h2"), function (node) {
+        return node.textContent.trim() === "Work Process";
+      });
+      var processHeading = processLabel && (processLabel.closest("h2") || processLabel);
+      if (processHeading) processHeading.id = "process";
+    }
+    if (!document.getElementById("products")) {
+      var productHeading = Array.prototype.find.call(document.querySelectorAll("h2"), function (node) {
+        return node.textContent.trim().indexOf("Deploy your AI Chatbot") === 0;
+      });
+      if (productHeading) productHeading.id = "products";
+    }
+    document.querySelectorAll("a").forEach(function (link) {
+      var label = link.textContent.trim();
+      var href = link.getAttribute("href") || "";
+      if (label === "Privacy Policy") link.setAttribute("href", "/privacy/");
+      if (label === "Terms of Service") link.setAttribute("href", "/terms/");
+      if (label === "Contact" && (href === "#contact" || href === "/#contact")) {
+        link.setAttribute("href", "/contact/");
+      }
+    });
+  }
+
+  function scrollToId(id) {
+    ensureAnchors();
+    var target = document.getElementById(id);
+    if (!target) return;
+    target.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   function paint() {
     if (!state || applying) return;
     applying = true;
@@ -114,16 +146,74 @@
       applyContact(state.contact);
       ensureJournal(state.posts || []);
       ensureNav();
+      ensureAnchors();
     } finally {
       applying = false;
     }
   }
+
+  document.addEventListener("click", function (event) {
+    var link = event.target.closest && event.target.closest("a");
+    if (!link) return;
+    var href = link.getAttribute("href") || "";
+    if (href === "#") {
+      event.preventDefault();
+      return;
+    }
+    if (href.charAt(0) !== "#" || href.length < 2) return;
+    event.preventDefault();
+    scrollToId(href.slice(1));
+    if (history.replaceState) history.replaceState(null, "", href);
+  });
+
+  document.addEventListener("submit", function (event) {
+    var form = event.target;
+    if (!form || form.tagName !== "FORM") return;
+    var emailInput = form.querySelector("#email, input[type='email']");
+    if (!emailInput) return;
+    var messageInput = form.querySelector("#message");
+    var payload = messageInput
+      ? {
+          kind: "contact",
+          firstName: (form.querySelector("#firstName") || {}).value || "",
+          lastName: (form.querySelector("#lastName") || {}).value || "",
+          email: emailInput.value,
+          message: messageInput.value
+        }
+      : { kind: "newsletter", email: emailInput.value };
+    event.preventDefault();
+    var note = form.querySelector(".at-form-note");
+    if (!note) {
+      note = document.createElement("p");
+      note.className = "at-form-note";
+      note.setAttribute("role", "status");
+      note.style.marginTop = "12px";
+      note.style.fontSize = "14px";
+      form.appendChild(note);
+    }
+    fetch("/api/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).then(function (response) {
+      return response.json().then(function (body) {
+        if (!response.ok) throw new Error(body.error || "Try again.");
+        note.textContent = payload.kind === "newsletter"
+          ? "You're on the list."
+          : "Received. The team can read this in the admin.";
+        form.reset();
+      });
+    }).catch(function (error) {
+      note.textContent = error.message;
+    });
+  }, true);
 
   fetch("/api/content")
     .then(function (response) { return response.json(); })
     .then(function (data) {
       state = data;
       paint();
+      if (location.hash) scrollToId(location.hash.slice(1));
       var queued = false;
       new MutationObserver(function () {
         if (applying || queued) return;

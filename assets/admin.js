@@ -29,6 +29,8 @@
       '<header class="top"><a href="/"><img src="/image/logolight.png" alt="ATwebTech"></a>' +
       '<nav><a href="#contact" data-view="contact"' + (view === "contact" ? ' aria-current="page"' : "") + ">Contact</a>" +
       '<a href="#journal" data-view="journal"' + (view === "journal" || view === "edit" ? ' aria-current="page"' : "") + ">Journal</a>" +
+      '<a href="#messages" data-view="messages"' + (view === "messages" ? ' aria-current="page"' : "") + ">Messages</a>" +
+      '<a href="#mail" data-view="mail"' + (view === "mail" ? ' aria-current="page"' : "") + ">Mail</a>" +
       '<a href="#password" data-view="password"' + (view === "password" ? ' aria-current="page"' : "") + ">Password</a></nav>" +
       '<div class="top-actions"><a href="/blog/" target="_blank" rel="noopener">View journal</a>' +
       '<button class="ghost" type="button" id="signout">Sign out</button></div></header>' +
@@ -187,6 +189,83 @@
           error = err.message;
           render();
         });
+      });
+      return;
+    }
+    if (view === "mail") {
+      shell("<h1>Mail</h1><p class=\"sub\">Loading mailbox…</p>");
+      api("/api/admin/mail").then(function (body) {
+        var mail = body.mail || {};
+        if (view !== "mail") return;
+        shell(
+          "<h1>Mail</h1><p class=\"sub\">Consultation requests are always saved under Messages. Fill this in so each one is also emailed to the team.</p>" +
+          showError(error) + (message ? '<p class="ok">' + escapeHtml(message) + "</p>" : "") +
+          '<form id="mail-form" class="card">' +
+          '<label for="host">SMTP host</label><input id="host" name="host" placeholder="smtp.gmail.com" value="' + escapeHtml(mail.host || "") + '">' +
+          '<div class="row"><div><label for="port">Port</label><input id="port" name="port" type="number" min="1" max="65535" required value="' + escapeHtml(mail.port || 587) + '"></div>' +
+          '<div><label for="tls">Security</label><select id="tls" name="tls">' +
+          '<option value="starttls"' + (mail.tls !== "ssl" ? " selected" : "") + ">STARTTLS</option>" +
+          '<option value="ssl"' + (mail.tls === "ssl" ? " selected" : "") + ">SSL</option></select></div></div>" +
+          '<label for="user">Username</label><input id="user" name="user" autocomplete="off" value="' + escapeHtml(mail.user || "") + '">' +
+          '<label for="password">Password</label><input id="password" name="password" type="password" autocomplete="new-password" placeholder="' + (mail.passwordSet ? "Saved. Leave blank to keep it." : "Mailbox password or app password") + '">' +
+          '<label for="fromName">From name</label><input id="fromName" name="fromName" required value="' + escapeHtml(mail.fromName || "At Web Technologies") + '">' +
+          '<label for="from">From</label><input id="from" name="from" type="email" required value="' + escapeHtml(mail.from || "arshad@atwebtechnologies.com") + '">' +
+          '<label for="to">Send requests to</label><input id="to" name="to" type="text" required value="' + escapeHtml(mail.to || "") + '">' +
+          '<div class="actions"><button class="primary" type="submit">Save mailbox</button></div></form>'
+        );
+        document.getElementById("mail-form").addEventListener("submit", function (event) {
+          event.preventDefault();
+          message = "";
+          error = "";
+          var form = event.target;
+          api("/api/admin/mail", {
+            method: "PUT",
+            body: JSON.stringify({
+              host: form.host.value,
+              port: Number(form.port.value),
+              tls: form.tls.value,
+              user: form.user.value,
+              password: form.password.value,
+              from: form.from.value,
+              fromName: form.fromName.value,
+              to: form.to.value
+            })
+          }).then(function () {
+            message = "Mailbox saved. New consultation requests will be emailed.";
+            render();
+          }).catch(function (err) {
+            error = err.message;
+            render();
+          });
+        });
+      }).catch(function (err) {
+        error = err.message;
+        shell("<h1>Mail</h1>" + showError(error));
+      });
+      return;
+    }
+    if (view === "messages") {
+      shell("<h1>Messages</h1><p class=\"sub\">Notes from the contact form and the newsletter.</p><div id=\"message-list\"><p class=\"sub\">Loading…</p></div>");
+      api("/api/admin/messages").then(function (body) {
+        var list = document.getElementById("message-list");
+        if (!list) return;
+        var items = body.messages || [];
+        list.innerHTML = items.length
+          ? '<div class="list">' + items.map(function (item) {
+              var who = item.kind === "contact"
+                ? escapeHtml((item.firstName || "") + " " + (item.lastName || "")).trim()
+                : "Newsletter";
+              var extra = item.phone ? " · " + escapeHtml(item.phone) : "";
+              var delivery = item.kind === "contact" ? (item.emailed ? "emailed" : "saved") : item.kind;
+              return '<article class="item"><span><strong>' + (who || "Contact") + "</strong><span>" +
+                escapeHtml(item.email) + extra + " · " + escapeHtml(item.at) +
+                (item.message ? "<br>" + escapeHtml(item.message) : "") +
+                "</span></span><span class=\"status\">" + escapeHtml(delivery) + "</span></article>";
+            }).join("") + "</div>"
+          : "<p class=\"sub\">No messages yet.</p>";
+      }).catch(function (err) {
+        var list = document.getElementById("message-list");
+        if (list) list.innerHTML = '<p class="banner" role="alert">' + escapeHtml(err.message) + "</p>";
       });
       return;
     }
