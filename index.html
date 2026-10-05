@@ -45,6 +45,18 @@
       fetchpriority="low"
       href="/_next/static/chunks/1cxe7yfa6_uqi.js"
     />
+    <script>
+      (function () {
+        try {
+          var request = new XMLHttpRequest();
+          request.open("GET", "/api/content", false);
+          request.send();
+          if (request.status !== 200) return;
+          var data = JSON.parse(request.responseText);
+          if (data && Array.isArray(data.projects)) window.AT_PROJECTS = data.projects;
+        } catch (error) {}
+      })();
+    </script>
     <script src="/_next/static/chunks/3t7w6fh49ggh3.js" async=""></script>
     <script src="/_next/static/chunks/3n7dm2ojtyzwn.js" async=""></script>
     <script src="/_next/static/chunks/turbopack-2j_y0a48gou94.js" async=""></script>

@@ -202,6 +202,7 @@ def send_consultation(entry):
             f"Name: {name or '—'}",
             f"Email: {entry['email']}",
             f"Phone: {entry.get('phone') or '—'}",
+            f"Plan: {((entry.get('plan') or '').title() + (' yearly' if entry.get('billing') == 'yearly' else ' monthly')) if entry.get('plan') else '—'}",
             f"Received: {entry['at']}",
             "",
             "Project",
@@ -262,7 +263,12 @@ def normalize_message(raw):
             raise ValueError("Describe the project in a sentence or two.")
         if len(message) > 4000:
             raise ValueError("That message is too long.")
+        plan = clean_text(raw.get("plan"), 20).lower()
+        cycle = clean_text(raw.get("billing"), 20).lower()
         entry.update({"firstName": first, "lastName": last, "phone": phone, "message": message})
+        if plan in ("starter", "pro", "enterprise"):
+            entry["plan"] = plan
+            entry["billing"] = "yearly" if cycle == "yearly" else "monthly"
     return entry
 
 
@@ -271,7 +277,43 @@ def public_content(content):
     posts.sort(key=lambda post: post.get("date", ""), reverse=True)
     services = [service for service in content.get("services", []) if service.get("published", True)]
     services.sort(key=lambda service: (service.get("order", 0), service.get("title", "")))
-    return {"contact": content.get("contact", {}), "posts": posts, "services": services}
+    projects = [public_project(project) for project in content.get("projects", []) if project.get("published", True)]
+    projects.sort(key=lambda project: (project.get("order", 0), project.get("title", "")))
+    return {"contact": content.get("contact", {}), "posts": posts, "services": services, "projects": projects}
+
+
+def public_project(project):
+    return {
+        "id": project.get("id"),
+        "title": project.get("title", ""),
+        "category": project.get("category", ""),
+        "src": project.get("image", ""),
+        "aspect": 0.75,
+        "description": project.get("description", ""),
+        "metrics": project.get("metrics") or [],
+        "highlights": project.get("highlights") or [],
+        "techStack": project.get("techStack") or [],
+        "order": project.get("order", 0),
+    }
+
+
+def projects_of(content):
+    projects = content.get("projects")
+    if not isinstance(projects, list):
+        content["projects"] = []
+    return content["projects"]
+
+
+def image_ok(image):
+    if image.startswith("https://") and " " not in image and ".." not in image:
+        return True
+    return bool(re.fullmatch(r"/[A-Za-z0-9_./-]+", image)) and ".." not in image
+
+
+def lines_of(value):
+    if isinstance(value, list):
+        return value
+    return str(value or "").splitlines()
 
 
 def services_of(content):
@@ -380,6 +422,65 @@ def normalize_service(raw, services, existing=None):
     }
 
 
+def normalize_project(raw, projects, existing=None):
+    title = clean_text(raw.get("title"), 140)
+    if not title:
+        raise ValueError("Add a project name.")
+    category = clean_text(raw.get("category"), 80)
+    if len(category) < 2:
+        raise ValueError("Add a category.")
+    description = " ".join(str(raw.get("description") or "").split())
+    if len(description) < 20:
+        raise ValueError("Add a short description.")
+    if len(description) > 2000:
+        raise ValueError("That description is too long.")
+    image = str(raw.get("image") or "").strip()
+    if len(image) > 400 or not image_ok(image):
+        raise ValueError("Use an image path like /images/projects/project-agents.jpg, or an https image address.")
+    try:
+        order = int(raw.get("order") if raw.get("order") not in ("", None) else (existing or {}).get("order", len(projects) + 1))
+    except (TypeError, ValueError):
+        raise ValueError("Order should be a number.")
+    metrics = []
+    for line in lines_of(raw.get("metrics")):
+        text = " ".join(str(line).split())
+        if not text:
+            continue
+        if "|" not in text:
+            raise ValueError("Write each metric as a value, a vertical bar, and a label.")
+        value, label = text.split("|", 1)
+        value, label = value.strip(), label.strip()
+        if not value or not label:
+            raise ValueError("Each metric needs a value and a label.")
+        metrics.append({"value": value[:24], "label": label[:40]})
+    if not metrics or len(metrics) > 6:
+        raise ValueError("Add between 1 and 6 metrics.")
+    highlights = [clean_text(line, 180) for line in lines_of(raw.get("highlights"))]
+    highlights = [line for line in highlights if line]
+    if not highlights or len(highlights) > 8:
+        raise ValueError("Add between 1 and 8 capabilities.")
+    tech = []
+    for line in lines_of(raw.get("techStack") if raw.get("techStack") is not None else raw.get("tech")):
+        for part in str(line).split(","):
+            name = clean_text(part, 40)
+            if name:
+                tech.append(name)
+    if not tech or len(tech) > 12:
+        raise ValueError("Add between 1 and 12 technologies.")
+    return {
+        "id": existing["id"] if existing else secrets.token_hex(4),
+        "title": title,
+        "category": category,
+        "image": image,
+        "description": description,
+        "metrics": metrics,
+        "highlights": highlights,
+        "techStack": tech,
+        "order": order,
+        "published": bool(raw.get("published", True)),
+    }
+
+
 def normalize_contact(raw):
     email = clean_text(raw.get("email"), 120)
     phone = clean_text(raw.get("phone"), 40)
@@ -478,7 +579,8 @@ class Handler(BaseHTTPRequestHandler):
             content = load_content()
             posts = sorted(content.get("posts", []), key=lambda post: post.get("date", ""), reverse=True)
             services = sorted(services_of(content), key=lambda service: (service.get("order", 0), service.get("title", "")))
-            self.send_json(200, {"contact": content.get("contact", {}), "posts": posts, "services": services})
+            projects = sorted(projects_of(content), key=lambda project: (project.get("order", 0), project.get("title", "")))
+            self.send_json(200, {"contact": content.get("contact", {}), "posts": posts, "services": services, "projects": projects})
             return
         self.serve_static(path)
 
@@ -508,6 +610,17 @@ class Handler(BaseHTTPRequestHandler):
                 if token:
                     sessions.pop(token, None)
                 self.send_json(200, {"ok": True}, [("Set-Cookie", "at_session=; HttpOnly; Path=/; SameSite=Lax; Max-Age=0")])
+                return
+            if path == "/api/admin/projects":
+                if not self.require_admin():
+                    return
+                raw = self.read_json()
+                with write_lock:
+                    content = load_content()
+                    project = normalize_project(raw, projects_of(content))
+                    content["projects"].append(project)
+                    save_content(content)
+                self.send_json(201, {"project": project})
                 return
             if path == "/api/admin/services":
                 if not self.require_admin():
@@ -573,6 +686,23 @@ class Handler(BaseHTTPRequestHandler):
                     save_content(content)
                 self.send_json(200, {"contact": contact})
                 return
+            project_prefix = "/api/admin/projects/"
+            if path.startswith(project_prefix):
+                if not self.require_admin():
+                    return
+                project_id = path[len(project_prefix):]
+                raw = self.read_json()
+                with write_lock:
+                    content = load_content()
+                    existing = next((project for project in projects_of(content) if project["id"] == project_id), None)
+                    if not existing:
+                        self.send_json(404, {"error": "That project is gone."})
+                        return
+                    updated = normalize_project(raw, content["projects"], existing)
+                    content["projects"] = [updated if project["id"] == project_id else project for project in content["projects"]]
+                    save_content(content)
+                self.send_json(200, {"project": updated})
+                return
             service_prefix = "/api/admin/services/"
             if path.startswith(service_prefix):
                 if not self.require_admin():
@@ -614,6 +744,21 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_DELETE(self):
         path = unquote(urlparse(self.path).path)
+        project_prefix = "/api/admin/projects/"
+        if path.startswith(project_prefix):
+            if not self.require_admin():
+                return
+            project_id = path[len(project_prefix):]
+            with write_lock:
+                content = load_content()
+                before = len(projects_of(content))
+                content["projects"] = [project for project in content["projects"] if project["id"] != project_id]
+                if len(content["projects"]) == before:
+                    self.send_json(404, {"error": "That project is gone."})
+                    return
+                save_content(content)
+            self.send_json(200, {"ok": True})
+            return
         service_prefix = "/api/admin/services/"
         if path.startswith(service_prefix):
             if not self.require_admin():

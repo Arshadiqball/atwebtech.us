@@ -4,6 +4,7 @@
   var view = "contact";
   var editing = null;
   var serviceEditing = null;
+  var projectEditing = null;
   var message = "";
   var error = "";
 
@@ -40,6 +41,7 @@
       '<header class="top"><a href="/"><img src="/image/logolight.png" alt="ATwebTech"></a>' +
       '<nav><a href="#contact" data-view="contact"' + (view === "contact" ? ' aria-current="page"' : "") + ">Contact</a>" +
       '<a href="#services" data-view="services"' + (view === "services" || view === "service-edit" ? ' aria-current="page"' : "") + ">Services</a>" +
+      '<a href="#projects" data-view="projects"' + (view === "projects" || view === "project-edit" ? ' aria-current="page"' : "") + ">Projects</a>" +
       '<a href="#journal" data-view="journal"' + (view === "journal" || view === "edit" ? ' aria-current="page"' : "") + ">Journal</a>" +
       '<a href="#messages" data-view="messages"' + (view === "messages" ? ' aria-current="page"' : "") + ">Messages</a>" +
       '<a href="#mail" data-view="mail"' + (view === "mail" ? ' aria-current="page"' : "") + ">Mail</a>" +
@@ -53,6 +55,7 @@
         view = link.getAttribute("data-view");
         editing = null;
         serviceEditing = null;
+        projectEditing = null;
         message = "";
         error = "";
         render();
@@ -233,6 +236,125 @@
       });
       return;
     }
+    if (view === "project-edit") {
+      var project = projectEditing || { title: "", category: "", image: "/images/projects/", description: "", metrics: [], highlights: [], techStack: [], order: (content.projects || []).length + 1, published: true };
+      var metricText = Array.isArray(project.metrics)
+        ? project.metrics.map(function (metric) { return metric.value + " | " + metric.label; }).join("\n")
+        : (project.metrics || "");
+      var highlightText = Array.isArray(project.highlights) ? project.highlights.join("\n") : (project.highlights || "");
+      var techText = Array.isArray(project.techStack) ? project.techStack.join("\n") : (project.techStack || "");
+      shell(
+        "<h1>" + (project.id ? "Edit project" : "New project") + "</h1>" +
+        '<p class="sub">This is a card in the homepage project showcase. One metric per line, written as value | label.</p>' +
+        showError(error) +
+        '<form id="project-form" class="card">' +
+        '<label for="title">Name</label><input id="title" name="title" required value="' + escapeHtml(project.title) + '">' +
+        '<div class="row"><div><label for="category">Category</label><input id="category" name="category" required value="' + escapeHtml(project.category || "") + '"></div>' +
+        '<div><label for="order">Order</label><input id="order" name="order" type="number" value="' + escapeHtml(project.order) + '"></div></div>' +
+        '<label for="image">Image path or address</label><input id="image" name="image" required value="' + escapeHtml(project.image || "") + '">' +
+        '<label for="description">Description</label><textarea id="description" name="description" class="short" required>' + escapeHtml(project.description || "") + "</textarea>" +
+        '<label for="metrics">Metrics</label><textarea id="metrics" name="metrics" class="short" required>' + escapeHtml(metricText) + "</textarea>" +
+        '<label for="highlights">Capabilities</label><textarea id="highlights" name="highlights" class="short">' + escapeHtml(highlightText) + "</textarea>" +
+        '<label for="tech">Architecture stack</label><textarea id="tech" name="tech" class="short">' + escapeHtml(techText) + "</textarea>" +
+        '<label class="check"><input type="checkbox" name="published"' + (project.published !== false ? " checked" : "") + "> Show on the site</label>" +
+        '<div class="actions"><button class="primary" type="submit">Save project</button>' +
+        '<button class="quiet" type="button" id="cancel">Cancel</button>' +
+        (project.id ? '<a class="quiet" href="/#projects" target="_blank" rel="noopener">View showcase</a>' : "") +
+        (project.id ? '<button class="danger" type="button" id="remove">Delete</button>' : "") +
+        "</div></form>"
+      );
+      document.getElementById("cancel").addEventListener("click", function () {
+        view = "projects";
+        projectEditing = null;
+        error = "";
+        render();
+      });
+      var removeProject = document.getElementById("remove");
+      if (removeProject) {
+        removeProject.addEventListener("click", function () {
+          if (!window.confirm("Delete this project?")) return;
+          api("/api/admin/projects/" + project.id, { method: "DELETE" }).then(function () {
+            message = "Project deleted.";
+            return api("/api/admin/content");
+          }).then(function (body) {
+            content = body;
+            view = "projects";
+            projectEditing = null;
+            render();
+          }).catch(function (err) {
+            error = err.message;
+            render();
+          });
+        });
+      }
+      document.getElementById("project-form").addEventListener("submit", function (event) {
+        event.preventDefault();
+        var form = event.target;
+        var payload = {
+          title: form.title.value,
+          category: form.category.value,
+          image: form.image.value,
+          description: form.description.value,
+          metrics: form.metrics.value,
+          highlights: form.highlights.value,
+          techStack: form.tech.value,
+          order: Number(form.order.value),
+          published: form.published.checked
+        };
+        var request = project.id
+          ? api("/api/admin/projects/" + project.id, { method: "PUT", body: JSON.stringify(payload) })
+          : api("/api/admin/projects", { method: "POST", body: JSON.stringify(payload) });
+        request.then(function () {
+          message = "Project saved. Reload the homepage to see it in the showcase.";
+          return api("/api/admin/content");
+        }).then(function (body) {
+          content = body;
+          view = "projects";
+          projectEditing = null;
+          error = "";
+          render();
+        }).catch(function (err) {
+          error = err.message;
+          projectEditing = Object.assign({}, project, payload);
+          render();
+        });
+      });
+      return;
+    }
+    if (view === "projects") {
+      var projects = content.projects || [];
+      shell(
+        '<div class="actions" style="justify-content:space-between"><div><h1>Projects</h1><p class="sub">These are the cards in the homepage showcase. Hidden projects stay off the carousel.</p></div>' +
+        '<button class="primary" type="button" id="new-project">New project</button></div>' +
+        (message ? '<p class="ok">' + escapeHtml(message) + "</p>" : "") +
+        (projects.length ? '<div class="list">' + projects.map(function (item) {
+          return '<a class="item" href="#project" data-id="' + escapeHtml(item.id) + '"><span><strong>' + escapeHtml(item.title) +
+            "</strong><span>" + escapeHtml(item.category) + "</span></span>" +
+            '<span class="status">' + (item.published === false ? "Hidden" : "Live") + "</span></a>";
+        }).join("") + "</div>" : "<p class=\"sub\">No projects yet.</p>")
+      );
+      var addProject = document.getElementById("new-project");
+      if (addProject) {
+        addProject.addEventListener("click", function () {
+          projectEditing = null;
+          view = "project-edit";
+          error = "";
+          message = "";
+          render();
+        });
+      }
+      app.querySelectorAll("[data-id]").forEach(function (row) {
+        row.addEventListener("click", function (event) {
+          event.preventDefault();
+          projectEditing = projects.find(function (item) { return item.id === row.getAttribute("data-id"); });
+          view = "project-edit";
+          error = "";
+          message = "";
+          render();
+        });
+      });
+      return;
+    }
     if (view === "edit") {
       var post = editing || { title: "", slug: "", excerpt: "", category: "Notes", date: new Date().toISOString().slice(0, 10), body: "", published: true };
       shell(
@@ -384,6 +506,7 @@
                 ? escapeHtml((item.firstName || "") + " " + (item.lastName || "")).trim()
                 : "Newsletter";
               var extra = item.phone ? " · " + escapeHtml(item.phone) : "";
+              if (item.plan) extra += " · " + escapeHtml(item.plan.charAt(0).toUpperCase() + item.plan.slice(1) + (item.billing === "yearly" ? " yearly" : " monthly"));
               var delivery = item.kind === "contact" ? (item.emailed ? "emailed" : "saved") : item.kind;
               return '<article class="item"><span><strong>' + (who || "Contact") + "</strong><span>" +
                 escapeHtml(item.email) + extra + " · " + escapeHtml(item.at) +

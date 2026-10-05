@@ -174,5 +174,286 @@
       ],
       "body": "A forecast is only useful if someone will do something different because of it. Order more, staff the afternoon, call the accounts that are about to go quiet.\n\nWe build that from the history you have: orders, seasons, pipeline, and the exceptions your team already knows about. The page shows the number and the few factors behind it, so a manager can disagree with the model using their own knowledge.\n\nWe do not promise a perfect read of the market. We build a forecast you can compare with what actually happened, and we adjust it when the business changes."
     }
+  ],
+  "projects": [
+    {
+      "id": "p1",
+      "title": "Swarms-X: Autonomous Multi-Agent Core",
+      "category": "AUTONOMIC MULTI-AGENT SWARM",
+      "image": "/images/projects/project-agents.jpg",
+      "description": "A self-orchestrating multi-agent framework capable of autonomous task decomposition, dynamic tool invocation, and continuous multi-agent consensus for enterprise mission-critical workflows with zero human intervention.",
+      "metrics": [
+        {
+          "value": "10x",
+          "label": "Workflow Velocity"
+        },
+        {
+          "value": "99.4%",
+          "label": "Consensus Accuracy"
+        },
+        {
+          "value": "50+",
+          "label": "Swarm Nodes"
+        }
+      ],
+      "highlights": [
+        "Self-healing agent loops with automatic failure fallback",
+        "Dynamic tool invocation and live schema execution",
+        "Hierarchical delegation across specialized domain agents"
+      ],
+      "techStack": [
+        "Multi-Agent Consensus",
+        "Memory Vectors",
+        "LangGraph",
+        "FastAPI",
+        "Python"
+      ],
+      "order": 1,
+      "published": true
+    },
+    {
+      "id": "p2",
+      "title": "NeuroPredict: Real-Time Machine Learning",
+      "category": "PREDICTIVE DEEP LEARNING",
+      "image": "/images/projects/project-ml.jpg",
+      "description": "Sub-millisecond inference engine built on custom quantized neural networks, forecasting enterprise supply chain bottlenecks and financial market fluctuations with mathematical precision.",
+      "metrics": [
+        {
+          "value": "12ms",
+          "label": "Inference Latency"
+        },
+        {
+          "value": "99.8%",
+          "label": "Model Precision"
+        },
+        {
+          "value": "2.4M",
+          "label": "Events / Sec"
+        }
+      ],
+      "highlights": [
+        "Streaming time-series neural architecture for real-time risk",
+        "Automated feature engineering and model drift detection",
+        "Sub-millisecond quantized tensor compilation on NVIDIA GPUs"
+      ],
+      "techStack": [
+        "PyTorch",
+        "TensorRT",
+        "CUDA",
+        "Apache Kafka",
+        "Kubernetes"
+      ],
+      "order": 2,
+      "published": true
+    },
+    {
+      "id": "p3",
+      "title": "OmniVision: Biometric & Visual Intelligence",
+      "category": "COMPUTER VISION & OCULAR AI",
+      "image": "/images/projects/project-vision.jpg",
+      "description": "Next-generation computer vision system featuring real-time spatial object tracking, 3D facial volumetric reconstruction, and industrial defect detection at 120 FPS under extreme conditions.",
+      "metrics": [
+        {
+          "value": "120 FPS",
+          "label": "Real-Time Tracking"
+        },
+        {
+          "value": "0.02%",
+          "label": "Defect Error Margin"
+        },
+        {
+          "value": "Sub-pixel",
+          "label": "Spatial Precision"
+        }
+      ],
+      "highlights": [
+        "Volumetric 3D spatial reconstruction with LiDAR fusion",
+        "Edge-accelerated neural vision running on local hardware",
+        "Sub-pixel edge defect classification for manufacturing"
+      ],
+      "techStack": [
+        "YOLO-World",
+        "OpenCV",
+        "Spatial Transformers",
+        "CUDA",
+        "WebRTC"
+      ],
+      "order": 3,
+      "published": true
+    },
+    {
+      "id": "p4",
+      "title": "RoboFlow: Intelligent Robotic Automation",
+      "category": "ROBOTIC PROCESS AUTOMATION",
+      "image": "https://images.unsplash.com/photo-1485827404703-89b55fcc595e?w=900&h=1200&q=85&auto=format&fit=crop",
+      "description": "Hardware-agnostic robotic process automation platform connecting physical cobot arms with cloud-trained neural policies for automated precision assembly and autonomous warehouse handling.",
+      "metrics": [
+        {
+          "value": "100%",
+          "label": "Zero-Error Assembly"
+        },
+        {
+          "value": "24/7",
+          "label": "Autonomic Operations"
+        },
+        {
+          "value": "3.2x",
+          "label": "Efficiency ROI"
+        }
+      ],
+      "highlights": [
+        "Adaptive force-feedback control with microsecond response",
+        "Autonomous trajectory recalculation preventing physical collisions",
+        "Sim-to-real zero-shot policy transfer using digital twins"
+      ],
+      "techStack": [
+        "ROS2",
+        "Reinforcement Learning",
+        "Digital Twins",
+        "NVIDIA Isaac",
+        "C++"
+      ],
+      "order": 4,
+      "published": true
+    },
+    {
+      "id": "p5",
+      "title": "CogniText: Enterprise NLP & LLM Architecture",
+      "category": "NATURAL LANGUAGE PROCESSING",
+      "image": "https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?w=900&h=1200&q=85&auto=format&fit=crop",
+      "description": "Private enterprise LLM fine-tuned on proprietary corporate knowledge bases with hybrid sparse-dense vector retrieval and cryptographic data isolation guaranteed on-premise.",
+      "metrics": [
+        {
+          "value": "100K",
+          "label": "Token Context Window"
+        },
+        {
+          "value": "0%",
+          "label": "Data Egress / Leak"
+        },
+        {
+          "value": "4.9/5",
+          "label": "Accuracy Score"
+        }
+      ],
+      "highlights": [
+        "Cryptographic air-gapped deployment with zero cloud leakage",
+        "Hallucination-guarded hybrid retrieval-augmented generation",
+        "Multi-lingual domain-specific semantic understanding"
+      ],
+      "techStack": [
+        "Hybrid RAG",
+        "Milvus Vector DB",
+        "LoRA Fine-Tuning",
+        "vLLM",
+        "Python"
+      ],
+      "order": 5,
+      "published": true
+    },
+    {
+      "id": "p6",
+      "title": "QuantumSync: Distributed Neural Cloud",
+      "category": "CLOUD AI INFRASTRUCTURE",
+      "image": "https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?w=900&h=1200&q=85&auto=format&fit=crop",
+      "description": "Global distributed model deployment infrastructure designed for high-availability multi-region GPU clusters with automated load balancing and zero cold starts.",
+      "metrics": [
+        {
+          "value": "99.999%",
+          "label": "Service Uptime"
+        },
+        {
+          "value": "8",
+          "label": "Global Regions"
+        },
+        {
+          "value": "0ms",
+          "label": "Cold Start Overhead"
+        }
+      ],
+      "highlights": [
+        "Dynamic GPU memory virtualization across distributed instances",
+        "Cross-region active-active failover with sub-second replication",
+        "Predictive auto-scaling allocating compute ahead of traffic spikes"
+      ],
+      "techStack": [
+        "vLLM",
+        "Triton Server",
+        "Ray Clusters",
+        "Docker",
+        "Terraform"
+      ],
+      "order": 6,
+      "published": true
+    },
+    {
+      "id": "p7",
+      "title": "CyberNexus: Enterprise Data Intelligence",
+      "category": "DATA INTELLIGENCE & GRAPH AI",
+      "image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=900&h=1200&q=85&auto=format&fit=crop",
+      "description": "Knowledge-graph neural network analyzing billions of enterprise transaction nodes to uncover hidden anomalies, fraud rings, and strategic revenue optimizations.",
+      "metrics": [
+        {
+          "value": "5B+",
+          "label": "Graph Neural Nodes"
+        },
+        {
+          "value": "450ms",
+          "label": "Deep Traversal Query"
+        },
+        {
+          "value": "98.9%",
+          "label": "Fraud Detection"
+        }
+      ],
+      "highlights": [
+        "Temporal graph link prediction identifying emerging patterns",
+        "Automated regulatory compliance reporting and audit verification",
+        "Sub-second multi-hop traversals across billions of entity relations"
+      ],
+      "techStack": [
+        "Neo4j",
+        "Graph Neural Networks",
+        "Apache Spark",
+        "PyTorch Geometric"
+      ],
+      "order": 7,
+      "published": true
+    },
+    {
+      "id": "p8",
+      "title": "DeepTensor: Predictive Neural Pipeline",
+      "category": "END-TO-END MLOPS PIPELINE",
+      "image": "https://images.unsplash.com/photo-1507413245164-6160d8298b31?w=900&h=1200&q=85&auto=format&fit=crop",
+      "description": "Full lifecycle MLOps platform automating data ingestion, continuous model retraining, automated evaluation benchmarks, and seamless shadow canary deployments.",
+      "metrics": [
+        {
+          "value": "3 Clicks",
+          "label": "Model Deployment"
+        },
+        {
+          "value": "100%",
+          "label": "CI/CD Automation"
+        },
+        {
+          "value": "Auto-Tune",
+          "label": "Hyperparameters"
+        }
+      ],
+      "highlights": [
+        "Automated model drift rollback with canary shadow testing",
+        "Continuous self-supervised retraining on streaming production data",
+        "Federated learning coordination for privacy-preserving updates"
+      ],
+      "techStack": [
+        "MLflow",
+        "Kubeflow",
+        "Weights & Biases",
+        "Prometheus",
+        "Next.js"
+      ],
+      "order": 8,
+      "published": true
+    }
   ]
 }

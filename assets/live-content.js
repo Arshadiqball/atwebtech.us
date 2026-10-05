@@ -220,6 +220,20 @@ function fetchApi(path, options) {
   }
 
   document.addEventListener("click", function (event) {
+    var button = event.target.closest && event.target.closest("#pricing button");
+    if (!button || button.getAttribute("aria-label") === "Toggle billing cycle") return;
+    var card = button.closest("article");
+    var heading = card && card.querySelector("h3");
+    var plan = heading ? heading.textContent.trim().toLowerCase() : "";
+    if (plan !== "starter" && plan !== "pro" && plan !== "enterprise") return;
+    event.preventDefault();
+    event.stopPropagation();
+    var toggle = document.querySelector("#pricing [aria-label='Toggle billing cycle']");
+    var billing = toggle && toggle.getAttribute("aria-pressed") === "true" ? "yearly" : "monthly";
+    location.href = "/contact/?plan=" + plan + "&billing=" + billing;
+  }, true);
+
+  document.addEventListener("click", function (event) {
     var service = serviceFrom(event.target);
     if (!service) return;
     event.preventDefault();

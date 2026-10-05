@@ -227,7 +227,126 @@ function public_content(array $content): array
     usort($services, function ($a, $b) {
         return [$a['order'] ?? 0, $a['title'] ?? ''] <=> [$b['order'] ?? 0, $b['title'] ?? ''];
     });
-    return ['contact' => $content['contact'] ?? [], 'posts' => $posts, 'services' => $services];
+    $projects = array_values(array_filter($content['projects'] ?? [], function ($project) {
+        return ($project['published'] ?? true) !== false;
+    }));
+    usort($projects, function ($a, $b) {
+        return [$a['order'] ?? 0, $a['title'] ?? ''] <=> [$b['order'] ?? 0, $b['title'] ?? ''];
+    });
+    $projects = array_map('public_project', $projects);
+    return ['contact' => $content['contact'] ?? [], 'posts' => $posts, 'services' => $services, 'projects' => $projects];
+}
+
+function public_project(array $project): array
+{
+    return [
+        'id' => $project['id'] ?? '',
+        'title' => $project['title'] ?? '',
+        'category' => $project['category'] ?? '',
+        'src' => $project['image'] ?? '',
+        'aspect' => 0.75,
+        'description' => $project['description'] ?? '',
+        'metrics' => $project['metrics'] ?? [],
+        'highlights' => $project['highlights'] ?? [],
+        'techStack' => $project['techStack'] ?? [],
+        'order' => $project['order'] ?? 0,
+    ];
+}
+
+function image_ok(string $image): bool
+{
+    if (str_starts_with($image, 'https://') && !str_contains($image, ' ') && !str_contains($image, '..')) {
+        return true;
+    }
+    return (bool) preg_match('#^/[A-Za-z0-9_./-]+$#', $image) && !str_contains($image, '..');
+}
+
+function lines_of($value): array
+{
+    if (is_array($value)) {
+        return $value;
+    }
+    return preg_split('/\r\n|\n|\r/', (string) $value) ?: [];
+}
+
+function normalize_project(array $raw, array $projects, ?array $existing = null): array
+{
+    $title = clean_text($raw['title'] ?? '', 140);
+    if ($title === '') {
+        throw new InvalidArgumentException('Add a project name.');
+    }
+    $category = clean_text($raw['category'] ?? '', 80);
+    if (strlen($category) < 2) {
+        throw new InvalidArgumentException('Add a category.');
+    }
+    $description = trim(preg_replace('/\s+/', ' ', (string) ($raw['description'] ?? '')) ?? '');
+    if (strlen($description) < 20) {
+        throw new InvalidArgumentException('Add a short description.');
+    }
+    if (strlen($description) > 2000) {
+        throw new InvalidArgumentException('That description is too long.');
+    }
+    $image = trim((string) ($raw['image'] ?? ''));
+    if (strlen($image) > 400 || !image_ok($image)) {
+        throw new InvalidArgumentException('Use an image path like /images/projects/project-agents.jpg, or an https image address.');
+    }
+    $order = $raw['order'] ?? ($existing['order'] ?? count($projects) + 1);
+    if (!is_numeric($order)) {
+        throw new InvalidArgumentException('Order should be a number.');
+    }
+    $metrics = [];
+    foreach (lines_of($raw['metrics'] ?? []) as $line) {
+        $text = trim(preg_replace('/\s+/', ' ', (string) $line) ?? '');
+        if ($text === '') {
+            continue;
+        }
+        if (!str_contains($text, '|')) {
+            throw new InvalidArgumentException('Write each metric as a value, a vertical bar, and a label.');
+        }
+        [$value, $label] = array_map('trim', explode('|', $text, 2));
+        if ($value === '' || $label === '') {
+            throw new InvalidArgumentException('Each metric needs a value and a label.');
+        }
+        $metrics[] = ['value' => substr($value, 0, 24), 'label' => substr($label, 0, 40)];
+    }
+    if (count($metrics) < 1 || count($metrics) > 6) {
+        throw new InvalidArgumentException('Add between 1 and 6 metrics.');
+    }
+    $highlights = [];
+    foreach (lines_of($raw['highlights'] ?? []) as $line) {
+        $point = clean_text($line, 180);
+        if ($point !== '') {
+            $highlights[] = $point;
+        }
+    }
+    if (count($highlights) < 1 || count($highlights) > 8) {
+        throw new InvalidArgumentException('Add between 1 and 8 capabilities.');
+    }
+    $tech = [];
+    $techSource = $raw['techStack'] ?? ($raw['tech'] ?? []);
+    foreach (lines_of($techSource) as $line) {
+        foreach (explode(',', (string) $line) as $part) {
+            $name = clean_text($part, 40);
+            if ($name !== '') {
+                $tech[] = $name;
+            }
+        }
+    }
+    if (count($tech) < 1 || count($tech) > 12) {
+        throw new InvalidArgumentException('Add between 1 and 12 technologies.');
+    }
+    return [
+        'id' => $existing['id'] ?? bin2hex(random_bytes(4)),
+        'title' => $title,
+        'category' => $category,
+        'image' => $image,
+        'description' => $description,
+        'metrics' => $metrics,
+        'highlights' => $highlights,
+        'techStack' => $tech,
+        'order' => (int) $order,
+        'published' => (bool) ($raw['published'] ?? true),
+    ];
 }
 
 function normalize_contact(array $raw): array
@@ -381,6 +500,11 @@ function normalize_message(array $raw): array
         $entry['lastName'] = $last;
         $entry['phone'] = $phone;
         $entry['message'] = $message;
+        $plan = strtolower(clean_text($raw['plan'] ?? '', 20));
+        if (in_array($plan, ['starter', 'pro', 'enterprise'], true)) {
+            $entry['plan'] = $plan;
+            $entry['billing'] = strtolower(clean_text($raw['billing'] ?? '', 20)) === 'yearly' ? 'yearly' : 'monthly';
+        }
     }
     return $entry;
 }
@@ -516,6 +640,7 @@ function send_consultation(array $entry): array
         'Name: ' . ($name ?: '—'),
         'Email: ' . $entry['email'],
         'Phone: ' . (($entry['phone'] ?? '') ?: '—'),
+        'Plan: ' . (!empty($entry['plan']) ? ucfirst($entry['plan']) . (($entry['billing'] ?? '') === 'yearly' ? ' yearly' : ' monthly') : '—'),
         'Received: ' . $entry['at'],
         '',
         'Project',
@@ -643,7 +768,11 @@ try {
         usort($services, function ($a, $b) {
             return [$a['order'] ?? 0, $a['title'] ?? ''] <=> [$b['order'] ?? 0, $b['title'] ?? ''];
         });
-        send_json(200, ['contact' => $content['contact'] ?? [], 'posts' => $posts, 'services' => $services]);
+        $projects = $content['projects'] ?? [];
+        usort($projects, function ($a, $b) {
+            return [$a['order'] ?? 0, $a['title'] ?? ''] <=> [$b['order'] ?? 0, $b['title'] ?? ''];
+        });
+        send_json(200, ['contact' => $content['contact'] ?? [], 'posts' => $posts, 'services' => $services, 'projects' => $projects]);
     }
     if ($path === '/api/admin/messages' && $method === 'GET') {
         require_admin();
@@ -690,6 +819,15 @@ try {
         save_json(CONTENT_PATH, $content);
         send_json(201, ['post' => $post]);
     }
+    if ($path === '/api/admin/projects' && $method === 'POST') {
+        require_admin();
+        $content = load_json(CONTENT_PATH, []);
+        $content['projects'] = $content['projects'] ?? [];
+        $project = normalize_project(read_json_body(), $content['projects']);
+        $content['projects'][] = $project;
+        save_json(CONTENT_PATH, $content);
+        send_json(201, ['project' => $project]);
+    }
     if ($path === '/api/admin/services' && $method === 'POST') {
         require_admin();
         $content = load_json(CONTENT_PATH, []);
@@ -699,11 +837,11 @@ try {
         save_json(CONTENT_PATH, $content);
         send_json(201, ['service' => $service]);
     }
-    if (preg_match('#^/api/admin/(posts|services)/([^/]+)$#', $path, $match)) {
+    if (preg_match('#^/api/admin/(posts|services|projects)/([^/]+)$#', $path, $match)) {
         require_admin();
         $kind = $match[1];
         $id = $match[2];
-        $key = $kind === 'posts' ? 'posts' : 'services';
+        $key = $kind;
         $content = load_json(CONTENT_PATH, []);
         $items = $content[$key] ?? [];
         $index = null;
@@ -714,7 +852,8 @@ try {
             }
         }
         if ($index === null) {
-            send_json(404, ['error' => $kind === 'posts' ? 'That note is gone.' : 'That service is gone.']);
+            $missing = $kind === 'posts' ? 'That note is gone.' : ($kind === 'services' ? 'That service is gone.' : 'That project is gone.');
+            send_json(404, ['error' => $missing]);
         }
         if ($method === 'DELETE') {
             array_splice($items, $index, 1);
@@ -723,13 +862,18 @@ try {
             send_json(200, ['ok' => true]);
         }
         if ($method === 'PUT') {
-            $updated = $kind === 'posts'
-                ? normalize_post(read_json_body(), $items, $items[$index])
-                : normalize_service(read_json_body(), $items, $items[$index]);
+            $body = read_json_body();
+            if ($kind === 'posts') {
+                $updated = normalize_post($body, $items, $items[$index]);
+            } elseif ($kind === 'services') {
+                $updated = normalize_service($body, $items, $items[$index]);
+            } else {
+                $updated = normalize_project($body, $items, $items[$index]);
+            }
             $items[$index] = $updated;
             $content[$key] = $items;
             save_json(CONTENT_PATH, $content);
-            send_json(200, [$kind === 'posts' ? 'post' : 'service' => $updated]);
+            send_json(200, [($kind === 'posts' ? 'post' : ($kind === 'services' ? 'service' : 'project')) => $updated]);
         }
     }
     send_json(404, ['error' => 'Not found.']);
