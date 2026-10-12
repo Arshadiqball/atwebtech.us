@@ -1,0 +1,59 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=e3]:
+    - main [ref=e4]:
+      - generic [ref=e5]:
+        - link "atwebtech home" [ref=e6] [cursor=pointer]:
+          - /url: /
+        - heading "Log in to atwebtech" [level=1] [ref=e7]
+        - paragraph [ref=e8]:
+          - text: New to atwebtech?
+          - link "Create an account" [ref=e9] [cursor=pointer]:
+            - /url: /signup
+        - generic [ref=e10]:
+          - generic [ref=e11]:
+            - generic [ref=e12]: Email
+            - textbox "Email" [ref=e13]:
+              - /placeholder: Your email address
+          - generic [ref=e14]:
+            - generic [ref=e15]: Password
+            - generic [ref=e16]:
+              - textbox "Password" [ref=e17]:
+                - /placeholder: Your password
+              - button "Show password" [ref=e18] [cursor=pointer]
+          - button "Continue" [ref=e23] [cursor=pointer]
+          - paragraph [ref=e24]:
+            - text: Forgot your password?
+            - link "Contact the atwebtech team" [ref=e25] [cursor=pointer]:
+              - /url: /contact
+            - text: and we'll help you get back in.
+      - navigation "Legal" [ref=e26]:
+        - link "Terms of use" [ref=e27] [cursor=pointer]:
+          - /url: /terms
+        - generic [aria-hidden] [ref=e28]: ·
+        - link "Privacy policy" [ref=e29] [cursor=pointer]:
+          - /url: /privacy
+        - generic [aria-hidden] [ref=e30]: ·
+        - link "Contact" [ref=e31] [cursor=pointer]:
+          - /url: /contact
+    - complementary "About atwebtech" [ref=e32]:
+      - generic [ref=e33]: Early access
+      - heading "Plan your content in one workspace" [level=2] [ref=e34]
+      - paragraph [ref=e35]: Your account is ready today. Publishing, the inbox, and insights are being built, and each one is marked until it's live.
+      - generic [ref=e54]:
+        - generic [ref=e55]:
+          - generic [ref=e56]: Ideas
+          - generic [ref=e57]: This week
+        - generic [ref=e58]:
+          - generic [ref=e59]:
+            - generic [ref=e60]: Ideas 2
+            - generic [ref=e61]: Behind the scenes clip
+            - generic [ref=e63]: Customer question roundup
+          - generic [ref=e65]:
+            - generic [ref=e66]: Drafting 2
+            - generic [ref=e67]: Launch checklist carousel
+            - generic [ref=e69]: Weekly tips thread
+          - generic [ref=e71]:
+            - generic [ref=e72]: Ready 1
+            - generic [ref=e73]: Studio tour reel

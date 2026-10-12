@@ -977,7 +977,22 @@
         }
       } else {
         $('[data-pv-name2]', form).textContent = first.dataset.name;
+        $('[data-pv-meta]', form).textContent = first.dataset.provider === 'linkedin' ? 'Just now · LinkedIn' : 'Just now';
         $('[data-pv-text2]', form).textContent = area.value || 'Your post text shows here.';
+        $('[data-pv-react]', form).hidden = first.dataset.provider !== 'linkedin';
+        const face = $('[data-pv-face]', form);
+        const label = first.closest('label');
+        const photo = label ? $('img', label) : null;
+        const initial = label ? $('.ch-av-initial', label) : null;
+        face.replaceChildren();
+        if (photo) {
+          const img = document.createElement('img');
+          img.src = photo.getAttribute('src');
+          img.alt = '';
+          face.append(img);
+        } else {
+          face.textContent = (initial ? initial.textContent : (first.dataset.name || '•')).trim().charAt(0);
+        }
         const box = $('[data-pv-media2]', form);
         box.innerHTML = '';
         if (thumb && thumb.tagName === 'IMG') { const img = document.createElement('img'); img.src = thumb.getAttribute('src'); img.alt = ''; box.append(img); }

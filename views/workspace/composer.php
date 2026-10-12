@@ -250,9 +250,18 @@ $media = $p['media'];
             </div>
           </div>
           <div class="pv-post" data-pv-post hidden>
-            <div class="pv-who"><span class="pv-dot" aria-hidden="true"></span><b data-pv-name2></b></div>
+            <div class="pv-who">
+              <span class="pv-face" data-pv-face aria-hidden="true"></span>
+              <span class="pv-id"><b data-pv-name2></b><small data-pv-meta></small></span>
+            </div>
             <p data-pv-text2></p>
             <div class="pv-img" data-pv-media2></div>
+            <div class="pv-react" data-pv-react hidden>
+              <span><?= icon('thumbs-up') ?>Like</span>
+              <span><?= icon('chat-circle-text') ?>Comment</span>
+              <span><?= icon('arrows-clockwise') ?>Repost</span>
+              <span><?= icon('paper-plane-tilt') ?>Send</span>
+            </div>
           </div>
           <p class="pv-blank" data-pv-blank>See your post’s preview here.</p>
         </div>
