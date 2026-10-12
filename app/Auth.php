@@ -101,11 +101,34 @@ final class Auth
         return null;
     }
 
-    /** Only same-site paths inside the workspace are allowed as a post-login destination. */
+    public static function isAdmin(): bool
+    {
+        $user = self::user();
+        if ($user === null) {
+            return false;
+        }
+        $allowed = array_filter(array_map(
+            static fn (string $email): string => strtolower(trim($email)),
+            explode(',', (string) config('admin.emails'))
+        ));
+        return in_array(strtolower((string) $user['email']), $allowed, true);
+    }
+
+    /** Logged-in admin, or a login redirect. Anyone else gets a not-found page. */
+    public static function requireAdmin(): array
+    {
+        $user = self::require();
+        if (!self::isAdmin()) {
+            not_found();
+        }
+        return $user;
+    }
+
+    /** Only same-site paths inside the workspace or admin inbox are allowed as a post-login destination. */
     public static function safeNext(?string $next): ?string
     {
         $next = safe_return_path($next, '');
-        return preg_match('#^/(app|welcome)(/|$|\?)#', $next) ? $next : null;
+        return preg_match('#^/(app|welcome|admin)(/|$|\?)#', $next) ? $next : null;
     }
 
     public static function onboarding(int $userId): array

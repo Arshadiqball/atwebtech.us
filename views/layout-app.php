@@ -19,6 +19,9 @@ $theme = Auth::user()['theme'] ?? 'light';
   <link rel="preload" href="/assets/fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/account.css')) ?>">
+<?php if (!empty($meta['admin'])): ?>
+  <link rel="stylesheet" href="<?= e(asset('css/admin.css')) ?>">
+<?php endif; ?>
   <script src="<?= e(asset('js/app.js')) ?>" defer></script>
 </head>
 <body class="acct">

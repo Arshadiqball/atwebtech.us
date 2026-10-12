@@ -111,6 +111,9 @@ $notice = flash('notice');
         <div class="ws-account-menu" id="ws-account-menu" hidden>
           <p class="ws-account-email"><?= e($user['email']) ?></p>
           <a href="/app/account"<?= aria_current('/app/account') ?>><?= icon('user') ?>Account</a>
+<?php if (Auth::isAdmin()): ?>
+          <a href="/admin"><?= icon('tray') ?>Messages</a>
+<?php endif; ?>
           <div class="ws-account-theme"><span>Theme</span><?php partial('partials/theme-toggle'); ?></div>
           <a href="/">atwebtech.us</a>
           <form action="/logout" method="post">

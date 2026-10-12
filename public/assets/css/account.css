@@ -40,7 +40,6 @@
   --a-shadow: 0 16px 40px -12px rgb(0 0 0 / 0.6), 0 0 0 1px rgb(255 255 255 / 0.05);
   color-scheme: dark;
 }
-[data-theme="dark"] .logo-mark path { stroke: #151918; }
 [data-theme="dark"] .status--available { color: #BDEBC9; }
 [data-theme="dark"] .form-status.is-error { background: #3A1E1B; color: #FFC2BA; }
 

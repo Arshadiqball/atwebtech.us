@@ -158,12 +158,10 @@ main:focus { outline: none; }
 }
 .header-logo { display: inline-flex; text-decoration: none; justify-self: start; border-radius: 10px; }
 .logo { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); }
-.logo-mark { width: 30px; height: 30px; }
+.logo-mark { width: 30px; height: 30px; flex: none; object-fit: contain; }
 .logo-word { font-family: var(--font-display); font-weight: 600; font-size: 23px; letter-spacing: -0.035em; line-height: 1; }
 .logo--xl { color: var(--green); gap: 14px; }
 .logo--xl .logo-mark { width: clamp(52px, 6vw, 76px); height: auto; }
-.logo--xl .logo-mark circle { fill: var(--footer); }
-.logo--xl .logo-mark path { stroke: var(--footer); }
 .logo--xl .logo-word { font-size: clamp(52px, 6.5vw, 88px); }
 
 .nav-list { display: flex; align-items: center; gap: 2px; margin: 0; padding: 0; list-style: none; }
@@ -844,8 +842,6 @@ select.input { appearance: none; padding-right: 40px; background-image: linear-g
 .ai-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ai-title { display: inline-flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
 .ai-head .app-logo { color: var(--green); }
-.ai-head .app-logo path, .ai-head .app-logo circle { stroke: #141414; }
-.ai-head .app-logo circle { fill: #141414; }
 .ai-log { display: flex; flex-direction: column; gap: 12px; min-height: 250px; max-height: 330px; overflow-y: auto; padding-right: 4px; }
 .ai-msg { display: flex; gap: 10px; align-items: flex-start; }
 .ai-msg--user { justify-content: flex-end; }

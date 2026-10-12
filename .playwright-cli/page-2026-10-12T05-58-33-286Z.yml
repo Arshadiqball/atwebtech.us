@@ -1,0 +1,29 @@
+- generic [active] [ref=f4e1]:
+  - link "Skip to content" [ref=f4e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=f4e3]:
+    - banner [ref=f4e4]:
+      - link "Messages" [ref=f4e5] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=f4e6]: atwebtech
+      - paragraph [ref=f4e12]: Signed in as arshadiqbal.d@gmail.com
+      - generic [ref=f4e13]:
+        - link "Workspace" [ref=f4e14] [cursor=pointer]:
+          - /url: /app
+        - generic [ref=f4e15]:
+          - button "Light theme" [pressed] [ref=f4e16] [cursor=pointer]
+          - button "Dark theme" [ref=f4e20] [cursor=pointer]
+        - button "Log out" [ref=f4e25] [cursor=pointer]
+    - article [ref=f4e27]:
+      - link "All messages" [ref=f4e28] [cursor=pointer]:
+        - /url: /admin
+      - generic [ref=f4e31]:
+        - paragraph [ref=f4e32]: Partnership
+        - heading "Jordan Hale" [level=2] [ref=f4e33]
+        - paragraph [ref=f4e34]:
+          - link "jordan.hale@example.com" [ref=f4e35] [cursor=pointer]:
+            - /url: mailto:jordan.hale%40example.com?subject=Re%3A%20Partnership
+          - time [ref=f4e36]: 12 Oct 2026, 05:57 UTC
+        - link "Reply by email" [ref=f4e37] [cursor=pointer]:
+          - /url: mailto:jordan.hale%40example.com?subject=Re%3A%20Partnership
+      - generic [ref=f4e40]: We would like to talk about a partnership for a small set of creator accounts. Happy to share more by email.

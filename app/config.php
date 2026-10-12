@@ -30,6 +30,9 @@ return [
     'contact' => [
         'email' => (string) Env::get('CONTACT_EMAIL', ''),
     ],
+    'admin' => [
+        'emails' => (string) Env::get('ADMIN_EMAILS', ''),
+    ],
     'integrations' => [
         'available' => (string) Env::get('INTEGRATIONS_AVAILABLE', ''),
     ],
@@ -46,6 +49,10 @@ return [
         'linkedin' => [
             'client_id' => (string) Env::get('LINKEDIN_CLIENT_ID', ''),
             'client_secret' => (string) Env::get('LINKEDIN_CLIENT_SECRET', ''),
+        ],
+        'facebook' => [
+            'client_id' => (string) Env::get('FACEBOOK_CLIENT_ID', ''),
+            'client_secret' => (string) Env::get('FACEBOOK_CLIENT_SECRET', ''),
         ],
     ],
     'forms' => [

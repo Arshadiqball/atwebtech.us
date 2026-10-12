@@ -59,6 +59,7 @@ Content lives in `app/data/*.php`, so most copy changes don't touch templates. R
 | `DB_*` | Database connection. Credentials only ever come from the environment. |
 | `MAIL_ENABLED`, `MAIL_FROM`, `MAIL_NOTIFY_TO` | Optional notification email for new signups and messages, via PHP `mail()`. Submissions are saved whether or not mail works. |
 | `CONTACT_EMAIL` | Public address shown on `/contact`. Blank shows the form only. |
+| `ADMIN_EMAILS` | Comma-separated account emails that can open `/admin` and read contact messages. |
 | `INTEGRATIONS_AVAILABLE` | Comma-separated channel slugs to mark as Available, e.g. `instagram,linkedin`. Everything else shows Planned. |
 | `RATE_LIMIT_MAX`, `RATE_LIMIT_WINDOW_MINUTES` | Saved form submissions allowed per connection per window (default 5 per 10 minutes). |
 
@@ -70,6 +71,8 @@ Content lives in `app/data/*.php`, so most copy changes don't touch templates. R
 - Without JavaScript, the server redirects back to the form with a one-time message.
 
 Each submission must pass a session CSRF token, a honeypot field, a signed timestamp (rejects submissions under 2 seconds old and tampered values) and a database-backed rate limit. Input is validated on both client and server. All queries use prepared statements. A success message is only shown after the row is written. Repeat waitlist signups update the existing row instead of creating duplicates.
+
+Contact messages are saved in `enquiries` and listed at `/admin` for the accounts named in `ADMIN_EMAILS`. Anyone else gets a not-found page. Log in with one of those accounts, then open `/admin`. On the production server, add the same `ADMIN_EMAILS` value to `.env`.
 
 Data is stored in `waitlist_signups` and `enquiries`. Signups from `/pricing` also record the chosen `plan`, `billing` and `channels` (migration `002`); these stay empty when no plan was picked.
 

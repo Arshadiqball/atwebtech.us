@@ -328,6 +328,42 @@ return [
     ['POST', '/app/checklist/close', [AccountHandler::class, 'closeChecklist']],
     ['POST', '/account/theme', [AccountHandler::class, 'theme']],
 
+    ['GET', '/admin', static function (): void {
+        $user = Auth::requireAdmin();
+        View::render('admin', [
+            'user' => $user,
+            'messages' => Admin::messages(),
+            'selected' => null,
+        ], [
+            'title' => 'Messages | atwebtech',
+            'description' => 'Contact form messages.',
+            'layout' => 'app',
+            'noindex' => true,
+            'admin' => true,
+        ]);
+    }],
+    ['GET', '/admin/messages/{id}', static function (string $id): void {
+        if (!ctype_digit($id)) {
+            not_found();
+        }
+        $user = Auth::requireAdmin();
+        $selected = Admin::message((int) $id);
+        if ($selected === null) {
+            not_found();
+        }
+        View::render('admin', [
+            'user' => $user,
+            'messages' => Admin::messages(),
+            'selected' => $selected,
+        ], [
+            'title' => $selected['name'] . ' | Messages | atwebtech',
+            'description' => 'Contact form message.',
+            'layout' => 'app',
+            'noindex' => true,
+            'admin' => true,
+        ]);
+    }],
+
     ['GET', '/sitemap.xml', static function (): void {
         $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/terms'];
         foreach (array_keys(data('features')) as $slug) {
@@ -351,7 +387,7 @@ return [
     ['GET', '/robots.txt', static function (): void {
         header('Content-Type: text/plain; charset=utf-8');
         if (config('app.is_production')) {
-            echo "User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /welcome\nDisallow: /login\nDisallow: /signup\n\nSitemap: ", absolute_url('/sitemap.xml'), "\n";
+            echo "User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /admin\nDisallow: /welcome\nDisallow: /login\nDisallow: /signup\n\nSitemap: ", absolute_url('/sitemap.xml'), "\n";
         } else {
             echo "User-agent: *\nDisallow: /\n";
         }

@@ -14,6 +14,7 @@ require BASE_PATH . '/app/RateLimiter.php';
 require BASE_PATH . '/app/Mailer.php';
 require BASE_PATH . '/app/Campaign.php';
 require BASE_PATH . '/app/FormHandler.php';
+require BASE_PATH . '/app/Admin.php';
 require BASE_PATH . '/app/View.php';
 require BASE_PATH . '/app/Charts.php';
 require BASE_PATH . '/app/Pricing.php';
