@@ -15,7 +15,7 @@ cp .env.example .env
 php -r "echo bin2hex(random_bytes(32)), PHP_EOL;"   # paste into APP_KEY
 # set APP_URL=http://localhost:8000 and your local DB_* values
 
-mysql -u root -e "CREATE DATABASE atwebtech CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+mysql -u root -e "CREATE DATABASE atwebtec_us CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
 php bin/migrate.php
 
 php -S localhost:8000 -t public public/index.php

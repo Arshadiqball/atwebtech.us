@@ -17,7 +17,7 @@ return [
         'driver' => (string) Env::get('DB_DRIVER', 'mysql'),
         'host' => (string) Env::get('DB_HOST', '127.0.0.1'),
         'port' => (int) Env::get('DB_PORT', 3306),
-        'name' => (string) Env::get('DB_NAME', 'atwebtech'),
+        'name' => (string) Env::get('DB_NAME', 'atwebtec_us'),
         'user' => (string) Env::get('DB_USER', ''),
         'pass' => (string) Env::get('DB_PASS', ''),
         'sqlite_path' => (string) Env::get('DB_SQLITE_PATH', 'storage/atwebtech.sqlite'),
