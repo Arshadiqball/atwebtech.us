@@ -52,7 +52,13 @@ final class Assistant
             ]);
         } catch (Throwable $e) {
             error_log(sprintf('[%s] ai generate failed for user %d: %s', gmdate('c'), (int) $user['id'], $e->getMessage()));
-            json_response(['status' => 'error', 'message' => 'The AI Assistant couldn’t answer just now. Please try again.'], 502);
+            $rejected = $e->getMessage() === 'invalid_api_key';
+            json_response([
+                'status' => 'error',
+                'message' => $rejected
+                    ? 'OpenAI rejected the API key on this server. Replace it, then try again.'
+                    : 'The AI Assistant couldn’t answer just now. Please try again.',
+            ], $rejected ? 401 : 502);
         }
         json_response(['status' => 'ok', 'text' => mb_substr($text, 0, (int) $limit)]);
     }
@@ -78,7 +84,11 @@ final class Assistant
         }
         $data = json_decode((string) $body, true);
         if ($status !== 200) {
-            throw new RuntimeException(sprintf('OpenAI HTTP %d %s', $status, mb_substr((string) ($data['error']['type'] ?? ''), 0, 80)));
+            $code = (string) ($data['error']['code'] ?? '');
+            if ($status === 401 || $code === 'invalid_api_key') {
+                throw new RuntimeException('invalid_api_key');
+            }
+            throw new RuntimeException(sprintf('OpenAI HTTP %d %s', $status, mb_substr($code !== '' ? $code : (string) ($data['error']['type'] ?? ''), 0, 80)));
         }
         $text = trim((string) ($data['choices'][0]['message']['content'] ?? ''));
         if ($text === '') {
