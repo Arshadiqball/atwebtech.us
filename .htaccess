@@ -7,7 +7,9 @@ Options -Indexes
     RewriteEngine On
 
     # Never serve application code, configuration, data, or tooling directly.
-    RewriteRule ^(app|bin|database|storage|views|vendor)(/|$) - [F,L]
+    # /app is the workspace, so that prefix is routed into public/ below
+    # instead of being forbidden here. The rewrite still hides the app/ source tree.
+    RewriteRule ^(bin|database|storage|views|vendor)(/|$) - [F,L]
     RewriteCond %{REQUEST_URI} !^/\.well-known/
     RewriteRule (^|/)\. - [F,L]
     RewriteRule \.(md|sql|sqlite|log|lock|example)$ - [F,L]

@@ -41,7 +41,7 @@ Content lives in `app/data/*.php`, so most copy changes don't touch templates. R
 ## Deploying to shared hosting
 
 1. Upload the project **outside** the public web root if possible, and point the domain's document root at `public/`.
-   If the host forces the project root as document root, the root `.htaccess` rewrites requests into `public/` and blocks `app/`, `storage/`, `database/`, `views/`, `bin/` and dotfiles.
+   If the host forces the project root as document root, the root `.htaccess` rewrites requests into `public/` and blocks `storage/`, `database/`, `views/`, `bin/` and dotfiles. `/app` is the workspace, so that address is routed through `public/` rather than blocked.
 2. Create `.env` on the server from `.env.example`:
    - `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://atwebtech.us`
    - a fresh `APP_KEY` (64 hex characters; required in production)
