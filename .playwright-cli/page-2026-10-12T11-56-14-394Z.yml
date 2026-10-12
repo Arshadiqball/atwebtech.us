@@ -1,0 +1,52 @@
+- generic [active] [ref=f2e1]:
+  - link "Skip to content" [ref=f2e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=f2e3]:
+    - banner [ref=f2e4]:
+      - link "Admin home" [ref=f2e5] [cursor=pointer]:
+        - /url: /admin
+        - generic [ref=f2e6]: atwebtech
+      - paragraph [ref=f2e8]: Signed in as arshadiqbal.d@gmail.com
+      - navigation "Admin" [ref=f2e9]:
+        - link "Messages" [ref=f2e10] [cursor=pointer]:
+          - /url: /admin
+        - link "Subscribers" [ref=f2e11] [cursor=pointer]:
+          - /url: /admin/subscribers
+      - generic [ref=f2e12]:
+        - link "Workspace" [ref=f2e13] [cursor=pointer]:
+          - /url: /app
+        - generic [ref=f2e14]:
+          - button "Light theme" [pressed] [ref=f2e15] [cursor=pointer]
+          - button "Dark theme" [ref=f2e19] [cursor=pointer]
+        - button "Log out" [ref=f2e24] [cursor=pointer]
+    - generic [ref=f2e25]:
+      - region "Waitlist subscribers" [ref=f2e26]:
+        - generic [ref=f2e27]:
+          - heading "Subscribers" [level=1] [ref=f2e28]
+          - paragraph [ref=f2e29]: 1 email
+        - list [ref=f2e30]:
+          - listitem [ref=f2e31]:
+            - link "arshadiqbal.d@gmail.com 11 Oct Homepage" [ref=f2e32] [cursor=pointer]:
+              - /url: /admin/subscribers/12
+              - generic [ref=f2e33]:
+                - generic [ref=f2e34]: arshadiqbal.d@gmail.com
+                - time [ref=f2e35]: 11 Oct
+              - generic [ref=f2e36]: Homepage
+      - article [ref=f2e37]:
+        - generic [ref=f2e38]:
+          - paragraph [ref=f2e39]: Waitlist
+          - heading "arshadiqbal.d@gmail.com" [level=2] [ref=f2e40]
+          - paragraph [ref=f2e41]:
+            - time [ref=f2e42]: Joined 10 Oct 2026, 18:02 UTC
+          - link "Email subscriber" [ref=f2e43] [cursor=pointer]:
+            - /url: mailto:arshadiqbal.d%40gmail.com?subject=atwebtech
+        - generic [ref=f2e46]:
+          - generic [ref=f2e47]:
+            - term [ref=f2e48]: Joined
+            - definition [ref=f2e49]: 10 Oct 2026, 18:02 UTC
+          - generic [ref=f2e50]:
+            - term [ref=f2e51]: Updated
+            - definition [ref=f2e52]: 11 Oct 2026, 07:14 UTC
+          - generic [ref=f2e53]:
+            - term [ref=f2e54]: From
+            - definition [ref=f2e55]: Homepage

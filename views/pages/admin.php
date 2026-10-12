@@ -6,19 +6,7 @@ $open = $selected !== null;
 $count = count($messages);
 ?>
 <div class="adm<?= $open ? ' is-open' : '' ?>" id="main" tabindex="-1">
-  <header class="adm-bar">
-    <a class="adm-logo" href="/admin" aria-label="Messages"><?php partial('partials/logo'); ?></a>
-    <p class="sr-only">Signed in as <?= e($user['email']) ?></p>
-    <p class="adm-bar-label">Admin</p>
-    <div class="adm-tools">
-      <a href="/app">Workspace</a>
-      <?php partial('partials/theme-toggle'); ?>
-      <form action="/logout" method="post">
-        <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
-        <button type="submit">Log out</button>
-      </form>
-    </div>
-  </header>
+  <?php partial('partials/admin-bar', ['user' => $user, 'section' => 'messages']); ?>
 
 <?php if (!$messages): ?>
   <div class="adm-empty">

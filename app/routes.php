@@ -364,6 +364,42 @@ return [
         ]);
     }],
 
+    ['GET', '/admin/subscribers', static function (): void {
+        $user = Auth::requireAdmin();
+        View::render('admin-subscribers', [
+            'user' => $user,
+            'subscribers' => Admin::subscribers(),
+            'selected' => null,
+        ], [
+            'title' => 'Subscribers | atwebtech',
+            'description' => 'Waitlist emails for future updates.',
+            'layout' => 'app',
+            'noindex' => true,
+            'admin' => true,
+        ]);
+    }],
+    ['GET', '/admin/subscribers/{id}', static function (string $id): void {
+        if (!ctype_digit($id)) {
+            not_found();
+        }
+        $user = Auth::requireAdmin();
+        $selected = Admin::subscriber((int) $id);
+        if ($selected === null) {
+            not_found();
+        }
+        View::render('admin-subscribers', [
+            'user' => $user,
+            'subscribers' => Admin::subscribers(),
+            'selected' => $selected,
+        ], [
+            'title' => $selected['email'] . ' | Subscribers | atwebtech',
+            'description' => 'Waitlist signup.',
+            'layout' => 'app',
+            'noindex' => true,
+            'admin' => true,
+        ]);
+    }],
+
     ['GET', '/sitemap.xml', static function (): void {
         $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/terms'];
         foreach (array_keys(data('features')) as $slug) {

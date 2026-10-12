@@ -27,9 +27,58 @@ final class Admin
         return $row ?: null;
     }
 
+    public static function subscribers(): array
+    {
+        $stmt = Database::connection()->query(
+            'SELECT id, email, role, plan, billing, channels, source, utm_source, utm_medium, utm_campaign, utm_content, utm_term, click_kind, created_at, updated_at
+             FROM waitlist_signups
+             ORDER BY updated_at DESC, id DESC
+             LIMIT ' . self::LIMIT
+        );
+        return $stmt->fetchAll();
+    }
+
+    public static function subscriber(int $id): ?array
+    {
+        $stmt = Database::connection()->prepare(
+            'SELECT id, email, role, plan, billing, channels, source, utm_source, utm_medium, utm_campaign, utm_content, utm_term, click_kind, created_at, updated_at
+             FROM waitlist_signups WHERE id = :id'
+        );
+        $stmt->execute(['id' => $id]);
+        $row = $stmt->fetch();
+        return $row ?: null;
+    }
+
     public static function topic(string $topic): string
     {
         return FormHandler::CONTACT_TOPICS[$topic] ?? $topic;
+    }
+
+    public static function role(string $role): string
+    {
+        return FormHandler::WAITLIST_ROLES[$role] ?? $role;
+    }
+
+    public static function source(string $source): string
+    {
+        return [
+            'hero' => 'Homepage',
+            'final-cta' => 'Page ending',
+            'pricing' => 'Pricing',
+            'feature' => 'Feature page',
+            'solution' => 'Solution page',
+            'resources' => 'Resources',
+            'demo' => 'Demo',
+            'contact' => 'Contact page',
+            'join' => 'Waitlist page',
+            'page' => 'Website',
+        ][$source] ?? $source;
+    }
+
+    public static function plan(string $plan): string
+    {
+        $plans = data('pricing')['plans'] ?? [];
+        return $plans[$plan]['name'] ?? $plan;
     }
 
     public static function excerpt(string $message, int $length = 120): string

@@ -113,6 +113,7 @@ $notice = flash('notice');
           <a href="/app/account"<?= aria_current('/app/account') ?>><?= icon('user') ?>Account</a>
 <?php if (Auth::isAdmin()): ?>
           <a href="/admin"><?= icon('tray') ?>Messages</a>
+          <a href="/admin/subscribers"><?= icon('envelope-simple') ?>Subscribers</a>
 <?php endif; ?>
           <div class="ws-account-theme"><span>Theme</span><?php partial('partials/theme-toggle'); ?></div>
           <a href="/">atwebtech.us</a>
