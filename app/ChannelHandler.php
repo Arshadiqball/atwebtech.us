@@ -26,8 +26,9 @@ final class ChannelHandler
 
         $state = bin2hex(random_bytes(24));
         $verifier = rtrim(strtr(base64_encode(random_bytes(48)), '+/', '-_'), '=');
-        $_SESSION['_oauth'] = ['provider' => $provider, 'state' => $state, 'verifier' => $verifier, 'at' => time()];
-        redirect(Channels::authorizeUrl($provider, $state, $verifier, ($_POST['switch'] ?? '') === '1'));
+        $redirectUri = Channels::redirectUri($provider);
+        $_SESSION['_oauth'] = ['provider' => $provider, 'state' => $state, 'verifier' => $verifier, 'redirect' => $redirectUri, 'at' => time()];
+        redirect(Channels::authorizeUrl($provider, $state, $verifier, ($_POST['switch'] ?? '') === '1', $redirectUri));
     }
 
     public static function callback(string $provider): never
@@ -50,7 +51,8 @@ final class ChannelHandler
         }
 
         try {
-            $tokens = Channels::exchange($provider, $code, $flow['verifier']);
+            $redirectUri = is_string($flow['redirect'] ?? null) ? $flow['redirect'] : null;
+            $tokens = Channels::exchange($provider, $code, (string) $flow['verifier'], $redirectUri);
             if ($provider === 'youtube' && !str_contains($tokens['scope'], Channels::YOUTUBE_SCOPE)) {
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'YouTube access wasn’t granted. Tick the YouTube permission on the Google screen to connect.');
@@ -60,9 +62,17 @@ final class ChannelHandler
                 self::notice('/app/channels', 'LinkedIn profile access wasn’t granted. Tick the profile permission to connect.');
             }
             $accounts = Channels::accounts($provider, $tokens['access_token']);
+            if (!$accounts && $provider === 'linkedin') {
+                $accounts = Channels::profileFromIdToken((string) ($tokens['id_token'] ?? ''));
+            }
+            unset($tokens['id_token']);
         } catch (Throwable $e) {
             error_log(sprintf('[%s] %s connect failed for user %d: %s', gmdate('c'), $provider, (int) $user['id'], $e->getMessage()));
-            self::notice('/app/channels', sprintf('We couldn’t reach %s to finish connecting. Please try again in a few minutes.', $who));
+            $detail = 'Please try again in a few minutes.';
+            if ($e instanceof ChannelApiException && $e->status >= 400 && $e->status < 500) {
+                $detail = self::connectRefusal($e->getMessage());
+            }
+            self::notice('/app/channels', sprintf('We couldn’t reach %s to finish connecting. %s', $who, $detail));
         }
         if (!$accounts) {
             Channels::revoke($tokens['access_token'], $provider);
@@ -327,6 +337,18 @@ final class ChannelHandler
             }
         }
         return false;
+    }
+
+    private static function connectRefusal(string $message): string
+    {
+        $text = strtolower($message);
+        if (str_contains($text, 'client authentication') || str_contains($text, 'invalid_client')) {
+            return 'LinkedIn did not accept the app secret on this server. Save the full secret, including the characters at the end, then try again.';
+        }
+        if (str_contains($text, 'redirect') || str_contains($text, 'code verifier')) {
+            return 'LinkedIn did not accept the return address. In the LinkedIn app, the redirect URL must be exactly https://atwebtech.us/app/channels/callback/linkedin';
+        }
+        return 'LinkedIn refused the sign-in. Please try again.';
     }
 
     private static function notice(string $location, string $message): never

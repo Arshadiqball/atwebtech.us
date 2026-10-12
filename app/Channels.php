@@ -180,23 +180,23 @@ final class Channels
         };
     }
 
-    public static function authorizeUrl(string $provider, string $state, string $verifier, bool $switchAccount = false): string
+    public static function authorizeUrl(string $provider, string $state, string $verifier, bool $switchAccount = false, ?string $redirectUri = null): string
     {
-        $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
+        $redirectUri = $redirectUri ?: self::redirectUri($provider);
         if ($provider === 'linkedin') {
+            // LinkedIn's web apps reject PKCE. A client secret is the proof instead.
             return 'https://www.linkedin.com/oauth/v2/authorization?' . http_build_query([
                 'response_type' => 'code',
                 'client_id' => config('oauth.linkedin.client_id'),
-                'redirect_uri' => self::redirectUri('linkedin'),
+                'redirect_uri' => $redirectUri,
                 'scope' => self::LINKEDIN_SIGNIN . ' ' . self::LINKEDIN_SHARE,
                 'state' => $state,
-                'code_challenge' => $challenge,
-                'code_challenge_method' => 'S256',
             ], '', '&', PHP_QUERY_RFC3986);
         }
+        $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
         return 'https://accounts.google.com/o/oauth2/v2/auth?' . http_build_query([
             'client_id' => config('oauth.google.client_id'),
-            'redirect_uri' => self::redirectUri('youtube'),
+            'redirect_uri' => $redirectUri,
             'response_type' => 'code',
             'scope' => self::YOUTUBE_SCOPE . ' ' . self::UPLOAD_SCOPE,
             'access_type' => 'offline',
@@ -209,27 +209,34 @@ final class Channels
     }
 
     /** Swap an authorization code for tokens. */
-    public static function exchange(string $provider, string $code, string $verifier): array
+    public static function exchange(string $provider, string $code, string $verifier, ?string $redirectUri = null): array
     {
         $creds = $provider === 'linkedin' ? config('oauth.linkedin') : config('oauth.google');
-        $data = self::request('POST', self::endpoint($provider, 'token'), [
+        $fields = [
+            'grant_type' => 'authorization_code',
             'code' => $code,
+            'redirect_uri' => $redirectUri ?: self::redirectUri($provider),
             'client_id' => $creds['client_id'],
             'client_secret' => $creds['client_secret'],
-            'redirect_uri' => self::redirectUri($provider),
-            'grant_type' => 'authorization_code',
-            'code_verifier' => $verifier,
-        ]);
+        ];
+        if ($provider !== 'linkedin') {
+            $fields['code_verifier'] = $verifier;
+        }
+        $data = self::request('POST', self::endpoint($provider, 'token'), $fields);
         if (empty($data['access_token']) || !is_string($data['access_token'])) {
             throw new RuntimeException('Token response had no access token.');
         }
         $fallback = $provider === 'linkedin' ? self::LINKEDIN_SIGNIN . ' ' . self::LINKEDIN_SHARE : self::YOUTUBE_SCOPE;
-        return [
+        $tokens = [
             'access_token' => $data['access_token'],
             'refresh_token' => is_string($data['refresh_token'] ?? null) ? $data['refresh_token'] : null,
             'expires_at' => gmdate('Y-m-d H:i:s', time() + max(60, (int) ($data['expires_in'] ?? 3600))),
             'scope' => mb_substr((string) ($data['scope'] ?? $fallback), 0, 500),
         ];
+        if ($provider === 'linkedin' && is_string($data['id_token'] ?? null) && $data['id_token'] !== '') {
+            $tokens['id_token'] = $data['id_token'];
+        }
+        return $tokens;
     }
 
     /** Accounts the signed-in user can add: YouTube channels, or one LinkedIn Profile. */
@@ -269,6 +276,24 @@ final class Channels
             error_log(sprintf('[%s] linkedin userinfo failed: %s', gmdate('c'), $e->getMessage()));
             return [];
         }
+        return self::linkedinAccount($info);
+    }
+
+    /** Profile from the OpenID token LinkedIn returns with the access token. */
+    public static function profileFromIdToken(string $jwt): array
+    {
+        $parts = explode('.', $jwt, 3);
+        if (count($parts) !== 3) {
+            return [];
+        }
+        $segment = $parts[1] . str_repeat('=', (4 - strlen($parts[1]) % 4) % 4);
+        $payload = base64_decode(strtr($segment, '-_', '+/'), true);
+        $info = is_string($payload) ? json_decode($payload, true) : null;
+        return is_array($info) ? self::linkedinAccount($info) : [];
+    }
+
+    private static function linkedinAccount(array $info): array
+    {
         $id = (string) ($info['sub'] ?? '');
         if (str_starts_with($id, 'urn:li:person:')) {
             $id = substr($id, strlen('urn:li:person:'));
