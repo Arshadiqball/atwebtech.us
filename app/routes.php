@@ -92,6 +92,8 @@ return [
     ['GET', '/faq', page('faq', 'Frequently asked questions | atwebtech', 'Answers about what atwebtech is, who it is for, the demo, integration status, launch updates, and how to contact the team.')],
     ['GET', '/about', page('about', 'About | atwebtech', 'atwebtech is built to make everyday social work simpler, with a focus on clarity, organization, and honest product status.')],
     ['GET', '/contact', page('contact', 'Contact | atwebtech', 'Send the atwebtech team a question, feedback, or partnership enquiry.')],
+    ['GET', '/join', page('join', 'Join the waitlist | atwebtech', 'Join the atwebtech waitlist for product updates and early-access news.')],
+    ['GET', '/joined', page('joined', 'You are on the list | atwebtech', 'Your atwebtech waitlist signup is confirmed.', [], ['noindex' => true])],
     ['GET', '/privacy', page('legal', 'Privacy policy (draft) | atwebtech', 'Draft privacy policy for atwebtech.us, pending owner and legal review.', ['doc' => 'privacy'])],
     ['GET', '/terms', page('legal', 'Terms of use (draft) | atwebtech', 'Draft terms of use for atwebtech.us, pending owner and legal review.', ['doc' => 'terms'])],
 
@@ -327,7 +329,7 @@ return [
     ['POST', '/account/theme', [AccountHandler::class, 'theme']],
 
     ['GET', '/sitemap.xml', static function (): void {
-        $paths = ['/', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/terms'];
+        $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/terms'];
         foreach (array_keys(data('features')) as $slug) {
             $paths[] = '/features/' . $slug;
         }

@@ -73,6 +73,8 @@ Each submission must pass a session CSRF token, a honeypot field, a signed times
 
 Data is stored in `waitlist_signups` and `enquiries`. Signups from `/pricing` also record the chosen `plan`, `billing` and `channels` (migration `002`); these stay empty when no plan was picked.
 
+Campaign links should use `/join`. Example: `/join?utm_source=google&utm_medium=cpc&utm_campaign=launch`. Email can use `utm_source=email`. The first link in a browser session is kept, including `gclid`, `fbclid`, and `msclkid` when an ad network adds one. A successful signup goes to `/joined`, which is the page to use as the ad conversion. The same campaign labels are stored on a new account if that person then signs up. Repeat visits do not overwrite the first campaign.
+
 ## Accounts and onboarding
 
 `/signup` creates an account with an email and password. After signing up, `/welcome` shows a welcome screen and four questions (role, current tools, number of accounts, channels in focus). Each question can be skipped, and someone who leaves partway through resumes at the next unanswered question. When it's finished, `/app` opens the workspace.

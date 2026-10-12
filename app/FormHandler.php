@@ -20,7 +20,7 @@ final class FormHandler
         'other' => 'Something else',
     ];
 
-    private const SOURCES = ['hero', 'final-cta', 'pricing', 'feature', 'solution', 'resources', 'demo', 'contact', 'page'];
+    private const SOURCES = ['hero', 'final-cta', 'pricing', 'feature', 'solution', 'resources', 'demo', 'contact', 'join', 'page'];
 
     public static function waitlist(): never
     {
@@ -34,6 +34,7 @@ final class FormHandler
         $billing = isset($_POST['billing']) ? Pricing::billing($_POST['billing']) : null;
         $channels = isset($_POST['channels']) ? Pricing::clampChannels($_POST['channels']) : null;
         $source = in_array($_POST['source'] ?? '', self::SOURCES, true) ? $_POST['source'] : 'page';
+        $campaign = Campaign::get();
 
         self::guard('waitlist', $formId, $input);
 
@@ -57,7 +58,7 @@ final class FormHandler
             $billing = null;
         }
 
-        self::persist('waitlist', $formId, $input, static function (PDO $pdo) use ($input, $source, $billing, $channels): void {
+        self::persist('waitlist', $formId, $input, static function (PDO $pdo) use ($input, $source, $billing, $channels, $campaign): void {
             $now = Database::now();
             $params = [
                 'email' => $input['email'],
@@ -66,6 +67,13 @@ final class FormHandler
                 'billing' => $billing,
                 'channels' => $channels,
                 'source' => $source,
+                'utm_source' => $campaign['utm_source'],
+                'utm_medium' => $campaign['utm_medium'],
+                'utm_campaign' => $campaign['utm_campaign'],
+                'utm_content' => $campaign['utm_content'],
+                'utm_term' => $campaign['utm_term'],
+                'click_kind' => $campaign['click_kind'],
+                'click_id' => $campaign['click_id'],
                 'fp' => Security::clientFingerprint(),
                 'ua' => mb_substr((string) ($_SERVER['HTTP_USER_AGENT'] ?? ''), 0, 255),
                 'created' => $now,
@@ -73,15 +81,29 @@ final class FormHandler
             ];
             try {
                 $pdo->prepare(
-                    'INSERT INTO waitlist_signups (email, role, plan, billing, channels, source, fingerprint, user_agent, created_at, updated_at)
-                     VALUES (:email, :role, :plan, :billing, :channels, :source, :fp, :ua, :created, :updated)'
+                    'INSERT INTO waitlist_signups (email, role, plan, billing, channels, source, utm_source, utm_medium, utm_campaign, utm_content, utm_term, click_kind, click_id, fingerprint, user_agent, created_at, updated_at)
+                     VALUES (:email, :role, :plan, :billing, :channels, :source, :utm_source, :utm_medium, :utm_campaign, :utm_content, :utm_term, :click_kind, :click_id, :fp, :ua, :created, :updated)'
                 )->execute($params);
             } catch (PDOException $e) {
                 if ($e->getCode() !== '23000') {
                     throw $e;
                 }
-                $update = 'UPDATE waitlist_signups SET updated_at = :updated, role = COALESCE(:role, role)';
-                $values = ['updated' => $now, 'role' => $params['role'], 'email' => $input['email']];
+                $update = 'UPDATE waitlist_signups SET updated_at = :updated, role = COALESCE(:role, role),
+                    utm_source = COALESCE(utm_source, :utm_source), utm_medium = COALESCE(utm_medium, :utm_medium),
+                    utm_campaign = COALESCE(utm_campaign, :utm_campaign), utm_content = COALESCE(utm_content, :utm_content),
+                    utm_term = COALESCE(utm_term, :utm_term), click_kind = COALESCE(click_kind, :click_kind), click_id = COALESCE(click_id, :click_id)';
+                $values = [
+                    'updated' => $now,
+                    'role' => $params['role'],
+                    'email' => $input['email'],
+                    'utm_source' => $params['utm_source'],
+                    'utm_medium' => $params['utm_medium'],
+                    'utm_campaign' => $params['utm_campaign'],
+                    'utm_content' => $params['utm_content'],
+                    'utm_term' => $params['utm_term'],
+                    'click_kind' => $params['click_kind'],
+                    'click_id' => $params['click_id'],
+                ];
                 if ($params['plan'] !== null) {
                     $update .= ', plan = :plan, billing = :billing, channels = :channels';
                     $values += ['plan' => $params['plan'], 'billing' => $billing, 'channels' => $channels];
@@ -95,9 +117,11 @@ final class FormHandler
             'Role' => self::WAITLIST_ROLES[$input['role']] ?? 'Not provided',
             'Plan' => $input['plan'] !== '' ? $plans[$input['plan']]['name'] . ' (' . ($channels ?? '?') . ' channels' . ($billing ? ", {$billing}" : '') . ')' : 'Not provided',
             'Source' => $source,
+            'Campaign' => Campaign::label(),
         ]);
 
-        self::respond($formId, 'success', "You're on the list. We'll email you with atwebtech product and early-access news.");
+        flash('joined', '1');
+        self::respond($formId, 'success', "You're on the list. We'll email you with atwebtech product and early-access news.", 200, [], [], '/joined');
     }
 
     public static function contact(): never
@@ -193,10 +217,17 @@ final class FormHandler
         return preg_match('/^[a-z0-9-]{1,40}$/', $id) ? $id : 'form';
     }
 
-    private static function respond(string $formId, string $status, string $message, int $code = 200, array $errors = [], array $old = []): never
+    private static function respond(string $formId, string $status, string $message, int $code = 200, array $errors = [], array $old = [], ?string $redirectTo = null): never
     {
         if (wants_json()) {
-            json_response(['status' => $status, 'message' => $message, 'errors' => (object) $errors], $code);
+            $payload = ['status' => $status, 'message' => $message, 'errors' => (object) $errors];
+            if ($redirectTo !== null && $status === 'success') {
+                $payload['redirect'] = $redirectTo;
+            }
+            json_response($payload, $code);
+        }
+        if ($redirectTo !== null && $status === 'success') {
+            redirect($redirectTo);
         }
         flash('form', [
             'form' => $formId,

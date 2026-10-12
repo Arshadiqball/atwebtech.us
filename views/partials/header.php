@@ -61,7 +61,7 @@ $channels = integrations();
     <div class="header-actions">
       <a class="header-login" href="<?= Auth::check() ? '/app' : '/login' ?>"><?= Auth::check() ? 'Open workspace' : 'Log in' ?></a>
       <a class="btn btn--outline btn--sm header-demo" href="/demo">View demo</a>
-      <a class="btn btn--green btn--sm" href="#join">Join the waitlist</a>
+      <a class="btn btn--green btn--sm" href="/join">Join the waitlist</a>
       <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" data-menu-open>
         <?= icon('list', 'icon icon--lg') ?><span class="sr-only">Open menu</span>
       </button>
@@ -96,7 +96,7 @@ $channels = integrations();
     <div class="mobile-menu-actions">
       <a class="btn btn--outline btn--block" href="<?= Auth::check() ? '/app' : '/login' ?>"><?= Auth::check() ? 'Open workspace' : 'Log in' ?></a>
       <a class="btn btn--outline btn--block" href="/demo">View demo</a>
-      <a class="btn btn--green btn--block" href="#join" data-menu-close-link>Join the waitlist</a>
+      <a class="btn btn--green btn--block" href="/join" data-menu-close-link>Join the waitlist</a>
     </div>
   </div>
 </header>

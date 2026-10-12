@@ -48,9 +48,10 @@ final class AccountHandler
             }
 
             $now = Database::now();
+            $campaign = Campaign::get();
             $pdo->prepare(
-                'INSERT INTO users (email, password_hash, display_name, theme, created_at, updated_at, last_login_at)
-                 VALUES (:email, :hash, :name, :theme, :created, :updated, :login)'
+                'INSERT INTO users (email, password_hash, display_name, theme, created_at, updated_at, last_login_at, utm_source, utm_medium, utm_campaign, utm_content, utm_term, click_kind, click_id)
+                 VALUES (:email, :hash, :name, :theme, :created, :updated, :login, :utm_source, :utm_medium, :utm_campaign, :utm_content, :utm_term, :click_kind, :click_id)'
             )->execute([
                 'email' => $input['email'],
                 'hash' => Auth::hash($password),
@@ -59,6 +60,13 @@ final class AccountHandler
                 'created' => $now,
                 'updated' => $now,
                 'login' => $now,
+                'utm_source' => $campaign['utm_source'],
+                'utm_medium' => $campaign['utm_medium'],
+                'utm_campaign' => $campaign['utm_campaign'],
+                'utm_content' => $campaign['utm_content'],
+                'utm_term' => $campaign['utm_term'],
+                'click_kind' => $campaign['click_kind'],
+                'click_id' => $campaign['click_id'],
             ]);
             $userId = (int) $pdo->lastInsertId();
             Auth::onboarding($userId);
@@ -71,7 +79,7 @@ final class AccountHandler
         }
 
         Auth::login($userId);
-        Mailer::notify('New account', ['Email' => $input['email']]);
+        Mailer::notify('New account', ['Email' => $input['email'], 'Campaign' => Campaign::label()]);
         redirect('/welcome');
     }
 

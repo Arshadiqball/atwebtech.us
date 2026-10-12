@@ -14,13 +14,13 @@ return [
 
 <h2>Information we collect</h2>
 <h3>Waitlist</h3>
-<p>When you join the waitlist we store your email address, the optional role you select (for example, creator or agency), which form you used, and the date and time.</p>
+<p>When you join the waitlist we store your email address, the optional role you select (for example, creator or agency), which form you used, and the date and time. If you arrived from an ad or an email, we also store the campaign name and source from that link, and the click id when the ad network adds one.</p>
 <h3>Contact form</h3>
 <p>When you send a message we store your name, email address, chosen topic, your message, and the date and time.</p>
 <h3>Technical information</h3>
 <p>To protect the forms from abuse we store a one-way keyed hash derived from your IP address (not the address itself) and your browser's user-agent string. We also record form attempts for a short period to apply rate limits.</p>
 <h3>Cookies</h3>
-<p>This site sets one essential session cookie, used to protect forms against cross-site request forgery and to show the result of a form submission. It expires when you close your browser. The site does not use advertising or analytics cookies. [Update this section if analytics are added.]</p>
+<p>This site sets one essential session cookie, used to protect forms against cross-site request forgery, to show the result of a form submission, and to remember the campaign link you arrived from until you close the browser. The site does not use advertising or analytics cookies. [Update this section if analytics are added.]</p>
 <h3>Interactive demo</h3>
 <p>Demo interactions, such as moving idea cards or typing a reply, run entirely in your browser. They are not sent to or stored on our servers.</p>
 
