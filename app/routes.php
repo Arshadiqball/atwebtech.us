@@ -110,9 +110,26 @@ return [
         if (Auth::check()) {
             redirect($next ?? '/app');
         }
+        TwoFactor::clearLogin();
         View::render('auth', ['mode' => 'login', 'next' => $next], ['title' => 'Log in | atwebtech', 'description' => 'Log in to your atwebtech account.', 'layout' => 'app', 'noindex' => true]);
     }],
     ['POST', '/login', [AccountHandler::class, 'login']],
+    ['GET', '/login/two-factor', static function (): void {
+        if (Auth::check()) {
+            redirect('/app');
+        }
+        $pending = TwoFactor::pendingLogin();
+        if ($pending === null) {
+            redirect('/login');
+        }
+        View::render('two-factor', ['email' => $pending['email']], [
+            'title' => 'Authentication code | atwebtech',
+            'description' => 'Enter the code from your authenticator app.',
+            'layout' => 'app',
+            'noindex' => true,
+        ]);
+    }],
+    ['POST', '/login/two-factor', [AccountHandler::class, 'twoFactorLogin']],
     ['POST', '/logout', [AccountHandler::class, 'logout']],
 
     ['GET', '/welcome', static function (): void {
@@ -224,6 +241,17 @@ return [
     ['POST', '/app/posts', [WorkspaceHandler::class, 'post']],
     ['POST', '/app/templates', [WorkspaceHandler::class, 'template']],
     ['POST', '/account/timezone', [WorkspaceHandler::class, 'timezone']],
+    ['GET', '/app/account', static function (): void {
+        Workspace::render('account', 'workspace/account', 'Account', static function (array $user): array {
+            return ['twoFactor' => TwoFactor::pageState((int) $user['id'])];
+        });
+    }],
+    ['POST', '/app/account/two-factor/start', [AccountHandler::class, 'twoFactorStart']],
+    ['POST', '/app/account/two-factor/cancel', [AccountHandler::class, 'twoFactorCancel']],
+    ['POST', '/app/account/two-factor/confirm', [AccountHandler::class, 'twoFactorConfirm']],
+    ['POST', '/app/account/two-factor/disable', [AccountHandler::class, 'twoFactorDisable']],
+    ['POST', '/app/account/two-factor/recovery', [AccountHandler::class, 'twoFactorRecovery']],
+    ['POST', '/app/account/two-factor/recovery/done', [AccountHandler::class, 'twoFactorRecoveryDone']],
     ['GET', '/app/channels', static function (): void {
         Workspace::render('channels', 'workspace/channels', 'Channels', static fn (array $user): array => ['connected' => Channels::forUser((int) $user['id'])]);
     }],

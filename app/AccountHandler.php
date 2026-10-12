@@ -102,7 +102,7 @@ final class AccountHandler
             }
 
             $pdo = Database::connection();
-            $stmt = $pdo->prepare('SELECT id, password_hash FROM users WHERE email = :email');
+            $stmt = $pdo->prepare('SELECT id, password_hash, totp_confirmed_at FROM users WHERE email = :email');
             $stmt->execute(['email' => $input['email']]);
             $user = $stmt->fetch();
             // Unknown emails still pay for one hash so response timing doesn't reveal which accounts exist.
@@ -115,21 +115,134 @@ final class AccountHandler
                 self::fail('login', $back, 'That email and password combination is incorrect.', [], $input);
             }
 
-            $now = Database::now();
-            $update = ['id' => $user['id'], 'login' => $now];
-            $sql = 'UPDATE users SET last_login_at = :login';
-            if (password_needs_rehash($user['password_hash'], defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT)) {
-                $sql .= ', password_hash = :hash';
-                $update['hash'] = Auth::hash($password);
+            $rehash = password_needs_rehash($user['password_hash'], defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_BCRYPT)
+                ? Auth::hash($password) : null;
+            if ($user['totp_confirmed_at'] !== null) {
+                TwoFactor::rememberLogin([
+                    'id' => (int) $user['id'],
+                    'email' => $input['email'],
+                    'next' => $next,
+                    'rehash' => $rehash,
+                ]);
+                redirect('/login/two-factor');
             }
-            $pdo->prepare($sql . ' WHERE id = :id')->execute($update);
         } catch (PDOException $e) {
             error_log(sprintf('[%s] login failed: %s', gmdate('c'), $e->getMessage()));
             self::fail('login', $back, "We couldn't log you in right now. Please try again in a few minutes.", [], $input);
         }
 
-        Auth::login((int) $user['id']);
-        redirect($next ?? '/app');
+        self::finishLogin((int) $user['id'], $next, $rehash);
+    }
+
+    public static function twoFactorLogin(): never
+    {
+        $pending = TwoFactor::pendingLogin();
+        $back = '/login/two-factor';
+        if ($pending === null) {
+            flash('form', ['form' => 'login', 'status' => 'error', 'message' => 'That sign-in expired. Enter your email and password again.', 'errors' => [], 'old' => []]);
+            redirect('/login');
+        }
+        if (!Security::verifyCsrf($_POST['_token'] ?? null)) {
+            self::fail('two-factor', $back, 'Your session expired. Refresh the page and try again.', [], []);
+        }
+        $code = trim((string) ($_POST['code'] ?? ''));
+        $fingerprint = Security::keyedHash('tfa-login:' . $pending['id']);
+        $ipKey = Security::clientFingerprint();
+        if (TwoFactor::tooManyAttempts('tfa-login', $fingerprint) || TwoFactor::tooManyAttempts('tfa-login', $ipKey)) {
+            TwoFactor::clearLogin();
+            flash('form', ['form' => 'login', 'status' => 'error', 'message' => 'Too many failed attempts. Please wait 15 minutes and try again.', 'errors' => [], 'old' => ['email' => $pending['email']]]);
+            redirect('/login');
+        }
+        if ($code === '') {
+            self::fail('two-factor', $back, 'Enter the code from your authenticator app, or a recovery code.', ['code' => 'Enter your authentication code.'], []);
+        }
+        try {
+            $ok = TwoFactor::acceptLogin((int) $pending['id'], $code);
+        } catch (PDOException $e) {
+            error_log(sprintf('[%s] two-factor login failed: %s', gmdate('c'), $e->getMessage()));
+            self::fail('two-factor', $back, "We couldn't check that code right now. Please try again in a few minutes.", [], []);
+        }
+        if (!$ok) {
+            TwoFactor::hit('tfa-login', $fingerprint);
+            TwoFactor::hit('tfa-login', $ipKey);
+            self::fail('two-factor', $back, 'That code didn’t match. Try the next code from your app, or a recovery code.', ['code' => 'That code didn’t match.'], []);
+        }
+        TwoFactor::clearLogin();
+        self::finishLogin((int) $pending['id'], $pending['next'], $pending['rehash']);
+    }
+
+    public static function twoFactorStart(): never
+    {
+        $user = self::member();
+        $back = '/app/account';
+        if (TwoFactor::pageState((int) $user['id'])['enabled']) {
+            redirect($back);
+        }
+        $password = (string) ($_POST['password'] ?? '');
+        $fingerprint = Security::keyedHash('tfa-setup:' . $user['id']);
+        if (TwoFactor::tooManyAttempts('tfa-setup', $fingerprint)) {
+            self::fail('tfa-start', $back, 'Too many attempts. Please wait 15 minutes and try again.', [], []);
+        }
+        if ($password === '') {
+            self::fail('tfa-start', $back, 'Enter your password to set up two-factor authentication.', ['password' => 'Enter your password.'], []);
+        }
+        if (!TwoFactor::passwordOk((int) $user['id'], $password)) {
+            TwoFactor::hit('tfa-setup', $fingerprint);
+            self::fail('tfa-start', $back, 'That password is incorrect.', ['password' => 'That password is incorrect.'], []);
+        }
+        TwoFactor::beginSetup((int) $user['id']);
+        redirect($back);
+    }
+
+    public static function twoFactorCancel(): never
+    {
+        self::member();
+        TwoFactor::cancelSetup();
+        redirect('/app/account');
+    }
+
+    public static function twoFactorConfirm(): never
+    {
+        $user = self::member();
+        $back = '/app/account';
+        $code = trim((string) ($_POST['code'] ?? ''));
+        $fingerprint = Security::keyedHash('tfa-confirm:' . $user['id']);
+        if (TwoFactor::tooManyAttempts('tfa-confirm', $fingerprint)) {
+            self::fail('tfa-confirm', $back, 'Too many attempts. Please wait 15 minutes and try again.', [], []);
+        }
+        if ($code === '') {
+            self::fail('tfa-confirm', $back, 'Enter the 6-digit code from your authenticator app.', ['code' => 'Enter the 6-digit code.'], []);
+        }
+        try {
+            $error = TwoFactor::confirmSetup((int) $user['id'], $code);
+        } catch (PDOException $e) {
+            error_log(sprintf('[%s] two-factor confirm failed: %s', gmdate('c'), $e->getMessage()));
+            self::fail('tfa-confirm', $back, "We couldn't turn on two-factor authentication right now. Please try again.", [], []);
+        }
+        if ($error !== null) {
+            TwoFactor::hit('tfa-confirm', $fingerprint);
+            self::fail('tfa-confirm', $back, $error, ['code' => $error], []);
+        }
+        redirect($back);
+    }
+
+    public static function twoFactorRecoveryDone(): never
+    {
+        $user = self::member();
+        TwoFactor::dismissRecovery((int) $user['id']);
+        redirect('/app/account');
+    }
+
+    public static function twoFactorRecovery(): never
+    {
+        $user = self::member();
+        self::guardedChange((int) $user['id'], 'tfa-recovery', [TwoFactor::class, 'replaceRecovery']);
+    }
+
+    public static function twoFactorDisable(): never
+    {
+        $user = self::member();
+        self::guardedChange((int) $user['id'], 'tfa-disable', [TwoFactor::class, 'disable']);
     }
 
     public static function logout(): never
@@ -223,6 +336,59 @@ final class AccountHandler
         Database::connection()->prepare('UPDATE users SET theme = :theme, updated_at = :updated WHERE id = :id')
             ->execute(['theme' => $theme, 'updated' => Database::now(), 'id' => $user['id']]);
         self::done(safe_return_path($_POST['return'] ?? '/app', '/app'));
+    }
+
+    private static function finishLogin(int $userId, ?string $next, ?string $rehash): never
+    {
+        try {
+            $update = ['id' => $userId, 'login' => Database::now()];
+            $sql = 'UPDATE users SET last_login_at = :login';
+            if ($rehash !== null && $rehash !== '') {
+                $sql .= ', password_hash = :hash';
+                $update['hash'] = $rehash;
+            }
+            Database::connection()->prepare($sql . ' WHERE id = :id')->execute($update);
+        } catch (PDOException $e) {
+            error_log(sprintf('[%s] login finish failed: %s', gmdate('c'), $e->getMessage()));
+            flash('form', ['form' => 'login', 'status' => 'error', 'message' => "We couldn't log you in right now. Please try again in a few minutes.", 'errors' => [], 'old' => []]);
+            redirect('/login');
+        }
+        Auth::login($userId);
+        redirect($next ?? '/app');
+    }
+
+    /** @param callable(int, string): ?string $action */
+    private static function guardedChange(int $userId, string $form, callable $action): never
+    {
+        $back = '/app/account';
+        $password = (string) ($_POST['password'] ?? '');
+        $code = trim((string) ($_POST['code'] ?? ''));
+        $fingerprint = Security::keyedHash($form . ':' . $userId);
+        if (TwoFactor::tooManyAttempts($form, $fingerprint)) {
+            self::fail($form, $back, 'Too many attempts. Please wait 15 minutes and try again.', [], []);
+        }
+        $errors = array_filter([
+            'password' => $password === '' ? 'Enter your password.' : null,
+            'code' => $code === '' ? 'Enter an authentication code.' : null,
+        ]);
+        if ($errors) {
+            self::fail($form, $back, 'Enter your password and a current code.', $errors, []);
+        }
+        if (!TwoFactor::passwordOk($userId, $password)) {
+            TwoFactor::hit($form, $fingerprint);
+            self::fail($form, $back, 'That password is incorrect.', ['password' => 'That password is incorrect.'], []);
+        }
+        try {
+            $error = $action($userId, $code);
+        } catch (PDOException $e) {
+            error_log(sprintf('[%s] two-factor update failed: %s', gmdate('c'), $e->getMessage()));
+            self::fail($form, $back, "We couldn't update two-factor authentication right now. Please try again.", [], []);
+        }
+        if ($error !== null) {
+            TwoFactor::hit($form, $fingerprint);
+            self::fail($form, $back, $error, ['code' => $error], []);
+        }
+        redirect($back);
     }
 
     private static function member(): array

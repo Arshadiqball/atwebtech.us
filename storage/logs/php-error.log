@@ -19,3 +19,26 @@ Stack trace:
 #1 {main}
   thrown in Command line code on line 8
 [11-Oct-2026 06:32:20 UTC] [2026-10-11T06:32:20+00:00] publish post 40 failed: LinkedIn posts from atwebtech can include an image, not a video. Attach an image or remove the file, then retry.
+[12-Oct-2026 05:12:25 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:12:41 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:12:41 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:12:48 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:12:48 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:13:10 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:23:35 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:23:35 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES) in /Users/mac/Documents/atwebtech/atwebtechus/app/Database.php:37
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/app/Database.php(37): PDO->__construct('mysql:host=loca...', 'atwebtec_us', Object(SensitiveParameterValue), Array)
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(83): Database::connection()
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(53): Migrator::apply('mysql', Array)
+#3 /Users/mac/Documents/atwebtech/atwebtechus/app/bootstrap.php(40): Migrator::run()
+#4 /Users/mac/Documents/atwebtech/atwebtechus/bin/migrate.php(12): require('/Users/mac/Docu...')
+#5 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/app/Database.php on line 37
+[12-Oct-2026 05:25:02 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:25:06 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:27:42 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:27:42 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:30:06 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:30:06 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)
+[12-Oct-2026 05:30:07 UTC] Migration failed: SQLSTATE[HY000] [1045] Access denied for user 'atwebtec_us'@'localhost' (using password: YES)

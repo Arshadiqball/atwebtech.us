@@ -110,6 +110,7 @@ $notice = flash('notice');
         <button type="button" class="ws-icon-btn ws-collapse" aria-pressed="false" data-ws-collapse><?= icon('sidebar-simple') ?><span class="sr-only">Collapse sidebar</span></button>
         <div class="ws-account-menu" id="ws-account-menu" hidden>
           <p class="ws-account-email"><?= e($user['email']) ?></p>
+          <a href="/app/account"<?= aria_current('/app/account') ?>><?= icon('user') ?>Account</a>
           <div class="ws-account-theme"><span>Theme</span><?php partial('partials/theme-toggle'); ?></div>
           <a href="/">atwebtech.us</a>
           <form action="/logout" method="post">

@@ -654,6 +654,36 @@
     });
   });
 
+  $$('[data-copy]').forEach((btn) => {
+    const live = $('.sr-only', btn);
+    btn.addEventListener('click', async () => {
+      const source = document.getElementById(btn.getAttribute('data-copy'));
+      const text = (source?.getAttribute('data-copy-text') || source?.textContent || '').trim();
+      if (!text) return;
+      try {
+        if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(text);
+        } else {
+          const area = document.createElement('textarea');
+          area.value = text;
+          area.setAttribute('readonly', '');
+          area.style.position = 'fixed';
+          area.style.left = '-9999px';
+          document.body.appendChild(area);
+          area.select();
+          document.execCommand('copy');
+          area.remove();
+        }
+        if (live) {
+          const prev = live.dataset.prev || live.textContent;
+          live.dataset.prev = prev;
+          live.textContent = ' Copied';
+          setTimeout(() => { live.textContent = prev; }, 1600);
+        }
+      } catch (err) { /* the text stays selectable */ }
+    });
+  });
+
   $$('[data-password-rules]').forEach((input) => {
     const box = $('[data-rules]', input.form);
     const status = $('[data-rules-status]', box);

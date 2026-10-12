@@ -46,7 +46,7 @@ Content lives in `app/data/*.php`, so most copy changes don't touch templates. R
    - `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://atwebtech.us`
    - a fresh `APP_KEY` (64 hex characters; required in production)
    - the production database credentials
-3. Run `php bin/migrate.php` over SSH. Without SSH, import each file in `database/migrations/*.mysql.sql` in order in phpMyAdmin.
+3. Migrations run by themselves the first time the site or `bin/publish.php` starts, and again whenever a new file is added under `database/migrations/`. `php bin/migrate.php` still works over SSH and prints what it applied. Do not also import those files by hand.
 4. Make `storage/logs` and `storage/sessions` writable by PHP.
 5. Serve over HTTPS. In production the app sends HSTS, marks the session cookie `Secure`, and only then allows indexing (`robots.txt` and the robots meta tag block indexing in every other environment).
 
@@ -83,6 +83,7 @@ Data is stored in `waitlist_signups` and `enquiries`. Signups from `/pricing` al
   - The session ID is regenerated on login and logout.
   - Every account form requires the session CSRF token. Sign-up also uses the honeypot, signed timestamp and rate limit.
   - Login locks for 15 minutes after 10 failed attempts, per connection and per email address.
+  - Two-factor authentication is optional. From Account in the workspace menu, a person confirms their password, scans a QR code with an authenticator app, and saves 8 one-time recovery codes. After that, sign-in asks for a 6-digit code (or a recovery code) before the session starts. The shared secret is encrypted at rest, recovery codes are stored only as hashes, and the plaintext codes are shown once.
   - After login, only `/app` and `/welcome` paths are accepted as a destination.
   - Account pages are `noindex` and disallowed in `robots.txt`.
 - **Workspace:** Home has the activity summary, first steps, Up Next, Comments, Templates and the survey. There is a light/dark theme (saved per user) and a collapsible sidebar. The sidebar's "+ New" menu opens the post composer or a new idea. Start pages and team invites are marked "Soon".

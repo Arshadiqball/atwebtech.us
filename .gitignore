@@ -1,4 +1,7 @@
+.env
 data/auth.json
 data/messages.json
 data/mail.json
 data/sessions.json
+storage/migrations.stamp
+storage/migrations.lock
