@@ -143,7 +143,17 @@ final class Channels
 
     public static function redirectUri(string $provider): string
     {
-        return config('app.url') . '/app/channels/callback/' . $provider;
+        return self::baseUrl() . '/app/channels/callback/' . $provider;
+    }
+
+    /** The address LinkedIn and Google must send the browser back to. */
+    private static function baseUrl(): string
+    {
+        $host = strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
+        if ($host === 'atwebtech.us' || $host === 'www.atwebtech.us') {
+            return 'https://atwebtech.us';
+        }
+        return rtrim((string) config('app.url'), '/');
     }
 
     /** API hosts. Outside production, GOOGLE_OAUTH_TEST_BASE / LINKEDIN_OAUTH_TEST_BASE point at a local fake. */
