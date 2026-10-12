@@ -1,0 +1,628 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "atwebtech home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]: atwebtech
+      - navigation "Main" [ref=e12]:
+        - list [ref=e13]:
+          - listitem [ref=e14]:
+            - button "Features" [ref=e15] [cursor=pointer]
+          - listitem [ref=e18]:
+            - button "Integrations" [ref=e19] [cursor=pointer]
+          - listitem [ref=e22]:
+            - button "Solutions" [ref=e23] [cursor=pointer]
+          - listitem [ref=e26]:
+            - button "Resources" [ref=e27] [cursor=pointer]
+          - listitem [ref=e30]:
+            - link "Pricing" [ref=e31] [cursor=pointer]:
+              - /url: /pricing
+      - generic [ref=e32]:
+        - link "View demo" [ref=e33] [cursor=pointer]:
+          - /url: /demo
+        - link "Join the waitlist" [ref=e34] [cursor=pointer]:
+          - /url: "#join"
+  - main [ref=e35]:
+    - generic [ref=e36]:
+      - region [ref=e37]:
+        - generic [ref=e38]:
+          - heading "Flexible pricing for every workspace" [level=1] [ref=e39]
+          - heading "Plans" [level=2] [ref=e40]
+          - generic [ref=e41]:
+            - generic [ref=e42]:
+              - generic [ref=e43]:
+                - generic [ref=e44]: Channels
+                - generic [ref=e45]: Select how many channels you want to connect
+              - generic [ref=e46]:
+                - button "Decrease channels" [disabled] [ref=e47]
+                - spinbutton "Channels" [ref=e50]: "1"
+                - button "Increase channels" [ref=e51] [cursor=pointer]
+            - group [ref=e54]:
+              - generic [ref=e55]:
+                - generic [ref=e56]: Billing
+                - generic [ref=e57]: Select your preferred billing schedule
+              - generic [ref=e58]:
+                - generic [ref=e59]:
+                  - radio "Monthly" [ref=e60] [cursor=pointer]
+                  - generic [ref=e61]: Monthly
+                - generic [ref=e62]:
+                  - radio "Yearly" [checked] [ref=e63] [cursor=pointer]
+                  - generic [ref=e64]: Yearly
+          - generic [ref=e65]:
+            - article [ref=e66]:
+              - paragraph [aria-hidden] [ref=e67]
+              - heading "Free" [level=3] [ref=e68]
+              - paragraph [ref=e69]:
+                - generic [ref=e70]: Free
+                - generic [ref=e71]: forever
+              - paragraph [ref=e72]: Connect up to 3 channels
+              - link "Join the waitlist for Free" [ref=e73] [cursor=pointer]:
+                - /url: /pricing?plan=free&channels=1&billing=yearly#join
+                - text: Join the waitlist
+                - generic [ref=e76]: for Free
+              - heading "What's included" [level=4] [ref=e77]
+              - list [ref=e78]:
+                - listitem [ref=e79]:
+                  - generic [ref=e80]: 10 scheduled posts per channel, refilled as posts go out
+                  - button "About 10 scheduled posts per channel, refilled as posts go out" [ref=e82] [cursor=pointer]
+                - listitem [ref=e85]:
+                  - generic [ref=e86]: 100 ideas
+                  - button "About 100 ideas" [ref=e88] [cursor=pointer]
+                - listitem [ref=e91]:
+                  - generic [ref=e92]: 1 user account
+                  - button "About 1 user account" [ref=e94] [cursor=pointer]
+                - listitem [ref=e97]:
+                  - generic [ref=e98]: AI writing assistance
+                  - button "About AI writing assistance" [ref=e100] [cursor=pointer]
+                - listitem [ref=e103]:
+                  - generic [ref=e104]: Insights
+                  - button "About Insights" [ref=e106] [cursor=pointer]
+                - listitem [ref=e109]:
+                  - generic [ref=e110]: Community inbox
+                  - button "About Community inbox" [ref=e112] [cursor=pointer]
+                - listitem [ref=e115]:
+                  - generic [ref=e116]: Link in bio page
+                  - button "About Link in bio page" [ref=e118] [cursor=pointer]
+            - article [ref=e121]:
+              - paragraph [ref=e122]:
+                - generic [ref=e123]: Recommended
+              - heading "Essentials" [level=3] [ref=e124]
+              - paragraph [ref=e125]:
+                - generic [ref=e126]: $5
+                - generic [ref=e127]: /month
+              - paragraph [ref=e128]: 1 channel · $60 billed yearly (save 2 months)
+              - link "Join the waitlist for Essentials" [ref=e129] [cursor=pointer]:
+                - /url: /pricing?plan=essentials&channels=1&billing=yearly#join
+                - text: Join the waitlist
+                - generic [ref=e132]: for Essentials
+              - heading "What's included" [level=4] [ref=e133]
+              - list [ref=e134]:
+                - listitem [ref=e135]:
+                  - generic [ref=e136]: Unlimited scheduled posts per channel
+                  - button "About Unlimited scheduled posts per channel" [ref=e138] [cursor=pointer]
+                - listitem [ref=e141]:
+                  - generic [ref=e142]: Unlimited ideas
+                  - button "About Unlimited ideas" [ref=e144] [cursor=pointer]
+                - listitem [ref=e147]:
+                  - generic [ref=e148]: 1 user account
+                  - button "About 1 user account" [ref=e150] [cursor=pointer]
+                - listitem [ref=e153]:
+                  - generic [ref=e154]: AI writing assistance
+                  - button "About AI writing assistance" [ref=e156] [cursor=pointer]
+                - listitem [ref=e159]:
+                  - generic [ref=e160]: Advanced analytics
+                  - button "About Advanced analytics" [ref=e162] [cursor=pointer]
+                - listitem [ref=e165]:
+                  - generic [ref=e166]: Community inbox
+                  - button "About Community inbox" [ref=e168] [cursor=pointer]
+                - listitem [ref=e171]:
+                  - generic [ref=e172]: Hashtag manager
+                  - button "About Hashtag manager" [ref=e174] [cursor=pointer]
+                - listitem [ref=e177]:
+                  - generic [ref=e178]: First comment scheduling
+                  - button "About First comment scheduling" [ref=e180] [cursor=pointer]
+            - article [ref=e183]:
+              - paragraph [aria-hidden] [ref=e184]
+              - heading "Team" [level=3] [ref=e185]
+              - paragraph [ref=e186]:
+                - generic [ref=e187]: $10
+                - generic [ref=e188]: /month
+              - paragraph [ref=e189]: 1 channel · $120 billed yearly (save 2 months)
+              - link "Join the waitlist for Team" [ref=e190] [cursor=pointer]:
+                - /url: /pricing?plan=team&channels=1&billing=yearly#join
+                - text: Join the waitlist
+                - generic [ref=e193]: for Team
+              - heading "What's included" [level=4] [ref=e194]
+              - list [ref=e195]:
+                - listitem [ref=e196]:
+                  - generic [ref=e197]: Unlimited scheduled posts per channel
+                  - button "About Unlimited scheduled posts per channel" [ref=e199] [cursor=pointer]
+                - listitem [ref=e202]:
+                  - generic [ref=e203]: Unlimited ideas
+                  - button "About Unlimited ideas" [ref=e205] [cursor=pointer]
+                - listitem [ref=e208]:
+                  - generic [ref=e209]: Unlimited team members
+                  - button "About Unlimited team members" [ref=e211] [cursor=pointer]
+                - listitem [ref=e214]:
+                  - generic [ref=e215]: AI writing assistance
+                  - button "About AI writing assistance" [ref=e217] [cursor=pointer]
+                - listitem [ref=e220]:
+                  - generic [ref=e221]: Advanced analytics
+                  - button "About Advanced analytics" [ref=e223] [cursor=pointer]
+                - listitem [ref=e226]:
+                  - generic [ref=e227]: Community inbox
+                  - button "About Community inbox" [ref=e229] [cursor=pointer]
+                - listitem [ref=e232]:
+                  - generic [ref=e233]: Hashtag manager
+                  - button "About Hashtag manager" [ref=e235] [cursor=pointer]
+                - listitem [ref=e238]:
+                  - generic [ref=e239]: First comment scheduling
+                  - button "About First comment scheduling" [ref=e241] [cursor=pointer]
+                - listitem [ref=e244]:
+                  - generic [ref=e245]: Access levels
+                  - button "About Access levels" [ref=e247] [cursor=pointer]
+                - listitem [ref=e250]:
+                  - generic [ref=e251]: Content approval workflows
+                  - button "About Content approval workflows" [ref=e253] [cursor=pointer]
+          - paragraph [ref=e256]
+          - generic [ref=e257]:
+            - paragraph [ref=e258]: Planned launch pricing in US dollars. atwebtech is in development, so choosing a plan adds you to the waitlist. No payment is taken.
+            - link "Compare plans" [ref=e259] [cursor=pointer]:
+              - /url: "#compare"
+      - region [ref=e262]:
+        - generic [ref=e264]:
+          - generic [ref=e265]:
+            - heading "Channels we plan to support" [level=2] [ref=e266]
+            - link "See integration status" [ref=e267] [cursor=pointer]:
+              - /url: /integrations
+          - list [ref=e270]:
+            - listitem [ref=e271]:
+              - link [ref=e272] [cursor=pointer]:
+                - /url: /integrations#instagram
+                - img "Instagram" [ref=e273]
+            - listitem [ref=e275]:
+              - link [ref=e276] [cursor=pointer]:
+                - /url: /integrations#facebook
+                - img "Facebook" [ref=e277]
+            - listitem [ref=e279]:
+              - link [ref=e280] [cursor=pointer]:
+                - /url: /integrations#tiktok
+                - img "TikTok" [ref=e281]
+            - listitem [ref=e283]:
+              - link "in LinkedIn" [ref=e284] [cursor=pointer]:
+                - /url: /integrations#linkedin
+                - generic [ref=e285]: in
+                - generic [ref=e286]: LinkedIn
+            - listitem [ref=e287]:
+              - link [ref=e288] [cursor=pointer]:
+                - /url: /integrations#youtube
+                - img "YouTube" [ref=e289]
+            - listitem [ref=e291]:
+              - link [ref=e292] [cursor=pointer]:
+                - /url: /integrations#pinterest
+                - img "Pinterest" [ref=e293]
+            - listitem [ref=e295]:
+              - link [ref=e296] [cursor=pointer]:
+                - /url: /integrations#threads
+                - img "Threads" [ref=e297]
+            - listitem [ref=e299]:
+              - link [ref=e300] [cursor=pointer]:
+                - /url: /integrations#x
+                - img "X" [ref=e301]
+            - listitem [ref=e303]:
+              - link [ref=e304] [cursor=pointer]:
+                - /url: /integrations#google-business-profile
+                - img "Google Business Profile" [ref=e305]
+      - region [ref=e307]:
+        - generic [ref=e309]:
+          - heading "Pay for the channels you manage. Nothing more." [level=2] [ref=e310]
+          - paragraph [ref=e311]: Add a channel when you take on a new account and remove it when you no longer need it. From the 11th channel on, each one is $4 a month on any paid plan, so your average cost per channel goes down as you grow.
+      - region [ref=e312]:
+        - generic [ref=e313]:
+          - table [ref=e314]:
+            - caption [ref=e315]: Feature comparison of the Free, Essentials, and Team plans
+            - rowgroup [ref=e316]:
+              - row [ref=e317]:
+                - cell [ref=e318]:
+                  - heading "Feature comparison" [level=2] [ref=e319]
+                - columnheader "Free Join the waitlist for Free" [ref=e320]:
+                  - generic [ref=e321]: Free
+                  - link "Join the waitlist for Free" [ref=e322] [cursor=pointer]:
+                    - /url: /pricing?plan=free&channels=1&billing=yearly#join
+                    - text: Join
+                    - generic [ref=e323]: the waitlist for Free
+                - columnheader "Recommended Essentials Join the waitlist for Essentials" [ref=e326]:
+                  - generic [ref=e327]: Recommended
+                  - generic [ref=e328]: Essentials
+                  - link "Join the waitlist for Essentials" [ref=e329] [cursor=pointer]:
+                    - /url: /pricing?plan=essentials&channels=1&billing=yearly#join
+                    - text: Join
+                    - generic [ref=e330]: the waitlist for Essentials
+                - columnheader "Team Join the waitlist for Team" [ref=e333]:
+                  - generic [ref=e334]: Team
+                  - link "Join the waitlist for Team" [ref=e335] [cursor=pointer]:
+                    - /url: /pricing?plan=team&channels=1&billing=yearly#join
+                    - text: Join
+                    - generic [ref=e336]: the waitlist for Team
+            - rowgroup [ref=e339]:
+              - row [ref=e340]:
+                - columnheader [ref=e341]:
+                  - button "Content planning" [expanded] [ref=e342] [cursor=pointer]
+            - rowgroup [ref=e345]:
+              - row [ref=e346]:
+                - rowheader "Ideas Capture and store content ideas whenever they come to you." [ref=e347]:
+                  - generic [ref=e348]: Ideas
+                  - generic [ref=e349]: Capture and store content ideas whenever they come to you.
+                - cell "100 ideas" [ref=e350]
+                - cell "Unlimited" [ref=e351]
+                - cell "Unlimited" [ref=e352]
+              - row [ref=e353]:
+                - rowheader "Tags Organize content by campaign, format, or topic." [ref=e354]:
+                  - generic [ref=e355]: Tags
+                  - generic [ref=e356]: Organize content by campaign, format, or topic.
+                - cell "3 tags" [ref=e357]
+                - cell "250 tags" [ref=e358]
+                - cell "250 tags" [ref=e359]
+              - row [ref=e360]:
+                - rowheader "Drafts Keep work in progress until it is ready." [ref=e361]:
+                  - generic [ref=e362]: Drafts
+                  - generic [ref=e363]: Keep work in progress until it is ready.
+                - cell "Unlimited" [ref=e364]
+                - cell "Unlimited" [ref=e365]
+                - cell "Unlimited" [ref=e366]
+              - row [ref=e367]:
+                - rowheader "Board view Move ideas through Ideas, Drafting, and Ready for review columns." [ref=e368]:
+                  - generic [ref=e369]: Board view
+                  - generic [ref=e370]: Move ideas through Ideas, Drafting, and Ready for review columns.
+                - cell "Included" [ref=e371]
+                - cell "Included" [ref=e375]
+                - cell "Included" [ref=e379]
+              - row [ref=e383]:
+                - rowheader "AI writing assistance Suggest ideas, refine drafts, and organize a plan." [ref=e384]:
+                  - generic [ref=e385]: AI writing assistance
+                  - generic [ref=e386]: Suggest ideas, refine drafts, and organize a plan.
+                - cell "Included" [ref=e387]
+                - cell "Included" [ref=e391]
+                - cell "Included" [ref=e395]
+            - rowgroup [ref=e399]:
+              - row [ref=e400]:
+                - columnheader [ref=e401]:
+                  - button "Publishing" [expanded] [ref=e402] [cursor=pointer]
+            - rowgroup [ref=e405]:
+              - row [ref=e406]:
+                - rowheader "Scheduled posts per channel How many posts each channel can have scheduled at one time." [ref=e407]:
+                  - generic [ref=e408]: Scheduled posts per channel
+                  - generic [ref=e409]: How many posts each channel can have scheduled at one time.
+                - cell "10" [ref=e410]
+                - cell "Unlimited" [ref=e411]
+                - cell "Unlimited" [ref=e412]
+              - row [ref=e413]:
+                - rowheader "Visual content calendar See your schedule across weeks or months." [ref=e414]:
+                  - generic [ref=e415]: Visual content calendar
+                  - generic [ref=e416]: See your schedule across weeks or months.
+                - cell "Included" [ref=e417]
+                - cell "Included" [ref=e421]
+                - cell "Included" [ref=e425]
+              - row [ref=e429]:
+                - rowheader "Queue A running list of upcoming posts you can reorder." [ref=e430]:
+                  - generic [ref=e431]: Queue
+                  - generic [ref=e432]: A running list of upcoming posts you can reorder.
+                - cell "Included" [ref=e433]
+                - cell "Included" [ref=e437]
+                - cell "Included" [ref=e441]
+              - row [ref=e445]:
+                - rowheader "Link in bio page A simple landing page with links to your content. Counts as one channel." [ref=e446]:
+                  - generic [ref=e447]: Link in bio page
+                  - generic [ref=e448]: A simple landing page with links to your content. Counts as one channel.
+                - cell "Included" [ref=e449]
+                - cell "Included" [ref=e453]
+                - cell "Included" [ref=e457]
+              - row [ref=e461]:
+                - rowheader "Duplicate posts Copy a post and adapt it for another channel or date." [ref=e462]:
+                  - generic [ref=e463]: Duplicate posts
+                  - generic [ref=e464]: Copy a post and adapt it for another channel or date.
+                - cell "Included" [ref=e465]
+                - cell "Included" [ref=e469]
+                - cell "Included" [ref=e473]
+              - row [ref=e477]:
+                - rowheader "First comment scheduling Schedule a first comment to go out with a post." [ref=e478]:
+                  - generic [ref=e479]: First comment scheduling
+                  - generic [ref=e480]: Schedule a first comment to go out with a post.
+                - cell "Not included" [ref=e481]
+                - cell "Included" [ref=e484]
+                - cell "Included" [ref=e488]
+              - row [ref=e492]:
+                - rowheader "Channel groups Group channels for quick selection when scheduling." [ref=e493]:
+                  - generic [ref=e494]: Channel groups
+                  - generic [ref=e495]: Group channels for quick selection when scheduling.
+                - cell "Not included" [ref=e496]
+                - cell "Included" [ref=e499]
+                - cell "Included" [ref=e503]
+              - row [ref=e507]:
+                - rowheader "Hashtag manager Save groups of hashtags and reuse them." [ref=e508]:
+                  - generic [ref=e509]: Hashtag manager
+                  - generic [ref=e510]: Save groups of hashtags and reuse them.
+                - cell "Not included" [ref=e511]
+                - cell "Included" [ref=e514]
+                - cell "Included" [ref=e518]
+            - rowgroup [ref=e522]:
+              - row [ref=e523]:
+                - columnheader [ref=e524]:
+                  - button "Community" [expanded] [ref=e525] [cursor=pointer]
+            - rowgroup [ref=e528]:
+              - row [ref=e529]:
+                - rowheader "Community inbox Read and reply to comments from connected channels in one place." [ref=e530]:
+                  - generic [ref=e531]: Community inbox
+                  - generic [ref=e532]: Read and reply to comments from connected channels in one place.
+                - cell "Included" [ref=e533]
+                - cell "Included" [ref=e537]
+                - cell "Included" [ref=e541]
+              - row [ref=e545]:
+                - rowheader "Saved replies Reuse answers to common questions." [ref=e546]:
+                  - generic [ref=e547]: Saved replies
+                  - generic [ref=e548]: Reuse answers to common questions.
+                - cell "1 saved reply" [ref=e549]
+                - cell "Unlimited" [ref=e550]
+                - cell "Unlimited" [ref=e551]
+              - row [ref=e552]:
+                - rowheader "AI reply suggestions Draft replies in your tone for you to review and send." [ref=e553]:
+                  - generic [ref=e554]: AI reply suggestions
+                  - generic [ref=e555]: Draft replies in your tone for you to review and send.
+                - cell "5 per week" [ref=e556]
+                - cell "Unlimited" [ref=e557]
+                - cell "Unlimited" [ref=e558]
+            - rowgroup [ref=e559]:
+              - row [ref=e560]:
+                - columnheader [ref=e561]:
+                  - button "Analytics" [expanded] [ref=e562] [cursor=pointer]
+            - rowgroup [ref=e565]:
+              - row [ref=e566]:
+                - rowheader "Insights Follower growth, engagement, and post performance." [ref=e567]:
+                  - generic [ref=e568]: Insights
+                  - generic [ref=e569]: Follower growth, engagement, and post performance.
+                - cell "30-day history" [ref=e570]
+                - cell "Unlimited" [ref=e571]
+                - cell "Unlimited" [ref=e572]
+              - row [ref=e573]:
+                - rowheader "Performance overview A summary of results for any date range, compared with the previous period." [ref=e574]:
+                  - generic [ref=e575]: Performance overview
+                  - generic [ref=e576]: A summary of results for any date range, compared with the previous period.
+                - cell "Not included" [ref=e577]
+                - cell "Included" [ref=e580]
+                - cell "Included" [ref=e584]
+              - row [ref=e588]:
+                - rowheader "Reports Export your data as CSV or PDF." [ref=e589]:
+                  - generic [ref=e590]: Reports
+                  - generic [ref=e591]: Export your data as CSV or PDF.
+                - cell "Not included" [ref=e592]
+                - cell "Included" [ref=e595]
+                - cell "Included" [ref=e599]
+              - row [ref=e603]:
+                - rowheader "Custom UTM parameters Add tracking parameters to the links you share." [ref=e604]:
+                  - generic [ref=e605]: Custom UTM parameters
+                  - generic [ref=e606]: Add tracking parameters to the links you share.
+                - cell "Not included" [ref=e607]
+                - cell "Included" [ref=e610]
+                - cell "Included" [ref=e614]
+              - row [ref=e618]:
+                - rowheader "Branded reports Add your logo and a cover page to exported reports." [ref=e619]:
+                  - generic [ref=e620]: Branded reports
+                  - generic [ref=e621]: Add your logo and a cover page to exported reports.
+                - cell "Not included" [ref=e622]
+                - cell "Not included" [ref=e625]
+                - cell "Included" [ref=e628]
+            - rowgroup [ref=e632]:
+              - row [ref=e633]:
+                - columnheader [ref=e634]:
+                  - button "Collaboration" [expanded] [ref=e635] [cursor=pointer]
+            - rowgroup [ref=e638]:
+              - row [ref=e639]:
+                - rowheader "Included users How many people can sign in to the workspace." [ref=e640]:
+                  - generic [ref=e641]: Included users
+                  - generic [ref=e642]: How many people can sign in to the workspace.
+                - cell "1" [ref=e643]
+                - cell "1" [ref=e644]
+                - cell "Unlimited" [ref=e645]
+              - row [ref=e646]:
+                - rowheader "Two-factor authentication Protect sign-in with a one-time code." [ref=e647]:
+                  - generic [ref=e648]: Two-factor authentication
+                  - generic [ref=e649]: Protect sign-in with a one-time code.
+                - cell "Included" [ref=e650]
+                - cell "Included" [ref=e654]
+                - cell "Included" [ref=e658]
+              - row [ref=e662]:
+                - rowheader "Internal notes Leave comments on posts that only your team can see." [ref=e663]:
+                  - generic [ref=e664]: Internal notes
+                  - generic [ref=e665]: Leave comments on posts that only your team can see.
+                - cell "Not included" [ref=e666]
+                - cell "Included" [ref=e669]
+                - cell "Included" [ref=e673]
+              - row [ref=e677]:
+                - rowheader "Approval workflows Decide who can draft and who can approve posts." [ref=e678]:
+                  - generic [ref=e679]: Approval workflows
+                  - generic [ref=e680]: Decide who can draft and who can approve posts.
+                - cell "Not included" [ref=e681]
+                - cell "Not included" [ref=e684]
+                - cell "Included" [ref=e687]
+              - row [ref=e691]:
+                - rowheader "Access levels Choose which channels each team member can use." [ref=e692]:
+                  - generic [ref=e693]: Access levels
+                  - generic [ref=e694]: Choose which channels each team member can use.
+                - cell "Not included" [ref=e695]
+                - cell "Not included" [ref=e698]
+                - cell "Included" [ref=e701]
+            - rowgroup [ref=e705]:
+              - row [ref=e706]:
+                - columnheader [ref=e707]:
+                  - button "Support" [expanded] [ref=e708] [cursor=pointer]
+            - rowgroup [ref=e711]:
+              - row [ref=e712]:
+                - rowheader "Help guides Step-by-step articles for getting set up and using each feature." [ref=e713]:
+                  - generic [ref=e714]: Help guides
+                  - generic [ref=e715]: Step-by-step articles for getting set up and using each feature.
+                - cell "Included" [ref=e716]
+                - cell "Included" [ref=e720]
+                - cell "Included" [ref=e724]
+              - row [ref=e728]:
+                - rowheader "Email support Reach the atwebtech team by email." [ref=e729]:
+                  - generic [ref=e730]: Email support
+                  - generic [ref=e731]: Reach the atwebtech team by email.
+                - cell "Included" [ref=e732]
+                - cell "Included" [ref=e736]
+                - cell "Included" [ref=e740]
+          - paragraph [ref=e744]:
+            - text: All features are planned for launch and may change before release. See each
+            - link "feature page" [ref=e745] [cursor=pointer]:
+              - /url: /features
+            - text: for its current status.
+      - region [ref=e746]:
+        - generic [ref=e747]:
+          - heading "FAQs" [level=2] [ref=e749]
+          - generic [ref=e750]:
+            - group [ref=e751]:
+              - generic "Can I sign up for a plan today?" [ref=e752] [cursor=pointer]
+            - group [ref=e757]:
+              - generic "What counts as a channel?" [ref=e758] [cursor=pointer]
+            - group [ref=e763]:
+              - generic "How does per-channel pricing work?" [ref=e764] [cursor=pointer]
+            - group [ref=e769]:
+              - generic "What are the billing options?" [ref=e770] [cursor=pointer]
+            - group [ref=e775]:
+              - generic "Is there a free plan?" [ref=e776] [cursor=pointer]
+            - group [ref=e781]:
+              - generic "What is the scheduled post limit for each plan?" [ref=e782] [cursor=pointer]
+            - group [ref=e787]:
+              - generic "Which channels can I connect?" [ref=e788] [cursor=pointer]
+            - group [ref=e793]:
+              - generic "Could these prices change before launch?" [ref=e794] [cursor=pointer]
+      - region [ref=e799]:
+        - generic [ref=e802]:
+          - heading "Make space for your next great idea." [level=2] [ref=e803]
+          - paragraph [ref=e804]: Join the atwebtech waitlist for product updates and early-access news.
+          - generic [ref=e805]:
+            - generic [aria-hidden] [ref=e806]:
+              - text: Leave this field empty
+              - textbox [ref=e807]
+            - generic [ref=e808]:
+              - generic [ref=e809]: Plan I'm interested in (optional)
+              - combobox "Plan I'm interested in (optional)" [ref=e810]:
+                - option "Not sure yet" [selected]
+                - option "Free"
+                - option "Essentials"
+                - option "Team"
+            - generic [ref=e811]:
+              - generic [ref=e812]: Email address
+              - generic [ref=e813]:
+                - textbox "Email address" [ref=e814]:
+                  - /placeholder: Enter your email...
+                - button "Join the waitlist" [ref=e815] [cursor=pointer]
+            - paragraph [ref=e819]:
+              - text: By joining, you agree to receive atwebtech launch emails. See our
+              - link "privacy policy" [ref=e820] [cursor=pointer]:
+                - /url: /privacy
+              - text: .
+  - contentinfo [ref=e821]:
+    - generic [ref=e822]:
+      - generic [ref=e823]:
+        - navigation "Product" [ref=e824]:
+          - heading "Product" [level=2] [ref=e825]
+          - list [ref=e826]:
+            - listitem [ref=e827]:
+              - link "Content Planner" [ref=e828] [cursor=pointer]:
+                - /url: /features/content-planner
+            - listitem [ref=e829]:
+              - link "Publishing" [ref=e830] [cursor=pointer]:
+                - /url: /features/publishing
+            - listitem [ref=e831]:
+              - link "Analytics" [ref=e832] [cursor=pointer]:
+                - /url: /features/analytics
+            - listitem [ref=e833]:
+              - link "Community Inbox" [ref=e834] [cursor=pointer]:
+                - /url: /features/community
+            - listitem [ref=e835]:
+              - link "Team Collaboration" [ref=e836] [cursor=pointer]:
+                - /url: /features/collaboration
+            - listitem [ref=e837]:
+              - link "Link in Bio" [ref=e838] [cursor=pointer]:
+                - /url: /features/link-in-bio
+            - listitem [ref=e839]:
+              - link "AI Writing Assistant" [ref=e840] [cursor=pointer]:
+                - /url: /features/ai-assistant
+            - listitem [ref=e841]:
+              - link "Integrations" [ref=e842] [cursor=pointer]:
+                - /url: /integrations
+            - listitem [ref=e843]:
+              - link "Interactive demo" [ref=e844] [cursor=pointer]:
+                - /url: /demo
+        - navigation "Solutions" [ref=e845]:
+          - heading "Solutions" [level=2] [ref=e846]
+          - list [ref=e847]:
+            - listitem [ref=e848]:
+              - link "Creators" [ref=e849] [cursor=pointer]:
+                - /url: /solutions/creators
+            - listitem [ref=e850]:
+              - link "Small Businesses" [ref=e851] [cursor=pointer]:
+                - /url: /solutions/businesses
+            - listitem [ref=e852]:
+              - link "Agencies" [ref=e853] [cursor=pointer]:
+                - /url: /solutions/agencies
+            - listitem [ref=e854]:
+              - link "Marketing Teams" [ref=e855] [cursor=pointer]:
+                - /url: /solutions/marketing-teams
+        - navigation "Resources" [ref=e856]:
+          - heading "Resources" [level=2] [ref=e857]
+          - list [ref=e858]:
+            - listitem [ref=e859]:
+              - link "All guides" [ref=e860] [cursor=pointer]:
+                - /url: /resources
+            - listitem [ref=e861]:
+              - link "Getting started" [ref=e862] [cursor=pointer]:
+                - /url: /resources/getting-started
+            - listitem [ref=e863]:
+              - link "Weekly content calendar" [ref=e864] [cursor=pointer]:
+                - /url: /resources/weekly-content-calendar
+            - listitem [ref=e865]:
+              - link "Adapting ideas by channel" [ref=e866] [cursor=pointer]:
+                - /url: /resources/adapting-ideas-for-each-channel
+            - listitem [ref=e867]:
+              - link "Choosing social metrics" [ref=e868] [cursor=pointer]:
+                - /url: /resources/choosing-social-metrics
+            - listitem [ref=e869]:
+              - link "FAQ" [ref=e870] [cursor=pointer]:
+                - /url: /faq
+        - navigation "Company" [ref=e871]:
+          - heading "Company" [level=2] [ref=e872]
+          - list [ref=e873]:
+            - listitem [ref=e874]:
+              - link "About" [ref=e875] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e876]:
+              - link "Pricing" [ref=e877] [cursor=pointer]:
+                - /url: /pricing
+            - listitem [ref=e878]:
+              - link "Contact" [ref=e879] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e880]:
+              - link "Privacy" [ref=e881] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e882]:
+              - link "Terms" [ref=e883] [cursor=pointer]:
+                - /url: /terms
+      - generic [ref=e884]:
+        - generic [ref=e885]:
+          - link "atwebtech home" [ref=e886] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e887]: atwebtech
+          - paragraph [ref=e893]: A social media workspace in development, designed to help creators and businesses plan content, organize ideas, and keep a consistent presence.
+        - paragraph [ref=e894]:
+          - text: Copyright © 2026 atwebtech |
+          - link "Privacy" [ref=e895] [cursor=pointer]:
+            - /url: /privacy
+          - text: "|"
+          - link "Terms" [ref=e896] [cursor=pointer]:
+            - /url: /terms
+          - text: "|"
+          - link "Contact" [ref=e897] [cursor=pointer]:
+            - /url: /contact

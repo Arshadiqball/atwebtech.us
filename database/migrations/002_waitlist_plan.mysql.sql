@@ -1,0 +1,4 @@
+ALTER TABLE waitlist_signups
+    ADD COLUMN plan VARCHAR(20) NULL AFTER role,
+    ADD COLUMN billing VARCHAR(10) NULL AFTER plan,
+    ADD COLUMN channels SMALLINT UNSIGNED NULL AFTER billing;

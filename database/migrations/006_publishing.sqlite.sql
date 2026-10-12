@@ -1,0 +1,28 @@
+CREATE TABLE IF NOT EXISTS media (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+    kind TEXT NOT NULL,
+    mime TEXT NULL,
+    size INTEGER NOT NULL DEFAULT 0,
+    expected_size INTEGER NOT NULL,
+    original_name TEXT NOT NULL,
+    path TEXT NOT NULL,
+    status TEXT NOT NULL DEFAULT 'uploading',
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_media_user ON media (user_id, status);
+
+ALTER TABLE posts ADD COLUMN channel_id INTEGER NULL REFERENCES channels (id) ON DELETE SET NULL;
+ALTER TABLE posts ADD COLUMN media_id INTEGER NULL REFERENCES media (id) ON DELETE SET NULL;
+ALTER TABLE posts ADD COLUMN title TEXT NULL;
+ALTER TABLE posts ADD COLUMN meta TEXT NULL;
+ALTER TABLE posts ADD COLUMN tags TEXT NULL;
+ALTER TABLE posts ADD COLUMN sent_at TEXT NULL;
+ALTER TABLE posts ADD COLUMN external_id TEXT NULL;
+ALTER TABLE posts ADD COLUMN external_url TEXT NULL;
+ALTER TABLE posts ADD COLUMN error TEXT NULL;
+ALTER TABLE posts ADD COLUMN attempts INTEGER NOT NULL DEFAULT 0;
+CREATE INDEX IF NOT EXISTS idx_posts_due ON posts (status, planned_at);
+
+ALTER TABLE channels ADD COLUMN queue_intro_closed_at TEXT NULL;

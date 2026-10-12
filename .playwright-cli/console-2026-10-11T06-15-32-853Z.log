@@ -1,0 +1,2 @@
+[    3024ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/ideas:0
+[    6173ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0

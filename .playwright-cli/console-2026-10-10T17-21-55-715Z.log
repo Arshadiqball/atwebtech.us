@@ -1,0 +1,41 @@
+[  225198ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[  226110ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[  226977ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[  240719ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/waitlist:0
+[  586739ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[  587833ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[  588711ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[  630109ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[  630960ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[  631768ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[ 1557919ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/[object%20RadioNodeList]:0
+[ 1609633ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/[object%20RadioNodeList]:0
+[ 1750007ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[ 1751272ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[ 1752272ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/nope:0
+[ 2593403ms] TypeError: Cannot read properties of null (reading 'addEventListener')
+    at http://localhost:8000/assets/js/app.js?v=1791655433:34:13
+    at Array.forEach (<anonymous>)
+    at http://localhost:8000/assets/js/app.js?v=1791655433:32:13
+    at http://localhost:8000/assets/js/app.js?v=1791655433:1072:3
+[ 2593480ms] TypeError: Cannot read properties of null (reading 'addEventListener')
+    at http://localhost:8000/assets/js/app.js?v=1791655433:34:13
+    at Array.forEach (<anonymous>)
+    at http://localhost:8000/assets/js/app.js?v=1791655433:32:13
+    at http://localhost:8000/assets/js/app.js?v=1791655433:1072:3
+[ 2636588ms] TypeError: Cannot read properties of null (reading 'addEventListener')
+    at http://localhost:8000/assets/js/app.js?v=1791655433:34:13
+    at Array.forEach (<anonymous>)
+    at http://localhost:8000/assets/js/app.js?v=1791655433:32:13
+    at http://localhost:8000/assets/js/app.js?v=1791655433:1072:3
+[ 2642037ms] TypeError: Cannot read properties of null (reading 'addEventListener')
+    at http://localhost:8000/assets/js/app.js?v=1791655433:34:13
+    at Array.forEach (<anonymous>)
+    at http://localhost:8000/assets/js/app.js?v=1791655433:32:13
+    at http://localhost:8000/assets/js/app.js?v=1791655433:1072:3
+[ 2657616ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/app/[object%20RadioNodeList]:0
+[ 2658083ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/app/[object%20RadioNodeList]:0
+[ 2697547ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8000/app/[object%20RadioNodeList]:0
+[ 2713547ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/ideas:0
+[ 2717131ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0
+[ 2717581ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0

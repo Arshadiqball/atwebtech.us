@@ -1,0 +1,9 @@
+[    3715ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/ideas:0
+[    6731ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0
+[    7181ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0
+[   75129ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/ideas:0
+[   78161ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0
+[   78611ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0
+[  247988ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/ideas:0
+[  251229ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0
+[  251672ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8000/app/posts:0

@@ -1,7 +1,0 @@
-{
-  "name": "alpha-ai-local",
-  "private": true,
-  "scripts": {
-    "start": "python3 server.py"
-  }
-}

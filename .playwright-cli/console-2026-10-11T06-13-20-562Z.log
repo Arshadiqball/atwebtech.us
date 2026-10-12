@@ -1,0 +1,9 @@
+[    2690ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8002/app/posts:0
+[    2695ms] [ERROR] Failed to load resource: the server responded with a status of 419 (Unknown Status Code) @ http://localhost:8002/app/media:0
+[    2699ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8002/app/ai/generate:0
+[    5396ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8002/app/media/8:0
+[    5406ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8002/app/channels/7:0
+[    5411ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8002/app/channels/7/queue?from=2026-12-01:0
+[    5414ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8002/app/posts:0
+[    5420ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:8002/app/media/8/chunk:0
+[    5426ms] [ERROR] Failed to load resource: the server responded with a status of 422 (Unknown Status Code) @ http://localhost:8002/app/posts:0

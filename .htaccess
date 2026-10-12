@@ -1,15 +1,22 @@
-RewriteEngine On
+# Used only when the host cannot point the document root at /public.
+# Preferred setup: set the document root to <project>/public and this file is ignored.
 
-# Keep passwords, messages, and the server program off the public web.
-RewriteRule ^data/ - [F,L]
-RewriteRule ^(server\.py|package\.json)$ - [F,L]
+Options -Indexes
 
-# The admin and the contact form call /api/...
-RewriteRule ^api(?:/(.*))?$ api.php?r=$1 [L,QSA]
+<IfModule mod_rewrite.c>
+    RewriteEngine On
 
-# Service and journal pages that are not real files.
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^services(?:/.*)?$ service/index.html [L]
+    # Never serve application code, configuration, data, or tooling directly.
+    RewriteRule ^(app|bin|database|storage|views|vendor)(/|$) - [F,L]
+    RewriteCond %{REQUEST_URI} !^/\.well-known/
+    RewriteRule (^|/)\. - [F,L]
+    RewriteRule \.(md|sql|sqlite|log|lock|example)$ - [F,L]
 
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteRule ^blog/.+ blog/index.html [L]
+    # Route everything else through /public.
+    RewriteCond %{REQUEST_URI} !^/public/
+    RewriteRule ^(.*)$ public/$1 [L]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    Require all denied
+</IfModule>

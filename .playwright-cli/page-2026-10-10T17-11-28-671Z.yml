@@ -1,0 +1,1036 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - navigation [ref=e4]:
+      - paragraph [ref=e5]: Top navigation
+      - generic [ref=e6]:
+        - link "Buffer" [ref=e8] [cursor=pointer]:
+          - /url: /
+        - generic [ref=e17]:
+          - button "Features" [ref=e19] [cursor=pointer]
+          - button "Integrations" [ref=e27] [cursor=pointer]
+          - button "Made for" [ref=e35] [cursor=pointer]
+          - button "Resources" [ref=e43] [cursor=pointer]
+          - link "Pricing" [ref=e50] [cursor=pointer]:
+            - /url: /pricing?cta=bufferSite-globalNav-pricing-pricing-1
+        - generic [ref=e52]:
+          - link "Log in" [ref=e53] [cursor=pointer]:
+            - /url: https://login.buffer.com/login?plan=free&cycle=year&cta=bufferSite-globalNav-login-1
+          - link "Get started for free" [ref=e55] [cursor=pointer]:
+            - /url: https://login.buffer.com/signup?product=buffer&plan=free&cycle=year&cta=bufferSite-globalNav-signup-1
+  - main [ref=e57]:
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - heading "Pricing" [level=1] [ref=e60]
+        - paragraph [ref=e61]: Flexible pricing for everyone
+      - region [ref=e62]:
+        - heading "Plans" [level=2] [ref=e63]
+        - generic [ref=e64]:
+          - generic [ref=e65]:
+            - generic [ref=e66]: Channels
+            - generic [ref=e68]:
+              - spinbutton "Channels" [ref=e69]: "1"
+              - button "Decrease channels" [ref=e70] [cursor=pointer]
+              - button "Increase channels" [ref=e74] [cursor=pointer]
+          - group [ref=e78]:
+            - generic [ref=e79]:
+              - generic [ref=e81]:
+                - text: Billing
+                - generic [ref=e82]: frequency
+              - generic [ref=e83]:
+                - generic [ref=e84] [cursor=pointer]:
+                  - radio "Monthly" [ref=e85]
+                  - generic [ref=e86]: Monthly
+                - generic [ref=e87] [cursor=pointer]:
+                  - radio "Yearly" [checked] [ref=e88]
+                  - generic [ref=e89]: Yearly
+        - generic [ref=e90]:
+          - generic [ref=e91]:
+            - heading "Free" [level=3] [ref=e92]
+            - paragraph [ref=e94]:
+              - generic [ref=e95]: Free
+              - generic [ref=e96]: forever
+            - paragraph [ref=e97]: Connect up to 3 channels
+            - link "Let's go" [ref=e98] [cursor=pointer]:
+              - /url: https://login.buffer.com/signup?product=buffer&plan=free&cycle=year&cta=bufferSite-pricing-cards-free-1
+            - heading "What's included" [level=4] [ref=e103]
+            - list [ref=e104]:
+              - listitem [ref=e105]:
+                - generic [ref=e106]:
+                  - paragraph [ref=e107]: 10 scheduled posts per channel - refill anytime
+                  - button "10 scheduled posts per channel - refill anytime description" [ref=e108] [cursor=pointer]
+              - listitem [ref=e113]:
+                - generic [ref=e114]:
+                  - paragraph [ref=e115]: 100 ideas
+                  - button "100 ideas description" [ref=e116] [cursor=pointer]
+              - listitem [ref=e121]:
+                - generic [ref=e122]:
+                  - paragraph [ref=e123]: 1 user account
+                  - button "1 user account description" [ref=e124] [cursor=pointer]
+              - listitem [ref=e129]:
+                - generic [ref=e130]:
+                  - paragraph [ref=e131]: AI Assistant
+                  - button "AI Assistant description" [ref=e132] [cursor=pointer]
+              - listitem [ref=e137]:
+                - generic [ref=e138]:
+                  - paragraph [ref=e139]: Insights
+                  - button "Insights description" [ref=e140] [cursor=pointer]
+              - listitem [ref=e145]:
+                - generic [ref=e146]:
+                  - paragraph [ref=e147]: API access
+                  - button "API access description" [ref=e148] [cursor=pointer]
+                - list [ref=e153]:
+                  - listitem [ref=e154]: 1 API key
+                  - listitem [ref=e155]: 3,000 requests/month
+              - listitem [ref=e156]:
+                - generic [ref=e157]:
+                  - paragraph [ref=e158]: Community inbox
+                  - button "Community inbox description" [ref=e159] [cursor=pointer]
+              - listitem [ref=e164]:
+                - generic [ref=e165]:
+                  - paragraph [ref=e166]: World-class customer support
+                  - button "World-class customer support description" [ref=e167] [cursor=pointer]
+          - generic [ref=e172]:
+            - heading "Essentials Recommended" [level=3] [ref=e173]:
+              - generic [ref=e174]: Essentials
+              - generic [ref=e175]: Recommended
+            - paragraph [ref=e176]:
+              - generic [ref=e177]: $5
+              - generic [ref=e178]: /month
+            - paragraph [ref=e179]: 1 channel · $60 billed yearly (save 2 months)
+            - link "Start 14-day free trial" [ref=e180] [cursor=pointer]:
+              - /url: https://login.buffer.com/signup?product=buffer&plan=team&cycle=year&cta=bufferSite-pricing-cards-essentials-1&redirect=https%3A%2F%2Fpublish.buffer.com%2F%3Fintent%3Dstart-trial%26cta%3DbufferSite-pricing-cards-essentials-1
+            - heading "What's included" [level=4] [ref=e185]
+            - list [ref=e186]:
+              - listitem [ref=e187]:
+                - generic [ref=e188]:
+                  - paragraph [ref=e189]: Unlimited scheduled posts per channel
+                  - button "Unlimited scheduled posts per channel description" [ref=e190] [cursor=pointer]
+              - listitem [ref=e195]:
+                - generic [ref=e196]:
+                  - paragraph [ref=e197]: Unlimited ideas
+                  - button "Unlimited ideas description" [ref=e198] [cursor=pointer]
+              - listitem [ref=e203]:
+                - generic [ref=e204]:
+                  - paragraph [ref=e205]: 1 user account
+                  - button "1 user account description" [ref=e206] [cursor=pointer]
+              - listitem [ref=e211]:
+                - generic [ref=e212]:
+                  - paragraph [ref=e213]: AI Assistant
+                  - button "AI Assistant description" [ref=e214] [cursor=pointer]
+              - listitem [ref=e219]:
+                - generic [ref=e220]:
+                  - paragraph [ref=e221]: Advanced analytics
+                  - button "Advanced analytics description" [ref=e222] [cursor=pointer]
+              - listitem [ref=e227]:
+                - generic [ref=e228]:
+                  - paragraph [ref=e229]: API access
+                  - button "API access description" [ref=e230] [cursor=pointer]
+                - list [ref=e235]:
+                  - listitem [ref=e236]: 3 API keys
+                  - listitem [ref=e237]: 7,500 requests/month
+              - listitem [ref=e238]:
+                - generic [ref=e239]:
+                  - paragraph [ref=e240]: Community inbox
+                  - button "Community inbox description" [ref=e241] [cursor=pointer]
+              - listitem [ref=e246]:
+                - generic [ref=e247]:
+                  - paragraph [ref=e248]: Hashtag manager
+                  - button "Hashtag manager description" [ref=e249] [cursor=pointer]
+              - listitem [ref=e254]:
+                - generic [ref=e255]:
+                  - paragraph [ref=e256]: First comment scheduling
+                  - button "First comment scheduling description" [ref=e257] [cursor=pointer]
+              - listitem [ref=e262]:
+                - generic [ref=e263]:
+                  - paragraph [ref=e264]: World-class customer support
+                  - button "World-class customer support description" [ref=e265] [cursor=pointer]
+          - generic [ref=e270]:
+            - heading "Team" [level=3] [ref=e271]
+            - paragraph [ref=e273]:
+              - generic [ref=e274]: $10
+              - generic [ref=e275]: /month
+            - paragraph [ref=e276]: 1 channel · $120 billed yearly (save 2 months)
+            - link "Start 14-day free trial" [ref=e277] [cursor=pointer]:
+              - /url: https://login.buffer.com/signup?product=buffer&plan=team&cycle=year&cta=bufferSite-pricing-cards-team-1&redirect=https%3A%2F%2Fpublish.buffer.com%2F%3Fintent%3Dstart-trial%26cta%3DbufferSite-pricing-cards-team-1
+            - heading "What's included" [level=4] [ref=e282]
+            - list [ref=e283]:
+              - listitem [ref=e284]:
+                - generic [ref=e285]:
+                  - paragraph [ref=e286]: Unlimited scheduled posts per channel
+                  - button "Unlimited scheduled posts per channel description" [ref=e287] [cursor=pointer]
+              - listitem [ref=e292]:
+                - generic [ref=e293]:
+                  - paragraph [ref=e294]: Unlimited ideas
+                  - button "Unlimited ideas description" [ref=e295] [cursor=pointer]
+              - listitem [ref=e300]:
+                - generic [ref=e301]:
+                  - paragraph [ref=e302]: Unlimited team members
+                  - button "Unlimited team members description" [ref=e303] [cursor=pointer]
+              - listitem [ref=e308]:
+                - generic [ref=e309]:
+                  - paragraph [ref=e310]: AI Assistant
+                  - button "AI Assistant description" [ref=e311] [cursor=pointer]
+              - listitem [ref=e316]:
+                - generic [ref=e317]:
+                  - paragraph [ref=e318]: Advanced analytics
+                  - button "Advanced analytics description" [ref=e319] [cursor=pointer]
+              - listitem [ref=e324]:
+                - generic [ref=e325]:
+                  - paragraph [ref=e326]: API access
+                  - button "API access description" [ref=e327] [cursor=pointer]
+                - list [ref=e332]:
+                  - listitem [ref=e333]: 5 API keys
+                  - listitem [ref=e334]: 15,000 requests/month
+              - listitem [ref=e335]:
+                - generic [ref=e336]:
+                  - paragraph [ref=e337]: Community inbox
+                  - button "Community inbox description" [ref=e338] [cursor=pointer]
+              - listitem [ref=e343]:
+                - generic [ref=e344]:
+                  - paragraph [ref=e345]: Hashtag manager
+                  - button "Hashtag manager description" [ref=e346] [cursor=pointer]
+              - listitem [ref=e351]:
+                - generic [ref=e352]:
+                  - paragraph [ref=e353]: First comment scheduling
+                  - button "First comment scheduling description" [ref=e354] [cursor=pointer]
+              - listitem [ref=e359]:
+                - generic [ref=e360]:
+                  - paragraph [ref=e361]: Access levels
+                  - button "Access levels description" [ref=e362] [cursor=pointer]
+              - listitem [ref=e367]:
+                - generic [ref=e368]:
+                  - paragraph [ref=e369]: Content approval workflows
+                  - button "Content approval workflows description" [ref=e370] [cursor=pointer]
+              - listitem [ref=e375]:
+                - generic [ref=e376]:
+                  - paragraph [ref=e377]: World-class customer support
+                  - button "World-class customer support description" [ref=e378] [cursor=pointer]
+        - paragraph [ref=e383]:
+          - link "See machine-readable pricing (for AI agents)" [ref=e384] [cursor=pointer]:
+            - /url: /pricing.md
+        - link "Compare plans" [ref=e386] [cursor=pointer]:
+          - /url: "#compare-plans"
+      - region [ref=e391]:
+        - generic [ref=e393]:
+          - heading "Connect your favorite accounts" [level=2] [ref=e395]
+          - list [ref=e397]:
+            - listitem [ref=e398]:
+              - link "Buffer × LinkedIn" [ref=e399] [cursor=pointer]:
+                - /url: /linkedin
+                - generic [aria-hidden]:
+                  - generic: Buffer × LinkedIn
+            - listitem [ref=e404]:
+              - link "Buffer × Threads" [ref=e405] [cursor=pointer]:
+                - /url: /threads
+                - generic [aria-hidden]:
+                  - generic: Buffer × Threads
+            - listitem [ref=e410]:
+              - link "Buffer × Pinterest" [ref=e411] [cursor=pointer]:
+                - /url: /pinterest
+                - generic [aria-hidden]:
+                  - generic: Buffer × Pinterest
+            - listitem [ref=e416]:
+              - link "Buffer × Bluesky" [ref=e417] [cursor=pointer]:
+                - /url: /bluesky
+                - generic [aria-hidden]:
+                  - generic: Buffer × Bluesky
+            - listitem [ref=e422]:
+              - link "Buffer × YouTube" [ref=e423] [cursor=pointer]:
+                - /url: /youtube
+                - generic [aria-hidden]:
+                  - generic: Buffer × YouTube
+            - listitem [ref=e428]:
+              - link "Buffer × X" [ref=e429] [cursor=pointer]:
+                - /url: /x
+                - generic [aria-hidden]:
+                  - generic: Buffer × X
+            - listitem [ref=e434]:
+              - link "Buffer × Google Business Profile" [ref=e435] [cursor=pointer]:
+                - /url: /google-business-profile
+                - generic [aria-hidden]:
+                  - generic: Buffer × Google Business Profile
+            - listitem [ref=e440]:
+              - link "Buffer × Instagram" [ref=e441] [cursor=pointer]:
+                - /url: /instagram
+                - generic [aria-hidden]:
+                  - generic: Buffer × Instagram
+            - listitem [ref=e446]:
+              - link "Buffer × Substack" [ref=e447] [cursor=pointer]:
+                - /url: /substack
+                - generic [aria-hidden]:
+                  - generic: Buffer × Substack
+            - listitem [ref=e452]:
+              - link "Buffer × Mastodon" [ref=e453] [cursor=pointer]:
+                - /url: /mastodon
+                - generic [aria-hidden]:
+                  - generic: Buffer × Mastodon
+            - listitem [ref=e458]:
+              - link "Buffer × TikTok" [ref=e459] [cursor=pointer]:
+                - /url: /tiktok
+                - generic [aria-hidden]:
+                  - generic: Buffer × TikTok
+            - listitem [ref=e464]:
+              - link "Buffer × Facebook" [ref=e465] [cursor=pointer]:
+                - /url: /facebook
+                - generic [aria-hidden]:
+                  - generic: Buffer × Facebook
+      - region [ref=e470]:
+        - heading "What people are saying" [level=2] [ref=e471]
+        - figure "Alexandrea Bowman Sapphire Social" [ref=e474]:
+          - blockquote [ref=e475]: Buffer's per-channel pricing allows me to be flexible and save money if a client leaves. They're never locked in indefinitely, and I don't want to continue paying for their channel when they're no longer in contract.
+          - generic [ref=e478]:
+            - generic [ref=e479]: Alexandrea Bowman
+            - generic [ref=e480]: Sapphire Social
+      - region [ref=e481]:
+        - heading "Feature comparison" [level=2] [ref=e482]
+        - table [ref=e484]:
+          - caption [ref=e485]: Feature comparison
+          - rowgroup [ref=e486]:
+            - row [ref=e487]:
+              - columnheader "Feature Feature comparison" [ref=e488]:
+                - generic [ref=e489]: Feature
+                - generic [ref=e490]:
+                  - generic [ref=e491]: Feature
+                  - generic [ref=e492]: comparison
+              - columnheader "Free Let's go" [ref=e493]:
+                - generic [ref=e494]:
+                  - generic [ref=e495]: Free
+                  - link "Let's go" [ref=e497] [cursor=pointer]:
+                    - /url: https://login.buffer.com/signup?product=buffer&plan=free&cycle=year&cta=bufferSite-pricing-tableTop-free-1
+              - columnheader "Essentials Recommended Start 14-day free trial" [ref=e502]:
+                - generic [ref=e503]:
+                  - generic [ref=e504]:
+                    - generic [ref=e505]: Essentials
+                    - generic [ref=e506]: Recommended
+                  - link "Start 14-day free trial" [ref=e507] [cursor=pointer]:
+                    - /url: https://login.buffer.com/signup?product=buffer&plan=team&cycle=yearly&cta=bufferSite-pricing-tableTop-essentials-1&redirect=https%3A%2F%2Fpublish.buffer.com%2F%3Fintent%3Dstart-trial%26cta%3DbufferSite-pricing-tableTop-essentials-1
+              - columnheader "Team Start 14-day free trial" [ref=e512]:
+                - generic [ref=e513]:
+                  - generic [ref=e514]: Team
+                  - link "Start 14-day free trial" [ref=e516] [cursor=pointer]:
+                    - /url: https://login.buffer.com/signup?product=buffer&plan=team&cycle=yearly&cta=bufferSite-pricing-tableTop-team-1&redirect=https%3A%2F%2Fpublish.buffer.com%2F%3Fintent%3Dstart-trial%26cta%3DbufferSite-pricing-tableTop-team-1
+          - rowgroup [ref=e521]:
+            - row [ref=e522]:
+              - columnheader "Content creation" [ref=e523]
+            - row [ref=e524]:
+              - rowheader "Ideas Capture and store content ideas whenever they come to you." [ref=e525]:
+                - generic [ref=e526]: Ideas
+                - generic [ref=e527]: Capture and store content ideas whenever they come to you.
+              - cell "100 ideas" [ref=e528]
+              - cell "Unlimited" [ref=e529]
+              - cell "Unlimited" [ref=e530]
+            - row [ref=e531]:
+              - rowheader "Tags Save and organize your content by campaign or topic." [ref=e532]:
+                - generic [ref=e533]: Tags
+                - generic [ref=e534]: Save and organize your content by campaign or topic.
+              - cell "3 tags" [ref=e535]
+              - cell "250 tags" [ref=e536]
+              - cell "250 tags" [ref=e537]
+            - row [ref=e538]:
+              - rowheader "Drafts Capture and store content ideas whenever they come to you." [ref=e539]:
+                - generic [ref=e540]: Drafts
+                - generic [ref=e541]: Capture and store content ideas whenever they come to you.
+              - cell "Unlimited" [ref=e542]
+              - cell "Unlimited" [ref=e543]
+              - cell "Unlimited" [ref=e544]
+            - row [ref=e545]:
+              - rowheader "Templates Social post ideas to spark inspiration" [ref=e546]:
+                - generic [ref=e547]: Templates
+                - generic [ref=e548]: Social post ideas to spark inspiration
+              - cell "Included" [ref=e549]
+              - cell "Included" [ref=e553]
+              - cell "Included" [ref=e557]
+            - row [ref=e561]:
+              - rowheader "AI Assistant Refine and repurpose your content using AI. Unlimited credits." [ref=e562]:
+                - generic [ref=e563]: AI Assistant
+                - generic [ref=e564]: Refine and repurpose your content using AI. Unlimited credits.
+              - cell "Included" [ref=e565]
+              - cell "Included" [ref=e569]
+              - cell "Included" [ref=e573]
+            - row [ref=e577]:
+              - rowheader "Board view Organize your ideas into kanban-style columns." [ref=e578]:
+                - generic [ref=e579]: Board view
+                - generic [ref=e580]: Organize your ideas into kanban-style columns.
+              - cell "Included" [ref=e581]
+              - cell "Included" [ref=e585]
+              - cell "Included" [ref=e589]
+            - row [ref=e593]:
+              - rowheader "Browser extension Open Buffer on any web page and add content directly to your queue." [ref=e594]:
+                - generic [ref=e595]: Browser extension
+                - generic [ref=e596]: Open Buffer on any web page and add content directly to your queue.
+              - cell "Included" [ref=e597]
+              - cell "Included" [ref=e601]
+              - cell "Included" [ref=e605]
+          - rowgroup [ref=e609]:
+            - row [ref=e610]:
+              - columnheader "Publishing" [ref=e611]
+            - row [ref=e612]:
+              - rowheader "Scheduled posts per channel The number of scheduled posts per channel at one time. Learn more." [ref=e613]:
+                - generic [ref=e614]: Scheduled posts per channel
+                - generic [ref=e615]:
+                  - text: The number of scheduled posts per channel at one time.
+                  - link "Learn more" [ref=e616] [cursor=pointer]:
+                    - /url: https://www.youtube.com/watch?v=XkwsF_dJ3C8&ab_channel=Buffer
+                  - text: .
+              - cell "10" [ref=e617]
+              - cell [ref=e618]:
+                - text: Unlimited
+                - button "Unlimited description description" [ref=e619] [cursor=pointer]
+              - cell [ref=e624]:
+                - text: Unlimited
+                - button "Unlimited description description" [ref=e625] [cursor=pointer]
+            - row [ref=e630]:
+              - rowheader "Threaded posts Publish threads to X, Bluesky, Threads, and Mastodon." [ref=e631]:
+                - generic [ref=e632]: Threaded posts
+                - generic [ref=e633]: Publish threads to X, Bluesky, Threads, and Mastodon.
+              - cell "1" [ref=e634]
+              - cell [ref=e635]:
+                - text: Unlimited
+                - button "Unlimited description description" [ref=e636] [cursor=pointer]
+              - cell [ref=e641]:
+                - text: Unlimited
+                - button "Unlimited description description" [ref=e642] [cursor=pointer]
+            - row [ref=e647]:
+              - rowheader "Queue Create a queue of posts that you can re-arrange or shuffle." [ref=e648]:
+                - generic [ref=e649]: Queue
+                - generic [ref=e650]: Create a queue of posts that you can re-arrange or shuffle.
+              - cell "Included" [ref=e651]
+              - cell "Included" [ref=e655]
+              - cell "Included" [ref=e659]
+            - row [ref=e663]:
+              - rowheader "Visual content calendar Visualize your content schedule across weeks or months." [ref=e664]:
+                - generic [ref=e665]: Visual content calendar
+                - generic [ref=e666]: Visualize your content schedule across weeks or months.
+              - cell "Included" [ref=e667]
+              - cell "Included" [ref=e671]
+              - cell "Included" [ref=e675]
+            - row [ref=e679]:
+              - rowheader "Reminder notifications Get a mobile notification when it's time to post so that you can finish the post natively. Available for Instagram, TikTok, and YouTube." [ref=e680]:
+                - generic [ref=e681]: Reminder notifications
+                - generic [ref=e682]: Get a mobile notification when it's time to post so that you can finish the post natively. Available for Instagram, TikTok, and YouTube.
+              - cell "Included" [ref=e683]
+              - cell "Included" [ref=e687]
+              - cell "Included" [ref=e691]
+            - row [ref=e695]:
+              - rowheader "Start Page A landing page with links to your content. A Start Page counts as a channel towards your plan." [ref=e696]:
+                - generic [ref=e697]: Start Page
+                - generic [ref=e698]: A landing page with links to your content. A Start Page counts as a channel towards your plan.
+              - cell "Included" [ref=e699]
+              - cell "Included" [ref=e703]
+              - cell "Included" [ref=e707]
+            - row [ref=e711]:
+              - rowheader "Duplicate posts Clone your posts and reuse them." [ref=e712]:
+                - generic [ref=e713]: Duplicate posts
+                - generic [ref=e714]: Clone your posts and reuse them.
+              - cell "Included" [ref=e715]
+              - cell "Included" [ref=e719]
+              - cell "Included" [ref=e723]
+            - row [ref=e727]:
+              - rowheader "Link shortening Automatically shorten the links you share." [ref=e728]:
+                - generic [ref=e729]: Link shortening
+                - generic [ref=e730]: Automatically shorten the links you share.
+              - cell "Included" [ref=e731]
+              - cell "Included" [ref=e735]
+              - cell "Included" [ref=e739]
+            - row [ref=e743]:
+              - rowheader "First comment scheduling Schedule a first comment with your Instagram, Facebook, or LinkedIn posts." [ref=e744]:
+                - generic [ref=e745]: First comment scheduling
+                - generic [ref=e746]: Schedule a first comment with your Instagram, Facebook, or LinkedIn posts.
+              - cell "Not included" [ref=e747]
+              - cell "Included" [ref=e749]
+              - cell "Included" [ref=e753]
+            - row [ref=e757]:
+              - rowheader "Channel groups Group your channels for easy bulk selection when scheduling." [ref=e758]:
+                - generic [ref=e759]: Channel groups
+                - generic [ref=e760]: Group your channels for easy bulk selection when scheduling.
+              - cell "Not included" [ref=e761]
+              - cell "Included" [ref=e763]
+              - cell "Included" [ref=e767]
+            - row [ref=e771]:
+              - rowheader "Hashtag manager Save and reuse hashtags." [ref=e772]:
+                - generic [ref=e773]: Hashtag manager
+                - generic [ref=e774]: Save and reuse hashtags.
+              - cell "Not included" [ref=e775]
+              - cell "Included" [ref=e777]
+              - cell "Included" [ref=e781]
+            - row [ref=e785]:
+              - rowheader "Custom video covers Choose a frame from your video. Available for Facebook, Instagram, and TikTok." [ref=e786]:
+                - generic [ref=e787]: Custom video covers
+                - generic [ref=e788]: Choose a frame from your video. Available for Facebook, Instagram, and TikTok.
+              - cell "Not included" [ref=e789]
+              - cell "Included" [ref=e791]
+              - cell "Included" [ref=e795]
+          - rowgroup [ref=e799]:
+            - row [ref=e800]:
+              - columnheader "Community" [ref=e801]
+            - row [ref=e802]:
+              - rowheader "Reply to comments Reply to comments on your Instagram, Facebook, LinkedIn, Threads, Bluesky, X, TikTok, Google Business Profile, YouTube, and Mastodon posts." [ref=e803]:
+                - generic [ref=e804]: Reply to comments
+                - generic [ref=e805]: Reply to comments on your Instagram, Facebook, LinkedIn, Threads, Bluesky, X, TikTok, Google Business Profile, YouTube, and Mastodon posts.
+              - cell "Included" [ref=e806]
+              - cell "Included" [ref=e810]
+              - cell "Included" [ref=e814]
+            - row [ref=e818]:
+              - rowheader "Comment score Track your consistency, speed, and habits." [ref=e819]:
+                - generic [ref=e820]: Comment score
+                - generic [ref=e821]: Track your consistency, speed, and habits.
+              - cell "Included" [ref=e822]
+              - cell "Included" [ref=e826]
+              - cell "Included" [ref=e830]
+            - row [ref=e834]:
+              - rowheader "AI replies AI that learns your voice and sounds like you." [ref=e835]:
+                - generic [ref=e836]: AI replies
+                - generic [ref=e837]: AI that learns your voice and sounds like you.
+              - cell "5 suggestions per week" [ref=e838]
+              - cell "Unlimited" [ref=e839]
+              - cell "Unlimited" [ref=e840]
+            - row [ref=e841]:
+              - rowheader "Saved replies Reply faster while keeping your tone authentic." [ref=e842]:
+                - generic [ref=e843]: Saved replies
+                - generic [ref=e844]: Reply faster while keeping your tone authentic.
+              - cell "1 saved reply" [ref=e845]
+              - cell "Unlimited" [ref=e846]
+              - cell "Unlimited" [ref=e847]
+            - row [ref=e848]:
+              - rowheader "Comment insights Pull out themes or ideas from your replies for fresh content inspiration." [ref=e849]:
+                - generic [ref=e850]: Comment insights
+                - generic [ref=e851]: Pull out themes or ideas from your replies for fresh content inspiration.
+              - cell "Included" [ref=e852]
+              - cell "Included" [ref=e856]
+              - cell "Included" [ref=e860]
+            - row [ref=e864]:
+              - rowheader "Turn comments into posts Instantly turn a comment exchange into a new post." [ref=e865]:
+                - generic [ref=e866]: Turn comments into posts
+                - generic [ref=e867]: Instantly turn a comment exchange into a new post.
+              - cell "Included" [ref=e868]
+              - cell "Included" [ref=e872]
+              - cell "Included" [ref=e876]
+          - rowgroup [ref=e880]:
+            - row [ref=e881]:
+              - columnheader "Analytics" [ref=e882]
+            - row [ref=e883]:
+              - rowheader "Insights Follower growth, engagement, impressions, and post performance — built right into Buffer alongside the content it's measuring." [ref=e884]:
+                - generic [ref=e885]: Insights
+                - generic [ref=e886]: Follower growth, engagement, impressions, and post performance — built right into Buffer alongside the content it's measuring.
+              - cell "30-day history" [ref=e887]
+              - cell "Unlimited" [ref=e888]
+              - cell "Unlimited" [ref=e889]
+            - row [ref=e890]:
+              - rowheader "Performance overview A summary of posts, likes, comments, impressions, shares, saves, follows, reach, and engagement rate for any date range — with period-over-period comparisons." [ref=e891]:
+                - generic [ref=e892]: Performance overview
+                - generic [ref=e893]: A summary of posts, likes, comments, impressions, shares, saves, follows, reach, and engagement rate for any date range — with period-over-period comparisons.
+              - cell "Not included" [ref=e894]
+              - cell "Included" [ref=e896]
+              - cell "Included" [ref=e900]
+            - row [ref=e904]:
+              - rowheader "Custom analytics Filter your Insights by tag or channel to see how specific content categories or campaigns performed." [ref=e905]:
+                - generic [ref=e906]: Custom analytics
+                - generic [ref=e907]: Filter your Insights by tag or channel to see how specific content categories or campaigns performed.
+              - cell "Not included" [ref=e908]
+              - cell "Included" [ref=e910]
+              - cell "Included" [ref=e914]
+            - row [ref=e918]:
+              - rowheader "Takeaways AI-powered observations about your content performance — what's working, what's not, and what to try next, in plain language." [ref=e919]:
+                - generic [ref=e920]: Takeaways
+                - generic [ref=e921]: AI-powered observations about your content performance — what's working, what's not, and what to try next, in plain language.
+              - cell "Included" [ref=e922]
+              - cell "Included" [ref=e926]
+              - cell "Included" [ref=e930]
+            - row [ref=e934]:
+              - rowheader "Reports Export your data as CSV, PDF, or markdown to use anywhere — in a client report, a doc, or straight into an AI tool." [ref=e935]:
+                - generic [ref=e936]: Reports
+                - generic [ref=e937]: Export your data as CSV, PDF, or markdown to use anywhere — in a client report, a doc, or straight into an AI tool.
+              - cell "Not included" [ref=e938]
+              - cell "Included" [ref=e940]
+              - cell "Included" [ref=e944]
+            - row [ref=e948]:
+              - rowheader "Custom UTM parameters Set UTM parameter values within Buffer to organize your traffic data." [ref=e949]:
+                - generic [ref=e950]: Custom UTM parameters
+                - generic [ref=e951]: Set UTM parameter values within Buffer to organize your traffic data.
+              - cell "Not included" [ref=e952]
+              - cell "Included" [ref=e954]
+              - cell "Included" [ref=e958]
+            - row [ref=e962]:
+              - rowheader "Branded reports Add your logo and generate a cover page." [ref=e963]:
+                - generic [ref=e964]: Branded reports
+                - generic [ref=e965]: Add your logo and generate a cover page.
+              - cell "Not included" [ref=e966]
+              - cell "Not included" [ref=e968]
+              - cell "Included" [ref=e970]
+          - rowgroup [ref=e974]:
+            - row [ref=e975]:
+              - columnheader "Collaboration" [ref=e976]
+            - row [ref=e977]:
+              - rowheader "Included users The number of users who can access and contribute content to your Buffer account." [ref=e978]:
+                - generic [ref=e979]: Included users
+                - generic [ref=e980]: The number of users who can access and contribute content to your Buffer account.
+              - cell "1" [ref=e981]
+              - cell "1" [ref=e982]
+              - cell "Unlimited" [ref=e983]
+            - row [ref=e984]:
+              - rowheader "Two-factor authentication Two-factor authentication codes can be generated via Email or Authenticator Apps (available on iOS and Android)." [ref=e985]:
+                - generic [ref=e986]: Two-factor authentication
+                - generic [ref=e987]: Two-factor authentication codes can be generated via Email or Authenticator Apps (available on iOS and Android).
+              - cell "Included" [ref=e988]
+              - cell "Included" [ref=e992]
+              - cell "Included" [ref=e996]
+            - row [ref=e1000]:
+              - rowheader "Notes Add internal comments to your content." [ref=e1001]:
+                - generic [ref=e1002]: Notes
+                - generic [ref=e1003]: Add internal comments to your content.
+              - cell "Not included" [ref=e1004]
+              - cell "Included" [ref=e1006]
+              - cell "Included" [ref=e1010]
+            - row [ref=e1014]:
+              - rowheader "Approval workflows Manage who can draft and approve posts across your team." [ref=e1015]:
+                - generic [ref=e1016]: Approval workflows
+                - generic [ref=e1017]: Manage who can draft and approve posts across your team.
+              - cell "Not included" [ref=e1018]
+              - cell "Not included" [ref=e1020]
+              - cell "Included" [ref=e1022]
+            - row [ref=e1026]:
+              - rowheader "Custom access and permissions Manage which channels each team member is invited to use." [ref=e1027]:
+                - generic [ref=e1028]: Custom access and permissions
+                - generic [ref=e1029]: Manage which channels each team member is invited to use.
+              - cell "Not included" [ref=e1030]
+              - cell "Not included" [ref=e1032]
+              - cell "Included" [ref=e1034]
+          - rowgroup [ref=e1038]:
+            - row [ref=e1039]:
+              - columnheader "Integrations" [ref=e1040]
+            - row [ref=e1041]:
+              - rowheader "Bitly Add custom shortlinks to your posts." [ref=e1042]:
+                - generic [ref=e1043]: Bitly
+                - generic [ref=e1044]: Add custom shortlinks to your posts.
+              - cell "Included" [ref=e1045]
+              - cell "Included" [ref=e1049]
+              - cell "Included" [ref=e1053]
+            - row [ref=e1057]:
+              - rowheader "Canva Import content directly from Canva." [ref=e1058]:
+                - generic [ref=e1059]: Canva
+                - generic [ref=e1060]: Import content directly from Canva.
+              - cell "Included" [ref=e1061]
+              - cell "Included" [ref=e1065]
+              - cell "Included" [ref=e1069]
+            - row [ref=e1073]:
+              - rowheader "ChatGPT Manage your content from ChatGPT and Codex." [ref=e1074]:
+                - generic [ref=e1075]: ChatGPT
+                - generic [ref=e1076]: Manage your content from ChatGPT and Codex.
+              - cell "Included" [ref=e1077]
+              - cell "Included" [ref=e1081]
+              - cell "Included" [ref=e1085]
+            - row [ref=e1089]:
+              - rowheader "Claude Manage your Buffer queue and draft posts from Claude." [ref=e1090]:
+                - generic [ref=e1091]: Claude
+                - generic [ref=e1092]: Manage your Buffer queue and draft posts from Claude.
+              - cell "Included" [ref=e1093]
+              - cell "Included" [ref=e1097]
+              - cell "Included" [ref=e1101]
+            - row [ref=e1105]:
+              - rowheader "Cursor Automate Buffer workflows from the Cursor code editor." [ref=e1106]:
+                - generic [ref=e1107]: Cursor
+                - generic [ref=e1108]: Automate Buffer workflows from the Cursor code editor.
+              - cell "Included" [ref=e1109]
+              - cell "Included" [ref=e1113]
+              - cell "Included" [ref=e1117]
+            - row [ref=e1121]:
+              - rowheader "Dropbox Import files directly from Dropbox." [ref=e1122]:
+                - generic [ref=e1123]: Dropbox
+                - generic [ref=e1124]: Import files directly from Dropbox.
+              - cell "Included" [ref=e1125]
+              - cell "Included" [ref=e1129]
+              - cell "Included" [ref=e1133]
+            - row [ref=e1137]:
+              - rowheader "Google Drive and Photos Import files directly from Google Drive and Photos." [ref=e1138]:
+                - generic [ref=e1139]: Google Drive and Photos
+                - generic [ref=e1140]: Import files directly from Google Drive and Photos.
+              - cell "Included" [ref=e1141]
+              - cell "Included" [ref=e1145]
+              - cell "Included" [ref=e1149]
+            - row [ref=e1153]:
+              - rowheader "IFTTT Automate your workflows and connect Buffer to hundreds of other apps." [ref=e1154]:
+                - generic [ref=e1155]: IFTTT
+                - generic [ref=e1156]: Automate your workflows and connect Buffer to hundreds of other apps.
+              - cell "Included" [ref=e1157]
+              - cell "Included" [ref=e1161]
+              - cell "Included" [ref=e1165]
+            - row [ref=e1169]:
+              - rowheader "Make Build powerful visual automations between Buffer and hundreds of apps." [ref=e1170]:
+                - generic [ref=e1171]: Make
+                - generic [ref=e1172]: Build powerful visual automations between Buffer and hundreds of apps.
+              - cell "Included" [ref=e1173]
+              - cell "Included" [ref=e1177]
+              - cell "Included" [ref=e1181]
+            - row [ref=e1185]:
+              - rowheader "n8n Build self-hosted, open-source automations with Buffer." [ref=e1186]:
+                - generic [ref=e1187]: n8n
+                - generic [ref=e1188]: Build self-hosted, open-source automations with Buffer.
+              - cell "Included" [ref=e1189]
+              - cell "Included" [ref=e1193]
+              - cell "Included" [ref=e1197]
+            - row [ref=e1201]:
+              - rowheader "One Drive Import files directly from One Drive." [ref=e1202]:
+                - generic [ref=e1203]: One Drive
+                - generic [ref=e1204]: Import files directly from One Drive.
+              - cell "Included" [ref=e1205]
+              - cell "Included" [ref=e1209]
+              - cell "Included" [ref=e1213]
+            - row [ref=e1217]:
+              - rowheader "Perplexity Web Research and publish social media content from Perplexity." [ref=e1218]:
+                - generic [ref=e1219]: Perplexity Web
+                - generic [ref=e1220]: Research and publish social media content from Perplexity.
+              - cell "Included" [ref=e1221]
+              - cell "Included" [ref=e1225]
+              - cell "Included" [ref=e1229]
+            - row [ref=e1233]:
+              - rowheader "Raycast Create and schedule Buffer posts from your Mac menu bar." [ref=e1234]:
+                - generic [ref=e1235]: Raycast
+                - generic [ref=e1236]: Create and schedule Buffer posts from your Mac menu bar.
+              - cell "Included" [ref=e1237]
+              - cell "Included" [ref=e1241]
+              - cell "Included" [ref=e1245]
+            - row [ref=e1249]:
+              - rowheader "Unsplash Search and attach images from Unsplash." [ref=e1250]:
+                - generic [ref=e1251]: Unsplash
+                - generic [ref=e1252]: Search and attach images from Unsplash.
+              - cell "Included" [ref=e1253]
+              - cell "Included" [ref=e1257]
+              - cell "Included" [ref=e1261]
+            - row [ref=e1265]:
+              - rowheader "WordPress Add Wordpress content to your queue using a WP plugin." [ref=e1266]:
+                - generic [ref=e1267]: WordPress
+                - generic [ref=e1268]: Add Wordpress content to your queue using a WP plugin.
+              - cell "Included" [ref=e1269]
+              - cell "Included" [ref=e1273]
+              - cell "Included" [ref=e1277]
+            - row [ref=e1281]:
+              - rowheader "Zapier Automate your workflows and connect Buffer to hundreds of other apps." [ref=e1282]:
+                - generic [ref=e1283]: Zapier
+                - generic [ref=e1284]: Automate your workflows and connect Buffer to hundreds of other apps.
+              - cell "Included" [ref=e1285]
+              - cell "Included" [ref=e1289]
+              - cell "Included" [ref=e1293]
+          - rowgroup [ref=e1297]:
+            - row [ref=e1298]:
+              - columnheader "API" [ref=e1299]
+            - row [ref=e1300]:
+              - rowheader "API Keys API keys for authenticating requests to Buffer's API." [ref=e1301]:
+                - generic [ref=e1302]: API Keys
+                - generic [ref=e1303]: API keys for authenticating requests to Buffer's API.
+              - cell "1" [ref=e1304]
+              - cell "3" [ref=e1305]
+              - cell "5" [ref=e1306]
+            - row [ref=e1307]:
+              - rowheader "App Clients OAuth app clients for building third-party integrations with Buffer." [ref=e1308]:
+                - generic [ref=e1309]: App Clients
+                - generic [ref=e1310]: OAuth app clients for building third-party integrations with Buffer.
+              - cell "1" [ref=e1311]
+              - cell "3" [ref=e1312]
+              - cell "5" [ref=e1313]
+            - row [ref=e1314]:
+              - rowheader "15-min limit Maximum API requests allowed in a 15-minute window." [ref=e1315]:
+                - generic [ref=e1316]: 15-min limit
+                - generic [ref=e1317]: Maximum API requests allowed in a 15-minute window.
+              - cell "100" [ref=e1318]
+              - cell "100" [ref=e1319]
+              - cell "100" [ref=e1320]
+            - row [ref=e1321]:
+              - rowheader "24-hr limit Maximum API requests allowed in a 24-hour window." [ref=e1322]:
+                - generic [ref=e1323]: 24-hr limit
+                - generic [ref=e1324]: Maximum API requests allowed in a 24-hour window.
+              - cell "250" [ref=e1325]
+              - cell "250" [ref=e1326]
+              - cell "500" [ref=e1327]
+            - row [ref=e1328]:
+              - rowheader "30-day limit Maximum API requests allowed in a 30-day window." [ref=e1329]:
+                - generic [ref=e1330]: 30-day limit
+                - generic [ref=e1331]: Maximum API requests allowed in a 30-day window.
+              - cell "3,000" [ref=e1332]
+              - cell "7,500" [ref=e1333]
+              - cell "15,000" [ref=e1334]
+          - rowgroup [ref=e1335]:
+            - row [ref=e1336]:
+              - columnheader "Support" [ref=e1337]
+            - row [ref=e1338]:
+              - rowheader "Self-service knowledge base Access to our comprehensive Help Centre, where you'll find how-to guides, most popular questions, and video tutorials." [ref=e1339]:
+                - generic [ref=e1340]: Self-service knowledge base
+                - generic [ref=e1341]: Access to our comprehensive Help Centre, where you'll find how-to guides, most popular questions, and video tutorials.
+              - cell "Included" [ref=e1342]
+              - cell "Included" [ref=e1346]
+              - cell "Included" [ref=e1350]
+            - row [ref=e1354]:
+              - rowheader "Email support Fast and helpful support via email — a whole team of people cheering for you." [ref=e1355]:
+                - generic [ref=e1356]: Email support
+                - generic [ref=e1357]: Fast and helpful support via email — a whole team of people cheering for you.
+              - cell "Included" [ref=e1358]
+              - cell "Included" [ref=e1362]
+              - cell "Included" [ref=e1366]
+    - region [ref=e1370]:
+      - generic [ref=e1372]:
+        - heading "FAQs" [level=2] [ref=e1373]
+        - generic [ref=e1374]:
+          - group [ref=e1375]:
+            - heading "Does Buffer work for agencies or businesses managing multiple brands?" [level=3] [ref=e1378] [cursor=pointer]
+          - group [ref=e1381]:
+            - heading "What counts as a channel?" [level=3] [ref=e1384] [cursor=pointer]
+          - group [ref=e1387]:
+            - heading "What features are supported for each specific channel?" [level=3] [ref=e1390] [cursor=pointer]
+          - group [ref=e1393]:
+            - heading "What are the billing options for Buffer's paid plans?" [level=3] [ref=e1396] [cursor=pointer]
+          - group [ref=e1399]:
+            - heading "What payment methods does Buffer accept?" [level=3] [ref=e1402] [cursor=pointer]
+          - group [ref=e1405]:
+            - heading "Does Buffer have a free trial?" [level=3] [ref=e1408] [cursor=pointer]
+          - group [ref=e1411]:
+            - heading "What happens at the end of the 14-day trial?" [level=3] [ref=e1414] [cursor=pointer]
+          - group [ref=e1417]:
+            - heading "Can I keep my three free channels if I upgrade from Buffer's Free plan to a paid plan?" [level=3] [ref=e1420] [cursor=pointer]
+          - group [ref=e1423]:
+            - heading "What is the scheduled post limit for each plan?" [level=3] [ref=e1426] [cursor=pointer]
+          - group [ref=e1429]:
+            - heading "Does Buffer offer a discount to nonprofit organizations and charities?" [level=3] [ref=e1432] [cursor=pointer]
+          - group [ref=e1435]:
+            - heading "Does Buffer charge Value-Added Tax (VAT) to customers?" [level=3] [ref=e1438] [cursor=pointer]
+          - group [ref=e1441]:
+            - heading "When were the prices of Buffer's plans last updated?" [level=3] [ref=e1444] [cursor=pointer]
+          - group [ref=e1447]:
+            - heading "How does Buffer's new pricing help me save as I grow?" [level=3] [ref=e1450] [cursor=pointer]
+  - contentinfo [ref=e1454]:
+    - heading "Buffer" [level=2] [ref=e1455]
+    - generic [ref=e1456]:
+      - generic [ref=e1457]:
+        - generic [ref=e1458]:
+          - generic [ref=e1459]:
+            - heading "Features" [level=3] [ref=e1460]
+            - list "Features" [ref=e1461]:
+              - listitem [ref=e1462]:
+                - link "Buffer API" [ref=e1463] [cursor=pointer]:
+                  - /url: /api
+              - listitem [ref=e1464]:
+                - link "Collaborate" [ref=e1465] [cursor=pointer]:
+                  - /url: /collaborate
+              - listitem [ref=e1466]:
+                - link "Community" [ref=e1467] [cursor=pointer]:
+                  - /url: /community
+              - listitem [ref=e1468]:
+                - link "Create" [ref=e1469] [cursor=pointer]:
+                  - /url: /create
+              - listitem [ref=e1470]:
+                - link "Insights" [ref=e1471] [cursor=pointer]:
+                  - /url: /insights
+              - listitem [ref=e1472]:
+                - link "Publish" [ref=e1473] [cursor=pointer]:
+                  - /url: /publish
+          - generic [ref=e1474]:
+            - heading "Tools" [level=3] [ref=e1475]
+            - list "Tools" [ref=e1476]:
+              - listitem [ref=e1477]:
+                - link "AI Assistant" [ref=e1478] [cursor=pointer]:
+                  - /url: /ai-assistant
+              - listitem [ref=e1479]:
+                - link "Android App" [ref=e1480] [cursor=pointer]:
+                  - /url: https://play.google.com/store/apps/details?id=org.buffer.android&hl=en
+              - listitem [ref=e1481]:
+                - link "Browser Extension" [ref=e1482] [cursor=pointer]:
+                  - /url: /extensions
+              - listitem [ref=e1483]:
+                - link "Integrations" [ref=e1484] [cursor=pointer]:
+                  - /url: /integrations
+              - listitem [ref=e1485]:
+                - link "iOS App" [ref=e1486] [cursor=pointer]:
+                  - /url: https://apps.apple.com/us/app/buffer-plan-schedule-posts/id490474324?pt=936146&ct=SiteFooter&mt=8
+              - listitem [ref=e1487]:
+                - link "Social Media MCP" [ref=e1488] [cursor=pointer]:
+                  - /url: /mcp
+              - listitem [ref=e1489]:
+                - link "Start Page" [ref=e1490] [cursor=pointer]:
+                  - /url: /start-page
+              - listitem [ref=e1491]:
+                - link "Template Library" [ref=e1492] [cursor=pointer]:
+                  - /url: /templates
+        - generic [ref=e1493]:
+          - heading "Channels" [level=3] [ref=e1494]
+          - list "Channels" [ref=e1495]:
+            - listitem [ref=e1496]:
+              - link "Bluesky" [ref=e1497] [cursor=pointer]:
+                - /url: /bluesky
+            - listitem [ref=e1498]:
+              - link "Facebook" [ref=e1499] [cursor=pointer]:
+                - /url: /facebook
+            - listitem [ref=e1500]:
+              - link "Google Business Profile" [ref=e1501] [cursor=pointer]:
+                - /url: /google-business-profile
+            - listitem [ref=e1502]:
+              - link "Instagram" [ref=e1503] [cursor=pointer]:
+                - /url: /instagram
+            - listitem [ref=e1504]:
+              - link "LinkedIn" [ref=e1505] [cursor=pointer]:
+                - /url: /linkedin
+            - listitem [ref=e1506]:
+              - link "Mastodon" [ref=e1507] [cursor=pointer]:
+                - /url: /mastodon
+            - listitem [ref=e1508]:
+              - link "Pinterest" [ref=e1509] [cursor=pointer]:
+                - /url: /pinterest
+            - listitem [ref=e1510]:
+              - link "Substack New" [ref=e1511] [cursor=pointer]:
+                - /url: /substack
+                - text: Substack
+                - generic [ref=e1512]: New
+            - listitem [ref=e1513]:
+              - link "Threads" [ref=e1514] [cursor=pointer]:
+                - /url: /threads
+            - listitem [ref=e1515]:
+              - link "TikTok" [ref=e1516] [cursor=pointer]:
+                - /url: /tiktok
+            - listitem [ref=e1517]:
+              - link "X" [ref=e1518] [cursor=pointer]:
+                - /url: /x
+            - listitem [ref=e1519]:
+              - link "YouTube" [ref=e1520] [cursor=pointer]:
+                - /url: /youtube
+        - generic [ref=e1521]:
+          - heading "Made for" [level=3] [ref=e1522]
+          - list "Made for" [ref=e1523]:
+            - listitem [ref=e1524]:
+              - link "Agencies" [ref=e1525] [cursor=pointer]:
+                - /url: /partners/agencies
+            - listitem [ref=e1526]:
+              - link "Creators" [ref=e1527] [cursor=pointer]:
+                - /url: /made-for/creators
+            - listitem [ref=e1528]:
+              - link "Developers" [ref=e1529] [cursor=pointer]:
+                - /url: /made-for/developers
+            - listitem [ref=e1530]:
+              - link "Higher Education" [ref=e1531] [cursor=pointer]:
+                - /url: /made-for/higher-education
+            - listitem [ref=e1532]:
+              - link "Nonprofits" [ref=e1533] [cursor=pointer]:
+                - /url: /nonprofits
+            - listitem [ref=e1534]:
+              - link "Small Business" [ref=e1535] [cursor=pointer]:
+                - /url: /made-for/small-business
+            - listitem [ref=e1536]:
+              - link "Startups" [ref=e1537] [cursor=pointer]:
+                - /url: /made-for/startups
+      - generic [ref=e1538]:
+        - generic [ref=e1539]:
+          - heading "Resources" [level=3] [ref=e1540]
+          - list "Resources" [ref=e1541]:
+            - listitem [ref=e1542]:
+              - link "Blog" [ref=e1543] [cursor=pointer]:
+                - /url: /resources/
+            - listitem [ref=e1544]:
+              - link "Our Community" [ref=e1545] [cursor=pointer]:
+                - /url: /our-community
+            - listitem [ref=e1546]:
+              - link "Resource Library" [ref=e1547] [cursor=pointer]:
+                - /url: /library
+            - listitem [ref=e1548]:
+              - link "Social Media Terms Glossary" [ref=e1549] [cursor=pointer]:
+                - /url: /social-media-terms
+        - generic [ref=e1550]:
+          - generic [ref=e1551]:
+            - heading "Support" [level=3] [ref=e1552]
+            - list "Support" [ref=e1553]:
+              - listitem [ref=e1554]:
+                - link "Changelog" [ref=e1555] [cursor=pointer]:
+                  - /url: /changelog
+              - listitem [ref=e1556]:
+                - link "Developer Docs" [ref=e1557] [cursor=pointer]:
+                  - /url: https://developers.buffer.com/
+              - listitem [ref=e1558]:
+                - link "Help Center" [ref=e1559] [cursor=pointer]:
+                  - /url: https://support.buffer.com/
+              - listitem [ref=e1560]:
+                - link "Request a Feature" [ref=e1561] [cursor=pointer]:
+                  - /url: https://suggestions.buffer.com/
+              - listitem [ref=e1562]:
+                - link "Status" [ref=e1563] [cursor=pointer]:
+                  - /url: https://status.buffer.com/
+          - generic [ref=e1564]:
+            - heading "Transparency" [level=3] [ref=e1565]
+            - list "Transparency" [ref=e1566]:
+              - listitem [ref=e1567]:
+                - link "Open Hub" [ref=e1568] [cursor=pointer]:
+                  - /url: /open
+              - listitem [ref=e1569]:
+                - link "Product Roadmap" [ref=e1570] [cursor=pointer]:
+                  - /url: https://suggestions.buffer.com/roadmap
+              - listitem [ref=e1571]:
+                - link "Transparent Metrics" [ref=e1572] [cursor=pointer]:
+                  - /url: /metrics
+              - listitem [ref=e1573]:
+                - link "Transparent Pricing" [ref=e1574] [cursor=pointer]:
+                  - /url: /transparent-pricing
+              - listitem [ref=e1575]:
+                - link "Transparent Salaries" [ref=e1576] [cursor=pointer]:
+                  - /url: /salaries
+        - generic [ref=e1577]:
+          - heading "Company" [level=3] [ref=e1578]
+          - list "Company" [ref=e1579]:
+            - listitem [ref=e1580]:
+              - link "About" [ref=e1581] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e1582]:
+              - link "Careers" [ref=e1583] [cursor=pointer]:
+                - /url: /journey
+            - listitem [ref=e1584]:
+              - link "Legal" [ref=e1585] [cursor=pointer]:
+                - /url: /legal
+            - listitem [ref=e1586]:
+              - link "Partner Program" [ref=e1587] [cursor=pointer]:
+                - /url: /partners
+            - listitem [ref=e1588]:
+              - link "Press" [ref=e1589] [cursor=pointer]:
+                - /url: /press
+            - listitem [ref=e1590]:
+              - link "Sitemap" [ref=e1591] [cursor=pointer]:
+                - /url: /sitemap
+    - group [ref=e1592]:
+      - generic [ref=e1594] [cursor=pointer]:
+        - heading "Free tools and social media data" [level=3] [ref=e1596]
+        - paragraph [ref=e1599]: Benchmarks, best times to post, and tools you can use right now.
+    - generic [ref=e1600]:
+      - link "Buffer" [ref=e1601] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e1610]:
+        - group [ref=e1611]:
+          - generic "English" [ref=e1612] [cursor=pointer]
+        - generic [ref=e1618]:
+          - heading "Social media" [level=3] [ref=e1619]
+          - list [ref=e1620]:
+            - listitem [ref=e1621]:
+              - link "Instagram" [ref=e1622] [cursor=pointer]:
+                - /url: https://www.instagram.com/buffer
+            - listitem [ref=e1628]:
+              - link "Facebook" [ref=e1629] [cursor=pointer]:
+                - /url: https://www.facebook.com/bufferapp
+            - listitem [ref=e1633]:
+              - link "Bluesky" [ref=e1634] [cursor=pointer]:
+                - /url: https://bsky.app/profile/buffer.com
+            - listitem [ref=e1638]:
+              - link "X" [ref=e1639] [cursor=pointer]:
+                - /url: https://x.com/buffer
+            - listitem [ref=e1643]:
+              - link "LinkedIn" [ref=e1644] [cursor=pointer]:
+                - /url: https://www.linkedin.com/company/bufferapp
+            - listitem [ref=e1648]:
+              - link "Threads" [ref=e1649] [cursor=pointer]:
+                - /url: https://www.threads.net/@buffer
+        - generic [ref=e1653]:
+          - heading "Policies" [level=3] [ref=e1654]
+          - generic [ref=e1655]:
+            - paragraph [ref=e1656]: Copyright ©2026 Buffer
+            - generic [aria-hidden] [ref=e1657]: "|"
+            - paragraph [ref=e1658]:
+              - link "Privacy" [ref=e1659] [cursor=pointer]:
+                - /url: /legal#privacy-policy
+            - generic [aria-hidden] [ref=e1660]: "|"
+            - paragraph [ref=e1661]:
+              - link "Terms" [ref=e1662] [cursor=pointer]:
+                - /url: /legal#terms
+            - generic [aria-hidden] [ref=e1663]: "|"
+            - paragraph [ref=e1664]:
+              - link "Security" [ref=e1665] [cursor=pointer]:
+                - /url: /legal#security
