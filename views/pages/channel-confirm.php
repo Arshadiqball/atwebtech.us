@@ -41,9 +41,11 @@ $token = Security::csrfToken();
         </label>
 <?php endforeach; ?>
       </fieldset>
-      <p class="cc-fine"><?= $pending['provider'] === 'linkedin'
-          ? 'atwebtech can create posts on this LinkedIn Profile. It can’t see your messages, and Company Pages aren’t available yet. You can disconnect at any time.'
-          : 'atwebtech can read this channel and upload videos you schedule. It can’t delete videos or reply to comments. You can disconnect at any time.' ?></p>
+      <p class="cc-fine"><?= match ($pending['provider']) {
+          'linkedin' => 'atwebtech can create posts on this LinkedIn Profile. It can’t see your messages, and Company Pages aren’t available yet. You can disconnect at any time.',
+          'tiktok' => 'atwebtech can read this TikTok account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
+          default => 'atwebtech can read this channel and upload videos you schedule. It can’t delete videos or reply to comments. You can disconnect at any time.',
+      } ?></p>
     </form>
 
     <footer class="cc-foot">

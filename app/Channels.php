@@ -2,13 +2,15 @@
 
 declare(strict_types=1);
 
-/** Connected social channels. YouTube (Google) and a personal LinkedIn Profile can connect; the rest are not built yet. */
+/** Connected social channels. YouTube, a personal LinkedIn Profile, and TikTok (name and picture) can connect. */
 final class Channels
 {
     public const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
     public const UPLOAD_SCOPE = 'https://www.googleapis.com/auth/youtube.upload';
     public const LINKEDIN_SIGNIN = 'openid profile email';
     public const LINKEDIN_SHARE = 'w_member_social';
+    public const TIKTOK_BASIC = 'user.info.basic';
+    public const TIKTOK_PUBLISH = 'video.publish';
     public const GOALS = [
         1 => ['Keep it steady', '1 time/week', 'purple'],
         3 => ['Build a presence', '3 times/week', 'orange'],
@@ -23,6 +25,7 @@ final class Channels
         return match ($provider) {
             'youtube' => config('oauth.google.client_id') !== '' && config('oauth.google.client_secret') !== '',
             'linkedin' => config('oauth.linkedin.client_id') !== '' && config('oauth.linkedin.client_secret') !== '',
+            'tiktok' => config('oauth.tiktok.client_key') !== '' && config('oauth.tiktok.client_secret') !== '',
             default => false,
         };
     }
@@ -62,18 +65,27 @@ final class Channels
             return $access;
         }
         $refresh = Security::unseal($channel['refresh_token'] ?? null);
-        $network = $channel['provider'] === 'linkedin' ? 'LinkedIn' : 'Google';
+        $network = match ($channel['provider']) {
+            'linkedin' => 'LinkedIn',
+            'tiktok' => 'TikTok',
+            default => 'Google',
+        };
         if ($refresh === null) {
             throw new ChannelAuthException($network . ' access expired. Reconnect the channel to keep publishing.');
         }
-        $creds = $channel['provider'] === 'linkedin' ? config('oauth.linkedin') : config('oauth.google');
+        $creds = match ($channel['provider']) {
+            'linkedin' => config('oauth.linkedin'),
+            'tiktok' => config('oauth.tiktok'),
+            default => config('oauth.google'),
+        };
+        $refreshFields = $channel['provider'] === 'tiktok'
+            ? ['client_key' => $creds['client_key'], 'client_secret' => $creds['client_secret'], 'refresh_token' => $refresh, 'grant_type' => 'refresh_token']
+            : ['client_id' => $creds['client_id'], 'client_secret' => $creds['client_secret'], 'refresh_token' => $refresh, 'grant_type' => 'refresh_token'];
         try {
-            $data = self::request('POST', self::endpoint($channel['provider'], 'token'), [
-                'client_id' => $creds['client_id'],
-                'client_secret' => $creds['client_secret'],
-                'refresh_token' => $refresh,
-                'grant_type' => 'refresh_token',
-            ]);
+            $data = self::request('POST', self::endpoint($channel['provider'], 'token'), $refreshFields);
+            if ($channel['provider'] === 'tiktok') {
+                $data = self::tiktokTokenBody($data);
+            }
         } catch (ChannelApiException $e) {
             if ($e->status === 400 || $e->status === 401) {
                 throw new ChannelAuthException($network . ' access was revoked. Reconnect the channel to keep publishing.');
@@ -156,9 +168,18 @@ final class Channels
         return rtrim((string) config('app.url'), '/');
     }
 
-    /** API hosts. Outside production, GOOGLE_OAUTH_TEST_BASE / LINKEDIN_OAUTH_TEST_BASE point at a local fake. */
+    /** API hosts. Outside production, a *_OAUTH_TEST_BASE value points at a local fake. */
     private static function endpoint(string $provider, string $name): string
     {
+        if ($provider === 'tiktok') {
+            $test = config('app.is_production') ? '' : rtrim((string) Env::get('TIKTOK_OAUTH_TEST_BASE', ''), '/');
+            return match ($name) {
+                'token' => ($test !== '' ? $test : 'https://open.tiktokapis.com') . '/v2/oauth/token/',
+                'revoke' => ($test !== '' ? $test : 'https://open.tiktokapis.com') . '/v2/oauth/revoke/',
+                'user' => ($test !== '' ? $test : 'https://open.tiktokapis.com') . '/v2/user/info/',
+                default => throw new RuntimeException('Unknown TikTok endpoint.'),
+            };
+        }
         $env = $provider === 'linkedin' ? 'LINKEDIN_OAUTH_TEST_BASE' : 'GOOGLE_OAUTH_TEST_BASE';
         $test = config('app.is_production') ? '' : rtrim((string) Env::get($env, ''), '/');
         if ($provider === 'linkedin') {
@@ -183,6 +204,19 @@ final class Channels
     public static function authorizeUrl(string $provider, string $state, string $verifier, bool $switchAccount = false, ?string $redirectUri = null): string
     {
         $redirectUri = $redirectUri ?: self::redirectUri($provider);
+        if ($provider === 'tiktok') {
+            $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
+            return 'https://www.tiktok.com/v2/auth/authorize/?' . http_build_query([
+                'client_key' => config('oauth.tiktok.client_key'),
+                'response_type' => 'code',
+                'scope' => self::TIKTOK_BASIC . ',' . self::TIKTOK_PUBLISH,
+                'redirect_uri' => $redirectUri,
+                'state' => $state,
+                'code_challenge' => $challenge,
+                'code_challenge_method' => 'S256',
+                'disable_auto_auth' => '1',
+            ], '', '&', PHP_QUERY_RFC3986);
+        }
         if ($provider === 'linkedin') {
             // LinkedIn's web apps reject PKCE. A client secret is the proof instead.
             return 'https://www.linkedin.com/oauth/v2/authorization?' . http_build_query([
@@ -211,22 +245,43 @@ final class Channels
     /** Swap an authorization code for tokens. */
     public static function exchange(string $provider, string $code, string $verifier, ?string $redirectUri = null): array
     {
-        $creds = $provider === 'linkedin' ? config('oauth.linkedin') : config('oauth.google');
-        $fields = [
-            'grant_type' => 'authorization_code',
-            'code' => $code,
-            'redirect_uri' => $redirectUri ?: self::redirectUri($provider),
-            'client_id' => $creds['client_id'],
-            'client_secret' => $creds['client_secret'],
-        ];
-        if ($provider !== 'linkedin') {
+        $creds = match ($provider) {
+            'linkedin' => config('oauth.linkedin'),
+            'tiktok' => config('oauth.tiktok'),
+            default => config('oauth.google'),
+        };
+        $redirect = $redirectUri ?: self::redirectUri($provider);
+        $fields = $provider === 'tiktok'
+            ? [
+                'client_key' => $creds['client_key'],
+                'client_secret' => $creds['client_secret'],
+                'code' => $code,
+                'grant_type' => 'authorization_code',
+                'redirect_uri' => $redirect,
+                'code_verifier' => $verifier,
+            ]
+            : [
+                'grant_type' => 'authorization_code',
+                'code' => $code,
+                'redirect_uri' => $redirect,
+                'client_id' => $creds['client_id'],
+                'client_secret' => $creds['client_secret'],
+            ];
+        if ($provider === 'youtube') {
             $fields['code_verifier'] = $verifier;
         }
         $data = self::request('POST', self::endpoint($provider, 'token'), $fields);
+        if ($provider === 'tiktok') {
+            $data = self::tiktokTokenBody($data);
+        }
         if (empty($data['access_token']) || !is_string($data['access_token'])) {
             throw new RuntimeException('Token response had no access token.');
         }
-        $fallback = $provider === 'linkedin' ? self::LINKEDIN_SIGNIN . ' ' . self::LINKEDIN_SHARE : self::YOUTUBE_SCOPE;
+        $fallback = match ($provider) {
+            'linkedin' => self::LINKEDIN_SIGNIN . ' ' . self::LINKEDIN_SHARE,
+            'tiktok' => self::TIKTOK_BASIC . ',' . self::TIKTOK_PUBLISH,
+            default => self::YOUTUBE_SCOPE,
+        };
         $tokens = [
             'access_token' => $data['access_token'],
             'refresh_token' => is_string($data['refresh_token'] ?? null) ? $data['refresh_token'] : null,
@@ -242,7 +297,11 @@ final class Channels
     /** Accounts the signed-in user can add: YouTube channels, or one LinkedIn Profile. */
     public static function accounts(string $provider, string $accessToken): array
     {
-        return $provider === 'linkedin' ? self::linkedinProfile($accessToken) : self::youtubeChannels($accessToken);
+        return match ($provider) {
+            'linkedin' => self::linkedinProfile($accessToken),
+            'tiktok' => self::tiktokAccount($accessToken),
+            default => self::youtubeChannels($accessToken),
+        };
     }
 
     /** YouTube channels the signed-in Google account (or brand account) can manage. */
@@ -264,6 +323,43 @@ final class Channels
             ];
         }
         return $out;
+    }
+
+    /** The TikTok account that approved the sandbox (or production) app. */
+    public static function tiktokAccount(string $accessToken): array
+    {
+        $url = self::endpoint('tiktok', 'user') . '?' . http_build_query(['fields' => 'open_id,display_name,avatar_url']);
+        $data = self::request('GET', $url, null, $accessToken);
+        $error = (string) ($data['error']['code'] ?? 'ok');
+        if ($error !== 'ok' && $error !== '') {
+            throw new ChannelApiException('TikTok refused the profile request (' . $error . ').', 400);
+        }
+        $user = is_array($data['data']['user'] ?? null) ? $data['data']['user'] : [];
+        $id = (string) ($user['open_id'] ?? '');
+        if ($id === '' || strlen($id) > 191 || !preg_match('/^[A-Za-z0-9._-]+$/', $id)) {
+            return [];
+        }
+        $name = trim((string) ($user['display_name'] ?? ''));
+        return [[
+            'id' => $id,
+            'name' => mb_substr($name !== '' ? $name : 'TikTok account', 0, 190),
+            'avatar' => self::safeAvatar((string) ($user['avatar_url'] ?? '')),
+            'kind' => 'Account',
+        ]];
+    }
+
+    /** TikTok sometimes nests the token under data, and reports errors with HTTP 200. */
+    private static function tiktokTokenBody(array $data): array
+    {
+        $error = $data['error'] ?? null;
+        if (is_array($error)) {
+            $code = (string) ($error['code'] ?? 'ok');
+            if ($code !== 'ok' && $code !== '') {
+                throw new ChannelApiException('TikTok refused the token (' . $code . ').', 400);
+            }
+        }
+        $inner = $data['data'] ?? null;
+        return is_array($inner) && isset($inner['access_token']) ? $inner : $data;
     }
 
     /** The signed-in member's personal LinkedIn Profile. Company Pages are not available yet. */
@@ -401,6 +497,13 @@ final class Channels
                 $form['client_id'] = config('oauth.linkedin.client_id');
                 $form['client_secret'] = config('oauth.linkedin.client_secret');
             }
+            if ($provider === 'tiktok') {
+                $form = [
+                    'client_key' => config('oauth.tiktok.client_key'),
+                    'client_secret' => config('oauth.tiktok.client_secret'),
+                    'token' => $token,
+                ];
+            }
             self::request('POST', self::endpoint($provider, 'revoke'), $form);
         } catch (Throwable $e) {
             error_log(sprintf('[%s] token revoke failed: %s', gmdate('c'), $e->getMessage()));
@@ -410,7 +513,11 @@ final class Channels
     private static function safeAvatar(string $url): ?string
     {
         $parts = parse_url($url);
-        return ($parts['scheme'] ?? '') === 'https' && in_array($parts['host'] ?? '', self::AVATAR_HOSTS, true) && strlen($url) <= 500 ? $url : null;
+        $host = strtolower((string) ($parts['host'] ?? ''));
+        $allowed = in_array($host, self::AVATAR_HOSTS, true)
+            || str_ends_with($host, '.tiktokcdn.com')
+            || str_ends_with($host, '.tiktokcdn-us.com');
+        return ($parts['scheme'] ?? '') === 'https' && $allowed && strlen($url) <= 500 ? $url : null;
     }
 
     private static function request(string $method, string $url, ?array $form = null, ?string $bearer = null): array

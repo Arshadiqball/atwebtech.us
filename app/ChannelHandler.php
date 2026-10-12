@@ -36,7 +36,11 @@ final class ChannelHandler
         $user = Auth::require();
         $flow = $_SESSION['_oauth'] ?? null;
         unset($_SESSION['_oauth']);
-        $who = $provider === 'linkedin' ? 'LinkedIn' : 'Google';
+        $who = match ($provider) {
+            'linkedin' => 'LinkedIn',
+            'tiktok' => 'TikTok',
+            default => 'Google',
+        };
 
         $state = (string) ($_GET['state'] ?? '');
         if (!is_array($flow) || $flow['provider'] !== $provider || $state === '' || !hash_equals($flow['state'], $state) || time() - (int) $flow['at'] > self::FLOW_SECONDS) {
@@ -61,6 +65,10 @@ final class ChannelHandler
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'LinkedIn profile access wasn’t granted. Tick the profile permission to connect.');
             }
+            if ($provider === 'tiktok' && !str_contains($tokens['scope'], Channels::TIKTOK_BASIC)) {
+                Channels::revoke($tokens['access_token'], $provider);
+                self::notice('/app/channels', 'TikTok profile access wasn’t granted. Tick the profile permission to connect.');
+            }
             $accounts = Channels::accounts($provider, $tokens['access_token']);
             if (!$accounts && $provider === 'linkedin') {
                 $accounts = Channels::profileFromIdToken((string) ($tokens['id_token'] ?? ''));
@@ -76,9 +84,11 @@ final class ChannelHandler
         }
         if (!$accounts) {
             Channels::revoke($tokens['access_token'], $provider);
-            self::notice('/app/channels', $provider === 'linkedin'
-                ? 'We couldn’t read this LinkedIn Profile. Try another account, or try again in a few minutes.'
-                : 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.');
+            self::notice('/app/channels', match ($provider) {
+                'linkedin' => 'We couldn’t read this LinkedIn Profile. Try another account, or try again in a few minutes.',
+                'tiktok' => 'We couldn’t read this TikTok account. Use a TikTok login that is added as a sandbox target user, then try again.',
+                default => 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.',
+            });
         }
 
         $_SESSION['_oauth_pending'] = [
