@@ -262,20 +262,23 @@ final class Channels
     /** The signed-in member's personal LinkedIn Profile. Company Pages are not available yet. */
     public static function linkedinProfile(string $accessToken): array
     {
-        $me = self::request('GET', self::endpoint('linkedin', 'me'), null, $accessToken);
-        $id = (string) ($me['id'] ?? '');
-        if ($id === '' || mb_strlen($id) > 191 || !preg_match('/^[A-Za-z0-9_-]+$/', $id)) {
-            return [];
-        }
-        $info = [];
+        // OpenID sign-in does not include permission for /v2/me. Name and id come from userinfo.
         try {
             $info = self::request('GET', self::endpoint('linkedin', 'userinfo'), null, $accessToken);
         } catch (Throwable $e) {
             error_log(sprintf('[%s] linkedin userinfo failed: %s', gmdate('c'), $e->getMessage()));
+            return [];
+        }
+        $id = (string) ($info['sub'] ?? '');
+        if (str_starts_with($id, 'urn:li:person:')) {
+            $id = substr($id, strlen('urn:li:person:'));
+        }
+        if ($id === '' || mb_strlen($id) > 191 || !preg_match('/^[A-Za-z0-9_-]+$/', $id)) {
+            return [];
         }
         $name = trim((string) ($info['name'] ?? ''));
         if ($name === '') {
-            $name = trim((string) ($me['localizedFirstName'] ?? '') . ' ' . (string) ($me['localizedLastName'] ?? ''));
+            $name = trim((string) ($info['given_name'] ?? '') . ' ' . (string) ($info['family_name'] ?? ''));
         }
         return [[
             'id' => $id,
