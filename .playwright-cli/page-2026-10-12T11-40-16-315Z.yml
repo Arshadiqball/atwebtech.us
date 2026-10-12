@@ -1,0 +1,1127 @@
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main"
+  - banner [ref=e3]:
+    - generic [ref=e4]:
+      - link "atwebtech home" [ref=e5] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e6]: atwebtech
+      - navigation "Main" [ref=e8]:
+        - list [ref=e9]:
+          - listitem [ref=e10]:
+            - button "Features" [ref=e11] [cursor=pointer]
+          - listitem [ref=e14]:
+            - button "Integrations" [ref=e15] [cursor=pointer]
+          - listitem [ref=e18]:
+            - button "Solutions" [ref=e19] [cursor=pointer]
+          - listitem [ref=e22]:
+            - button "Resources" [ref=e23] [cursor=pointer]
+          - listitem [ref=e26]:
+            - link "Pricing" [ref=e27] [cursor=pointer]:
+              - /url: /pricing
+      - generic [ref=e28]:
+        - link "Log in" [ref=e29] [cursor=pointer]:
+          - /url: /login
+        - link "View demo" [ref=e30] [cursor=pointer]:
+          - /url: /demo
+        - link "Join the waitlist" [ref=e31] [cursor=pointer]:
+          - /url: /join
+  - main [ref=e32]:
+    - region [ref=e33]:
+      - generic [aria-hidden] [ref=e42]: in
+      - generic [ref=e76]:
+        - heading "Your content. Your community. One workspace." [level=1] [ref=e77]:
+          - generic [ref=e78]: Your content. Your community.
+          - generic [ref=e79]: One workspace.
+        - paragraph [ref=e80]: "Meet atwebtech: a simpler way to plan your social content, organize ideas, and build a more consistent online presence."
+        - generic [ref=e81]:
+          - generic [aria-hidden] [ref=e82]:
+            - text: Leave this field empty
+            - textbox [ref=e83]
+          - generic [ref=e84]:
+            - generic [ref=e85]: Email address
+            - generic [ref=e86]:
+              - textbox "Email address" [ref=e87]:
+                - /placeholder: Enter your email...
+              - button "Join the waitlist" [ref=e88] [cursor=pointer]
+          - paragraph [ref=e92]:
+            - text: By joining, you agree to receive atwebtech launch emails. See our
+            - link "privacy policy" [ref=e93] [cursor=pointer]:
+              - /url: /privacy
+            - text: .
+        - link "Explore the demo" [ref=e94] [cursor=pointer]:
+          - /url: /demo
+      - generic [ref=e98]:
+        - generic [ref=e99]:
+          - generic [ref=e100]:
+            - generic [ref=e101]:
+              - generic [ref=e102]:
+                - generic [aria-hidden] [ref=e103]: MC
+                - text: Marigold Ceramics
+              - generic [ref=e104]: Demo data
+            - generic [aria-hidden] [ref=e107]:
+              - generic [ref=e108]: Calendar
+              - generic [ref=e111]: Queue
+              - generic [ref=e114]: Ideas
+          - generic [ref=e117]:
+            - complementary [ref=e118]:
+              - paragraph [ref=e119]: Channels
+              - list "Channels" [ref=e120]:
+                - listitem [ref=e121]:
+                  - button "Instagram" [pressed] [ref=e122] [cursor=pointer]
+                - listitem [ref=e130]:
+                  - button "TikTok" [pressed] [ref=e131] [cursor=pointer]
+                - listitem [ref=e139]:
+                  - button "LinkedIn" [pressed] [ref=e140] [cursor=pointer]:
+                    - generic "LinkedIn" [ref=e141]:
+                      - generic [aria-hidden] [ref=e142]: in
+                - listitem [ref=e147]:
+                  - button "Facebook" [pressed] [ref=e148] [cursor=pointer]
+                - listitem [ref=e156]:
+                  - button "Threads" [pressed] [ref=e157] [cursor=pointer]
+              - paragraph [ref=e165]: Select channels to show or hide their posts.
+            - generic [ref=e166]:
+              - generic [ref=e167]:
+                - strong [ref=e168]: Oct 12 to 18
+                - generic [aria-hidden] [ref=e174]:
+                  - generic [ref=e175]: Week
+                  - generic [ref=e176]: Month
+              - generic [ref=e177]:
+                - generic [ref=e178]:
+                  - generic [ref=e179]:
+                    - generic [ref=e180]: Mon
+                    - generic [ref=e181]: "12"
+                  - generic [ref=e182]:
+                    - generic [ref=e183]:
+                      - generic "Instagram" [ref=e184]
+                      - text: 9:00 AM
+                    - generic [ref=e187]: New speckled mug colors
+                  - generic [ref=e188]:
+                    - generic [ref=e189]:
+                      - generic "LinkedIn" [ref=e190]:
+                        - generic [aria-hidden] [ref=e191]: in
+                      - text: 12:30 PM
+                    - generic [ref=e192]: Lessons from our first pop-up
+                - generic [ref=e193]:
+                  - generic [ref=e194]:
+                    - generic [ref=e195]: Tue
+                    - generic [ref=e196]: "13"
+                  - generic [ref=e197]:
+                    - generic [ref=e198]:
+                      - generic "TikTok" [ref=e199]
+                      - text: 8:15 AM
+                    - generic [ref=e202]: Throwing a mug in 30 seconds
+                  - generic [ref=e203]:
+                    - generic [ref=e204]:
+                      - generic "Facebook" [ref=e205]
+                      - text: 5:00 PM
+                    - generic [ref=e208]: Thursday open studio
+                - generic [ref=e209]:
+                  - generic [ref=e210]:
+                    - generic [ref=e211]: Wed
+                    - generic [ref=e212]: "14"
+                  - generic [ref=e213]:
+                    - generic [ref=e214]:
+                      - generic "Pinterest" [ref=e215]
+                      - text: 10:00 AM
+                    - generic [ref=e218]: Autumn glaze palette
+                  - generic [ref=e219]:
+                    - generic [ref=e220]:
+                      - generic "Threads" [ref=e221]
+                      - text: 1:00 PM
+                    - generic [ref=e224]: Matte or glossy?
+                - generic [ref=e225]:
+                  - generic [ref=e226]:
+                    - generic [ref=e227]: Thu
+                    - generic [ref=e228]: "15"
+                  - generic [ref=e229]:
+                    - generic [ref=e230]:
+                      - generic "Instagram" [ref=e231]
+                      - text: 9:30 AM
+                    - generic [ref=e234]: Behind the wheel
+                  - generic [ref=e235]:
+                    - generic [ref=e236]:
+                      - generic "LinkedIn" [ref=e237]:
+                        - generic [aria-hidden] [ref=e238]: in
+                      - text: 4:00 PM
+                    - generic [ref=e239]: Wholesale for cafés
+                - generic [ref=e240]:
+                  - generic [ref=e241]:
+                    - generic [ref=e242]: Fri
+                    - generic [ref=e243]: "16"
+                  - generic [ref=e244]:
+                    - generic [ref=e245]:
+                      - generic "Facebook" [ref=e246]
+                      - text: 11:00 AM
+                    - generic [ref=e249]: Weekend market reminder
+                  - generic [ref=e250]:
+                    - generic [ref=e251]:
+                      - generic "Instagram" [ref=e252]
+                      - text: 6:00 PM
+                    - generic [ref=e255]: Planter restock
+                - generic [ref=e256]:
+                  - generic [ref=e257]:
+                    - generic [ref=e258]: Sat
+                    - generic [ref=e259]: "17"
+                  - generic [ref=e260]:
+                    - generic [ref=e261]:
+                      - generic "TikTok" [ref=e262]
+                      - text: 10:00 AM
+                    - generic [ref=e265]: Packing an order
+                - generic [ref=e266]:
+                  - generic [ref=e267]:
+                    - generic [ref=e268]: Sun
+                    - generic [ref=e269]: "18"
+                  - generic [ref=e270]:
+                    - generic [ref=e271]:
+                      - generic "Threads" [ref=e272]
+                      - text: 7:00 PM
+                    - generic [ref=e275]: Week in the studio
+        - generic [aria-hidden] [ref=e276]:
+          - generic [ref=e277]:
+            - generic [ref=e278]: MC
+            - generic [ref=e279]:
+              - generic [ref=e280]: marigold.ceramics
+              - generic [ref=e281]: Scheduled for Mon, 9:00 AM
+          - paragraph [ref=e292]: marigold.ceramics Three new speckled glazes, made for slow autumn mornings. Which one is yours?
+        - generic [aria-hidden] [ref=e293]:
+          - generic [ref=e294]:
+            - generic [ref=e295]: Followers
+            - generic [ref=e296]: Last 30 days
+          - generic [ref=e297]:
+            - text: 4,386
+            - generic [ref=e298]: "+284"
+        - generic [aria-hidden] [ref=e302]:
+          - generic [ref=e303]:
+            - generic [ref=e304]: Up next
+            - generic [ref=e305]: 3 posts
+          - generic [ref=e310]:
+            - generic [ref=e311]: New speckled mug colors
+            - text: Mon, 9:00 AM
+          - generic [ref=e316]:
+            - generic [ref=e317]: Throwing a mug in 30 seconds
+            - text: Tue, 8:15 AM
+          - generic [ref=e322]:
+            - generic [ref=e323]: Thursday open studio
+            - text: Tue, 5:00 PM
+    - region [ref=e324]:
+      - generic [ref=e325]:
+        - heading "Designed for the people behind the posts." [level=2] [ref=e326]
+        - list [ref=e328]:
+          - listitem [ref=e329]:
+            - link "Creators" [ref=e330] [cursor=pointer]:
+              - /url: /solutions/creators
+          - listitem [ref=e333]:
+            - link "Small businesses" [ref=e334] [cursor=pointer]:
+              - /url: /solutions/businesses
+          - listitem [ref=e337]:
+            - link "Agencies" [ref=e338] [cursor=pointer]:
+              - /url: /solutions/agencies
+          - listitem [ref=e341]:
+            - link "Marketing teams" [ref=e342] [cursor=pointer]:
+              - /url: /solutions/marketing-teams
+    - region "Core features" [ref=e345]:
+      - generic [ref=e346]:
+        - article [ref=e347]:
+          - generic [ref=e349]:
+            - generic [ref=e350]:
+              - generic [ref=e351]:
+                - group "Calendar view" [ref=e352]:
+                  - button "Week" [pressed] [ref=e353] [cursor=pointer]
+                  - button "Month" [ref=e354] [cursor=pointer]
+                - strong [ref=e355]: Oct 12 to 18
+              - generic [ref=e356]: Demo data
+            - group "Filter posts by channel" [ref=e359]:
+              - button "Instagram" [pressed] [ref=e360] [cursor=pointer]
+              - button "TikTok" [pressed] [ref=e364] [cursor=pointer]
+              - button [pressed] [ref=e368] [cursor=pointer]:
+                - generic "LinkedIn" [ref=e369]:
+                  - generic [aria-hidden] [ref=e370]: in
+                - text: LinkedIn
+              - button "Facebook" [pressed] [ref=e371] [cursor=pointer]
+              - button "Pinterest" [pressed] [ref=e375] [cursor=pointer]
+              - button "Threads" [pressed] [ref=e379] [cursor=pointer]
+              - generic [ref=e383]:
+                - generic [ref=e384]: Scheduled
+                - generic [ref=e385]: Draft
+            - generic [ref=e386]:
+              - generic [ref=e388]:
+                - generic [ref=e389]:
+                  - generic [ref=e390]:
+                    - generic [ref=e391]: Mon
+                    - generic [ref=e392]: "12"
+                  - list [ref=e393]:
+                    - listitem [ref=e394]:
+                      - button "9:00 AM New speckled mug colors Scheduled" [pressed] [ref=e395] [cursor=pointer]:
+                        - generic [ref=e396]:
+                          - generic "Instagram" [ref=e397]
+                          - generic [ref=e400]: 9:00 AM
+                        - generic [ref=e401]: New speckled mug colors
+                        - generic [ref=e402]: Scheduled
+                    - listitem [ref=e403]:
+                      - button "12:30 PM Lessons from our first pop-up Draft" [ref=e404] [cursor=pointer]:
+                        - generic [ref=e405]:
+                          - generic "LinkedIn" [ref=e406]:
+                            - generic [aria-hidden] [ref=e407]: in
+                          - generic [ref=e408]: 12:30 PM
+                        - generic [ref=e409]: Lessons from our first pop-up
+                        - generic [ref=e410]: Draft
+                - generic [ref=e411]:
+                  - generic [ref=e412]:
+                    - generic [ref=e413]: Tue
+                    - generic [ref=e414]: "13"
+                  - list [ref=e415]:
+                    - listitem [ref=e416]:
+                      - button "8:15 AM Throwing a mug in 30 seconds Scheduled" [ref=e417] [cursor=pointer]:
+                        - generic [ref=e418]:
+                          - generic "TikTok" [ref=e419]
+                          - generic [ref=e422]: 8:15 AM
+                        - generic [ref=e423]: Throwing a mug in 30 seconds
+                        - generic [ref=e424]: Scheduled
+                    - listitem [ref=e425]:
+                      - button "5:00 PM Thursday open studio Scheduled" [ref=e426] [cursor=pointer]:
+                        - generic [ref=e427]:
+                          - generic "Facebook" [ref=e428]
+                          - generic [ref=e431]: 5:00 PM
+                        - generic [ref=e432]: Thursday open studio
+                        - generic [ref=e433]: Scheduled
+                - generic [ref=e434]:
+                  - generic [ref=e435]:
+                    - generic [ref=e436]: Wed
+                    - generic [ref=e437]: "14"
+                  - list [ref=e438]:
+                    - listitem [ref=e439]:
+                      - button "10:00 AM Autumn glaze palette Draft" [ref=e440] [cursor=pointer]:
+                        - generic [ref=e441]:
+                          - generic "Pinterest" [ref=e442]
+                          - generic [ref=e445]: 10:00 AM
+                        - generic [ref=e446]: Autumn glaze palette
+                        - generic [ref=e447]: Draft
+                    - listitem [ref=e448]:
+                      - button "1:00 PM Matte or glossy? Scheduled" [ref=e449] [cursor=pointer]:
+                        - generic [ref=e450]:
+                          - generic "Threads" [ref=e451]
+                          - generic [ref=e454]: 1:00 PM
+                        - generic [ref=e455]: Matte or glossy?
+                        - generic [ref=e456]: Scheduled
+                - generic [ref=e457]:
+                  - generic [ref=e458]:
+                    - generic [ref=e459]: Thu
+                    - generic [ref=e460]: "15"
+                  - list [ref=e461]:
+                    - listitem [ref=e462]:
+                      - button "9:30 AM Behind the wheel Scheduled" [ref=e463] [cursor=pointer]:
+                        - generic [ref=e464]:
+                          - generic "Instagram" [ref=e465]
+                          - generic [ref=e468]: 9:30 AM
+                        - generic [ref=e469]: Behind the wheel
+                        - generic [ref=e470]: Scheduled
+                    - listitem [ref=e471]:
+                      - button "4:00 PM Wholesale for cafés Scheduled" [ref=e472] [cursor=pointer]:
+                        - generic [ref=e473]:
+                          - generic "LinkedIn" [ref=e474]:
+                            - generic [aria-hidden] [ref=e475]: in
+                          - generic [ref=e476]: 4:00 PM
+                        - generic [ref=e477]: Wholesale for cafés
+                        - generic [ref=e478]: Scheduled
+                - generic [ref=e479]:
+                  - generic [ref=e480]:
+                    - generic [ref=e481]: Fri
+                    - generic [ref=e482]: "16"
+                  - list [ref=e483]:
+                    - listitem [ref=e484]:
+                      - button "11:00 AM Weekend market reminder Draft" [ref=e485] [cursor=pointer]:
+                        - generic [ref=e486]:
+                          - generic "Facebook" [ref=e487]
+                          - generic [ref=e490]: 11:00 AM
+                        - generic [ref=e491]: Weekend market reminder
+                        - generic [ref=e492]: Draft
+                    - listitem [ref=e493]:
+                      - button "6:00 PM Planter restock Scheduled" [ref=e494] [cursor=pointer]:
+                        - generic [ref=e495]:
+                          - generic "Instagram" [ref=e496]
+                          - generic [ref=e499]: 6:00 PM
+                        - generic [ref=e500]: Planter restock
+                        - generic [ref=e501]: Scheduled
+                - generic [ref=e502]:
+                  - generic [ref=e503]:
+                    - generic [ref=e504]: Sat
+                    - generic [ref=e505]: "17"
+                  - list [ref=e506]:
+                    - listitem [ref=e507]:
+                      - button "10:00 AM Packing an order Draft" [ref=e508] [cursor=pointer]:
+                        - generic [ref=e509]:
+                          - generic "TikTok" [ref=e510]
+                          - generic [ref=e513]: 10:00 AM
+                        - generic [ref=e514]: Packing an order
+                        - generic [ref=e515]: Draft
+                - generic [ref=e516]:
+                  - generic [ref=e517]:
+                    - generic [ref=e518]: Sun
+                    - generic [ref=e519]: "18"
+                  - list [ref=e520]:
+                    - listitem [ref=e521]:
+                      - button "7:00 PM Week in the studio Draft" [ref=e522] [cursor=pointer]:
+                        - generic [ref=e523]:
+                          - generic "Threads" [ref=e524]
+                          - generic [ref=e527]: 7:00 PM
+                        - generic [ref=e528]: Week in the studio
+                        - generic [ref=e529]: Draft
+              - complementary "Post preview" [ref=e530]:
+                - paragraph [ref=e531]: Post preview
+                - generic [ref=e532]:
+                  - generic [ref=e533]:
+                    - generic [ref=e534]: MC
+                    - generic [ref=e535]:
+                      - generic [ref=e536]: Marigold Ceramics
+                      - generic [ref=e537]: Instagram
+                    - generic [ref=e538]: Scheduled
+                  - paragraph [ref=e539]: New speckled mug colors
+                  - paragraph [ref=e540]: "Three new speckled glazes, made for slow autumn mornings. Sage, oat, or terracotta: which one is yours?"
+                  - paragraph [ref=e541]:
+                    - generic [ref=e544]: Mon 12, 9:00 AM
+                - generic [ref=e545]:
+                  - button "Edit" [disabled] [ref=e546]
+                  - button "Schedule" [disabled] [ref=e547]
+                  - generic [ref=e548]: Publishing is disabled in this demo.
+          - generic [ref=e549]:
+            - generic [ref=e550]:
+              - paragraph [ref=e551]: Publishing
+              - heading "Make room for a more consistent posting rhythm." [level=2] [ref=e552]
+            - generic [ref=e553]:
+              - paragraph [ref=e554]: Organize upcoming posts in a clear calendar, tailor your content for each channel, and keep your next campaign moving.
+              - link "Explore publishing" [ref=e555] [cursor=pointer]:
+                - /url: /features/publishing
+        - article [ref=e558]:
+          - generic [ref=e560]:
+            - generic [ref=e561]:
+              - strong [ref=e563]: Content board
+              - generic [ref=e564]: Demo data
+            - generic [ref=e567]:
+              - generic [ref=e568]: New idea title
+              - textbox "New idea title" [ref=e569]:
+                - /placeholder: Add an idea...
+              - button "Add idea" [ref=e570] [cursor=pointer]
+            - generic [ref=e573]:
+              - region [ref=e574]:
+                - generic [ref=e575]:
+                  - heading "Ideas" [level=3] [ref=e576]
+                  - generic [ref=e577]: "3"
+                - list [ref=e578]:
+                  - listitem [ref=e579]:
+                    - paragraph [ref=e580]: Morning set collab with Hollow Oak Bakery
+                    - paragraph [ref=e581]: Mug and sourdough bundle. Shoot at the bakery counter.
+                    - generic [ref=e582]:
+                      - generic [ref=e583]: Collab
+                      - generic [ref=e585]:
+                        - button "Already in the first stage" [disabled] [ref=e586]
+                        - button "Move to Drafting" [ref=e589] [cursor=pointer]
+                  - listitem [ref=e592]:
+                    - paragraph [ref=e593]: "Café spotlight: who uses our cups"
+                    - paragraph [ref=e594]: Ask three wholesale cafés for a photo and a quote.
+                    - generic [ref=e595]:
+                      - generic [ref=e596]: Series
+                      - generic [ref=e598]:
+                        - button "Already in the first stage" [disabled] [ref=e599]
+                        - button "Move to Drafting" [ref=e602] [cursor=pointer]
+                  - listitem [ref=e605]:
+                    - paragraph [ref=e606]: Glaze test results
+                    - paragraph [ref=e607]: Carousel of six test tiles with the recipe names.
+                    - generic [ref=e608]:
+                      - generic [ref=e609]: Carousel
+                      - generic [ref=e611]:
+                        - button "Already in the first stage" [disabled] [ref=e612]
+                        - button "Move to Drafting" [ref=e615] [cursor=pointer]
+              - region [ref=e618]:
+                - generic [ref=e619]:
+                  - heading "Drafting" [level=3] [ref=e620]
+                  - generic [ref=e621]: "2"
+                - list [ref=e622]:
+                  - listitem [ref=e623]:
+                    - paragraph [ref=e624]: Studio tour reel
+                    - paragraph [ref=e625]: "Shot list: door, shelves, wheel, kiln, packing table."
+                    - generic [ref=e626]:
+                      - generic [ref=e627]: Reel
+                      - generic [ref=e629]:
+                        - button "Move back to Ideas" [ref=e630] [cursor=pointer]
+                        - button "Move to Ready for review" [ref=e633] [cursor=pointer]
+                  - listitem [ref=e636]:
+                    - paragraph [ref=e637]: How to care for stoneware
+                    - paragraph [ref=e638]: Dishwasher, microwave, and oven notes in plain language.
+                    - generic [ref=e639]:
+                      - generic [ref=e640]: Guide
+                      - generic [ref=e642]:
+                        - button "Move back to Ideas" [ref=e643] [cursor=pointer]
+                        - button "Move to Ready for review" [ref=e646] [cursor=pointer]
+              - region [ref=e649]:
+                - generic [ref=e650]:
+                  - heading "Ready for review" [level=3] [ref=e651]
+                  - generic [ref=e652]: "2"
+                - list [ref=e653]:
+                  - listitem [ref=e654]:
+                    - paragraph [ref=e655]: Autumn collection launch
+                    - paragraph [ref=e656]: Caption v3 ready. Needs final photo choice.
+                    - generic [ref=e657]:
+                      - generic [ref=e658]: Launch
+                      - generic [ref=e660]:
+                        - button "Move back to Drafting" [ref=e661] [cursor=pointer]
+                        - button "Already in the last stage" [disabled] [ref=e664]
+                  - listitem [ref=e667]:
+                    - paragraph [ref=e668]: Workshop sign-ups
+                    - paragraph [ref=e669]: Two dates in November, eight seats each.
+                    - generic [ref=e670]:
+                      - generic [ref=e671]: Event
+                      - generic [ref=e673]:
+                        - button "Move back to Drafting" [ref=e674] [cursor=pointer]
+                        - button "Already in the last stage" [disabled] [ref=e677]
+            - paragraph [ref=e680]: Drag cards or use the arrows. Changes stay in your browser and reset on reload.
+            - paragraph [ref=e681]
+          - generic [ref=e682]:
+            - paragraph [ref=e683]: Content planning
+            - heading "Give every good idea somewhere to grow." [level=2] [ref=e684]
+            - paragraph [ref=e685]: Collect inspiration, shape your drafts, and keep your content organized from the first thought to the final review.
+            - link "Explore content planning" [ref=e686] [cursor=pointer]:
+              - /url: /features/content-planner
+        - article [ref=e689]:
+          - generic [ref=e691]:
+            - generic [ref=e692]:
+              - generic [ref=e693]:
+                - strong [ref=e694]: Inbox
+                - generic [ref=e695]: 3 unread
+              - generic [ref=e696]: Demo data
+            - generic [ref=e699]:
+              - generic [ref=e700]: Filter by channel
+              - combobox "Filter by channel" [ref=e701]:
+                - option "All channels" [selected]
+                - option "Instagram"
+                - option "Facebook"
+                - option "TikTok"
+                - option "Threads"
+                - option "LinkedIn"
+              - generic [ref=e702]:
+                - checkbox "Unread only" [ref=e703]
+                - text: Unread only
+            - generic [ref=e704]:
+              - list "Conversations" [ref=e705]:
+                - listitem [ref=e706]:
+                  - button "PR Priya Raman 9:42 AM These are lovely. Is the sage one dishwasher safe? Question Unread" [pressed] [ref=e707] [cursor=pointer]:
+                    - generic [ref=e708]:
+                      - text: PR
+                      - generic "Instagram" [ref=e709]
+                    - generic [ref=e712]:
+                      - generic [ref=e713]:
+                        - generic [ref=e714]: Priya Raman
+                        - generic [ref=e715]: 9:42 AM
+                      - generic [ref=e716]: These are lovely. Is the sage one dishwasher safe?
+                      - generic [ref=e717]:
+                        - generic [ref=e718]: Question
+                        - generic [ref=e719]: Unread
+                - listitem [ref=e721]:
+                  - button "TW Tomasz Wójcik 9:10 AM Do I need to book for Thursday, or can we just turn up with the kids? Question Unread" [ref=e722] [cursor=pointer]:
+                    - generic [ref=e723]:
+                      - text: TW
+                      - generic "Facebook" [ref=e724]
+                    - generic [ref=e727]:
+                      - generic [ref=e728]:
+                        - generic [ref=e729]: Tomasz Wójcik
+                        - generic [ref=e730]: 9:10 AM
+                      - generic [ref=e731]: Do I need to book for Thursday, or can we just turn up with the kids?
+                      - generic [ref=e732]:
+                        - generic [ref=e733]: Question
+                        - generic [ref=e734]: Unread
+                - listitem [ref=e736]:
+                  - button "LH Lucía Herrera Yesterday My planter arrived and it is perfect. Any chance of a bigger size for a fiddle leaf fig? Feedback Unread" [ref=e737] [cursor=pointer]:
+                    - generic [ref=e738]:
+                      - text: LH
+                      - generic "Instagram" [ref=e739]
+                    - generic [ref=e742]:
+                      - generic [ref=e743]:
+                        - generic [ref=e744]: Lucía Herrera
+                        - generic [ref=e745]: Yesterday
+                      - generic [ref=e746]: My planter arrived and it is perfect. Any chance of a bigger size for a fiddle leaf fig?
+                      - generic [ref=e747]:
+                        - generic [ref=e748]: Feedback
+                        - generic [ref=e749]: Unread
+                - listitem [ref=e751]:
+                  - button "DK Daniel Kim Yesterday That is so much longer than I expected. Thanks! Question" [ref=e752] [cursor=pointer]:
+                    - generic [ref=e753]:
+                      - text: DK
+                      - generic "TikTok" [ref=e754]
+                    - generic [ref=e757]:
+                      - generic [ref=e758]:
+                        - generic [ref=e759]: Daniel Kim
+                        - generic [ref=e760]: Yesterday
+                      - generic [ref=e761]: That is so much longer than I expected. Thanks!
+                      - generic [ref=e762]: Question
+                - listitem [ref=e764]:
+                  - button "AO Ama Owusu Mon Matte, always. The texture is the best part of holding a mug. Reply" [ref=e765] [cursor=pointer]:
+                    - generic [ref=e766]:
+                      - text: AO
+                      - generic "Threads" [ref=e767]
+                    - generic [ref=e770]:
+                      - generic [ref=e771]:
+                        - generic [ref=e772]: Ama Owusu
+                        - generic [ref=e773]: Mon
+                      - generic [ref=e774]: Matte, always. The texture is the best part of holding a mug.
+                      - generic [ref=e775]: Reply
+                - listitem [ref=e777]:
+                  - button "HO Hollow Oak Bakery Mon Yes please. Would the first week of November work for you? Partner" [ref=e778] [cursor=pointer]:
+                    - generic [ref=e779]:
+                      - text: HO
+                      - generic "LinkedIn" [ref=e780]:
+                        - generic [aria-hidden] [ref=e781]: in
+                    - generic [ref=e782]:
+                      - generic [ref=e783]:
+                        - generic [ref=e784]: Hollow Oak Bakery
+                        - generic [ref=e785]: Mon
+                      - generic [ref=e786]: Yes please. Would the first week of November work for you?
+                      - generic [ref=e787]: Partner
+              - generic [ref=e789]:
+                - generic [ref=e790]:
+                  - generic [ref=e791]: PR
+                  - generic [ref=e792]:
+                    - generic [ref=e793]: Priya Raman
+                    - generic [ref=e794]: "on Instagram: New speckled mug colors"
+                - paragraph [ref=e796]: These are lovely. Is the sage one dishwasher safe?
+                - generic [ref=e797]:
+                  - generic [ref=e798]: Write a reply
+                  - textbox "Write a reply" [ref=e799]:
+                    - /placeholder: Write a reply...
+                  - generic [ref=e800]:
+                    - generic [ref=e801]: Demo only. Replies are never sent.
+                    - button "Add demo reply" [ref=e804] [cursor=pointer]
+          - generic [ref=e805]:
+            - paragraph [ref=e806]: Community
+            - heading "Keep the conversation moving." [level=2] [ref=e807]
+            - paragraph [ref=e808]: Explore a shared inbox designed to help your team organize conversations, find unanswered questions, and prepare thoughtful replies.
+            - link "Explore the inbox" [ref=e809] [cursor=pointer]:
+              - /url: /features/community
+        - article [ref=e812]:
+          - generic [ref=e814]:
+            - generic [ref=e815]:
+              - generic [ref=e816]:
+                - strong [ref=e817]: Analytics
+                - group "Date range" [ref=e818]:
+                  - button "30 days" [pressed] [ref=e819] [cursor=pointer]
+                  - button "90 days" [ref=e820] [cursor=pointer]
+              - generic [ref=e821]: Illustrative data
+            - generic [ref=e824]:
+              - generic [ref=e825]:
+                - generic [ref=e826]:
+                  - term [ref=e827]: Followers
+                  - definition [ref=e828]:
+                    - generic [ref=e829]: 4,386
+                    - generic [ref=e830]: "+284"
+                - generic [ref=e833]:
+                  - term [ref=e834]: Engagement rate
+                  - definition [ref=e835]:
+                    - generic [ref=e836]: 4.6%
+                    - generic [ref=e837]: +0.4 pts
+                - generic [ref=e840]:
+                  - term [ref=e841]: Posts
+                  - definition [ref=e842]:
+                    - generic [ref=e843]: "38"
+                    - generic [ref=e844]: "+6"
+                - generic [ref=e847]:
+                  - term [ref=e848]: Link clicks
+                  - definition [ref=e849]:
+                    - generic [ref=e850]: "612"
+                    - generic [ref=e851]: "+71"
+              - generic [ref=e854]:
+                - figure "Audience growth Total followers, all channels" [ref=e855]:
+                  - generic [ref=e856]:
+                    - generic [ref=e857]: Audience growth
+                    - generic [ref=e858]: Total followers, all channels
+                  - img "Followers grew from 4,102 to 4,386 over the last 30 days." [ref=e859]
+                  - generic [ref=e863]:
+                    - generic [ref=e864]: Sep 13
+                    - generic [ref=e865]: Sep 27
+                    - generic [ref=e866]: Oct 12
+                - figure "Engagement over time Engagements per 2 days" [ref=e867]:
+                  - generic [ref=e868]:
+                    - generic [ref=e869]: Engagement over time
+                    - generic [ref=e870]: Engagements per 2 days
+                  - img "Engagement ranged from 154 to 395 per period." [ref=e871]:
+                    - generic "305 engagements" [ref=e872]
+                    - generic "259 engagements" [ref=e873]
+                    - generic "254 engagements" [ref=e874]
+                    - generic "154 engagements" [ref=e875]
+                    - generic "228 engagements" [ref=e876]
+                    - generic "309 engagements" [ref=e877]
+                    - generic "299 engagements" [ref=e878]
+                    - generic "372 engagements" [ref=e879]
+                    - generic "295 engagements" [ref=e880]
+                    - generic "204 engagements" [ref=e881]
+                    - generic "250 engagements" [ref=e882]
+                    - generic "218 engagements" [ref=e883]
+                    - generic "297 engagements" [ref=e884]
+                    - generic "395 engagements" [ref=e885]
+                    - generic "324 engagements" [ref=e886]
+                  - generic [ref=e887]:
+                    - generic [ref=e888]: Sep 13
+                    - generic [ref=e889]: Sep 27
+                    - generic [ref=e890]: Oct 12
+                - figure "Content performance Top posts by engagement rate" [ref=e891]:
+                  - generic [ref=e892]:
+                    - generic [ref=e893]: Content performance
+                    - generic [ref=e894]: Top posts by engagement rate
+                  - list [ref=e895]:
+                    - listitem [ref=e896]:
+                      - generic "TikTok" [ref=e897]
+                      - generic [ref=e900]: Throwing a mug in 30 seconds
+                      - generic [ref=e902]: 7.9%
+                    - listitem [ref=e903]:
+                      - generic "Instagram" [ref=e904]
+                      - generic [ref=e907]: New speckled mug colors
+                      - generic [ref=e909]: 6.2%
+                    - listitem [ref=e910]:
+                      - generic "Threads" [ref=e911]
+                      - generic [ref=e914]: Matte or glossy?
+                      - generic [ref=e916]: 5.4%
+                    - listitem [ref=e917]:
+                      - generic "LinkedIn" [ref=e918]:
+                        - generic [aria-hidden] [ref=e919]: in
+                      - generic [ref=e920]: Wholesale for cafés
+                      - generic [ref=e922]: 4.1%
+                    - listitem [ref=e923]:
+                      - generic "Facebook" [ref=e924]
+                      - generic [ref=e927]: Thursday open studio
+                      - generic [ref=e929]: 2.8%
+                - figure "Channel comparison Engagement rate and posts per channel" [ref=e930]:
+                  - generic [ref=e931]:
+                    - generic [ref=e932]: Channel comparison
+                    - generic [ref=e933]: Engagement rate and posts per channel
+                  - list [ref=e934]:
+                    - listitem [ref=e935]:
+                      - generic [ref=e936]:
+                        - generic "TikTok" [ref=e937]
+                        - text: TikTok
+                      - generic [ref=e941]: 6.1% 7 posts
+                    - listitem [ref=e942]:
+                      - generic [ref=e943]:
+                        - generic "Instagram" [ref=e944]
+                        - text: Instagram
+                      - generic [ref=e948]: 4.8% 12 posts
+                    - listitem [ref=e949]:
+                      - generic [ref=e950]:
+                        - generic "Threads" [ref=e951]
+                        - text: Threads
+                      - generic [ref=e955]: 3.9% 6 posts
+                    - listitem [ref=e956]:
+                      - generic [ref=e957]:
+                        - generic "LinkedIn" [ref=e958]:
+                          - generic [aria-hidden] [ref=e959]: in
+                        - text: LinkedIn
+                      - generic [ref=e961]: 3.4% 5 posts
+                    - listitem [ref=e962]:
+                      - generic [ref=e963]:
+                        - generic "Facebook" [ref=e964]
+                        - text: Facebook
+                      - generic [ref=e968]: 2.3% 5 posts
+                    - listitem [ref=e969]:
+                      - generic [ref=e970]:
+                        - generic "Pinterest" [ref=e971]
+                        - text: Pinterest
+                      - generic [ref=e975]: 1.9% 3 posts
+          - generic [ref=e976]:
+            - generic [ref=e977]:
+              - paragraph [ref=e978]: Analytics
+              - heading "Understand the story behind your content." [level=2] [ref=e979]
+            - generic [ref=e980]:
+              - paragraph [ref=e981]: Explore clear reporting views that help you compare posts, spot useful patterns, and decide what to create next.
+              - link "Explore analytics" [ref=e982] [cursor=pointer]:
+                - /url: /features/analytics
+    - region [ref=e985]:
+      - generic [ref=e986]:
+        - heading "And plenty more to keep you organized." [level=2] [ref=e987]
+        - generic [ref=e988]:
+          - article [ref=e989]:
+            - generic [aria-hidden] [ref=e991]:
+              - generic [ref=e993]:
+                - generic [ref=e994]: Morning set collab
+                - generic [ref=e995]: Draft for Instagram
+              - generic [ref=e996]:
+                - generic [ref=e997]: SK
+                - paragraph [ref=e998]: Sam Love it. Can we try the oat mug in the first photo?
+              - generic [ref=e999]:
+                - generic [ref=e1000]: Approve
+                - generic [ref=e1003]: Request changes
+            - generic [ref=e1006]:
+              - heading "Collaboration" [level=3] [ref=e1007]
+              - paragraph [ref=e1008]: Bring feedback and approvals into one place.
+              - link "Explore collaboration" [ref=e1009] [cursor=pointer]:
+                - /url: /features/collaboration
+          - article [ref=e1012]:
+            - generic [aria-hidden] [ref=e1014]:
+              - generic [ref=e1015]:
+                - generic [ref=e1016]: Queue
+                - generic [ref=e1018]:
+                  - generic [ref=e1019]: Today, 6:00 PM
+                  - generic [ref=e1022]: Planter restock is back in stock
+                - generic [ref=e1024]:
+                  - generic [ref=e1025]: Tomorrow, 9:30 AM
+                  - generic [ref=e1028]: Behind the wheel
+              - generic [ref=e1030]: Designed for mobile browsers
+            - generic [ref=e1033]:
+              - heading "Mobile-friendly workspace" [level=3] [ref=e1034]
+              - paragraph [ref=e1035]: Keep your plans close, wherever you work.
+              - link "Try the demo on mobile" [ref=e1036] [cursor=pointer]:
+                - /url: /demo
+          - article [ref=e1039]:
+            - generic [ref=e1042]:
+              - generic [ref=e1043]: Marigold Ceramics
+              - generic [ref=e1044]: Handmade stoneware for slow mornings
+              - generic [ref=e1045]: Shop the autumn collection
+              - generic [ref=e1046]: Book a wheel workshop
+              - generic [ref=e1047]: Stoneware care guide
+            - generic [ref=e1048]:
+              - heading "Link in bio" [level=3] [ref=e1049]
+              - paragraph [ref=e1050]: Give your audience a clear next step.
+              - link "Explore link in bio" [ref=e1051] [cursor=pointer]:
+                - /url: /features/link-in-bio
+          - article [ref=e1054]:
+            - generic [aria-hidden] [ref=e1056]:
+              - generic [ref=e1057]:
+                - paragraph [ref=e1058]: Writing assistant
+                - paragraph [ref=e1061]: What would you like to write about?
+                - generic [ref=e1062]: New autumn mugs, three glazes, warm and short
+                - generic [ref=e1063]:
+                  - generic [ref=e1064]: Warmer
+                  - generic [ref=e1065]: Shorter
+                  - generic [ref=e1066]: For LinkedIn
+              - generic [ref=e1067]: Generate draft
+            - generic [ref=e1070]:
+              - heading "AI writing assistance" [level=3] [ref=e1071]
+              - paragraph [ref=e1072]: Turn a starting thought into a stronger draft.
+              - link "Explore AI assistance" [ref=e1073] [cursor=pointer]:
+                - /url: /features/ai-assistant
+    - region [ref=e1076]:
+      - generic [ref=e1078]:
+        - generic [ref=e1079]:
+          - heading "Plan for the channels your audience uses" [level=2] [ref=e1080]
+          - paragraph [ref=e1081]: No channel connections are live yet. Each one shows its current status.
+          - link "See integration status" [ref=e1082] [cursor=pointer]:
+            - /url: /integrations
+        - list [ref=e1085]:
+          - listitem [ref=e1086]:
+            - link "Instagram Planned" [ref=e1087] [cursor=pointer]:
+              - /url: /integrations#instagram
+              - generic [ref=e1091]: Instagram
+              - generic [ref=e1092]: Planned
+          - listitem [ref=e1093]:
+            - link "Facebook Planned" [ref=e1094] [cursor=pointer]:
+              - /url: /integrations#facebook
+              - generic [ref=e1098]: Facebook
+              - generic [ref=e1099]: Planned
+          - listitem [ref=e1100]:
+            - link "TikTok Planned" [ref=e1101] [cursor=pointer]:
+              - /url: /integrations#tiktok
+              - generic [ref=e1105]: TikTok
+              - generic [ref=e1106]: Planned
+          - listitem [ref=e1107]:
+            - link "LinkedIn Planned" [ref=e1108] [cursor=pointer]:
+              - /url: /integrations#linkedin
+              - generic [aria-hidden] [ref=e1110]: in
+              - generic [ref=e1111]: LinkedIn
+              - generic [ref=e1112]: Planned
+          - listitem [ref=e1113]:
+            - link "YouTube Planned" [ref=e1114] [cursor=pointer]:
+              - /url: /integrations#youtube
+              - generic [ref=e1118]: YouTube
+              - generic [ref=e1119]: Planned
+          - listitem [ref=e1120]:
+            - link "Pinterest Planned" [ref=e1121] [cursor=pointer]:
+              - /url: /integrations#pinterest
+              - generic [ref=e1125]: Pinterest
+              - generic [ref=e1126]: Planned
+          - listitem [ref=e1127]:
+            - link "Threads Planned" [ref=e1128] [cursor=pointer]:
+              - /url: /integrations#threads
+              - generic [ref=e1132]: Threads
+              - generic [ref=e1133]: Planned
+          - listitem [ref=e1134]:
+            - link "X Planned" [ref=e1135] [cursor=pointer]:
+              - /url: /integrations#x
+              - generic [ref=e1139]: X
+              - generic [ref=e1140]: Planned
+          - listitem [ref=e1141]:
+            - link "Google Business Profile Planned" [ref=e1142] [cursor=pointer]:
+              - /url: /integrations#google-business-profile
+              - generic [ref=e1146]: Google Business Profile
+              - generic [ref=e1147]: Planned
+    - region [ref=e1148]:
+      - generic [ref=e1150]:
+        - generic [ref=e1151]:
+          - paragraph [ref=e1152]: AI workflow preview
+          - heading "Move from a blank page to a clearer plan." [level=2] [ref=e1153]
+          - paragraph [ref=e1154]: See how an assistant inside atwebtech is designed to help you get from a rough thought to a plan you can review and edit.
+          - list [ref=e1155]:
+            - listitem [ref=e1156]: "Suggest: content ideas around a product, a season, or a question."
+            - listitem [ref=e1157]: "Refine: a draft caption until the tone and length feel right."
+            - listitem [ref=e1158]: "Organize: a handful of ideas into a simple posting plan."
+          - generic [ref=e1159]:
+            - link "Explore AI assistance" [ref=e1160] [cursor=pointer]:
+              - /url: /features/ai-assistant
+            - link "Open the full demo" [ref=e1163] [cursor=pointer]:
+              - /url: /demo#ai
+        - generic [ref=e1168]:
+          - generic [ref=e1169]:
+            - generic [ref=e1170]: atwebtech assistant
+            - generic [ref=e1171]: Scripted demo
+          - paragraph [ref=e1180]: Pick an example below to see how the assistant is designed to help. These replies are pre-written examples, not live AI output.
+          - group "Example requests" [ref=e1181]:
+            - button "Suggest content ideas" [ref=e1182] [cursor=pointer]
+            - button "Refine a draft" [ref=e1183] [cursor=pointer]
+            - button "Organize a posting plan" [ref=e1184] [cursor=pointer]
+          - generic [ref=e1186]: Live AI is not connected in this demo
+    - region [ref=e1190]:
+      - generic [ref=e1191]:
+        - generic [ref=e1192]:
+          - paragraph [ref=e1193]: Support
+          - heading "A clear path when you need a hand." [level=2] [ref=e1194]
+          - paragraph [ref=e1195]: Whether you are curious about the product, want to share feedback, or are planning ahead for launch, there is a straightforward place to start.
+          - generic [ref=e1196]:
+            - link "Contact the team" [ref=e1197] [cursor=pointer]:
+              - /url: /contact
+            - link "Read the FAQ" [ref=e1198] [cursor=pointer]:
+              - /url: /faq
+        - generic [ref=e1199]:
+          - link "Getting started What exists today, how the demo works, and how to hear about launch." [ref=e1200] [cursor=pointer]:
+            - /url: /resources/getting-started
+            - generic [ref=e1204]:
+              - generic [ref=e1205]: Getting started
+              - generic [ref=e1206]: What exists today, how the demo works, and how to hear about launch.
+          - link "Frequently asked questions Straight answers about the product, integrations, and status." [ref=e1209] [cursor=pointer]:
+            - /url: /faq
+            - generic [ref=e1213]:
+              - generic [ref=e1214]: Frequently asked questions
+              - generic [ref=e1215]: Straight answers about the product, integrations, and status.
+          - link "Contact Send a question, feedback, or partnership enquiry to the team." [ref=e1218] [cursor=pointer]:
+            - /url: /contact
+            - generic [ref=e1222]:
+              - generic [ref=e1223]: Contact
+              - generic [ref=e1224]: Send a question, feedback, or partnership enquiry to the team.
+    - region [ref=e1227]:
+      - generic [ref=e1228]:
+        - paragraph [ref=e1229]: Resources
+        - heading "Practical guides for everyday social work." [level=2] [ref=e1230]
+        - generic [ref=e1231]:
+          - link "Building a manageable weekly content calendar Pick a cadence you can sustain, give each day a purpose, and plan in one focused session." [ref=e1232] [cursor=pointer]:
+            - /url: /resources/weekly-content-calendar
+            - generic [ref=e1233]: Building a manageable weekly content calendar
+            - generic [ref=e1237]: Pick a cadence you can sustain, give each day a purpose, and plan in one focused session.
+            - generic [ref=e1239]:
+              - generic [ref=e1240]:
+                - generic [ref=e1241]: This week
+                - generic [ref=e1242]: 3 posts
+              - generic [ref=e1243]:
+                - generic [ref=e1244]: Mon
+                - generic [ref=e1245]: Something new
+              - generic [ref=e1246]:
+                - generic [ref=e1247]: Tue
+                - generic [ref=e1248]: Open
+              - generic [ref=e1249]:
+                - generic [ref=e1250]: Wed
+                - generic [ref=e1251]: Conversation
+              - generic [ref=e1252]:
+                - generic [ref=e1253]: Thu
+                - generic [ref=e1254]: Open
+              - generic [ref=e1255]:
+                - generic [ref=e1256]: Fri
+                - generic [ref=e1257]: Something useful
+          - link "Adapting one idea for different social channels Keep the core message, then change the format, length, and tone to suit each channel." [ref=e1258] [cursor=pointer]:
+            - /url: /resources/adapting-ideas-for-each-channel
+            - generic [ref=e1259]: Adapting one idea for different social channels
+            - generic [ref=e1263]: Keep the core message, then change the format, length, and tone to suit each channel.
+            - generic [ref=e1265]:
+              - generic [ref=e1266]: "One idea: autumn mugs"
+              - generic [ref=e1269]:
+                - generic [ref=e1270]: Carousel
+                - generic [ref=e1274]: Kiln reveal
+                - generic [ref=e1278]:
+                  - generic [aria-hidden] [ref=e1280]: in
+                  - text: Lessons learned
+                - generic [ref=e1281]: Quick poll
+          - link "Choosing social metrics that match your goals Start from your goal, pick two or three metrics that reflect it, and review them on a steady schedule." [ref=e1285] [cursor=pointer]:
+            - /url: /resources/choosing-social-metrics
+            - generic [ref=e1286]: Choosing social metrics that match your goals
+            - generic [ref=e1290]: Start from your goal, pick two or three metrics that reflect it, and review them on a steady schedule.
+            - generic [ref=e1292]:
+              - generic [ref=e1293]: "Goal: community"
+              - generic [ref=e1295]: Comments
+              - generic [ref=e1298]: Saves
+              - generic [ref=e1301]: Replies
+          - link "Getting started with atwebtech What exists today, how to explore the demo, and how to hear about early access." [ref=e1304] [cursor=pointer]:
+            - /url: /resources/getting-started
+            - generic [ref=e1305]: Getting started with atwebtech
+            - generic [ref=e1309]: What exists today, how to explore the demo, and how to hear about early access.
+            - generic [ref=e1311]:
+              - generic [ref=e1312]: Explore the demo
+              - generic [ref=e1315]: Join the waitlist
+              - generic [ref=e1318]: Launch updates by email
+    - region [ref=e1321]:
+      - generic [ref=e1322]:
+        - generic [ref=e1323]:
+          - generic [ref=e1324]:
+            - paragraph [ref=e1325]: About atwebtech
+            - heading "Built to make everyday social work simpler." [level=2] [ref=e1326]
+            - paragraph [ref=e1327]: "atwebtech is being built for the people who plan, write, and look after social content, often alongside many other jobs. Our focus is clarity and organization: one calm place to see what is planned, what is in progress, and what comes next."
+          - link "More about atwebtech" [ref=e1328] [cursor=pointer]:
+            - /url: /about
+        - list [ref=e1331]:
+          - listitem [ref=e1332]:
+            - generic [ref=e1336]: Clarity first
+            - generic [ref=e1337]: Every screen should make it obvious what is planned and what needs attention.
+          - listitem [ref=e1338]:
+            - generic [ref=e1342]: Organized by default
+            - generic [ref=e1343]: Ideas, drafts, and posts each have a clear home and a clear next step.
+          - listitem [ref=e1344]:
+            - generic [ref=e1348]: Honest about status
+            - generic [ref=e1349]: Demos are labelled as demos, and planned features are described as planned.
+          - listitem [ref=e1350]:
+            - generic [ref=e1354]: Made for small teams
+            - generic [ref=e1355]: Designed for people who manage social content alongside many other jobs.
+    - region [ref=e1356]:
+      - generic [ref=e1357]:
+        - generic [ref=e1358]:
+          - heading "Questions, answered." [level=2] [ref=e1359]
+          - paragraph [ref=e1360]:
+            - text: Can't find what you are looking for?
+            - link "Contact the team" [ref=e1361] [cursor=pointer]:
+              - /url: /contact
+            - text: .
+        - generic [ref=e1362]:
+          - group [ref=e1363]:
+            - generic "What is atwebtech?" [ref=e1364] [cursor=pointer]
+          - group [ref=e1369]:
+            - generic "Who is it designed for?" [ref=e1370] [cursor=pointer]
+          - group [ref=e1375]:
+            - generic "Can I explore the product before joining?" [ref=e1376] [cursor=pointer]
+          - group [ref=e1381]:
+            - generic "Which integrations are available?" [ref=e1382] [cursor=pointer]
+          - group [ref=e1387]:
+            - generic "How can I receive launch updates?" [ref=e1388] [cursor=pointer]
+          - group [ref=e1393]:
+            - generic "How can I contact the team?" [ref=e1394] [cursor=pointer]
+    - region [ref=e1399]:
+      - generic [ref=e1402]:
+        - heading "Make space for your next great idea." [level=2] [ref=e1403]
+        - paragraph [ref=e1404]: Join the atwebtech waitlist for product updates and early-access news.
+        - generic [ref=e1405]:
+          - generic [aria-hidden] [ref=e1406]:
+            - text: Leave this field empty
+            - textbox [ref=e1407]
+          - generic [ref=e1408]:
+            - generic [ref=e1409]: Email address
+            - generic [ref=e1410]:
+              - textbox "Email address" [ref=e1411]:
+                - /placeholder: Enter your email...
+              - button "Join the waitlist" [ref=e1412] [cursor=pointer]
+          - paragraph [ref=e1416]:
+            - text: By joining, you agree to receive atwebtech launch emails. See our
+            - link "privacy policy" [ref=e1417] [cursor=pointer]:
+              - /url: /privacy
+            - text: .
+  - contentinfo [ref=e1418]:
+    - generic [ref=e1419]:
+      - generic [ref=e1420]:
+        - navigation "Product" [ref=e1421]:
+          - heading "Product" [level=2] [ref=e1422]
+          - list [ref=e1423]:
+            - listitem [ref=e1424]:
+              - link "Content Planner" [ref=e1425] [cursor=pointer]:
+                - /url: /features/content-planner
+            - listitem [ref=e1426]:
+              - link "Publishing" [ref=e1427] [cursor=pointer]:
+                - /url: /features/publishing
+            - listitem [ref=e1428]:
+              - link "Analytics" [ref=e1429] [cursor=pointer]:
+                - /url: /features/analytics
+            - listitem [ref=e1430]:
+              - link "Community Inbox" [ref=e1431] [cursor=pointer]:
+                - /url: /features/community
+            - listitem [ref=e1432]:
+              - link "Team Collaboration" [ref=e1433] [cursor=pointer]:
+                - /url: /features/collaboration
+            - listitem [ref=e1434]:
+              - link "Link in Bio" [ref=e1435] [cursor=pointer]:
+                - /url: /features/link-in-bio
+            - listitem [ref=e1436]:
+              - link "AI Writing Assistant" [ref=e1437] [cursor=pointer]:
+                - /url: /features/ai-assistant
+            - listitem [ref=e1438]:
+              - link "Integrations" [ref=e1439] [cursor=pointer]:
+                - /url: /integrations
+            - listitem [ref=e1440]:
+              - link "Interactive demo" [ref=e1441] [cursor=pointer]:
+                - /url: /demo
+        - navigation "Solutions" [ref=e1442]:
+          - heading "Solutions" [level=2] [ref=e1443]
+          - list [ref=e1444]:
+            - listitem [ref=e1445]:
+              - link "Creators" [ref=e1446] [cursor=pointer]:
+                - /url: /solutions/creators
+            - listitem [ref=e1447]:
+              - link "Small Businesses" [ref=e1448] [cursor=pointer]:
+                - /url: /solutions/businesses
+            - listitem [ref=e1449]:
+              - link "Agencies" [ref=e1450] [cursor=pointer]:
+                - /url: /solutions/agencies
+            - listitem [ref=e1451]:
+              - link "Marketing Teams" [ref=e1452] [cursor=pointer]:
+                - /url: /solutions/marketing-teams
+        - navigation "Resources" [ref=e1453]:
+          - heading "Resources" [level=2] [ref=e1454]
+          - list [ref=e1455]:
+            - listitem [ref=e1456]:
+              - link "All guides" [ref=e1457] [cursor=pointer]:
+                - /url: /resources
+            - listitem [ref=e1458]:
+              - link "Getting started" [ref=e1459] [cursor=pointer]:
+                - /url: /resources/getting-started
+            - listitem [ref=e1460]:
+              - link "Weekly content calendar" [ref=e1461] [cursor=pointer]:
+                - /url: /resources/weekly-content-calendar
+            - listitem [ref=e1462]:
+              - link "Adapting ideas by channel" [ref=e1463] [cursor=pointer]:
+                - /url: /resources/adapting-ideas-for-each-channel
+            - listitem [ref=e1464]:
+              - link "Choosing social metrics" [ref=e1465] [cursor=pointer]:
+                - /url: /resources/choosing-social-metrics
+            - listitem [ref=e1466]:
+              - link "FAQ" [ref=e1467] [cursor=pointer]:
+                - /url: /faq
+        - navigation "Company" [ref=e1468]:
+          - heading "Company" [level=2] [ref=e1469]
+          - list [ref=e1470]:
+            - listitem [ref=e1471]:
+              - link "About" [ref=e1472] [cursor=pointer]:
+                - /url: /about
+            - listitem [ref=e1473]:
+              - link "Pricing" [ref=e1474] [cursor=pointer]:
+                - /url: /pricing
+            - listitem [ref=e1475]:
+              - link "Contact" [ref=e1476] [cursor=pointer]:
+                - /url: /contact
+            - listitem [ref=e1477]:
+              - link "Privacy" [ref=e1478] [cursor=pointer]:
+                - /url: /privacy
+            - listitem [ref=e1479]:
+              - link "Terms" [ref=e1480] [cursor=pointer]:
+                - /url: /terms
+      - generic [ref=e1481]:
+        - generic [ref=e1482]:
+          - link "atwebtech home" [ref=e1483] [cursor=pointer]:
+            - /url: /
+            - generic [ref=e1484]: atwebtech
+          - paragraph [ref=e1486]: A social media workspace in development, designed to help creators and businesses plan content, organize ideas, and keep a consistent presence.
+        - paragraph [ref=e1487]:
+          - text: Copyright © 2026 atwebtech |
+          - link "Privacy" [ref=e1488] [cursor=pointer]:
+            - /url: /privacy
+          - text: "|"
+          - link "Terms" [ref=e1489] [cursor=pointer]:
+            - /url: /terms
+          - text: "|"
+          - link "Contact" [ref=e1490] [cursor=pointer]:
+            - /url: /contact

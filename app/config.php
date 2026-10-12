@@ -28,7 +28,9 @@ return [
         'notify_to' => (string) Env::get('MAIL_NOTIFY_TO', ''),
     ],
     'contact' => [
-        'email' => (string) Env::get('CONTACT_EMAIL', ''),
+        'email' => (string) Env::get('CONTACT_EMAIL', 'info@atwebtech.us'),
+        'phone' => (string) Env::get('CONTACT_PHONE', '+1 (480) 743-4017'),
+        'address' => (string) Env::get('CONTACT_ADDRESS', '3672 S 16th Ave, Tucson, AZ 85713, US'),
     ],
     'admin' => [
         'emails' => (string) Env::get('ADMIN_EMAILS', ''),

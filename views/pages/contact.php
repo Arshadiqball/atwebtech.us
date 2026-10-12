@@ -4,6 +4,9 @@ $state = View::formState($id);
 $old = $state['old'] ?? [];
 $errors = $state['errors'] ?? [];
 $contactEmail = (string) config('contact.email');
+$contactPhone = (string) config('contact.phone');
+$contactAddress = (string) config('contact.address');
+$phoneHref = preg_replace('/[^\d+]/', '', $contactPhone) ?? '';
 $fieldAttrs = static function (string $name) use ($id, $errors): string {
     return ' id="' . e($id . '-' . $name) . '" name="' . e($name) . '" aria-describedby="' . e($id . '-' . $name . '-error') . '"'
         . (isset($errors[$name]) ? ' aria-invalid="true"' : '');
@@ -24,9 +27,26 @@ $errorEl = static function (string $name) use ($id, $errors): string {
   <div class="container contact-grid">
     <div class="contact-aside">
       <p class="lead">Questions, feedback, partnership ideas, or a channel you would like us to support: send a message and we will reply by email.</p>
+      <dl class="contact-details">
 <?php if ($contactEmail !== ''): ?>
-      <p>Prefer email? Write to <a href="mailto:<?= e($contactEmail) ?>"><?= e($contactEmail) ?></a>.</p>
+        <div>
+          <dt>Email</dt>
+          <dd><a href="mailto:<?= e($contactEmail) ?>"><?= e($contactEmail) ?></a></dd>
+        </div>
 <?php endif; ?>
+<?php if ($contactPhone !== ''): ?>
+        <div>
+          <dt>Office</dt>
+          <dd><a href="tel:<?= e($phoneHref) ?>"><?= e($contactPhone) ?></a></dd>
+        </div>
+<?php endif; ?>
+<?php if ($contactAddress !== ''): ?>
+        <div>
+          <dt>Address</dt>
+          <dd><a href="https://maps.google.com/?q=<?= rawurlencode($contactAddress) ?>"><?= e($contactAddress) ?></a></dd>
+        </div>
+<?php endif; ?>
+      </dl>
       <div class="notice" role="note">
         <?= icon('info') ?>
         <p><b>Looking for a quick answer?</b>The <a href="/faq">FAQ</a> covers the product status, the demo, and integrations. New to atwebtech? Read <a href="/resources/getting-started">getting started</a>.</p>
