@@ -57,7 +57,7 @@ Content lives in `app/data/*.php`, so most copy changes don't touch templates. R
 | `APP_ENV` | `local`, `staging` or `production`. Anything except production is `noindex`. |
 | `APP_KEY` | Secret for signed form timestamps and IP hashing. |
 | `DB_*` | Database connection. Credentials only ever come from the environment. |
-| `MAIL_ENABLED`, `MAIL_FROM`, `MAIL_NOTIFY_TO` | Optional notification email for new signups and messages, via PHP `mail()`. Submissions are saved whether or not mail works. |
+| `MAIL_*` | SMTP account used for every message the site sends (waitlist, contact, new account, channel connect). Submissions are saved whether or not mail works. |
 | `CONTACT_EMAIL`, `CONTACT_PHONE`, `CONTACT_ADDRESS` | Public details shown on `/contact`. A blank value hides that line. |
 | `ADMIN_EMAILS` | Comma-separated account emails that can open `/admin` and read contact messages. |
 | `INTEGRATIONS_AVAILABLE` | Comma-separated channel slugs to mark as Available, e.g. `instagram,linkedin`. Everything else shows Planned. |

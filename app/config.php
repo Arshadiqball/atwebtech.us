@@ -24,8 +24,16 @@ return [
     ],
     'mail' => [
         'enabled' => (bool) Env::get('MAIL_ENABLED', false),
-        'from' => (string) Env::get('MAIL_FROM', ''),
-        'notify_to' => (string) Env::get('MAIL_NOTIFY_TO', ''),
+        'host' => (string) Env::get('MAIL_HOST', 'mail.atwebtech.us'),
+        'port' => (int) Env::get('MAIL_PORT', 587),
+        'encryption' => (string) Env::get('MAIL_ENCRYPTION', 'starttls'),
+        'user' => (string) Env::get('MAIL_USER', ''),
+        'pass' => (string) Env::get('MAIL_PASS', ''),
+        'from' => (string) Env::get('MAIL_FROM', 'info@atwebtech.us'),
+        'from_name' => (string) Env::get('MAIL_FROM_NAME', 'At Web Tech US'),
+        'reply_to' => (string) Env::get('MAIL_REPLY_TO', 'info@atwebtech.us'),
+        'reply_to_name' => (string) Env::get('MAIL_REPLY_TO_NAME', 'At Web Tech Query'),
+        'notify_to' => (string) Env::get('MAIL_NOTIFY_TO', 'info@atwebtech.us'),
     ],
     'contact' => [
         'email' => (string) Env::get('CONTACT_EMAIL', 'info@atwebtech.us'),
