@@ -30,7 +30,7 @@ $hasItems = false;
 <?php foreach ($overdue as $post): ?>
         <li class="q-row">
           <span class="q-time"><?= e($post['at']->format('j M, g:i A')) ?></span>
-          <div class="q-post q-post--flag">
+          <div class="q-post q-post--flag"<?php if ($post['status'] !== 'publishing'): ?> draggable="true" data-move="<?= (int) $post['id'] ?>" data-at="<?= e($post['at']->format('Y-m-d H:i')) ?>" title="Drag to another time"<?php endif; ?>>
             <?= post_mark($post, $accounts) ?>
             <span class="q-post-text"><?= e($excerpt($text($post), 140)) ?>
 <?php if ($post['status'] === 'failed'): ?>
@@ -63,11 +63,11 @@ $hasItems = false;
 <?php endif; ?>
 <?php endif; ?>
 <?php foreach ($queue['days'] as $day): $items = array_filter($day['items'], static fn (array $item): bool => $shown($item['type'] === 'post' ? $item['post']['channel'] : $item['channel'])); if (!$items) continue; $hasItems = true; ?>
-    <section class="q-day" aria-labelledby="q-<?= e($day['date']) ?>">
+    <section class="q-day" aria-labelledby="q-<?= e($day['date']) ?>"<?= $day['date'] >= $queue['now']->format('Y-m-d') ? ' data-drop-day="' . e($day['date']) . '"' : '' ?>>
       <h2 id="q-<?= e($day['date']) ?>"><?= e($day['label']) ?><?php if ($day['date'] > $queue['now']->modify('+300 day')->format('Y-m-d')): ?> <?= e(substr($day['date'], 0, 4)) ?><?php endif; ?></h2>
       <ul class="q-list" role="list">
 <?php foreach ($items as $item): $time = $item['at']->format('g:i A'); ?>
-        <li class="q-row">
+        <li class="q-row"<?= $item['type'] === 'slot' ? ' data-drop="' . e($item['at']->format('Y-m-d H:i')) . '"' : '' ?>>
           <span class="q-time"><?= e($time) ?></span>
 <?php if ($item['type'] === 'slot'):
     $data = ['target' => $item['account'] ? 'c:' . (int) $item['account']['id'] : 'n:' . $item['channel'], 'date' => $item['at']->format('Y-m-d'), 'time' => $item['at']->format('H:i')];
@@ -77,7 +77,7 @@ $hasItems = false;
             <?= $item['account'] ? channel_avatar($item['account'], 'sm') : post_mark(['channel' => $item['channel'], 'channel_id' => null], []) ?><span class="q-slot-new"><?= icon('plus') ?>New</span>
           </a>
 <?php else: $post = $item['post']; $busy = $post['status'] === 'publishing'; ?>
-          <<?= $busy ? 'div' : 'a' ?> class="q-post"<?= $busy ? '' : ' href="/app/publish/new?id=' . (int) $post['id'] . '" data-compose="' . $compose($postJson($post)) . '"' ?>>
+          <<?= $busy ? 'div' : 'a' ?> class="q-post"<?= $busy ? '' : ' href="/app/publish/new?id=' . (int) $post['id'] . '" data-compose="' . $compose($postJson($post)) . '" draggable="true" data-move="' . (int) $post['id'] . '" data-at="' . e($item['at']->format('Y-m-d H:i')) . '" title="Drag to another time"' ?>>
             <?= post_mark($post, $accounts) ?><span class="q-post-text"><?= e($excerpt($text($post), 140)) ?></span><?= post_badge($post, $accounts) ?><?php if (!$busy): ?><span class="q-edit"><?= icon('pencil-simple') ?>Edit</span><?php endif; ?>
           </<?= $busy ? 'div' : 'a' ?>>
 <?php endif; ?>

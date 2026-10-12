@@ -29,11 +29,11 @@ if ($week['start']->format('m') !== $week['end']->format('m')) {
     $data = ['target' => $target, 'date' => $next->format('Y-m-d'), 'time' => $next->format('H:i')];
     $posts = array_filter($day['posts'], static fn (array $p): bool => $filter === '' || $p['channel'] === $filter);
 ?>
-      <li class="cal-day<?= $day['today'] ? ' is-today' : '' ?><?= $day['past'] ? ' is-past' : '' ?>">
+      <li class="cal-day<?= $day['today'] ? ' is-today' : '' ?><?= $day['past'] ? ' is-past' : '' ?>"<?= $day['past'] ? '' : ' data-drop-day="' . e($date->format('Y-m-d')) . '"' ?>>
         <h3 class="cal-date"><span><?= e($date->format('D')) ?></span><b><?= e($date->format('j')) ?></b><?php if ($day['today']): ?><span class="sr-only"> (today)</span><?php endif; ?></h3>
         <ul class="cal-posts" role="list">
 <?php foreach ($posts as $post): ?>
-          <li><a class="cal-post" href="/app/publish/new?id=<?= (int) $post['id'] ?>" data-compose="<?= $compose(Workspace::composeData($post, $tz, $uid)) ?>"><?= post_mark($post, $accounts) ?><span><b><?= e($post['at']->format('g:i A')) ?></b><?= e($excerpt($post['title'] ?: $post['body'], 60)) ?></span></a></li>
+          <li><a class="cal-post" href="/app/publish/new?id=<?= (int) $post['id'] ?>" data-compose="<?= $compose(Workspace::composeData($post, $tz, $uid)) ?>"<?php if ($post['status'] === 'planned'): ?> draggable="true" data-move="<?= (int) $post['id'] ?>" data-at="<?= e($post['at']->format('Y-m-d H:i')) ?>" title="Drag to another day"<?php endif; ?>><?= post_mark($post, $accounts) ?><span><b><?= e($post['at']->format('g:i A')) ?></b><?= e($excerpt($post['title'] ?: $post['body'], 60)) ?></span></a></li>
 <?php endforeach; ?>
         </ul>
 <?php if (!$day['past'] && $next->format('Y-m-d') === $date->format('Y-m-d')): ?>

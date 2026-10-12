@@ -1424,6 +1424,64 @@
     }
   }
 
+  /* Workspace: drag a queued post onto another time or day ------------ */
+  let movingPost = null;
+  let skipComposeClick = false;
+  const scheduleTarget = (node) => {
+    if (!(node instanceof Element)) return null;
+    return node.closest('[data-drop], [data-drop-day]');
+  };
+  document.addEventListener('dragstart', (e) => {
+    const card = e.target.closest('[data-move]');
+    if (!card) return;
+    movingPost = card;
+    skipComposeClick = true;
+    card.classList.add('is-dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', card.dataset.move);
+  });
+  document.addEventListener('dragend', () => {
+    movingPost?.classList.remove('is-dragging');
+    $$('.is-over').forEach((el) => el.classList.remove('is-over'));
+    movingPost = null;
+  });
+  document.addEventListener('dragover', (e) => {
+    if (!movingPost) return;
+    const target = scheduleTarget(e.target);
+    $$('[data-drop].is-over, [data-drop-day].is-over').forEach((el) => { if (el !== target) el.classList.remove('is-over'); });
+    if (!target || target.contains(movingPost)) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    target.classList.add('is-over');
+  });
+  document.addEventListener('drop', async (e) => {
+    const target = scheduleTarget(e.target);
+    const card = movingPost;
+    if (!card || !target || target.contains(card)) return;
+    e.preventDefault();
+    const from = card.dataset.at || '';
+    const when = target.dataset.drop || `${target.dataset.dropDay} ${from.slice(11, 16)}`;
+    if (when === from || !/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(when)) return;
+    const body = new FormData();
+    body.set('_token', ($('[data-workspace]') || {}).dataset?.token || '');
+    body.set('id', card.dataset.move);
+    body.set('date', when.slice(0, 10));
+    body.set('time', when.slice(11, 16));
+    try {
+      const res = await fetch('/app/posts/move', { method: 'POST', body, headers: { Accept: 'application/json' }, credentials: 'same-origin' });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || data.status === 'error') throw new Error(data.message || 'That move wasn’t saved.');
+      reloadWith(data.message || 'Post moved.');
+    } catch (err) {
+      toast(err.message || 'That move wasn’t saved.');
+    }
+  });
+  document.addEventListener('click', (e) => {
+    if (!skipComposeClick) return;
+    skipComposeClick = false;
+    if (e.target.closest('[data-move]')) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+
   /* Workspace: ideas board drag and drop ------------------------------- */
   $$('[data-idea-board]').forEach((board) => {
     const live = $('[data-board-live]', board);

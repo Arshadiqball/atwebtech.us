@@ -1,0 +1,156 @@
+- generic [active] [ref=f1e1]:
+  - link "Skip to content" [ref=f1e2] [cursor=pointer]:
+    - /url: "#main"
+  - generic [ref=f1e3]:
+    - complementary "Workspace" [ref=f1e4]:
+      - link "atwebtech workspace home" [ref=f1e6] [cursor=pointer]:
+        - /url: /app
+        - generic [ref=f1e7]: atwebtech
+      - button "New" [ref=f1e10] [cursor=pointer]
+      - navigation "Workspace sections" [ref=f1e14]:
+        - list [ref=f1e15]:
+          - listitem [ref=f1e16]:
+            - link "Home" [ref=f1e17] [cursor=pointer]:
+              - /url: /app
+          - listitem [ref=f1e21]:
+            - link "Create" [ref=f1e22] [cursor=pointer]:
+              - /url: /app/create
+          - listitem [ref=f1e26]:
+            - link "Publish 1 in queue" [ref=f1e27] [cursor=pointer]:
+              - /url: /app/publish
+              - generic [ref=f1e30]: Publish
+              - generic "1 in queue" [ref=f1e31]: "1"
+          - listitem [ref=f1e32]:
+            - link "Community" [ref=f1e33] [cursor=pointer]:
+              - /url: /app/community
+          - listitem [ref=f1e37]:
+            - link "Insights" [ref=f1e38] [cursor=pointer]:
+              - /url: /app/insights
+      - generic [ref=f1e42]:
+        - paragraph [ref=f1e43]: Connect channels
+        - list [ref=f1e44]:
+          - listitem [ref=f1e45]:
+            - link [ref=f1e46] [cursor=pointer]:
+              - /url: /app/channels#connect-facebook
+              - img "Connect Facebook" [ref=f1e47]
+          - listitem [ref=f1e49]:
+            - link [ref=f1e50] [cursor=pointer]:
+              - /url: /app/channels#connect-tiktok
+              - img "Connect TikTok" [ref=f1e51]
+          - listitem [ref=f1e53]:
+            - link "in Connect LinkedIn" [ref=f1e54] [cursor=pointer]:
+              - /url: /app/channels#connect-linkedin
+              - generic [ref=f1e55]: in
+              - generic [ref=f1e56]: Connect LinkedIn
+          - listitem [ref=f1e57]:
+            - link [ref=f1e58] [cursor=pointer]:
+              - /url: /app/channels#connect
+              - img "Connect a new channel" [ref=f1e59]
+      - generic [ref=f1e61]:
+        - generic [ref=f1e62]:
+          - link "0/3 channels connected" [ref=f1e63] [cursor=pointer]:
+            - /url: /app/channels
+          - button "Hide channel progress" [ref=f1e69] [cursor=pointer]
+        - generic [ref=f1e73]:
+          - button "My workspace Free plan" [ref=f1e74] [cursor=pointer]:
+            - generic [aria-hidden] [ref=f1e75]: A
+            - generic [ref=f1e76]:
+              - generic [ref=f1e77]: My workspace
+              - generic [ref=f1e78]: Free plan
+          - button "Collapse sidebar" [ref=f1e79] [cursor=pointer]
+    - main [ref=f1e83]:
+      - generic [ref=f1e84]:
+        - generic [ref=f1e85]:
+          - heading "Publish" [level=1] [ref=f1e90]
+          - generic [ref=f1e91]:
+            - link "Share feedback" [ref=f1e92] [cursor=pointer]:
+              - /url: /contact
+            - navigation "Layout" [ref=f1e96]:
+              - link "List" [ref=f1e97] [cursor=pointer]:
+                - /url: /app/publish?
+              - link "Calendar" [ref=f1e100] [cursor=pointer]:
+                - /url: /app/publish?view=calendar
+            - link "New Post" [ref=f1e103] [cursor=pointer]:
+              - /url: /app/publish/new
+        - generic [ref=f1e106]:
+          - navigation "Publish" [ref=f1e107]:
+            - link "Queue 1" [ref=f1e108] [cursor=pointer]:
+              - /url: /app/publish
+              - text: Queue
+              - generic [ref=f1e109]: "1"
+            - link "Drafts 0" [ref=f1e110] [cursor=pointer]:
+              - /url: /app/publish?tab=drafts
+              - text: Drafts
+              - generic [ref=f1e111]: "0"
+            - link "Approvals" [ref=f1e112] [cursor=pointer]:
+              - /url: /app/publish?tab=approvals
+            - link "Sent 0" [ref=f1e116] [cursor=pointer]:
+              - /url: /app/publish?tab=sent
+              - text: Sent
+              - generic [ref=f1e117]: "0"
+          - generic [ref=f1e118]:
+            - button "Channels" [ref=f1e120] [cursor=pointer]
+            - button "Karachi" [ref=f1e124] [cursor=pointer]
+        - paragraph [ref=f1e129]:
+          - generic [ref=f1e132]: Only connected YouTube channels and LinkedIn Profiles publish automatically. Everything else in your queue is a plan and is never sent.
+        - generic [ref=f1e133]:
+          - region [ref=f1e134]:
+            - heading "Today, 13 October" [level=2] [ref=f1e135]
+            - list [ref=f1e136]:
+              - listitem [ref=f1e137]:
+                - generic [ref=f1e138]: 9:00 AM
+                - link "New post for Facebook at 9:00 AM, Today, 13 October" [ref=f1e139] [cursor=pointer]:
+                  - /url: /app/publish/new?target=n%3Afacebook&date=2026-10-13&time=09%3A00
+                  - img "Facebook" [ref=f1e141]
+                  - generic [ref=f1e143]: New
+              - listitem [ref=f1e146]:
+                - generic [ref=f1e147]: 1:00 PM
+                - link "New post for TikTok at 1:00 PM, Today, 13 October" [ref=f1e148] [cursor=pointer]:
+                  - /url: /app/publish/new?target=n%3Atiktok&date=2026-10-13&time=13%3A00
+                  - img "TikTok" [ref=f1e150]
+                  - generic [ref=f1e152]: New
+              - listitem [ref=f1e155]:
+                - generic [ref=f1e156]: 5:00 PM
+                - link "New post for LinkedIn at 5:00 PM, Today, 13 October" [ref=f1e157] [cursor=pointer]:
+                  - /url: /app/publish/new?target=n%3Alinkedin&date=2026-10-13&time=17%3A00
+                  - generic [ref=f1e158]:
+                    - generic [ref=f1e159]: in
+                    - generic [ref=f1e160]: LinkedIn
+                  - generic [ref=f1e161]: New
+          - region [ref=f1e164]:
+            - heading "Tomorrow, 14 October" [level=2] [ref=f1e165]
+            - list [ref=f1e166]:
+              - listitem [ref=f1e167]:
+                - generic [ref=f1e168]: 9:00 AM
+                - link "in LinkedIn Drag me to another time Plan only Edit" [ref=f1e169]:
+                  - /url: /app/publish/new?id=43
+                  - generic [ref=f1e170]:
+                    - generic [ref=f1e171]: in
+                    - generic [ref=f1e172]: LinkedIn
+                  - generic [ref=f1e173]: Drag me to another time
+                  - generic [ref=f1e174]: Plan only
+                  - generic [ref=f1e175]: Edit
+              - listitem [ref=f1e178]:
+                - generic [ref=f1e179]: 9:00 AM
+                - link "New post for TikTok at 9:00 AM, Tomorrow, 14 October" [ref=f1e180] [cursor=pointer]:
+                  - /url: /app/publish/new?target=n%3Atiktok&date=2026-10-14&time=09%3A00
+                  - img "TikTok" [ref=f1e182]
+                  - generic [ref=f1e184]: New
+              - listitem [ref=f1e187]:
+                - generic [ref=f1e188]: 1:00 PM
+                - link "New post for LinkedIn at 1:00 PM, Tomorrow, 14 October" [ref=f1e189] [cursor=pointer]:
+                  - /url: /app/publish/new?target=n%3Alinkedin&date=2026-10-14&time=13%3A00
+                  - generic [ref=f1e190]:
+                    - generic [ref=f1e191]: in
+                    - generic [ref=f1e192]: LinkedIn
+                  - generic [ref=f1e193]: New
+              - listitem [ref=f1e196]:
+                - generic [ref=f1e197]: 5:00 PM
+                - link "New post for YouTube at 5:00 PM, Tomorrow, 14 October" [ref=f1e198] [cursor=pointer]:
+                  - /url: /app/publish/new?target=n%3Ayoutube&date=2026-10-14&time=17%3A00
+                  - img "YouTube" [ref=f1e200]
+                  - generic [ref=f1e202]: New
+          - link "More Recommended Times" [ref=f1e205] [cursor=pointer]:
+            - /url: /app/publish?days=7
+    - link "Help and FAQ" [ref=f1e208] [cursor=pointer]:
+      - /url: /faq

@@ -241,6 +241,7 @@ return [
     ['POST', '/app/ideas/move', [WorkspaceHandler::class, 'moveIdeas']],
     ['POST', '/app/groups', [WorkspaceHandler::class, 'group']],
     ['POST', '/app/posts', [WorkspaceHandler::class, 'post']],
+    ['POST', '/app/posts/move', [WorkspaceHandler::class, 'movePost']],
     ['POST', '/app/templates', [WorkspaceHandler::class, 'template']],
     ['POST', '/account/timezone', [WorkspaceHandler::class, 'timezone']],
     ['GET', '/app/account', static function (): void {

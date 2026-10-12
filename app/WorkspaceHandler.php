@@ -68,6 +68,46 @@ final class WorkspaceHandler
         self::done($back, $existing ? 'Idea saved.' : 'Idea added.', ['idea' => Workspace::idea($uid, $id)]);
     }
 
+    /** Move a queued post onto another day or empty time slot. */
+    public static function movePost(): never
+    {
+        $user = Auth::member();
+        $uid = (int) $user['id'];
+        $id = (int) ($_POST['id'] ?? 0);
+        $post = $id > 0 ? Workspace::post($uid, $id) : null;
+        if ($post === null || !in_array($post['status'], ['planned', 'failed'], true)) {
+            self::fail('composer', '/app/publish', 'That post can’t be moved.');
+        }
+        $date = (string) ($_POST['date'] ?? '');
+        $time = (string) ($_POST['time'] ?? '');
+        $tz = Workspace::timezone($user);
+        $at = preg_match('/^\d{4}-\d{2}-\d{2}$/', $date) && preg_match('/^\d{2}:\d{2}$/', $time)
+            ? DateTimeImmutable::createFromFormat('!Y-m-d H:i', $date . ' ' . $time, $tz)
+            : false;
+        if ($at === false || $at->format('Y-m-d H:i') !== $date . ' ' . $time) {
+            self::fail('composer', '/app/publish', 'Choose a date and time for this post.');
+        }
+        $now = new DateTimeImmutable('now', $tz);
+        if ($at <= $now) {
+            self::fail('composer', '/app/publish', 'Drop the post on a time that hasn’t passed.');
+        }
+        if ($at > $now->modify('+1 year')) {
+            self::fail('composer', '/app/publish', 'Choose a time within the next year.');
+        }
+        $stmt = Database::connection()->prepare('UPDATE posts SET planned_at = :at, status = :planned, error = NULL, attempts = 0, updated_at = :now WHERE id = :id AND user_id = :uid AND status IN (\'planned\', \'failed\')');
+        $stmt->execute([
+            'at' => $at->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
+            'planned' => 'planned',
+            'now' => Database::now(),
+            'id' => $id,
+            'uid' => $uid,
+        ]);
+        if ($stmt->rowCount() < 1) {
+            self::fail('composer', '/app/publish', 'That post can’t be moved.');
+        }
+        self::done('/app/publish', 'Moved to ' . $at->format('l, j F') . ' at ' . $at->format('g:i A') . '.');
+    }
+
     /** Save a column's order after drag and drop: `group` plus ordered `order[]` ids. */
     public static function moveIdeas(): never
     {
