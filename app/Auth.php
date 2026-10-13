@@ -114,14 +114,28 @@ final class Auth
         return in_array(strtolower((string) $user['email']), $allowed, true);
     }
 
-    /** Logged-in admin, or a login redirect. Anyone else gets a not-found page. */
+    public static function staff(): bool
+    {
+        return !empty($_SESSION['_staff']);
+    }
+
+    /** Dedicated admin login, separate from a workspace account. */
+    public static function staffUser(): array
+    {
+        return ['id' => 0, 'email' => (string) config('admin.user'), 'display_name' => 'Admin'];
+    }
+
+    /** Logged-in admin. Anyone else is sent to the admin login. */
     public static function requireAdmin(): array
     {
-        $user = self::require();
-        if (!self::isAdmin()) {
-            not_found();
+        if (self::staff()) {
+            return self::staffUser();
         }
-        return $user;
+        $user = self::user();
+        if ($user !== null && self::isAdmin()) {
+            return $user;
+        }
+        redirect('/admin/login');
     }
 
     /** Only same-site paths inside the workspace or admin inbox are allowed as a post-login destination. */

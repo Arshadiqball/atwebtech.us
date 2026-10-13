@@ -255,10 +255,11 @@ final class AccountHandler
 
     public static function logout(): never
     {
+        $staffOnly = Auth::staff() && !Auth::check();
         if (Security::verifyCsrf($_POST['_token'] ?? null)) {
             Auth::logout();
         }
-        redirect('/login');
+        redirect($staffOnly ? '/admin/login' : '/login');
     }
 
     public static function onboardingStep(): never

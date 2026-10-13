@@ -329,6 +329,18 @@ return [
     ['POST', '/app/checklist/close', [AccountHandler::class, 'closeChecklist']],
     ['POST', '/account/theme', [AccountHandler::class, 'theme']],
 
+    ['GET', '/admin/login', static function (): void {
+        if (Auth::staff() || Auth::isAdmin()) {
+            redirect('/admin');
+        }
+        View::render('admin-login', [], [
+            'title' => 'Admin login | atwebtech',
+            'description' => 'Sign in to the atwebtech admin panel.',
+            'layout' => 'app',
+            'noindex' => true,
+        ]);
+    }],
+    ['POST', '/admin/login', [Admin::class, 'login']],
     ['GET', '/admin', static function (): void {
         $user = Auth::requireAdmin();
         View::render('admin', [
@@ -399,6 +411,24 @@ return [
             'noindex' => true,
             'admin' => true,
         ]);
+    }],
+    ['POST', '/admin/subscribers/{id}/plan', static function (string $id): void {
+        if (!ctype_digit($id)) {
+            not_found();
+        }
+        Auth::requireAdmin();
+        if (!Security::verifyCsrf($_POST['_token'] ?? null)) {
+            flash('notice', 'Your session expired. Refresh the page and try again.');
+            redirect('/admin/subscribers/' . $id);
+        }
+        $plan = (string) ($_POST['plan'] ?? '');
+        $billing = (string) ($_POST['billing'] ?? 'monthly');
+        if (!Admin::setPlan((int) $id, $plan, $billing)) {
+            flash('notice', 'That plan could not be saved.');
+            redirect('/admin/subscribers/' . $id);
+        }
+        flash('notice', 'Plan updated.');
+        redirect('/admin/subscribers/' . $id);
     }],
 
     ['GET', '/sitemap.xml', static function (): void {

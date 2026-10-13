@@ -198,6 +198,49 @@
   white-space: pre-wrap;
   overflow-wrap: anywhere;
 }
+.adm-saved {
+  margin: 18px 32px 0;
+  color: var(--green-ink);
+  font-size: 14px;
+  font-weight: 600;
+}
+.adm-plan {
+  display: grid;
+  gap: 12px;
+  max-width: 320px;
+  margin: 22px 32px 0;
+}
+.adm-plan label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.adm-plan select {
+  width: 100%;
+  margin-top: 4px;
+  min-height: 40px;
+  padding: 0 10px;
+  border: 1px solid var(--a-line);
+  border-radius: 8px;
+  background: var(--a-panel);
+  color: var(--ink);
+}
+.adm-plan button {
+  justify-self: start;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--green);
+  color: var(--a-btn-ink);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.adm-plan button:hover { background: var(--green-hover); }
 .adm-facts {
   display: grid;
   gap: 14px;

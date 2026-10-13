@@ -81,6 +81,51 @@ final class Admin
         return $plans[$plan]['name'] ?? $plan;
     }
 
+    public static function login(): never
+    {
+        $username = trim((string) ($_POST['username'] ?? ''));
+        $password = (string) ($_POST['password'] ?? '');
+        $old = ['username' => $username];
+        if (!Security::verifyCsrf($_POST['_token'] ?? null)) {
+            self::fail('Your session expired. Refresh the page and try again.', $old);
+        }
+        $fingerprint = Security::clientFingerprint();
+        if (RateLimiter::tooManyAttempts('admin-login', $fingerprint, 8, 15)) {
+            self::fail('Too many failed attempts. Please wait 15 minutes and try again.', $old);
+        }
+        $expected = strtolower((string) config('admin.user'));
+        $hash = (string) config('admin.password_hash');
+        $ok = $expected !== '' && hash_equals($expected, strtolower($username)) && $hash !== '' && password_verify($password, $hash);
+        if (!$ok) {
+            RateLimiter::hit('admin-login', $fingerprint);
+            self::fail('That username or password is incorrect.', $old);
+        }
+        session_regenerate_id(true);
+        $_SESSION['_staff'] = true;
+        redirect('/admin');
+    }
+
+    /** Change the waitlist plan. Returns false when the signup does not exist. */
+    public static function setPlan(int $id, string $plan, string $billing): bool
+    {
+        $plans = data('pricing')['plans'] ?? [];
+        if (!isset($plans[$plan])) {
+            return false;
+        }
+        $billing = $plan === 'free' ? null : (in_array($billing, Pricing::BILLING, true) ? $billing : 'monthly');
+        $stmt = Database::connection()->prepare(
+            'UPDATE waitlist_signups SET plan = :plan, billing = :billing, updated_at = :now WHERE id = :id'
+        );
+        $stmt->execute(['plan' => $plan, 'billing' => $billing, 'now' => Database::now(), 'id' => $id]);
+        return $stmt->rowCount() > 0 || self::subscriber($id) !== null;
+    }
+
+    private static function fail(string $message, array $old): never
+    {
+        flash('form', ['form' => 'admin-login', 'status' => 'error', 'message' => $message, 'errors' => [], 'old' => $old]);
+        redirect('/admin/login');
+    }
+
     public static function excerpt(string $message, int $length = 120): string
     {
         $flat = preg_replace('/\s+/u', ' ', trim($message)) ?? '';

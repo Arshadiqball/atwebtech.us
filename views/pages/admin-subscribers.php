@@ -70,6 +70,31 @@ $count = count($subscribers);
         </p>
         <a class="adm-reply" href="<?= e($mailto) ?>"><?= icon('envelope-simple') ?>Email subscriber</a>
       </header>
+<?php $saved = flash('notice'); if (is_string($saved) && $saved !== ''): ?>
+      <p class="adm-saved" role="status"><?= e($saved) ?></p>
+<?php endif; ?>
+      <form class="adm-plan" action="/admin/subscribers/<?= (int) $selected['id'] ?>/plan" method="post">
+        <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+        <div>
+          <label for="sub-plan">Plan</label>
+          <select id="sub-plan" name="plan" required>
+<?php if (!$selected['plan']): ?>
+            <option value="" selected>Choose a plan</option>
+<?php endif; ?>
+<?php foreach (data('pricing')['plans'] as $slug => $plan): ?>
+            <option value="<?= e($slug) ?>"<?= $selected['plan'] === $slug ? ' selected' : '' ?>><?= e($plan['name']) ?></option>
+<?php endforeach; ?>
+          </select>
+        </div>
+        <div>
+          <label for="sub-billing">Billing</label>
+          <select id="sub-billing" name="billing">
+            <option value="monthly"<?= $selected['billing'] === 'monthly' ? ' selected' : '' ?>>Monthly</option>
+            <option value="yearly"<?= ($selected['billing'] ?? 'yearly') === 'yearly' ? ' selected' : '' ?>>Yearly</option>
+          </select>
+        </div>
+        <button type="submit">Save plan</button>
+      </form>
       <dl class="adm-facts">
 <?php foreach ($facts as $label => $value): ?>
         <div>

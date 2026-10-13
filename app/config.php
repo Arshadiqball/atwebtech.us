@@ -48,6 +48,8 @@ return [
     ],
     'admin' => [
         'emails' => (string) Env::get('ADMIN_EMAILS', ''),
+        'user' => (string) Env::get('ADMIN_USER', 'admin'),
+        'password_hash' => (string) Env::get('ADMIN_PASSWORD_HASH', '$2y$12$5GGD/Z5cJISTdInsdI4Q4eULMhAMEFeMw3FSXk7.BVYUYeGDMwF2e'),
     ],
     'integrations' => [
         'available' => (string) Env::get('INTEGRATIONS_AVAILABLE', ''),
