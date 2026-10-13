@@ -642,9 +642,47 @@ final class Channels
         return self::DAYS[$slot['day']] . ' at ' . ($at ? $at->format('g:i A') : $slot['time']);
     }
 
+    /**
+     * Plan for the signed-in account, taken from the waitlist row with the same email.
+     * Paid plans use the pricing channel cap. Anyone without a paid plan stays on Free.
+     *
+     * @return array{slug: string, name: string, limit: int, paid: bool}
+     */
+    public static function allowance(?int $userId = null): array
+    {
+        static $cache = [];
+        $userId ??= (int) (Auth::user()['id'] ?? 0);
+        if (isset($cache[$userId])) {
+            return $cache[$userId];
+        }
+        $cfg = data('pricing');
+        $slug = 'free';
+        if ($userId > 0) {
+            $stmt = Database::connection()->prepare(
+                'SELECT w.plan FROM users u
+                 INNER JOIN waitlist_signups w ON LOWER(w.email) = LOWER(u.email)
+                 WHERE u.id = :id AND w.plan IS NOT NULL AND w.plan <> \'\'
+                 ORDER BY w.updated_at DESC, w.id DESC
+                 LIMIT 1'
+            );
+            $stmt->execute(['id' => $userId]);
+            $plan = (string) $stmt->fetchColumn();
+            if (isset($cfg['plans'][$plan])) {
+                $slug = $plan;
+            }
+        }
+        $paid = $slug !== 'free';
+        return $cache[$userId] = [
+            'slug' => $slug,
+            'name' => (string) $cfg['plans'][$slug]['name'],
+            'limit' => $paid ? (int) $cfg['max_channels'] : (int) $cfg['free_channels'],
+            'paid' => $paid,
+        ];
+    }
+
     public static function freeLimit(): int
     {
-        return (int) data('pricing')['free_channels'];
+        return self::allowance()['limit'];
     }
 }
 

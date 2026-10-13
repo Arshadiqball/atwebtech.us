@@ -7,7 +7,7 @@ $all = array_column(integrations(), null, 'slug');
 
 <?php if ($connected): ?>
   <section class="chl" aria-labelledby="chl-title">
-    <h2 id="chl-title">Connected <small><?= count($connected) ?>/<?= Channels::freeLimit() ?> on the free plan</small></h2>
+    <h2 id="chl-title">Connected <small><?php $plan = Channels::allowance(); ?><?= $plan['paid'] ? count($connected) . ' on the ' . e($plan['name']) . ' plan' : count($connected) . '/' . (int) $plan['limit'] . ' on the free plan' ?></small></h2>
     <ul class="chl-list" role="list">
 <?php foreach ($connected as $c): ?>
       <li class="chl-row">

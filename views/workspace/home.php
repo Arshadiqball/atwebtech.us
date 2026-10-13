@@ -15,7 +15,7 @@ $connected = Channels::forUser((int) $user['id']);
 $counts = Workspace::counts((int) $user['id']);
 $steps = [
     $connected
-        ? ['1. Connect a channel', sprintf('%d of %d channels connected. Add another or set its posting goal.', count($connected), Channels::freeLimit()), '/app/channels', 'plus', 'Manage Channels', true]
+        ? ['1. Connect a channel', ($plan = Channels::allowance())['paid'] ? sprintf('%d channels connected. Add another or set its posting goal.', count($connected)) : sprintf('%d of %d channels connected. Add another or set its posting goal.', count($connected), $plan['limit']), '/app/channels', 'plus', 'Manage Channels', true]
         : ['1. Connect a channel', 'Link the channels you post to. See which you can connect today and which are on the way.', '/app/channels', 'plus', 'Connect Channel', false],
     ['2. Create a post', "Write a post and schedule it. Posts for a connected YouTube channel publish at their time; other networks are saved as plans.", '/app/publish/new', 'pencil-simple', 'Create Post', $counts['queue'] + $counts['drafts'] > 0],
     ['3. Explore the demo', 'Try the calendar, ideas board, inbox, and analytics with sample data.', '/demo', 'arrow-up-right', 'Open Demo', false],

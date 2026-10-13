@@ -11,7 +11,8 @@ $focus = array_values(array_filter(explode(',', (string) ($onboarding['focus_cha
 $suggested = array_slice(array_values(array_diff($focus ?: ['linkedin', 'facebook', 'tiktok'], $connectedProviders)), 0, 3);
 $currentChannel = isset($channel['id']) && $section === 'channels' ? (int) $channel['id'] : 0;
 $currentSub = $sub ?? 'publish';
-$freeChannels = (int) data('pricing')['free_channels'];
+$allowance = Channels::allowance((int) $user['id']);
+$channelLimit = $allowance['limit'];
 $initial = mb_strtoupper(mb_substr($user['display_name'], 0, 1));
 $queueCount = Workspace::counts((int) $user['id'])['queue'];
 $notice = flash('notice');
@@ -94,8 +95,10 @@ $notice = flash('notice');
     <div class="ws-side-foot">
 <?php if ($onboarding['checklist_closed_at'] === null): ?>
       <div class="ws-progress" data-dismissible>
-        <a class="ws-progress-link" href="/app/channels"><?= count($connected) ?>/<?= $freeChannels ?> channels connected</a>
-        <span class="ws-progress-bar" aria-hidden="true"><?php for ($i = 0; $i < $freeChannels; $i++): ?><i<?= $i < count($connected) ? ' class="is-on"' : '' ?>></i><?php endfor; ?></span>
+        <a class="ws-progress-link" href="/app/channels"><?= $allowance['paid'] ? count($connected) . ' channels connected' : count($connected) . '/' . $channelLimit . ' channels connected' ?></a>
+<?php if (!$allowance['paid']): ?>
+        <span class="ws-progress-bar" aria-hidden="true"><?php for ($i = 0; $i < $channelLimit; $i++): ?><i<?= $i < count($connected) ? ' class="is-on"' : '' ?>></i><?php endfor; ?></span>
+<?php endif; ?>
         <form action="/app/checklist/close" method="post" data-quiet-form>
           <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
           <button type="submit" class="ws-progress-close"><?= icon('x') ?><span class="sr-only">Hide channel progress</span></button>
@@ -105,7 +108,7 @@ $notice = flash('notice');
       <div class="ws-account">
         <button type="button" class="ws-org" aria-expanded="false" aria-controls="ws-account-menu" data-account-toggle>
           <span class="ws-avatar" aria-hidden="true"><?= e($initial) ?></span>
-          <span class="ws-org-text ws-label"><b>My workspace</b><small>Free plan</small></span>
+          <span class="ws-org-text ws-label"><b>My workspace</b><small><?= e($allowance['name']) ?> plan</small></span>
         </button>
         <button type="button" class="ws-icon-btn ws-collapse" aria-pressed="false" data-ws-collapse><?= icon('sidebar-simple') ?><span class="sr-only">Collapse sidebar</span></button>
         <div class="ws-account-menu" id="ws-account-menu" hidden>

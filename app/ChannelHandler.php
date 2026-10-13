@@ -15,8 +15,9 @@ final class ChannelHandler
         if (!Channels::connectable($provider)) {
             self::notice('/app/channels', 'Connecting this channel isn’t available yet.');
         }
-        if (count(Channels::forUser($uid)) >= Channels::freeLimit()) {
-            self::notice('/app/channels', sprintf('The free plan includes %d channels. Disconnect one to connect another.', Channels::freeLimit()));
+        $allowance = Channels::allowance($uid);
+        if (count(Channels::forUser($uid)) >= $allowance['limit']) {
+            self::notice('/app/channels', sprintf('The %s plan includes %d channels. Disconnect one to add another.', $allowance['name'], $allowance['limit']));
         }
         $fingerprint = Security::clientFingerprint();
         if (RateLimiter::tooManyAttempts('channel-connect', $fingerprint, 10, 10)) {
@@ -144,8 +145,9 @@ final class ChannelHandler
         $existing = Channels::forUser($uid);
         $known = array_map(static fn (array $c): string => $c['provider'] . ':' . $c['external_id'], $existing);
         $new = array_filter($picked, static fn (string $id): bool => !in_array($pending['provider'] . ':' . $id, $known, true));
-        if (count($existing) + count($new) > Channels::freeLimit()) {
-            flash('form', ['form' => 'confirm', 'status' => 'error', 'message' => sprintf('The free plan includes %d channels. You can add %d more.', Channels::freeLimit(), max(0, Channels::freeLimit() - count($existing))), 'errors' => [], 'old' => []]);
+        $allowance = Channels::allowance($uid);
+        if (count($existing) + count($new) > $allowance['limit']) {
+            flash('form', ['form' => 'confirm', 'status' => 'error', 'message' => sprintf('The %s plan includes %d channels. You can add %d more.', $allowance['name'], $allowance['limit'], max(0, $allowance['limit'] - count($existing))), 'errors' => [], 'old' => []]);
             redirect('/app/channels/confirm');
         }
 

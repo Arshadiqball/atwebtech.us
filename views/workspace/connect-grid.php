@@ -1,10 +1,11 @@
 <?php
 /** @var int $connectedCount */
 $token = Security::csrfToken();
-$full = $connectedCount >= Channels::freeLimit();
+$allowance = Channels::allowance();
+$full = $connectedCount >= $allowance['limit'];
 ?>
 <?php if ($full): ?>
-<p class="cg-note"><?= icon('info') ?><span>The free plan includes <?= Channels::freeLimit() ?> channels, and you've connected all of them. Disconnect one to add another.</span></p>
+<p class="cg-note"><?= icon('info') ?><span>The <?= e($allowance['name']) ?> plan includes <?= (int) $allowance['limit'] ?> channels, and you've connected all of them. Disconnect one to add another.</span></p>
 <?php endif; ?>
 <ul class="cg" role="list">
 <?php foreach (integrations() as $ch): $live = Channels::connectable($ch['slug']); ?>
