@@ -26,6 +26,7 @@ final class Channels
             'youtube' => config('oauth.google.client_id') !== '' && config('oauth.google.client_secret') !== '',
             'linkedin' => config('oauth.linkedin.client_id') !== '' && config('oauth.linkedin.client_secret') !== '',
             'tiktok' => config('oauth.tiktok.client_key') !== '' && config('oauth.tiktok.client_secret') !== '',
+            'pinterest' => self::pinterestOAuthReady() || config('oauth.pinterest.sandbox_token') !== '',
             default => false,
         };
     }
@@ -153,6 +154,11 @@ final class Channels
         return $id;
     }
 
+    public static function pinterestOAuthReady(): bool
+    {
+        return config('oauth.pinterest.client_id') !== '' && config('oauth.pinterest.client_secret') !== '';
+    }
+
     public static function redirectUri(string $provider): string
     {
         return self::baseUrl() . '/app/channels/callback/' . $provider;
@@ -204,6 +210,15 @@ final class Channels
     public static function authorizeUrl(string $provider, string $state, string $verifier, bool $switchAccount = false, ?string $redirectUri = null): string
     {
         $redirectUri = $redirectUri ?: self::redirectUri($provider);
+        if ($provider === 'pinterest') {
+            return 'https://www.pinterest.com/oauth/?' . http_build_query([
+                'client_id' => config('oauth.pinterest.client_id'),
+                'redirect_uri' => $redirectUri,
+                'response_type' => 'code',
+                'scope' => 'user_accounts:read,boards:read,pins:read,pins:write',
+                'state' => $state,
+            ], '', '&', PHP_QUERY_RFC3986);
+        }
         if ($provider === 'tiktok') {
             $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
             return 'https://www.tiktok.com/v2/auth/authorize/?' . http_build_query([
@@ -300,6 +315,7 @@ final class Channels
         return match ($provider) {
             'linkedin' => self::linkedinProfile($accessToken),
             'tiktok' => self::tiktokAccount($accessToken),
+            'pinterest' => self::pinterestAccount($accessToken),
             default => self::youtubeChannels($accessToken),
         };
     }
@@ -323,6 +339,28 @@ final class Channels
             ];
         }
         return $out;
+    }
+
+    /** The Pinterest account for an access token. Sandbox tokens only work against the sandbox host. */
+    public static function pinterestAccount(string $accessToken, bool $sandbox = false): array
+    {
+        $base = $sandbox ? 'https://api-sandbox.pinterest.com' : 'https://api.pinterest.com';
+        $data = self::request('GET', $base . '/v5/user_account', null, $accessToken);
+        $id = (string) ($data['id'] ?? '');
+        if ($id === '' || strlen($id) > 191 || !preg_match('/^[A-Za-z0-9_-]+$/', $id)) {
+            return [];
+        }
+        $name = trim((string) ($data['business_name'] ?? ''));
+        if ($name === '') {
+            $name = trim((string) ($data['username'] ?? ''));
+        }
+        $business = strtoupper((string) ($data['account_type'] ?? '')) === 'BUSINESS';
+        return [[
+            'id' => $id,
+            'name' => mb_substr($name !== '' ? $name : 'Pinterest account', 0, 190),
+            'avatar' => self::safeAvatar((string) ($data['profile_image'] ?? '')),
+            'kind' => $business ? 'Business' : 'Profile',
+        ]];
     }
 
     /** The TikTok account that approved the sandbox (or production) app. */
@@ -488,7 +526,7 @@ final class Channels
 
     public static function revoke(?string $token, string $provider = 'youtube'): void
     {
-        if ($token === null || $token === '') {
+        if ($token === null || $token === '' || $provider === 'pinterest') {
             return;
         }
         try {
@@ -516,7 +554,8 @@ final class Channels
         $host = strtolower((string) ($parts['host'] ?? ''));
         $allowed = in_array($host, self::AVATAR_HOSTS, true)
             || str_ends_with($host, '.tiktokcdn.com')
-            || str_ends_with($host, '.tiktokcdn-us.com');
+            || str_ends_with($host, '.tiktokcdn-us.com')
+            || str_ends_with($host, '.pinimg.com');
         return ($parts['scheme'] ?? '') === 'https' && $allowed && strlen($url) <= 500 ? $url : null;
     }
 

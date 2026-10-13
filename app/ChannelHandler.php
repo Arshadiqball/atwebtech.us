@@ -24,6 +24,10 @@ final class ChannelHandler
         }
         RateLimiter::hit('channel-connect', $fingerprint);
 
+        if ($provider === 'pinterest' && !Channels::pinterestOAuthReady()) {
+            self::connectPinterestSandbox();
+        }
+
         $state = bin2hex(random_bytes(24));
         $verifier = rtrim(strtr(base64_encode(random_bytes(48)), '+/', '-_'), '=');
         $redirectUri = Channels::redirectUri($provider);
@@ -39,6 +43,7 @@ final class ChannelHandler
         $who = match ($provider) {
             'linkedin' => 'LinkedIn',
             'tiktok' => 'TikTok',
+            'pinterest' => 'Pinterest',
             default => 'Google',
         };
 
@@ -87,6 +92,7 @@ final class ChannelHandler
             self::notice('/app/channels', match ($provider) {
                 'linkedin' => 'We couldn’t read this LinkedIn Profile. Try another account, or try again in a few minutes.',
                 'tiktok' => 'We couldn’t read this TikTok account. Use a TikTok login that is added as a sandbox target user, then try again.',
+                'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
                 default => 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.',
             });
         }
@@ -347,6 +353,34 @@ final class ChannelHandler
             }
         }
         return false;
+    }
+
+    /** Connect the Pinterest sandbox account for the token saved on this server. Trial access has no app secret yet. */
+    private static function connectPinterestSandbox(): never
+    {
+        $token = (string) config('oauth.pinterest.sandbox_token');
+        try {
+            $accounts = Channels::pinterestAccount($token, true);
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] pinterest sandbox connect failed: %s', gmdate('c'), $e->getMessage()));
+            self::notice('/app/channels', 'We couldn’t read the Pinterest sandbox account. Generate a new sandbox token and try again.');
+        }
+        if (!$accounts) {
+            self::notice('/app/channels', 'Pinterest didn’t return an account for this sandbox token. Generate a new one and try again.');
+        }
+        $_SESSION['_oauth_pending'] = [
+            'provider' => 'pinterest',
+            'sandbox' => true,
+            'tokens' => Security::seal(json_encode([
+                'access_token' => $token,
+                'refresh_token' => null,
+                'expires_at' => gmdate('Y-m-d H:i:s', time() + 86400),
+                'scope' => 'user_accounts:read,boards:read,pins:read',
+            ], JSON_THROW_ON_ERROR)),
+            'accounts' => $accounts,
+            'at' => time(),
+        ];
+        redirect('/app/channels/confirm');
     }
 
     private static function connectRefusal(string $message): string

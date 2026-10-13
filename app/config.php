@@ -3,6 +3,12 @@
 declare(strict_types=1);
 
 $env = (string) Env::get('APP_ENV', 'production');
+$pinterestSecret = (string) Env::get('PINTEREST_CLIENT_SECRET', '');
+$pinterestSandbox = (string) Env::get('PINTEREST_SANDBOX_TOKEN', '');
+if (str_starts_with($pinterestSecret, 'pina_')) {
+    $pinterestSandbox = $pinterestSandbox !== '' ? $pinterestSandbox : $pinterestSecret;
+    $pinterestSecret = '';
+}
 
 return [
     'app' => [
@@ -70,7 +76,8 @@ return [
         ],
         'pinterest' => [
             'client_id' => (string) Env::get('PINTEREST_CLIENT_ID', ''),
-            'client_secret' => (string) Env::get('PINTEREST_CLIENT_SECRET', ''),
+            'client_secret' => $pinterestSecret,
+            'sandbox_token' => $pinterestSandbox,
         ],
     ],
     'forms' => [
