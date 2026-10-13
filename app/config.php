@@ -68,6 +68,10 @@ return [
             'client_key' => (string) Env::get('TIKTOK_CLIENT_KEY', ''),
             'client_secret' => (string) Env::get('TIKTOK_CLIENT_SECRET', ''),
         ],
+        'pinterest' => [
+            'client_id' => (string) Env::get('PINTEREST_CLIENT_ID', ''),
+            'client_secret' => (string) Env::get('PINTEREST_CLIENT_SECRET', ''),
+        ],
     ],
     'forms' => [
         'rate_limit_max' => max(1, (int) Env::get('RATE_LIMIT_MAX', 5)),
