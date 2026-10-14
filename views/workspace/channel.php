@@ -76,6 +76,7 @@ $next = $queue['next'] ?? null;
           <a class="ws-menu-item" href="<?= e($self) ?>/settings"><?= icon('gear') ?>Channel settings</a>
           <form action="/app/channels/connect/<?= e($channel['provider']) ?>" method="post">
             <input type="hidden" name="_token" value="<?= e($token) ?>">
+            <input type="hidden" name="reconnect" value="1">
             <button type="submit" class="ws-menu-item"<?= Channels::connectable($channel['provider']) ? '' : ' disabled' ?>><?= icon('arrows-clockwise') ?>Reconnect channel</button>
           </form>
           <form action="<?= e($self) ?>/disconnect" method="post">
@@ -87,14 +88,15 @@ $next = $queue['next'] ?? null;
     </div>
   </div>
 
-<?php if (!$channel['can_publish']): ?>
+<?php if (!$channel['can_publish'] && in_array($channel['provider'], ['youtube', 'linkedin'], true)): ?>
   <div class="ch-banner" role="status">
     <?= icon('warning-circle') ?>
     <p><b>Reconnect to publish.</b> <?= $channel['provider'] === 'linkedin'
         ? 'Allow atwebtech to create posts on your LinkedIn Profile (the “Share on LinkedIn” permission) so scheduled posts can go out.'
-        : 'This channel was connected before publishing existed, or upload permission wasn’t ticked. Reconnect and allow “Manage your YouTube videos” so atwebtech can upload scheduled posts.' ?></p>
+        : 'Video upload was not granted. Reconnect and tick “Manage your YouTube videos” on the Google screen. If that choice is missing, add the youtube.upload scope in Google Cloud, then reconnect.' ?></p>
     <form action="/app/channels/connect/<?= e($channel['provider']) ?>" method="post">
       <input type="hidden" name="_token" value="<?= e($token) ?>">
+      <input type="hidden" name="reconnect" value="1">
       <button type="submit" class="ws-btn ws-btn--sm ws-btn--dark"<?= Channels::connectable($channel['provider']) ? '' : ' disabled' ?>>Reconnect</button>
     </form>
   </div>

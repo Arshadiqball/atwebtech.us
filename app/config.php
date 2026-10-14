@@ -81,6 +81,10 @@ return [
             'client_secret' => $pinterestSecret,
             'sandbox_token' => $pinterestSandbox,
         ],
+        'x' => [
+            'client_id' => (string) Env::get('X_CLIENT_ID', ''),
+            'client_secret' => (string) Env::get('X_CLIENT_SECRET', ''),
+        ],
     ],
     'forms' => [
         'rate_limit_max' => max(1, (int) Env::get('RATE_LIMIT_MAX', 5)),

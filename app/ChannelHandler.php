@@ -15,8 +15,9 @@ final class ChannelHandler
         if (!Channels::connectable($provider)) {
             self::notice('/app/channels', 'Connecting this channel isn’t available yet.');
         }
+        $reconnect = ($_POST['reconnect'] ?? '') === '1';
         $allowance = Channels::allowance($uid);
-        if (count(Channels::forUser($uid)) >= $allowance['limit']) {
+        if (!$reconnect && count(Channels::forUser($uid)) >= $allowance['limit']) {
             self::notice('/app/channels', sprintf('The %s plan includes %d channels. Disconnect one to add another.', $allowance['name'], $allowance['limit']));
         }
         $fingerprint = Security::clientFingerprint();
@@ -32,8 +33,8 @@ final class ChannelHandler
         $state = bin2hex(random_bytes(24));
         $verifier = rtrim(strtr(base64_encode(random_bytes(48)), '+/', '-_'), '=');
         $redirectUri = Channels::redirectUri($provider);
-        $_SESSION['_oauth'] = ['provider' => $provider, 'state' => $state, 'verifier' => $verifier, 'redirect' => $redirectUri, 'at' => time()];
-        redirect(Channels::authorizeUrl($provider, $state, $verifier, ($_POST['switch'] ?? '') === '1', $redirectUri));
+        $_SESSION['_oauth'] = ['provider' => $provider, 'state' => $state, 'verifier' => $verifier, 'redirect' => $redirectUri, 'reconnect' => $reconnect, 'at' => time()];
+        redirect(Channels::authorizeUrl($provider, $state, $verifier, ($_POST['switch'] ?? '') === '1', $redirectUri, $reconnect));
     }
 
     public static function callback(string $provider): never
@@ -45,6 +46,7 @@ final class ChannelHandler
             'linkedin' => 'LinkedIn',
             'tiktok' => 'TikTok',
             'pinterest' => 'Pinterest',
+            'x' => 'X',
             default => 'Google',
         };
 
@@ -75,6 +77,10 @@ final class ChannelHandler
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'TikTok profile access wasn’t granted. Tick the profile permission to connect.');
             }
+            if ($provider === 'x' && !str_contains($tokens['scope'], 'users.read')) {
+                Channels::revoke($tokens['access_token'], $provider);
+                self::notice('/app/channels', 'X profile access wasn’t granted. Tick the profile permission to connect.');
+            }
             $accounts = Channels::accounts($provider, $tokens['access_token']);
             if (!$accounts && $provider === 'linkedin') {
                 $accounts = Channels::profileFromIdToken((string) ($tokens['id_token'] ?? ''));
@@ -84,7 +90,7 @@ final class ChannelHandler
             error_log(sprintf('[%s] %s connect failed for user %d: %s', gmdate('c'), $provider, (int) $user['id'], $e->getMessage()));
             $detail = 'Please try again in a few minutes.';
             if ($e instanceof ChannelApiException && $e->status >= 400 && $e->status < 500) {
-                $detail = self::connectRefusal($e->getMessage());
+                $detail = self::connectRefusal($e->getMessage(), $provider);
             }
             self::notice('/app/channels', sprintf('We couldn’t reach %s to finish connecting. %s', $who, $detail));
         }
@@ -94,6 +100,7 @@ final class ChannelHandler
                 'linkedin' => 'We couldn’t read this LinkedIn Profile. Try another account, or try again in a few minutes.',
                 'tiktok' => 'We couldn’t read this TikTok account. Use a TikTok login that is added as a sandbox target user, then try again.',
                 'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
+                'x' => 'We couldn’t read this X account. Try again in a few minutes.',
                 default => 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.',
             });
         }
@@ -102,6 +109,7 @@ final class ChannelHandler
             'provider' => $provider,
             'tokens' => Security::seal(json_encode($tokens, JSON_THROW_ON_ERROR)),
             'accounts' => $accounts,
+            'reconnect' => !empty($flow['reconnect']),
             'at' => time(),
         ];
         redirect('/app/channels/confirm');
@@ -180,6 +188,9 @@ final class ChannelHandler
         }
         unset($_SESSION['_oauth_pending']);
         Mailer::notify('Channel connected', ['Provider' => $pending['provider'], 'Channels' => (string) count($picked)]);
+        if (!empty($pending['reconnect']) && $pending['provider'] === 'youtube' && !Channels::youtubeCanPublish((string) ($tokens['scope'] ?? ''))) {
+            flash('notice', 'YouTube is connected, but video upload was not allowed. Reconnect again and tick “Manage your YouTube videos”. If that choice is not listed, add the youtube.upload scope on the Google Cloud consent screen first.');
+        }
         redirect('/app/channels/' . $firstId . ($wasNew ? '?setup=goal' : ''));
     }
 
@@ -385,9 +396,15 @@ final class ChannelHandler
         redirect('/app/channels/confirm');
     }
 
-    private static function connectRefusal(string $message): string
+    private static function connectRefusal(string $message, string $provider = 'linkedin'): string
     {
         $text = strtolower($message);
+        if ($provider === 'x') {
+            if (str_contains($text, 'redirect')) {
+                return 'In the X app, the callback URL must be exactly https://atwebtech.us/app/channels/callback/x';
+            }
+            return 'X refused the sign-in. Turn on OAuth 2.0 for a Web App with Read and write, then try again.';
+        }
         if (str_contains($text, 'client authentication') || str_contains($text, 'invalid_client')) {
             return 'LinkedIn did not accept the app secret on this server. Save the full secret, including the characters at the end, then try again.';
         }
