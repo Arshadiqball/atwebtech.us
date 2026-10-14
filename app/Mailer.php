@@ -34,7 +34,26 @@ final class Mailer
         }
     }
 
-    private static function deliver(string $from, string $to, string $subject, string $body): void
+    /** Customer mail, with the HTML card and a plain-text copy. */
+    public static function send(string $to, string $subject, string $html, string $text): void
+    {
+        $from = (string) config('mail.from');
+        if (!config('mail.enabled') || !filter_var($to, FILTER_VALIDATE_EMAIL) || !filter_var($from, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+        if ((string) config('mail.host') === '' || (string) config('mail.user') === '' || (string) config('mail.pass') === '') {
+            error_log('Mailer: SMTP is enabled but host, user, or password is missing.');
+            return;
+        }
+        $safeSubject = trim(preg_replace('/[\r\n]+/', ' ', $subject) ?? $subject);
+        try {
+            self::deliver($from, $to, $safeSubject, $text, $html);
+        } catch (Throwable $e) {
+            error_log('Mailer: ' . $e->getMessage());
+        }
+    }
+
+    private static function deliver(string $from, string $to, string $subject, string $body, ?string $html = null): void
     {
         $host = (string) config('mail.host');
         $port = (int) config('mail.port');
@@ -56,7 +75,7 @@ final class Mailer
             self::command($socket, 'MAIL FROM:<' . $from . '>', 250);
             self::command($socket, 'RCPT TO:<' . $to . '>', [250, 251]);
             self::command($socket, 'DATA', 354);
-            self::write($socket, self::message($from, $to, $subject, $body) . "\r\n.\r\n");
+            self::write($socket, self::message($from, $to, $subject, $body, $html) . "\r\n.\r\n");
             self::expect($socket, 250);
             self::command($socket, 'QUIT', 221);
         } finally {
@@ -91,7 +110,7 @@ final class Mailer
         return $socket;
     }
 
-    private static function message(string $from, string $to, string $subject, string $body): string
+    private static function message(string $from, string $to, string $subject, string $body, ?string $html = null): string
     {
         $fromName = self::headerName((string) config('mail.from_name'));
         $replyTo = (string) config('mail.reply_to');
@@ -107,11 +126,35 @@ final class Mailer
             'Reply-To: ' . $replyName . ' <' . $replyTo . '>',
             'Subject: ' . $subject,
             'MIME-Version: 1.0',
+        ];
+        $text = self::dotStuff($body);
+        if ($html === null || $html === '') {
+            $headers[] = 'Content-Type: text/plain; charset=UTF-8';
+            $headers[] = 'Content-Transfer-Encoding: 8bit';
+            return implode("\r\n", $headers) . "\r\n\r\n" . $text;
+        }
+        $boundary = 'awt_' . bin2hex(random_bytes(12));
+        $headers[] = 'Content-Type: multipart/alternative; boundary="' . $boundary . '"';
+        $parts = [
+            '--' . $boundary,
             'Content-Type: text/plain; charset=UTF-8',
             'Content-Transfer-Encoding: 8bit',
+            '',
+            $text,
+            '--' . $boundary,
+            'Content-Type: text/html; charset=UTF-8',
+            'Content-Transfer-Encoding: 8bit',
+            '',
+            self::dotStuff($html),
+            '--' . $boundary . '--',
         ];
-        $safeBody = preg_replace('/^\./m', '..', str_replace(["\r\n", "\r"], "\n", $body)) ?? $body;
-        return implode("\r\n", $headers) . "\r\n\r\n" . str_replace("\n", "\r\n", $safeBody);
+        return implode("\r\n", $headers) . "\r\n\r\n" . implode("\r\n", $parts);
+    }
+
+    private static function dotStuff(string $body): string
+    {
+        $body = preg_replace('/^\./m', '..', str_replace(["\r\n", "\r"], "\n", $body)) ?? $body;
+        return str_replace("\n", "\r\n", $body);
     }
 
     private static function headerName(string $name): string

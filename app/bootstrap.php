@@ -12,6 +12,7 @@ require BASE_PATH . '/app/Database.php';
 require BASE_PATH . '/app/Security.php';
 require BASE_PATH . '/app/RateLimiter.php';
 require BASE_PATH . '/app/Mailer.php';
+require BASE_PATH . '/app/EmailTemplate.php';
 require BASE_PATH . '/app/Campaign.php';
 require BASE_PATH . '/app/FormHandler.php';
 require BASE_PATH . '/app/Admin.php';

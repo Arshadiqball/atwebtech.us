@@ -431,6 +431,13 @@ return [
         redirect('/admin/subscribers/' . $id);
     }],
 
+    ['GET', '/email/preview/confirm', static function (): void {
+        header('Content-Type: text/html; charset=utf-8');
+        header('X-Robots-Tag: noindex');
+        header('Cache-Control: no-store');
+        echo EmailTemplate::confirm(absolute_url('/signup'))['html'];
+    }],
+
     ['GET', '/sitemap.xml', static function (): void {
         $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/terms'];
         foreach (array_keys(data('features')) as $slug) {
@@ -454,7 +461,7 @@ return [
     ['GET', '/robots.txt', static function (): void {
         header('Content-Type: text/plain; charset=utf-8');
         if (config('app.is_production')) {
-            echo "User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /admin\nDisallow: /welcome\nDisallow: /login\nDisallow: /signup\n\nSitemap: ", absolute_url('/sitemap.xml'), "\n";
+            echo "User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /admin\nDisallow: /welcome\nDisallow: /login\nDisallow: /signup\nDisallow: /email\n\nSitemap: ", absolute_url('/sitemap.xml'), "\n";
         } else {
             echo "User-agent: *\nDisallow: /\n";
         }
