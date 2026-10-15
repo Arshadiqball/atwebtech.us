@@ -47,6 +47,7 @@ final class ChannelHandler
             'tiktok' => 'TikTok',
             'pinterest' => 'Pinterest',
             'x' => 'X',
+            'facebook' => 'Facebook',
             default => 'Google',
         };
 
@@ -81,6 +82,10 @@ final class ChannelHandler
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'X profile access wasn’t granted. Tick the profile permission to connect.');
             }
+            if ($provider === 'facebook' && !str_contains($tokens['scope'], 'pages_show_list')) {
+                Channels::revoke($tokens['access_token'], $provider);
+                self::notice('/app/channels', 'Facebook Page access wasn’t granted. Tick the Page permissions to connect.');
+            }
             $accounts = Channels::accounts($provider, $tokens['access_token']);
             if (!$accounts && $provider === 'linkedin') {
                 $accounts = Channels::profileFromIdToken((string) ($tokens['id_token'] ?? ''));
@@ -101,6 +106,7 @@ final class ChannelHandler
                 'tiktok' => 'We couldn’t read this TikTok account. Use a TikTok login that is added as a sandbox target user, then try again.',
                 'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
                 'x' => 'We couldn’t read this X account. Try again in a few minutes.',
+                'facebook' => 'This Facebook account doesn’t manage a Page. Create a Page, or sign in with an account that manages one, then try again.',
                 default => 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.',
             });
         }
@@ -164,7 +170,6 @@ final class ChannelHandler
             unset($_SESSION['_oauth_pending']);
             self::notice('/app/channels', 'That connection expired. Please connect the channel again.');
         }
-        $access = Security::seal($tokens['access_token']);
         $refresh = $tokens['refresh_token'] ? Security::seal($tokens['refresh_token']) : null;
         $now = Database::now();
         $find = $pdo->prepare('SELECT id FROM channels WHERE user_id = :uid AND provider = :provider AND external_id = :ext');
@@ -175,6 +180,8 @@ final class ChannelHandler
         $wasNew = false;
         foreach ($picked as $ext) {
             $account = $byId[$ext];
+            $tokenValue = is_string($account['token'] ?? null) && $account['token'] !== '' ? $account['token'] : $tokens['access_token'];
+            $access = Security::seal($tokenValue);
             $find->execute(['uid' => $uid, 'provider' => $pending['provider'], 'ext' => $ext]);
             $id = (int) $find->fetchColumn();
             if ($id > 0) {
@@ -404,6 +411,12 @@ final class ChannelHandler
                 return 'In the X app, the callback URL must be exactly https://atwebtech.us/app/channels/callback/x';
             }
             return 'X refused the sign-in. Turn on OAuth 2.0 for a Web App with Read and write, then try again.';
+        }
+        if ($provider === 'facebook') {
+            if (str_contains($text, 'redirect')) {
+                return 'In the Facebook app, the redirect URI must be exactly https://atwebtech.us/app/channels/callback/facebook';
+            }
+            return 'Facebook refused the sign-in. Use an account that is an admin of the app and that manages a Page, then try again.';
         }
         if (str_contains($text, 'client authentication') || str_contains($text, 'invalid_client')) {
             return 'LinkedIn did not accept the app secret on this server. Save the full secret, including the characters at the end, then try again.';

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-/** Connected social channels. YouTube, a personal LinkedIn Profile, TikTok, Pinterest, and X (name and picture) can connect. */
+/** Connected social channels. YouTube, a personal LinkedIn Profile, TikTok, Pinterest, X, and a Facebook Page (name and picture) can connect. */
 final class Channels
 {
     public const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
@@ -12,6 +12,7 @@ final class Channels
     public const TIKTOK_BASIC = 'user.info.basic';
     public const TIKTOK_PUBLISH = 'video.publish';
     public const X_SCOPES = 'users.read tweet.read tweet.write offline.access';
+    public const FACEBOOK_SCOPES = 'pages_show_list,pages_manage_posts';
     public const GOALS = [
         1 => ['Keep it steady', '1 time/week', 'purple'],
         3 => ['Build a presence', '3 times/week', 'orange'],
@@ -29,6 +30,7 @@ final class Channels
             'tiktok' => config('oauth.tiktok.client_key') !== '' && config('oauth.tiktok.client_secret') !== '',
             'pinterest' => self::pinterestOAuthReady() || config('oauth.pinterest.sandbox_token') !== '',
             'x' => config('oauth.x.client_id') !== '' && config('oauth.x.client_secret') !== '',
+            'facebook' => config('oauth.facebook.client_id') !== '' && config('oauth.facebook.client_secret') !== '',
             default => false,
         };
     }
@@ -72,6 +74,7 @@ final class Channels
             'linkedin' => 'LinkedIn',
             'tiktok' => 'TikTok',
             'x' => 'X',
+            'facebook' => 'Facebook',
             default => 'Google',
         };
         if ($refresh === null) {
@@ -235,6 +238,15 @@ final class Channels
                 'state' => $state,
             ], '', '&', PHP_QUERY_RFC3986);
         }
+        if ($provider === 'facebook') {
+            return 'https://www.facebook.com/v23.0/dialog/oauth?' . http_build_query([
+                'client_id' => config('oauth.facebook.client_id'),
+                'redirect_uri' => $redirectUri,
+                'state' => $state,
+                'response_type' => 'code',
+                'scope' => self::FACEBOOK_SCOPES,
+            ], '', '&', PHP_QUERY_RFC3986);
+        }
         if ($provider === 'x') {
             $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
             return 'https://x.com/i/oauth2/authorize?' . http_build_query([
@@ -292,9 +304,13 @@ final class Channels
             'linkedin' => config('oauth.linkedin'),
             'tiktok' => config('oauth.tiktok'),
             'x' => config('oauth.x'),
+            'facebook' => config('oauth.facebook'),
             default => config('oauth.google'),
         };
         $redirect = $redirectUri ?: self::redirectUri($provider);
+        if ($provider === 'facebook') {
+            return self::facebookToken($code, $redirect, $creds);
+        }
         if ($provider === 'x') {
             $data = self::request('POST', self::endpoint('x', 'token'), [
                 'grant_type' => 'authorization_code',
@@ -361,6 +377,7 @@ final class Channels
             'tiktok' => self::tiktokAccount($accessToken),
             'pinterest' => self::pinterestAccount($accessToken),
             'x' => self::xAccount($accessToken),
+            'facebook' => self::facebookPages($accessToken),
             default => self::youtubeChannels($accessToken),
         };
     }
@@ -574,6 +591,14 @@ final class Channels
         if ($token === null || $token === '' || $provider === 'pinterest') {
             return;
         }
+        if ($provider === 'facebook') {
+            try {
+                self::request('DELETE', 'https://graph.facebook.com/v23.0/me/permissions', null, $token);
+            } catch (Throwable $e) {
+                error_log(sprintf('[%s] token revoke failed: %s', gmdate('c'), $e->getMessage()));
+            }
+            return;
+        }
         if ($provider === 'x') {
             try {
                 self::request('POST', self::endpoint('x', 'revoke'), [
@@ -611,7 +636,9 @@ final class Channels
         $allowed = in_array($host, self::AVATAR_HOSTS, true)
             || str_ends_with($host, '.tiktokcdn.com')
             || str_ends_with($host, '.tiktokcdn-us.com')
-            || str_ends_with($host, '.pinimg.com');
+            || str_ends_with($host, '.pinimg.com')
+            || str_ends_with($host, '.fbcdn.net')
+            || str_ends_with($host, '.fbsbx.com');
         return ($parts['scheme'] ?? '') === 'https' && $allowed && strlen($url) <= 500 ? $url : null;
     }
 
@@ -654,6 +681,72 @@ final class Channels
         ]];
     }
 
+    /** Exchange a Facebook code for a long-lived user token. Page tokens are stored separately. */
+    private static function facebookToken(string $code, string $redirect, array $creds): array
+    {
+        $short = self::request('POST', 'https://graph.facebook.com/v23.0/oauth/access_token', [
+            'client_id' => $creds['client_id'],
+            'client_secret' => $creds['client_secret'],
+            'redirect_uri' => $redirect,
+            'code' => $code,
+        ]);
+        $token = (string) ($short['access_token'] ?? '');
+        if ($token === '') {
+            throw new RuntimeException('Facebook didn’t return an access token.');
+        }
+        $long = self::request('POST', 'https://graph.facebook.com/v23.0/oauth/access_token', [
+            'grant_type' => 'fb_exchange_token',
+            'client_id' => $creds['client_id'],
+            'client_secret' => $creds['client_secret'],
+            'fb_exchange_token' => $token,
+        ]);
+        $kept = (string) ($long['access_token'] ?? '');
+        if ($kept === '') {
+            $kept = $token;
+        }
+        return [
+            'access_token' => $kept,
+            'refresh_token' => null,
+            'expires_at' => gmdate('Y-m-d H:i:s', time() + 86400 * 365 * 5),
+            'scope' => self::FACEBOOK_SCOPES,
+        ];
+    }
+
+    /** Pages this Facebook account manages. Each row keeps that Page’s own token. Publishing is not available yet. */
+    public static function facebookPages(string $accessToken): array
+    {
+        try {
+            $data = self::request('GET', 'https://graph.facebook.com/v23.0/me/accounts?' . http_build_query([
+                'fields' => 'id,name,access_token,picture',
+                'limit' => 50,
+            ]), null, $accessToken);
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] facebook page lookup failed: %s', gmdate('c'), $e->getMessage()));
+            return [];
+        }
+        $out = [];
+        foreach (is_array($data['data'] ?? null) ? $data['data'] : [] as $page) {
+            if (!is_array($page)) {
+                continue;
+            }
+            $id = (string) ($page['id'] ?? '');
+            $name = trim((string) ($page['name'] ?? ''));
+            $pageToken = (string) ($page['access_token'] ?? '');
+            if ($id === '' || strlen($id) > 191 || !preg_match('/^[0-9]+$/', $id) || $name === '' || $pageToken === '') {
+                continue;
+            }
+            $picture = (string) ($page['picture']['data']['url'] ?? '');
+            $out[] = [
+                'id' => $id,
+                'name' => mb_substr($name, 0, 190),
+                'avatar' => self::safeAvatar($picture),
+                'kind' => 'Page',
+                'token' => $pageToken,
+            ];
+        }
+        return $out;
+    }
+
     private static function request(string $method, string $url, ?array $form = null, ?string $bearer = null, array $headers = []): array
     {
         if ($bearer !== null) {
@@ -663,6 +756,8 @@ final class Channels
         if ($method === 'POST') {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($form ?? []));
+        } elseif ($method === 'DELETE') {
+            curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
         }
         return self::finish($ch, $url);
     }
