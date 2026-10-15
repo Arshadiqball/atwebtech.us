@@ -71,6 +71,7 @@ return [
         'facebook' => [
             'client_id' => (string) Env::get('FACEBOOK_CLIENT_ID', ''),
             'client_secret' => (string) Env::get('FACEBOOK_CLIENT_SECRET', ''),
+            'config_id' => (string) Env::get('FACEBOOK_CONFIG_ID', ''),
         ],
         'tiktok' => [
             'client_key' => (string) Env::get('TIKTOK_CLIENT_KEY', ''),

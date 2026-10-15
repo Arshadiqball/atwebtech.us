@@ -30,7 +30,7 @@ final class Channels
             'tiktok' => config('oauth.tiktok.client_key') !== '' && config('oauth.tiktok.client_secret') !== '',
             'pinterest' => self::pinterestOAuthReady() || config('oauth.pinterest.sandbox_token') !== '',
             'x' => config('oauth.x.client_id') !== '' && config('oauth.x.client_secret') !== '',
-            'facebook' => config('oauth.facebook.client_id') !== '' && config('oauth.facebook.client_secret') !== '',
+            'facebook' => config('oauth.facebook.client_id') !== '' && config('oauth.facebook.client_secret') !== '' && config('oauth.facebook.config_id') !== '',
             default => false,
         };
     }
@@ -244,7 +244,7 @@ final class Channels
                 'redirect_uri' => $redirectUri,
                 'state' => $state,
                 'response_type' => 'code',
-                'scope' => self::FACEBOOK_SCOPES,
+                'config_id' => config('oauth.facebook.config_id'),
             ], '', '&', PHP_QUERY_RFC3986);
         }
         if ($provider === 'x') {
