@@ -396,6 +396,7 @@ final class Workspace
         $nowUtc = $now->setTimezone($utc)->format('Y-m-d H:i:s');
         $overdue = [];
         if ($from === null) {
+            Publisher::kick();
             $overdue = array_map(
                 static fn (array $post): array => $post + ['at' => self::local($post['planned_at'], $tz)],
                 array_merge(self::failed($uid, $channelId), self::planned($uid, null, $nowUtc, $channelId))

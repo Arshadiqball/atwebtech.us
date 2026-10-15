@@ -23,11 +23,16 @@ $hasItems = false;
 ?>
 <?php if (!$fragment): ?>
   <div class="q" data-queue>
-<?php $overdue = array_filter($queue['overdue'], static fn (array $p): bool => $shown($p['channel'])); if ($overdue): $hasItems = true; ?>
+<?php
+$overdue = array_filter($queue['overdue'], static fn (array $p): bool => $shown($p['channel']));
+$attention = array_filter($overdue, static fn (array $p): bool => $p['status'] === 'failed' || empty($accounts[(int) $p['channel_id']]['can_publish']));
+$due = array_filter($overdue, static fn (array $p): bool => $p['status'] === 'planned' && !empty($accounts[(int) $p['channel_id']]['can_publish']));
+?>
+<?php if ($attention): $hasItems = true; ?>
     <section class="q-day q-day--overdue" aria-labelledby="q-overdue">
       <h2 id="q-overdue">Needs attention</h2>
       <ul class="q-list" role="list">
-<?php foreach ($overdue as $post): ?>
+<?php foreach ($attention as $post): ?>
         <li class="q-row">
           <span class="q-time"><?= e($post['at']->format('j M, g:i A')) ?></span>
           <div class="q-post q-post--flag"<?php if ($post['status'] !== 'publishing'): ?> draggable="true" data-move="<?= (int) $post['id'] ?>" data-at="<?= e($post['at']->format('Y-m-d H:i')) ?>" title="Drag to another time"<?php endif; ?>>
@@ -35,8 +40,6 @@ $hasItems = false;
             <span class="q-post-text"><?= e($excerpt($text($post), 140)) ?>
 <?php if ($post['status'] === 'failed'): ?>
               <small class="q-error"><?= icon('warning-circle') ?><?= e($post['error'] ?: 'Publishing failed.') ?></small>
-<?php elseif ($post['status'] === 'planned' && !empty($accounts[(int) $post['channel_id']]['can_publish'])): ?>
-              <small>Waiting for the publisher. It runs every minute.</small>
 <?php else: ?>
               <small>This was a plan only, so nothing was sent. Pick a new time or delete it.</small>
 <?php endif; ?>
@@ -54,6 +57,28 @@ $hasItems = false;
 <?php if ($post['status'] !== 'publishing'): ?>
               <a class="ws-btn ws-btn--sm" href="/app/publish/new?id=<?= (int) $post['id'] ?>" data-compose="<?= $compose($postJson($post)) ?>"><?= icon('pencil-simple') ?>Edit</a>
 <?php endif; ?>
+            </span>
+          </div>
+        </li>
+<?php endforeach; ?>
+      </ul>
+    </section>
+<?php endif; ?>
+<?php if ($due): $hasItems = true; ?>
+    <section class="q-day" aria-labelledby="q-due">
+      <h2 id="q-due">Due now</h2>
+      <ul class="q-list" role="list">
+<?php foreach ($due as $post): ?>
+        <li class="q-row">
+          <span class="q-time"><?= e($post['at']->format('j M, g:i A')) ?></span>
+          <div class="q-post" draggable="true" data-move="<?= (int) $post['id'] ?>" data-at="<?= e($post['at']->format('Y-m-d H:i')) ?>" title="Drag to another time">
+            <?= post_mark($post, $accounts) ?>
+            <span class="q-post-text"><?= e($excerpt($text($post), 140)) ?>
+              <small>Sending now.</small>
+            </span>
+            <?= post_badge($post, $accounts) ?>
+            <span class="q-acts">
+              <a class="ws-btn ws-btn--sm" href="/app/publish/new?id=<?= (int) $post['id'] ?>" data-compose="<?= $compose($postJson($post)) ?>"><?= icon('pencil-simple') ?>Edit</a>
             </span>
           </div>
         </li>

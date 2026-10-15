@@ -8,16 +8,55 @@ final class Publisher
     public const MAX_ATTEMPTS = 3;
     private const STALE_MINUTES = 90;
 
-    /** @return array{sent:int, failed:int, retry:int} */
-    public static function run(int $batch = 5): array
+    /**
+     * Send due posts during a page view. LinkedIn is fast enough to do here.
+     * YouTube uploads stay on the minute cron so a video does not hold the page open.
+     */
+    public static function kick(): void
+    {
+        $lock = fopen(BASE_PATH . '/storage/logs/publish.lock', 'c');
+        if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
+            return;
+        }
+        try {
+            self::run(5, ['linkedin']);
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] publish kick failed: %s', gmdate('c'), $e->getMessage()));
+        } finally {
+            flock($lock, LOCK_UN);
+            fclose($lock);
+        }
+    }
+
+    /**
+     * @param list<string>|null $providers Limit to these networks. Null sends every network the publisher knows.
+     * @return array{sent:int, failed:int, retry:int}
+     */
+    public static function run(int $batch = 5, ?array $providers = null): array
     {
         $pdo = Database::connection();
         $now = Database::now();
         $pdo->prepare('UPDATE posts SET status = :planned, updated_at = :now WHERE status = :publishing AND updated_at < :stale')
             ->execute(['planned' => 'planned', 'now' => $now, 'publishing' => 'publishing', 'stale' => gmdate('Y-m-d H:i:s', time() - self::STALE_MINUTES * 60)]);
 
-        $due = $pdo->prepare('SELECT id FROM posts WHERE status = :planned AND channel_id IS NOT NULL AND planned_at <= :now ORDER BY planned_at LIMIT ' . max(1, $batch));
-        $due->execute(['planned' => 'planned', 'now' => $now]);
+        $sql = 'SELECT p.id FROM posts p WHERE p.status = :planned AND p.channel_id IS NOT NULL AND p.planned_at <= :now';
+        $params = ['planned' => 'planned', 'now' => $now];
+        if ($providers !== null) {
+            $allowed = array_values(array_filter($providers, static fn (string $p): bool => in_array($p, ['linkedin', 'youtube'], true)));
+            if (!$allowed) {
+                return ['sent' => 0, 'failed' => 0, 'retry' => 0];
+            }
+            $marks = [];
+            foreach ($allowed as $i => $provider) {
+                $key = 'provider' . $i;
+                $marks[] = ':' . $key;
+                $params[$key] = $provider;
+            }
+            $sql .= ' AND EXISTS (SELECT 1 FROM channels c WHERE c.id = p.channel_id AND c.provider IN (' . implode(', ', $marks) . '))';
+        }
+        $sql .= ' ORDER BY p.planned_at LIMIT ' . max(1, $batch);
+        $due = $pdo->prepare($sql);
+        $due->execute($params);
         $claim = $pdo->prepare('UPDATE posts SET status = :publishing, attempts = attempts + 1, updated_at = :now WHERE id = :id AND status = :planned');
 
         $result = ['sent' => 0, 'failed' => 0, 'retry' => 0];
