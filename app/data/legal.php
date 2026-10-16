@@ -9,7 +9,7 @@ return [
     'privacy' => [
         'title' => 'Privacy policy',
         'body' => <<<'HTML'
-<p>This policy explains what information atwebtech.us collects, why, and how it is handled. It applies to this marketing website, its interactive demo, the waitlist, and the contact form.</p>
+<p>This policy explains what information atwebtech.us collects, why, and how it is handled. It applies to this marketing website, its interactive demo, the waitlist, the contact form, and a workspace account, including a YouTube channel you choose to connect.</p>
 <p><strong>Who we are:</strong> atwebtech.us is operated by [Legal entity name], [Registered address]. You can reach us through the <a href="/contact">contact form</a>.</p>
 
 <h2>Information we collect</h2>
@@ -23,12 +23,19 @@ return [
 <p>This site sets one essential session cookie, used to protect forms against cross-site request forgery, to show the result of a form submission, and to remember the campaign link you arrived from until you close the browser. The site does not use advertising or analytics cookies. [Update this section if analytics are added.]</p>
 <h3>Interactive demo</h3>
 <p>Demo interactions, such as moving idea cards or typing a reply, run entirely in your browser. They are not sent to or stored on our servers.</p>
+<h3>Workspace account</h3>
+<p>When you create a workspace account we store your name, email address, and a password that is stored only as a hash. We do not store the password itself.</p>
+<h3>YouTube and other Google user data</h3>
+<p>If you connect a YouTube channel, you sign in with Google and choose the channel. Google then gives atwebtech that channel’s name and picture, and permission to upload videos you schedule. We store an encrypted token so the upload can run at the time you chose, using the title and description you wrote. We do not delete your videos, reply to comments, read YouTube analytics, or use YouTube data for advertising.</p>
+<p>We use this Google user data only to connect the channel you selected and to upload the videos you scheduled. We do not sell it, and we do not share it with anyone except the company that hosts this website, which stores it so the service can run. Use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy">Google API Services User Data Policy</a>, including the Limited Use requirements.</p>
+<p>You can disconnect the channel in your workspace at any time. Disconnecting revokes atwebtech’s access. You can also ask us to delete the stored channel name, picture, and token through the <a href="/contact">contact form</a>.</p>
 
 <h2>How we use information</h2>
 <ul>
   <li>To send atwebtech product updates and early-access news to waitlist members.</li>
   <li>To read and reply to messages sent through the contact form.</li>
   <li>To keep the website secure and prevent spam.</li>
+  <li>To show a YouTube channel you connected, and to upload videos you scheduled to that channel.</li>
 </ul>
 <p>We do not sell personal information. [Confirm any service providers, such as hosting or email delivery, that process data on our behalf.]</p>
 
