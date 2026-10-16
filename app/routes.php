@@ -94,7 +94,7 @@ return [
     ['GET', '/contact', page('contact', 'Contact | atwebtech', 'Send the atwebtech team a question, feedback, or partnership enquiry.')],
     ['GET', '/join', page('join', 'Join the waitlist | atwebtech', 'Join the atwebtech waitlist for product updates and early-access news.')],
     ['GET', '/joined', page('joined', 'You are on the list | atwebtech', 'Your atwebtech waitlist signup is confirmed.', [], ['noindex' => true])],
-    ['GET', '/privacy', page('legal', 'Privacy policy (draft) | atwebtech', 'Draft privacy policy for atwebtech.us, pending owner and legal review.', ['doc' => 'privacy'])],
+    ['GET', '/privacy', page('legal', 'Privacy policy | atwebtech', 'How atwebtech collects, uses, stores, and deletes information, including YouTube and other Google user data.', ['doc' => 'privacy'])],
     ['GET', '/terms', page('legal', 'Terms of use (draft) | atwebtech', 'Draft terms of use for atwebtech.us, pending owner and legal review.', ['doc' => 'terms'])],
 
     ['POST', '/waitlist', [FormHandler::class, 'waitlist']],
