@@ -48,6 +48,7 @@ final class ChannelHandler
             'pinterest' => 'Pinterest',
             'x' => 'X',
             'facebook' => 'Facebook',
+            'instagram' => 'Instagram',
             default => 'Google',
         };
 
@@ -82,6 +83,10 @@ final class ChannelHandler
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'X profile access wasn’t granted. Tick the profile permission to connect.');
             }
+            if ($provider === 'instagram' && !str_contains($tokens['scope'], 'instagram_business_basic')) {
+                Channels::revoke($tokens['access_token'], $provider);
+                self::notice('/app/channels', 'Instagram profile access wasn’t granted. Allow the profile permission to connect.');
+            }
             if ($provider === 'facebook' && !str_contains($tokens['scope'], 'pages_show_list')) {
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'Facebook Page access wasn’t granted. Tick the Page permissions to connect.');
@@ -107,6 +112,7 @@ final class ChannelHandler
                 'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
                 'x' => 'We couldn’t read this X account. Try again in a few minutes.',
                 'facebook' => 'This Facebook account doesn’t manage a Page. Create a Page, or sign in with an account that manages one, then try again.',
+                'instagram' => 'This Instagram account can’t be connected. Switch it to a Professional account (Business or Creator), and make sure that account is an admin of the app, then try again.',
                 default => 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.',
             });
         }
@@ -411,6 +417,12 @@ final class ChannelHandler
                 return 'In the X app, the callback URL must be exactly https://atwebtech.us/app/channels/callback/x';
             }
             return 'X refused the sign-in. Turn on OAuth 2.0 for a Web App with Read and write, then try again.';
+        }
+        if ($provider === 'instagram') {
+            if (str_contains($text, 'redirect')) {
+                return 'In the Instagram app, the redirect URI must be exactly https://atwebtech.us/app/channels/callback/instagram';
+            }
+            return 'Instagram refused the sign-in. Use a Professional account that is an admin of the app, then try again.';
         }
         if ($provider === 'facebook') {
             if (str_contains($text, 'redirect')) {

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-/** Connected social channels. YouTube, a personal LinkedIn Profile, TikTok, Pinterest, X, and a Facebook Page (name and picture) can connect. */
+/** Connected social channels. YouTube, a personal LinkedIn Profile, TikTok, Pinterest, X, a Facebook Page, and an Instagram professional account (name and picture) can connect. */
 final class Channels
 {
     public const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
@@ -13,6 +13,7 @@ final class Channels
     public const TIKTOK_PUBLISH = 'video.publish';
     public const X_SCOPES = 'users.read tweet.read tweet.write offline.access';
     public const FACEBOOK_SCOPES = 'pages_show_list,pages_manage_posts';
+    public const INSTAGRAM_SCOPES = 'instagram_business_basic,instagram_business_content_publish';
     public const GOALS = [
         1 => ['Keep it steady', '1 time/week', 'purple'],
         3 => ['Build a presence', '3 times/week', 'orange'],
@@ -31,6 +32,7 @@ final class Channels
             'pinterest' => self::pinterestOAuthReady() || config('oauth.pinterest.sandbox_token') !== '',
             'x' => config('oauth.x.client_id') !== '' && config('oauth.x.client_secret') !== '',
             'facebook' => config('oauth.facebook.client_id') !== '' && config('oauth.facebook.client_secret') !== '' && config('oauth.facebook.config_id') !== '',
+            'instagram' => config('oauth.instagram.client_id') !== '' && config('oauth.instagram.client_secret') !== '',
             default => false,
         };
     }
@@ -75,8 +77,35 @@ final class Channels
             'tiktok' => 'TikTok',
             'x' => 'X',
             'facebook' => 'Facebook',
+            'instagram' => 'Instagram',
             default => 'Google',
         };
+        if ($channel['provider'] === 'instagram') {
+            if ($access === null) {
+                throw new ChannelAuthException('Instagram access expired. Reconnect the channel.');
+            }
+            try {
+                $data = self::request('GET', 'https://graph.instagram.com/refresh_access_token?' . http_build_query([
+                    'grant_type' => 'ig_refresh_token',
+                    'access_token' => $access,
+                ]));
+            } catch (ChannelApiException $e) {
+                if ($e->status === 400 || $e->status === 401) {
+                    throw new ChannelAuthException('Instagram access expired. Reconnect the channel.');
+                }
+                throw $e;
+            }
+            if (empty($data['access_token']) || !is_string($data['access_token'])) {
+                throw new RuntimeException('Refresh response had no access token.');
+            }
+            Database::connection()->prepare('UPDATE channels SET access_token = :access, token_expires_at = :expires, updated_at = :now WHERE id = :id')->execute([
+                'access' => Security::seal($data['access_token']),
+                'expires' => gmdate('Y-m-d H:i:s', time() + max(3600, (int) ($data['expires_in'] ?? 5184000))),
+                'now' => Database::now(),
+                'id' => (int) $channel['id'],
+            ]);
+            return $data['access_token'];
+        }
         if ($refresh === null) {
             throw new ChannelAuthException($network . ' access expired. Reconnect the channel to keep publishing.');
         }
@@ -238,6 +267,15 @@ final class Channels
                 'state' => $state,
             ], '', '&', PHP_QUERY_RFC3986);
         }
+        if ($provider === 'instagram') {
+            return 'https://www.instagram.com/oauth/authorize?' . http_build_query([
+                'client_id' => config('oauth.instagram.client_id'),
+                'redirect_uri' => $redirectUri,
+                'response_type' => 'code',
+                'scope' => self::INSTAGRAM_SCOPES,
+                'state' => $state,
+            ], '', '&', PHP_QUERY_RFC3986);
+        }
         if ($provider === 'facebook') {
             return 'https://www.facebook.com/v23.0/dialog/oauth?' . http_build_query([
                 'client_id' => config('oauth.facebook.client_id'),
@@ -305,9 +343,13 @@ final class Channels
             'tiktok' => config('oauth.tiktok'),
             'x' => config('oauth.x'),
             'facebook' => config('oauth.facebook'),
+            'instagram' => config('oauth.instagram'),
             default => config('oauth.google'),
         };
         $redirect = $redirectUri ?: self::redirectUri($provider);
+        if ($provider === 'instagram') {
+            return self::instagramToken($code, $redirect, $creds);
+        }
         if ($provider === 'facebook') {
             return self::facebookToken($code, $redirect, $creds);
         }
@@ -378,6 +420,7 @@ final class Channels
             'pinterest' => self::pinterestAccount($accessToken),
             'x' => self::xAccount($accessToken),
             'facebook' => self::facebookPages($accessToken),
+            'instagram' => self::instagramAccount($accessToken),
             default => self::youtubeChannels($accessToken),
         };
     }
@@ -588,7 +631,7 @@ final class Channels
 
     public static function revoke(?string $token, string $provider = 'youtube'): void
     {
-        if ($token === null || $token === '' || $provider === 'pinterest') {
+        if ($token === null || $token === '' || $provider === 'pinterest' || $provider === 'instagram') {
             return;
         }
         if ($provider === 'facebook') {
@@ -638,7 +681,8 @@ final class Channels
             || str_ends_with($host, '.tiktokcdn-us.com')
             || str_ends_with($host, '.pinimg.com')
             || str_ends_with($host, '.fbcdn.net')
-            || str_ends_with($host, '.fbsbx.com');
+            || str_ends_with($host, '.fbsbx.com')
+            || str_ends_with($host, '.cdninstagram.com');
         return ($parts['scheme'] ?? '') === 'https' && $allowed && strlen($url) <= 500 ? $url : null;
     }
 
@@ -678,6 +722,78 @@ final class Channels
             'name' => mb_substr($name !== '' ? $name : 'X', 0, 190),
             'avatar' => self::safeAvatar($avatar),
             'kind' => 'Profile',
+        ]];
+    }
+
+    /** Exchange an Instagram code for a long-lived token. Publishing is not available yet. */
+    private static function instagramToken(string $code, string $redirect, array $creds): array
+    {
+        $short = self::request('POST', 'https://api.instagram.com/oauth/access_token', [
+            'client_id' => $creds['client_id'],
+            'client_secret' => $creds['client_secret'],
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $redirect,
+            'code' => $code,
+        ]);
+        $row = isset($short['data'][0]) && is_array($short['data'][0]) ? $short['data'][0] : $short;
+        $token = (string) ($row['access_token'] ?? '');
+        if ($token === '') {
+            throw new RuntimeException('Instagram didn’t return an access token.');
+        }
+        $perms = $row['permissions'] ?? '';
+        $scope = trim(is_array($perms) ? implode(',', $perms) : (string) $perms);
+        if ($scope === '') {
+            $scope = self::INSTAGRAM_SCOPES;
+        }
+        $long = self::request('GET', 'https://graph.instagram.com/access_token?' . http_build_query([
+            'grant_type' => 'ig_exchange_token',
+            'client_secret' => $creds['client_secret'],
+            'access_token' => $token,
+        ]));
+        $kept = (string) ($long['access_token'] ?? '');
+        if ($kept === '') {
+            $kept = $token;
+        }
+        return [
+            'access_token' => $kept,
+            'refresh_token' => null,
+            'expires_at' => gmdate('Y-m-d H:i:s', time() + max(3600, (int) ($long['expires_in'] ?? 5184000))),
+            'scope' => $scope,
+        ];
+    }
+
+    /** The signed-in Instagram professional account: name and picture. Publishing is not available yet. */
+    public static function instagramAccount(string $accessToken): array
+    {
+        try {
+            $user = self::request('GET', 'https://graph.instagram.com/v23.0/me?' . http_build_query([
+                'fields' => 'user_id,username,name,profile_picture_url,account_type',
+            ]), null, $accessToken);
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] instagram user lookup failed: %s', gmdate('c'), $e->getMessage()));
+            return [];
+        }
+        $id = (string) ($user['user_id'] ?? ($user['id'] ?? ''));
+        if ($id === '' || strlen($id) > 191 || !preg_match('/^[0-9]+$/', $id)) {
+            return [];
+        }
+        $type = strtoupper((string) ($user['account_type'] ?? ''));
+        if ($type === 'PERSONAL') {
+            return [];
+        }
+        $name = trim((string) ($user['name'] ?? ''));
+        if ($name === '') {
+            $name = trim((string) ($user['username'] ?? ''));
+        }
+        if ($name === '') {
+            return [];
+        }
+        $kind = in_array($type, ['MEDIA_CREATOR', 'CREATOR'], true) ? 'Creator' : 'Business';
+        return [[
+            'id' => $id,
+            'name' => mb_substr($name, 0, 190),
+            'avatar' => self::safeAvatar((string) ($user['profile_picture_url'] ?? '')),
+            'kind' => $kind,
         ]];
     }
 
