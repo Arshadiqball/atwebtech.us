@@ -3,7 +3,7 @@
 $token = Security::csrfToken();
 $allowance = Channels::allowance();
 $full = $connectedCount >= $allowance['limit'];
-$linked = array_column(Channels::forUser((int) Auth::member()['id']), 'provider');
+$linked = $linked ?? [];
 ?>
 <?php if ($full): ?>
 <p class="cg-note"><?= icon('info') ?><span>The <?= e($allowance['name']) ?> plan includes <?= (int) $allowance['limit'] ?> channels, and you've connected all of them. Disconnect one to add another.</span></p>

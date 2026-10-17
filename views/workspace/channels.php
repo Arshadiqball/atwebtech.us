@@ -26,6 +26,6 @@ $all = array_column(integrations(), null, 'slug');
   <section class="chl" id="connect" aria-labelledby="connect-page-title">
     <h2 id="connect-page-title">Connect a New Channel</h2>
     <p class="wsp-muted">Connecting lets atwebtech read your channel's name and picture. Publishing, comments and analytics aren't built yet, so nothing is posted or collected.</p>
-<?php partial('workspace/connect-grid', ['connectedCount' => count($connected)]); ?>
+<?php partial('workspace/connect-grid', ['connectedCount' => count($connected), 'linked' => array_column($connected, 'provider')]); ?>
   </section>
 </div>

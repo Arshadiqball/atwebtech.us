@@ -145,7 +145,7 @@ $notice = flash('notice');
       <h2 id="connect-title">Connect a New Channel</h2>
       <button type="button" class="ws-icon-btn" data-dialog-close><?= icon('x') ?><span class="sr-only">Close</span></button>
     </header>
-<?php partial('workspace/connect-grid', ['connectedCount' => count($connected)]); ?>
+<?php partial('workspace/connect-grid', ['connectedCount' => count($connected), 'linked' => $connectedProviders]); ?>
   </dialog>
   <dialog class="ws-dialog ws-dialog--sm" id="idea-dialog" aria-labelledby="idea-title" data-dialog="idea">
 <?php partial('workspace/idea-form', ['user' => $user, 'idea' => null, 'group' => 0, 'dialog' => true]); ?>
