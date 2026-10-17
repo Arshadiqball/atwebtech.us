@@ -29,9 +29,23 @@ function e(mixed $value): string
     return htmlspecialchars((string) $value, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
 }
 
+function public_origin(): string
+{
+    $host = strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
+    if ($host === 'atwebtech.us' || $host === 'www.atwebtech.us') {
+        return 'https://atwebtech.us';
+    }
+    return rtrim((string) config('app.url'), '/');
+}
+
+function is_public_site(): bool
+{
+    return config('app.is_production') || public_origin() === 'https://atwebtech.us';
+}
+
 function absolute_url(string $path = '/'): string
 {
-    return rtrim((string) config('app.url'), '/') . '/' . ltrim($path, '/');
+    return public_origin() . '/' . ltrim($path, '/');
 }
 
 function asset(string $path): string

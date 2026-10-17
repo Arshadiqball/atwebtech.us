@@ -209,11 +209,7 @@ final class Channels
     /** The address LinkedIn and Google must send the browser back to. */
     private static function baseUrl(): string
     {
-        $host = strtolower((string) preg_replace('/:\d+$/', '', (string) ($_SERVER['HTTP_HOST'] ?? '')));
-        if ($host === 'atwebtech.us' || $host === 'www.atwebtech.us') {
-            return 'https://atwebtech.us';
-        }
-        return rtrim((string) config('app.url'), '/');
+        return public_origin();
     }
 
     /** API hosts. Outside production, a *_OAUTH_TEST_BASE value points at a local fake. */

@@ -461,7 +461,7 @@ return [
 
     ['GET', '/robots.txt', static function (): void {
         header('Content-Type: text/plain; charset=utf-8');
-        if (config('app.is_production')) {
+        if (is_public_site()) {
             echo "User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /admin\nDisallow: /welcome\nDisallow: /login\nDisallow: /signup\nDisallow: /email\n\nSitemap: ", absolute_url('/sitemap.xml'), "\n";
         } else {
             echo "User-agent: *\nDisallow: /\n";

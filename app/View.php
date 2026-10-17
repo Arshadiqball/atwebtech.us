@@ -20,7 +20,7 @@ final class View
             'og_image' => asset('img/og-default.png'),
             'type' => 'website',
             'schema' => [],
-            'noindex' => !config('app.is_production'),
+            'noindex' => !is_public_site(),
         ];
 
         $layout = ($meta['layout'] ?? 'site') === 'app' ? 'layout-app' : 'layout';
