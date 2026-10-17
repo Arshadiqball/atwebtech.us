@@ -95,6 +95,7 @@ return [
     ['GET', '/join', page('join', 'Join the waitlist | atwebtech', 'Join the atwebtech waitlist for product updates and early-access news.')],
     ['GET', '/joined', page('joined', 'You are on the list | atwebtech', 'Your atwebtech waitlist signup is confirmed.', [], ['noindex' => true])],
     ['GET', '/privacy', page('legal', 'Privacy policy | atwebtech', 'How atwebtech collects, uses, stores, and deletes information, including YouTube and other Google user data.', ['doc' => 'privacy'])],
+    ['GET', '/data-deletion', page('legal', 'Data deletion | atwebtech', 'How to ask atwebtech to delete your account and data received from connected channels.', ['doc' => 'deletion'])],
     ['GET', '/terms', page('legal', 'Terms of use (draft) | atwebtech', 'Draft terms of use for atwebtech.us, pending owner and legal review.', ['doc' => 'terms'])],
 
     ['POST', '/waitlist', [FormHandler::class, 'waitlist']],
@@ -439,7 +440,7 @@ return [
     }],
 
     ['GET', '/sitemap.xml', static function (): void {
-        $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/terms'];
+        $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/data-deletion', '/terms'];
         foreach (array_keys(data('features')) as $slug) {
             $paths[] = '/features/' . $slug;
         }

@@ -50,10 +50,34 @@ return [
 <p>Waitlist and contact records are kept until you ask us to delete them, or until we no longer need them to reply to you or to send the updates you requested. A connected YouTube channel, its name and picture, and its encrypted tokens are kept until you disconnect the channel or ask us to delete them. A video file you attached to a scheduled post is kept until the post is sent or you delete the post. Security logs are kept only for a short period.</p>
 
 <h2>Your choices and rights</h2>
-<p>You can disconnect a YouTube channel in your workspace at any time. Disconnecting revokes atwebtech’s access to that channel. You can ask us to access, correct, or delete the information we hold about you, including your account, waitlist entry, messages, channel name, picture, and tokens, by emailing <a href="mailto:info@atwebtech.us">info@atwebtech.us</a> or using the <a href="/contact">contact form</a>.</p>
+<p>You can disconnect a connected channel in your workspace at any time. Disconnecting revokes atwebtech’s access to that channel. You can ask us to access, correct, or delete the information we hold about you, including your account, waitlist entry, messages, channel name, picture, and tokens, by emailing <a href="mailto:info@atwebtech.us">info@atwebtech.us</a> or using the <a href="/contact">contact form</a>. The steps are also on the <a href="/data-deletion">data deletion</a> page.</p>
 
 <h2>Changes to this policy</h2>
 <p>We will update this page if our practices change. The date at the top of this page is the date of the latest change.</p>
+HTML,
+    ],
+    'deletion' => [
+        'title' => 'Data deletion',
+        'updated' => '17 October 2026',
+        'body' => <<<'HTML'
+<p>You can ask atwebtech to delete the personal information we hold about you. This page explains how. It applies to your workspace account, the waitlist, contact messages, and information received when you connect a channel, including data from Google, YouTube, Facebook, Instagram, and Threads.</p>
+<p>atwebtech.us is operated by atwebtech, 3672 S 16th Ave, Tucson, AZ 85713, US.</p>
+
+<h2>How to ask</h2>
+<p>Email <a href="mailto:info@atwebtech.us">info@atwebtech.us</a> or use the <a href="/contact">contact form</a>. Use the subject “Delete my data” and include the email address on your atwebtech account. If you connected a channel, include the account or Page name so we can find the right record.</p>
+
+<h2>What we delete</h2>
+<ul>
+  <li>Your workspace account, including your name, email address, and password hash.</li>
+  <li>Connected channel names, pictures, and the encrypted access tokens stored for those channels.</li>
+  <li>Posts, drafts, and uploaded files saved in your workspace.</li>
+  <li>Your waitlist entry and contact messages, when you ask for those to be removed.</li>
+</ul>
+<p>Disconnecting a channel in the workspace revokes atwebtech’s access to that channel. A deletion request removes the stored record as well.</p>
+
+<h2>After the request</h2>
+<p>We delete the information described above and email you when it is done. We may keep a short security log that does not include the content of your account, and we may keep a record of the deletion request itself.</p>
+<p>More detail is in the <a href="/privacy">privacy policy</a>.</p>
 HTML,
     ],
     'terms' => [

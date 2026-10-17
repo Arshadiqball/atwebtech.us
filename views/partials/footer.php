@@ -21,6 +21,7 @@
       <p class="footer-legal">
         Copyright &copy; <?= e(date('Y')) ?> atwebtech
         <span aria-hidden="true">|</span> <a href="/privacy">Privacy</a>
+        <span aria-hidden="true">|</span> <a href="/data-deletion">Data deletion</a>
         <span aria-hidden="true">|</span> <a href="/terms">Terms</a>
         <span aria-hidden="true">|</span> <a href="/contact">Contact</a>
       </p>

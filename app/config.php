@@ -77,6 +77,10 @@ return [
             'client_id' => (string) Env::get('INSTAGRAM_CLIENT_ID', ''),
             'client_secret' => (string) Env::get('INSTAGRAM_CLIENT_SECRET', ''),
         ],
+        'threads' => [
+            'client_id' => (string) Env::get('THREADS_CLIENT_ID', ''),
+            'client_secret' => (string) Env::get('THREADS_CLIENT_SECRET', ''),
+        ],
         'tiktok' => [
             'client_key' => (string) Env::get('TIKTOK_CLIENT_KEY', ''),
             'client_secret' => (string) Env::get('TIKTOK_CLIENT_SECRET', ''),

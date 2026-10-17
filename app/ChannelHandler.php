@@ -49,6 +49,7 @@ final class ChannelHandler
             'x' => 'X',
             'facebook' => 'Facebook',
             'instagram' => 'Instagram',
+            'threads' => 'Threads',
             default => 'Google',
         };
 
@@ -83,6 +84,10 @@ final class ChannelHandler
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'X profile access wasn’t granted. Tick the profile permission to connect.');
             }
+            if ($provider === 'threads' && !str_contains($tokens['scope'], 'threads_basic')) {
+                Channels::revoke($tokens['access_token'], $provider);
+                self::notice('/app/channels', 'Threads profile access wasn’t granted. Allow the profile permission to connect.');
+            }
             if ($provider === 'instagram' && !str_contains($tokens['scope'], 'instagram_business_basic')) {
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'Instagram profile access wasn’t granted. Allow the profile permission to connect.');
@@ -113,6 +118,7 @@ final class ChannelHandler
                 'x' => 'We couldn’t read this X account. Try again in a few minutes.',
                 'facebook' => 'This Facebook account doesn’t manage a Page. Create a Page, or sign in with an account that manages one, then try again.',
                 'instagram' => 'This Instagram account can’t be connected. Switch it to a Professional account (Business or Creator), and make sure that account is an admin of the app, then try again.',
+                'threads' => 'We couldn’t read this Threads profile. Use the Threads account that is a tester on the app, then try again.',
                 default => 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.',
             });
         }
@@ -417,6 +423,12 @@ final class ChannelHandler
                 return 'In the X app, the callback URL must be exactly https://atwebtech.us/app/channels/callback/x';
             }
             return 'X refused the sign-in. Turn on OAuth 2.0 for a Web App with Read and write, then try again.';
+        }
+        if ($provider === 'threads') {
+            if (str_contains($text, 'redirect')) {
+                return 'In the Threads app, the redirect URI must be exactly https://atwebtech.us/app/channels/callback/threads';
+            }
+            return 'Threads refused the sign-in. Add this Threads account as a tester on the app, accept the invite, then try again.';
         }
         if ($provider === 'instagram') {
             if (str_contains($text, 'redirect')) {

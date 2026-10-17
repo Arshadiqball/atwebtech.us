@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-/** Connected social channels. YouTube, a personal LinkedIn Profile, TikTok, Pinterest, X, a Facebook Page, and an Instagram professional account (name and picture) can connect. */
+/** Connected social channels. YouTube, a personal LinkedIn Profile, TikTok, Pinterest, X, a Facebook Page, an Instagram professional account, and a Threads profile (name and picture) can connect. */
 final class Channels
 {
     public const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
@@ -14,6 +14,7 @@ final class Channels
     public const X_SCOPES = 'users.read tweet.read tweet.write offline.access';
     public const FACEBOOK_SCOPES = 'pages_show_list,pages_manage_posts';
     public const INSTAGRAM_SCOPES = 'instagram_business_basic,instagram_business_content_publish';
+    public const THREADS_SCOPES = 'threads_basic,threads_content_publish';
     public const GOALS = [
         1 => ['Keep it steady', '1 time/week', 'purple'],
         3 => ['Build a presence', '3 times/week', 'orange'],
@@ -33,6 +34,7 @@ final class Channels
             'x' => config('oauth.x.client_id') !== '' && config('oauth.x.client_secret') !== '',
             'facebook' => config('oauth.facebook.client_id') !== '' && config('oauth.facebook.client_secret') !== '' && config('oauth.facebook.config_id') !== '',
             'instagram' => config('oauth.instagram.client_id') !== '' && config('oauth.instagram.client_secret') !== '',
+            'threads' => config('oauth.threads.client_id') !== '' && config('oauth.threads.client_secret') !== '',
             default => false,
         };
     }
@@ -78,20 +80,22 @@ final class Channels
             'x' => 'X',
             'facebook' => 'Facebook',
             'instagram' => 'Instagram',
+            'threads' => 'Threads',
             default => 'Google',
         };
-        if ($channel['provider'] === 'instagram') {
+        if ($channel['provider'] === 'instagram' || $channel['provider'] === 'threads') {
+            $label = $channel['provider'] === 'threads' ? 'Threads' : 'Instagram';
             if ($access === null) {
-                throw new ChannelAuthException('Instagram access expired. Reconnect the channel.');
+                throw new ChannelAuthException($label . ' access expired. Reconnect the channel.');
             }
+            $refreshUrl = $channel['provider'] === 'threads'
+                ? 'https://graph.threads.net/refresh_access_token?' . http_build_query(['grant_type' => 'th_refresh_token', 'access_token' => $access])
+                : 'https://graph.instagram.com/refresh_access_token?' . http_build_query(['grant_type' => 'ig_refresh_token', 'access_token' => $access]);
             try {
-                $data = self::request('GET', 'https://graph.instagram.com/refresh_access_token?' . http_build_query([
-                    'grant_type' => 'ig_refresh_token',
-                    'access_token' => $access,
-                ]));
+                $data = self::request('GET', $refreshUrl);
             } catch (ChannelApiException $e) {
                 if ($e->status === 400 || $e->status === 401) {
-                    throw new ChannelAuthException('Instagram access expired. Reconnect the channel.');
+                    throw new ChannelAuthException($label . ' access expired. Reconnect the channel.');
                 }
                 throw $e;
             }
@@ -267,6 +271,15 @@ final class Channels
                 'state' => $state,
             ], '', '&', PHP_QUERY_RFC3986);
         }
+        if ($provider === 'threads') {
+            return 'https://threads.net/oauth/authorize?' . http_build_query([
+                'client_id' => config('oauth.threads.client_id'),
+                'redirect_uri' => $redirectUri,
+                'response_type' => 'code',
+                'scope' => self::THREADS_SCOPES,
+                'state' => $state,
+            ], '', '&', PHP_QUERY_RFC3986);
+        }
         if ($provider === 'instagram') {
             return 'https://www.instagram.com/oauth/authorize?' . http_build_query([
                 'client_id' => config('oauth.instagram.client_id'),
@@ -344,9 +357,13 @@ final class Channels
             'x' => config('oauth.x'),
             'facebook' => config('oauth.facebook'),
             'instagram' => config('oauth.instagram'),
+            'threads' => config('oauth.threads'),
             default => config('oauth.google'),
         };
         $redirect = $redirectUri ?: self::redirectUri($provider);
+        if ($provider === 'threads') {
+            return self::threadsToken($code, $redirect, $creds);
+        }
         if ($provider === 'instagram') {
             return self::instagramToken($code, $redirect, $creds);
         }
@@ -421,6 +438,7 @@ final class Channels
             'x' => self::xAccount($accessToken),
             'facebook' => self::facebookPages($accessToken),
             'instagram' => self::instagramAccount($accessToken),
+            'threads' => self::threadsAccount($accessToken),
             default => self::youtubeChannels($accessToken),
         };
     }
@@ -631,7 +649,7 @@ final class Channels
 
     public static function revoke(?string $token, string $provider = 'youtube'): void
     {
-        if ($token === null || $token === '' || $provider === 'pinterest' || $provider === 'instagram') {
+        if ($token === null || $token === '' || $provider === 'pinterest' || $provider === 'instagram' || $provider === 'threads') {
             return;
         }
         if ($provider === 'facebook') {
@@ -721,6 +739,67 @@ final class Channels
             'id' => $id,
             'name' => mb_substr($name !== '' ? $name : 'X', 0, 190),
             'avatar' => self::safeAvatar($avatar),
+            'kind' => 'Profile',
+        ]];
+    }
+
+    /** Exchange a Threads code for a long-lived token. Publishing is not available yet. */
+    private static function threadsToken(string $code, string $redirect, array $creds): array
+    {
+        $short = self::request('POST', 'https://graph.threads.net/oauth/access_token', [
+            'client_id' => $creds['client_id'],
+            'client_secret' => $creds['client_secret'],
+            'grant_type' => 'authorization_code',
+            'redirect_uri' => $redirect,
+            'code' => $code,
+        ]);
+        $token = (string) ($short['access_token'] ?? '');
+        if ($token === '') {
+            throw new RuntimeException('Threads didn’t return an access token.');
+        }
+        $long = self::request('GET', 'https://graph.threads.net/access_token?' . http_build_query([
+            'grant_type' => 'th_exchange_token',
+            'client_secret' => $creds['client_secret'],
+            'access_token' => $token,
+        ]));
+        $kept = (string) ($long['access_token'] ?? '');
+        if ($kept === '') {
+            $kept = $token;
+        }
+        return [
+            'access_token' => $kept,
+            'refresh_token' => null,
+            'expires_at' => gmdate('Y-m-d H:i:s', time() + max(3600, (int) ($long['expires_in'] ?? 5184000))),
+            'scope' => self::THREADS_SCOPES,
+        ];
+    }
+
+    /** The signed-in Threads profile: name and picture. Publishing is not available yet. */
+    public static function threadsAccount(string $accessToken): array
+    {
+        try {
+            $user = self::request('GET', 'https://graph.threads.net/v1.0/me?' . http_build_query([
+                'fields' => 'id,username,name,threads_profile_picture_url',
+            ]), null, $accessToken);
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] threads user lookup failed: %s', gmdate('c'), $e->getMessage()));
+            return [];
+        }
+        $id = (string) ($user['id'] ?? '');
+        if ($id === '' || strlen($id) > 191 || !preg_match('/^[0-9]+$/', $id)) {
+            return [];
+        }
+        $name = trim((string) ($user['name'] ?? ''));
+        if ($name === '') {
+            $name = trim((string) ($user['username'] ?? ''));
+        }
+        if ($name === '') {
+            return [];
+        }
+        return [[
+            'id' => $id,
+            'name' => mb_substr($name, 0, 190),
+            'avatar' => self::safeAvatar((string) ($user['threads_profile_picture_url'] ?? '')),
             'kind' => 'Profile',
         ]];
     }

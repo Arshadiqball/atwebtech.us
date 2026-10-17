@@ -47,6 +47,7 @@ $token = Security::csrfToken();
           'x' => 'atwebtech can read this X account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
           'facebook' => 'atwebtech can read this Facebook Page’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
           'instagram' => 'atwebtech can read this Instagram account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
+          'threads' => 'atwebtech can read this Threads profile’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
           'pinterest' => !empty($pending['sandbox'])
               ? 'This is the Pinterest sandbox account. atwebtech can read its name and picture. Publishing isn’t available yet, and this is not a live Pinterest profile. You can disconnect at any time.'
               : 'atwebtech can read this Pinterest account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
