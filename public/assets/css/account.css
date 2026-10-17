@@ -880,6 +880,8 @@ textarea.idea-input { resize: vertical; line-height: 1.5; }
 .cg-card.is-disabled:hover { border-color: var(--a-line); box-shadow: none; }
 .cg-card.is-disabled .cg-icon { filter: grayscale(.35); opacity: .7; }
 .cg-chip { position: absolute; top: 8px; right: 8px; margin: 0; }
+.cg-chip--on { background: var(--green-soft); color: var(--green-ink); }
+[data-theme="dark"] .cg-chip--on { color: #BDEBC9; }
 .cg-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; background: var(--c); color: #fff; }
 .cg-icon .brand-glyph { width: 18px; height: 18px; fill: currentColor; }
 .cg-icon .brand-text { font: 800 15px/1 var(--font-body); }
