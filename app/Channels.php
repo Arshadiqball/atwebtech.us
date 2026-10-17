@@ -268,7 +268,7 @@ final class Channels
             ], '', '&', PHP_QUERY_RFC3986);
         }
         if ($provider === 'threads') {
-            return 'https://threads.net/oauth/authorize?' . http_build_query([
+            return 'https://www.threads.com/oauth/authorize?' . http_build_query([
                 'client_id' => config('oauth.threads.client_id'),
                 'redirect_uri' => $redirectUri,
                 'response_type' => 'code',
