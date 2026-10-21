@@ -175,6 +175,7 @@ return [
                 'tag' => mb_substr(trim((string) ($_GET['tag'] ?? '')), 0, 24),
                 'set' => Workspace::pick('set', ['discover', 'personal']),
                 'category' => (string) ($_GET['category'] ?? ''),
+                'network' => (string) ($_GET['network'] ?? ''),
                 'q' => mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 80),
                 'board' => $tab === 'ideas' ? Workspace::board($uid) : null,
                 'personal' => Workspace::personalTemplates($uid),
@@ -222,6 +223,12 @@ return [
                 $prefill['idea'] = (int) $idea['id'];
             } elseif (isset($_GET['template']) && ($template = WorkspaceHandler::findTemplate($uid, (string) $_GET['template']))) {
                 $prefill['body'] = $template['prompt'];
+                if (!empty($template['image'])) {
+                    $prefill['image'] = $template['image'];
+                }
+                if (!empty($template['post_title'])) {
+                    $prefill['title'] = $template['post_title'];
+                }
             }
             return ['prefill' => $prefill];
         });

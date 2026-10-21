@@ -39,6 +39,56 @@ return [
         'cloud' => 'cloud.webp',
         'startups' => 'startups.webp',
         'productivity' => 'productivity.webp',
+        'instagram' => 'net-instagram.webp',
+        'facebook' => 'net-facebook.webp',
+        'tiktok' => 'net-tiktok.webp',
+        'linkedin' => 'net-linkedin.webp',
+        'youtube' => 'net-youtube.webp',
+        'pinterest' => 'net-pinterest.webp',
+        'threads' => 'net-threads.webp',
+        'x' => 'net-x.webp',
+    ],
+    'networks' => [
+        'instagram' => ['Instagram', [
+            ['ai', 'The line I rewrote myself', "One AI draft I almost posted this week.\n\nI rewrote the last two lines myself. That was the part people actually replied to."],
+            ['software', 'The check that stopped the bug', "The bug was one missing check.\n\nI added it, shipped the fix, and wrote down the test so it cannot sneak back in."],
+            ['gadgets', 'One setting, one quiet morning', "I turned off one notification on my phone.\n\nThe next morning I finished the task I kept postponing."],
+        ]],
+        'facebook' => ['Facebook', [
+            ['web', 'The page that felt slow', 'A page on our site was slow because it loaded images that were far bigger than the screen. We resized them. The page felt quicker, and more people reached the end of the form.'],
+            ['startups', 'What the customer actually opened', 'A customer told us the feature we were proud of was not the one they opened. We spent the next week on the thing they actually used.'],
+            ['productivity', 'The meeting we replaced', 'We cancelled a weekly meeting and replaced it with a short written update. People still knew what to do, and the hour came back.'],
+        ]],
+        'tiktok' => ['TikTok', [
+            ['ai', 'The check before I keep a line', "I asked an AI tool to draft this, then I checked every fact before I kept a line.\n\nHere is the one check I now do every time."],
+            ['gadgets', 'The setting that was already there', "This setting was already on my phone. I had just never turned it on.\n\nIt took a minute, and it saved me from unlocking the screen all afternoon."],
+            ['software', 'Stop guessing at the bug', "This bug took a day because I guessed instead of reproducing it.\n\nHere is the first thing I do now before I change any code."],
+        ]],
+        'linkedin' => ['LinkedIn', [
+            ['software', 'The review rule I still use', 'A bug that cost a day taught me a review rule I still use. Before I approve a change, I look for the one case the author did not try. That case is usually the one that reaches a customer.'],
+            ['startups', 'Ship the smaller fix first', 'We almost built the feature we wanted to talk about. A customer conversation showed they needed a smaller fix first. We shipped that, then decided what the bigger feature was actually for.'],
+            ['productivity', 'One block, one task', 'The most useful change to my week was not a new tool. I protected one block of time, wrote down the single task for that block, and stopped treating the inbox as the plan.'],
+        ]],
+        'youtube' => ['YouTube', [
+            ['ai', 'One check before you trust an AI draft', "I use an AI tool to start a draft, then I check it before anyone else sees it.\n\nIn this video I show the check, the kind of mistake it catches, and what I still write myself.", 'One check before you trust an AI draft'],
+            ['web', 'The change that made one page faster', "One page was slow because the images were larger than the layout needed.\n\nI show the before, the resize, and how I checked that the page still looked right.", 'The change that made one page faster'],
+            ['gadgets', 'The phone setting I wish I had found sooner', "A setting I already had, and the difference it made in a normal workday.\n\nI walk through where it is and who it helps.", 'The phone setting I wish I had found sooner'],
+        ]],
+        'pinterest' => ['Pinterest', [
+            ['productivity', 'A weekly plan you can finish', 'A simple weekly plan: one task in the morning block, a written update instead of a meeting, and a list short enough to finish.'],
+            ['web', 'Images sized for the screen', 'A faster page starts with images that match the size on screen. Save this for the next time a page feels heavy.'],
+            ['gadgets', 'What earns a place on the desk', 'Three things on a work desk that earn their space: a closed laptop, a notebook, and one device setting you actually use.'],
+        ]],
+        'threads' => ['Threads', [
+            ['ai', 'A first pass, then a real read', 'I let an AI tool draft the first pass. I still read every line before it goes anywhere.'],
+            ['software', 'The case you did not try', 'The review comment I leave most often: show me the case you did not try.'],
+            ['startups', 'The fix they named', 'We shipped the small fix a customer named before we built the feature we wanted to announce.'],
+        ]],
+        'x' => ['X', [
+            ['ai', 'Draft, then rewrite', 'I use an AI tool for a first draft. I still check the facts and rewrite the last lines myself before I post.'],
+            ['security', 'Three changes on a new laptop', 'New laptop, three changes before I sign in to work: updates on, a password manager, and the accounts that do not need to stay logged in.'],
+            ['software', 'Reproduce it once', 'Before I change code, I reproduce the bug once and write down the steps. Guessing is what made the last one take all day.'],
+        ]],
     ],
     'interests' => [
         'ai' => ['Artificial intelligence', [

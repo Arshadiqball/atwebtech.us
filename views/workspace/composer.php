@@ -31,6 +31,7 @@ $editing = (int) $p['id'] > 0;
 $library = data('templates');
 $featured = $library['items'];
 $interests = $library['interests'];
+$tplNetworks = $library['networks'];
 $images = $library['images'];
 $personal = Workspace::personalTemplates($uid);
 $ai = Assistant::enabled();
@@ -42,7 +43,7 @@ foreach (array_keys($picked) as $key) {
 }
 $media = $p['media'];
 ?>
-<form class="cp" action="/app/posts" method="post" novalidate data-cp>
+<form class="cp" action="/app/posts" method="post" novalidate data-cp<?= !empty($p['image']) && !$media ? ' data-cp-start-image="' . e($p['image']) . '"' : '' ?>>
   <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
   <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" data-field="id">
   <input type="hidden" name="idea" value="<?= (int) $p['idea'] ?>" data-field="idea">
@@ -211,6 +212,14 @@ $media = $p['media'];
     <aside class="cp-side" data-cp-side hidden>
       <section class="cp-panel" data-cp-panel="templates" hidden aria-label="Templates">
         <h3>Templates</h3>
+        <label class="cp-interest" for="<?= $px ?>-network">Network
+          <select class="idea-input" id="<?= $px ?>-network" data-cp-network>
+            <option value="">All networks</option>
+<?php foreach ($tplNetworks as $key => $group): ?>
+            <option value="<?= e($key) ?>"><?= e($group[0]) ?></option>
+<?php endforeach; ?>
+          </select>
+        </label>
         <label class="cp-interest" for="<?= $px ?>-interest">Interest
           <select class="idea-input" id="<?= $px ?>-interest" data-cp-interest>
             <option value="">All interests</option>
@@ -219,18 +228,22 @@ $media = $p['media'];
 <?php endforeach; ?>
           </select>
         </label>
-        <p class="cp-panel-lede">Choose an interest to see starting points you can rewrite. These are original prompts, not posts copied from other accounts.</p>
+        <p class="cp-panel-lede">Choose a network or an interest. Use puts the text and photo into your post so you can rewrite them.</p>
         <ul class="cp-tpl-list" role="list">
 <?php foreach ($personal as $tpl): ?>
-          <li data-cp-topic=""><b><?= e($tpl['title']) ?></b><p><?= e(mb_strimwidth($tpl['prompt'], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl['prompt']) ?>">Use</button></li>
+          <li data-cp-topic="" data-cp-network=""><b><?= e($tpl['title']) ?></b><p><?= e(mb_strimwidth($tpl['prompt'], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl['prompt']) ?>">Use</button></li>
 <?php endforeach; ?>
 <?php foreach ($featured as $key => $tpl): ?>
-          <li data-cp-topic=""><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($tpl[2]) ?></b><p><?= e(mb_strimwidth($tpl[3], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl[3]) ?>">Use</button></li>
+          <li data-cp-topic="" data-cp-network=""><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($tpl[2]) ?></b><p><?= e(mb_strimwidth($tpl[3], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl[3]) ?>" data-cp-image="/assets/img/templates/<?= e($images[$key]) ?>">Use</button></li>
 <?php endforeach; ?>
 <?php foreach ($interests as $key => $group): foreach ($group[1] as $post): ?>
-          <li data-cp-topic="<?= e($key) ?>" hidden><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($post[0]) ?></b><p><?= e(mb_strimwidth($post[1], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[1]) ?>">Use</button></li>
+          <li data-cp-topic="<?= e($key) ?>" data-cp-network="" hidden><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($post[0]) ?></b><p><?= e(mb_strimwidth($post[1], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[1]) ?>" data-cp-image="/assets/img/templates/<?= e($images[$key]) ?>">Use</button></li>
+<?php endforeach; endforeach; ?>
+<?php foreach ($tplNetworks as $net => $group): foreach ($group[1] as $post): ?>
+          <li data-cp-topic="<?= e($post[0]) ?>" data-cp-network="<?= e($net) ?>" hidden><img src="/assets/img/templates/<?= e($images[$net]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($post[1]) ?></b><p><?= e(mb_strimwidth($post[2], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[2]) ?>" data-cp-image="/assets/img/templates/<?= e($images[$net]) ?>"<?= isset($post[3]) ? ' data-cp-title="' . e($post[3]) . '"' : '' ?>>Use</button></li>
 <?php endforeach; endforeach; ?>
         </ul>
+        <p class="cp-panel-lede" data-cp-tpl-empty hidden>No starting points for that network and interest. Try another interest, or set interest back to All interests.</p>
         <a class="ws-link" href="/app/create?tab=templates">Manage templates</a>
       </section>
 

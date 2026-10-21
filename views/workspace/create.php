@@ -5,6 +5,7 @@
 /** @var string $tag */
 /** @var string $set */
 /** @var string $category */
+/** @var string $network */
 /** @var string $q */
 /** @var ?array $board */
 /** @var array $personal */
@@ -12,6 +13,11 @@ $token = Security::csrfToken();
 $library = data('templates');
 $discover = $library['items'];
 $categories = $library['categories'];
+$tplNetworks = $library['networks'];
+$images = $library['images'];
+if (!isset($tplNetworks[$network])) {
+    $network = '';
+}
 $excerpt = static fn (string $text, int $len): string => mb_strlen($text) > $len ? rtrim(mb_substr($text, 0, $len)) . '…' : $text;
 $ideaJson = static fn (array $idea): string => json_encode(['id' => (int) $idea['id'], 'title' => $idea['title'], 'body' => (string) $idea['body'], 'tags' => str_replace(',', ', ', (string) $idea['tags']), 'group' => (int) ($idea['group_id'] ?? 0)], JSON_UNESCAPED_UNICODE | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_TAG | JSON_HEX_AMP);
 $url = static fn (array $params): string => '/app/create?' . http_build_query(array_filter($params, static fn ($v) => $v !== '' && $v !== null));
@@ -25,13 +31,28 @@ if ($tab === 'ideas'): ?>
 <?php endif;
 $actions = (string) ob_get_clean();
 
-$renderTemplate = static function (string $key, string $emoji, string $title, string $prompt, bool $own = false) use ($token, $excerpt): void { ?>
+$renderTemplate = static function (string $key, string $emoji, string $title, string $prompt, bool $own = false, string $image = '', string $channel = '', string $postTitle = '') use ($token, $excerpt): void {
+    $compose = ['body' => $prompt];
+    if ($image !== '') {
+        $compose['image'] = '/assets/img/templates/' . $image;
+    }
+    if ($channel !== '') {
+        $compose['channel'] = $channel;
+    }
+    if ($postTitle !== '') {
+        $compose['title'] = $postTitle;
+    }
+    ?>
       <li class="tpl-card">
+<?php if ($image !== ''): ?>
+        <img src="/assets/img/templates/<?= e($image) ?>" alt="" width="640" height="360" loading="lazy" decoding="async">
+<?php else: ?>
         <span class="tpl-emoji" aria-hidden="true"><?= e($emoji) ?></span>
+<?php endif; ?>
         <h3 class="tpl-title"><?= e($title) ?></h3>
         <p class="tpl-text"><?= e($excerpt($prompt, 120)) ?></p>
         <div class="tpl-actions">
-          <a class="ws-btn ws-btn--sm" href="/app/publish/new?template=<?= e($key) ?>" data-compose="<?= e(json_encode(['body' => $prompt], JSON_UNESCAPED_UNICODE)) ?>"><?= icon('note-pencil') ?>Write post</a>
+          <a class="ws-btn ws-btn--sm" href="/app/publish/new?template=<?= e($key) ?>" data-compose="<?= e(json_encode($compose, JSON_UNESCAPED_UNICODE)) ?>"><?= icon('note-pencil') ?>Write post</a>
           <form action="/app/templates" method="post">
             <input type="hidden" name="_token" value="<?= e($token) ?>">
             <input type="hidden" name="key" value="<?= e($key) ?>">
@@ -184,6 +205,12 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
       <a href="/app/create?tab=templates&amp;set=personal"<?= $set === 'personal' ? ' aria-current="page"' : '' ?>>Personal <span><?= count($personal) ?></span></a>
     </nav>
 <?php if ($set === 'discover'): ?>
+    <nav class="tpl-nets" aria-label="Networks">
+      <a href="<?= e($url(['tab' => 'templates', 'q' => $q, 'category' => $category])) ?>"<?= $network === '' ? ' aria-current="page"' : '' ?>>All</a>
+<?php foreach ($tplNetworks as $slug => $group): ?>
+      <a href="<?= e($url(['tab' => 'templates', 'network' => $slug])) ?>"<?= $slug === $network ? ' aria-current="page"' : '' ?>><?= e($group[0]) ?></a>
+<?php endforeach; ?>
+    </nav>
     <div class="wsp-filters">
       <form class="tpl-search" action="/app/create" method="get" role="search">
         <input type="hidden" name="tab" value="templates">
@@ -229,13 +256,24 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
   </ul>
 <?php endif; ?>
 
+<?php elseif ($network !== ''): $group = $tplNetworks[$network]; ?>
+  <section class="tpl-section" aria-labelledby="tpl-net">
+    <header class="tpl-section-head">
+      <h2 id="tpl-net"><?= e($group[0]) ?></h2>
+      <a href="/app/create?tab=templates">All networks<?= icon('x') ?></a>
+    </header>
+    <ul class="tpl-grid" role="list">
+<?php foreach ($group[1] as $i => $post) { $renderTemplate($network . '-' . $i, '📝', $post[1], $post[2], false, $images[$network], $network, $post[3] ?? ''); } ?>
+    </ul>
+  </section>
+
 <?php elseif ($category === '' && $q === ''): ?>
   <section class="tpl-featured" aria-labelledby="tpl-featured-title">
     <p class="tpl-kicker">Featured templates</p>
     <h2 id="tpl-featured-title">Our top picks</h2>
     <p class="tpl-sub">Helpful starting points for your next post.</p>
     <ul class="tpl-grid tpl-grid--3" role="list">
-<?php foreach ($library['featured'] as $key) { [, $emoji, $title, $prompt] = $discover[$key]; $renderTemplate($key, $emoji, $title, $prompt); } ?>
+<?php foreach ($library['featured'] as $key) { [, $emoji, $title, $prompt] = $discover[$key]; $renderTemplate($key, $emoji, $title, $prompt, false, $images[$key] ?? ''); } ?>
     </ul>
   </section>
 <?php foreach ($categories as $cat => $label):
@@ -247,7 +285,7 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
       <a href="<?= e($url(['tab' => 'templates', 'category' => $cat])) ?>">See All<?= icon('caret-right') ?></a>
     </header>
     <ul class="tpl-grid" role="list">
-<?php foreach ($items as $key => [, $emoji, $title, $prompt]) { $renderTemplate($key, $emoji, $title, $prompt); } ?>
+<?php foreach ($items as $key => [, $emoji, $title, $prompt]) { $renderTemplate($key, $emoji, $title, $prompt, false, $images[$key] ?? ''); } ?>
     </ul>
   </section>
 <?php endforeach; ?>
@@ -260,7 +298,7 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
     </header>
 <?php if ($filtered): ?>
     <ul class="tpl-grid" role="list">
-<?php foreach ($filtered as $key => [, $emoji, $title, $prompt]) { $renderTemplate($key, $emoji, $title, $prompt); } ?>
+<?php foreach ($filtered as $key => [, $emoji, $title, $prompt]) { $renderTemplate($key, $emoji, $title, $prompt, false, $images[$key] ?? ''); } ?>
     </ul>
 <?php else: ?>
     <p class="wsp-muted">No templates match. Try another word or category.</p>

@@ -431,9 +431,20 @@ final class WorkspaceHandler
     /** Discover template by key, or a personal template as `p{id}`. */
     public static function findTemplate(int $uid, string $key): ?array
     {
-        $items = data('templates')['items'];
+        $library = data('templates');
+        $items = $library['items'];
+        $imageFor = static function (string $name) use ($library): string {
+            $file = $library['images'][$name] ?? '';
+            return $file !== '' ? '/assets/img/templates/' . $file : '';
+        };
         if (isset($items[$key])) {
-            return ['title' => $items[$key][2], 'prompt' => $items[$key][3]];
+            return ['title' => $items[$key][2], 'prompt' => $items[$key][3], 'image' => $imageFor($key)];
+        }
+        if (preg_match('/^(instagram|facebook|tiktok|linkedin|youtube|pinterest|threads|x)-(\d+)$/', $key, $hit)) {
+            $post = $library['networks'][$hit[1]][1][(int) $hit[2]] ?? null;
+            if ($post !== null) {
+                return ['title' => $post[1], 'prompt' => $post[2], 'image' => $imageFor($hit[1]), 'post_title' => $post[3] ?? ''];
+            }
         }
         if (preg_match('/^p(\d+)$/', $key, $m)) {
             $stmt = Database::connection()->prepare('SELECT title, prompt FROM post_templates WHERE id = :id AND user_id = :uid');

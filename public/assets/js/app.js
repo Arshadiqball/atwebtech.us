@@ -932,6 +932,7 @@
     const schedule = $('[data-cp-schedule]', form);
     let media = null;
     let uploading = false;
+    let pendingImage = false;
     const emptyFrame = $('[data-pv-media]', form).innerHTML;
 
     const setPanel = (name) => {
@@ -1135,10 +1136,27 @@
       if (e.key === 'Escape' && open) { e.preventDefault(); e.stopPropagation(); open.open = false; $('summary', open).focus(); }
     });
     const interest = $('[data-cp-interest]', form);
-    if (interest) interest.addEventListener('change', () => {
-      const value = interest.value;
-      $$('[data-cp-topic]', form).forEach((li) => { li.hidden = value === '' ? li.dataset.cpTopic !== '' : li.dataset.cpTopic !== value; });
-    });
+    const network = $('[data-cp-network]', form);
+    const applyTemplates = () => {
+      if (!interest && !network) return;
+      const topic = interest ? interest.value : '';
+      const net = network ? network.value : '';
+      let shown = 0;
+      $$('[data-cp-topic]', form).forEach((li) => {
+        const liTopic = li.dataset.cpTopic || '';
+        const liNet = li.dataset.cpNetwork || '';
+        const show = net === '' && topic === '' ? liNet === '' && liTopic === ''
+          : net !== '' && topic === '' ? liNet === net
+            : net === '' ? liNet === '' && liTopic === topic
+              : liNet === net && liTopic === topic;
+        li.hidden = !show;
+        if (show) shown += 1;
+      });
+      const empty = $('[data-cp-tpl-empty]', form);
+      if (empty) empty.hidden = shown > 0;
+    };
+    if (interest) interest.addEventListener('change', applyTemplates);
+    if (network) network.addEventListener('change', applyTemplates);
     const search = $('[data-cp-search]', form);
     search.addEventListener('input', () => {
       const q = search.value.trim().toLowerCase();
@@ -1146,11 +1164,35 @@
     });
     $('[data-cp-none]', form).addEventListener('click', () => { targets().forEach((t) => { t.checked = false; }); sync(); });
 
+    const attachImage = (src) => {
+      if (!src || uploading || pendingImage) return;
+      pendingImage = true;
+      fetch(src, { credentials: 'same-origin' })
+        .then((res) => { if (!res.ok) throw new Error('That image could not be added.'); return res.blob(); })
+        .then((blob) => {
+          pendingImage = false;
+          if (uploading) return;
+          const name = src.split('/').pop() || 'template.webp';
+          upload(new File([blob], name, { type: blob.type || 'image/webp' }));
+        })
+        .catch((err) => {
+          pendingImage = false;
+          mediaError(err.message || 'That image could not be added.');
+        });
+    };
+
     form.addEventListener('click', (e) => {
       const ins = e.target.closest('[data-cp-insert]');
       if (ins) { insert(ins.dataset.cpInsert); const pop = ins.closest('details'); if (pop) pop.open = false; return; }
       const use = e.target.closest('[data-cp-use]');
-      if (use) { area.value = area.value.trim() ? `${area.value.trimEnd()}\n\n${use.dataset.cpUse}` : use.dataset.cpUse; area.focus(); sync(); return; }
+      if (use) {
+        area.value = area.value.trim() ? `${area.value.trimEnd()}\n\n${use.dataset.cpUse}` : use.dataset.cpUse;
+        if (use.dataset.cpTitle) f.title.value = use.dataset.cpTitle;
+        area.focus();
+        sync();
+        attachImage(use.dataset.cpImage);
+        return;
+      }
       const tab = e.target.closest('[data-cp-tab]');
       if (tab) { setPanel(tab.dataset.cpTab); return; }
       const open = e.target.closest('[data-cp-open]');
@@ -1207,6 +1249,7 @@
     media = initialMedia;
     if (window.matchMedia('(min-width: 1100px)').matches) setPanel('preview');
     sync();
+    if (form.dataset.cpStartImage && !media) attachImage(form.dataset.cpStartImage);
 
     return {
       sync,
@@ -1230,6 +1273,7 @@
         mediaError('');
         $('[data-cp-progress]', form).hidden = true;
         showMedia(data.media || null);
+        if (!data.media && data.image) attachImage(data.image);
         $('[data-compose-title]', form).textContent = data.id ? 'Edit Post' : 'Create Post';
         $('[data-compose-delete]', form).hidden = !data.id;
         $('[data-cp-another-wrap]', form).hidden = !dialog || Boolean(data.id);
