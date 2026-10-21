@@ -46,10 +46,10 @@ $next = $queue['next'] ?? null;
       <form action="<?= e($self) ?>/fill" method="post">
         <input type="hidden" name="_token" value="<?= e($token) ?>">
         <button type="submit" class="ws-btn" data-confirm="<?= e(match ($channel['provider']) {
-            'linkedin' => 'Schedule 10 template posts on random days over the next 30 days? LinkedIn publishes each one at its time. You can edit or delete them before then.',
-            'youtube' => 'Schedule 10 template posts on random days over the next 30 days? Add a video to each one. YouTube does not publish a post that has no video.',
-            default => 'Schedule 10 template posts on random days over the next 30 days? You can edit or delete any of them. This network is saved as a plan and is not published automatically.',
-        }) ?>">Schedule 10</button>
+            'linkedin' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. LinkedIn publishes each one at 6:00 PM.',
+            'youtube' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Add a video to each one. YouTube does not publish a post that has no video.',
+            default => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. This network is saved as a plan and is not published automatically.',
+        }) ?>">Every day</button>
       </form>
       <a class="ws-btn ws-btn--dark" href="/app/publish/new?target=<?= e($target) ?>" data-compose="<?= $newPost ?>"><?= icon('plus') ?>New Post</a>
     </div>

@@ -340,7 +340,7 @@ final class ChannelHandler
         });
     }
 
-    /** Place 10 template posts on random days across the next 30 days. */
+    /** Place one template post on each of the next 30 days, including today. */
     public static function fillFromTemplates(string $id): never
     {
         $user = Auth::member();
@@ -357,23 +357,45 @@ final class ChannelHandler
         if (!$pool) {
             self::notice($back, 'No templates are short enough for this network.');
         }
+        $tz = Workspace::timezone($user);
+        $now = new DateTimeImmutable('now', $tz);
+        $soon = $now->modify('+15 minutes');
+        $taken = [];
+        $stmt = Database::connection()->prepare('SELECT planned_at FROM posts WHERE user_id = :uid AND channel_id = :cid AND status = :planned AND planned_at >= :from');
+        $stmt->execute([
+            'uid' => $uid,
+            'cid' => (int) $channel['id'],
+            'planned' => 'planned',
+            'from' => $now->setTime(0, 0)->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
+        ]);
+        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $planned) {
+            $taken[Workspace::local((string) $planned, $tz)->format('Y-m-d')] = true;
+        }
+        $slots = [];
+        for ($d = 0; $d < 30; $d++) {
+            $at = $now->setTime(0, 0)->modify('+' . $d . ' days')->setTime(18, 0);
+            if (isset($taken[$at->format('Y-m-d')])) {
+                continue;
+            }
+            if ($at <= $now) {
+                $at = $soon;
+            }
+            $slots[] = $at;
+        }
+        if (!$slots) {
+            self::notice($back, 'Every day for the next 30 days already has a post, including today.');
+        }
         $chosen = [];
-        while (count($chosen) < 10) {
+        while (count($chosen) < count($slots)) {
             $bag = $pool;
             shuffle($bag);
             foreach ($bag as $item) {
                 $chosen[] = $item;
-                if (count($chosen) === 10) {
+                if (count($chosen) === count($slots)) {
                     break;
                 }
             }
         }
-        $tz = Workspace::timezone($user);
-        $start = new DateTimeImmutable('tomorrow 18:00', $tz);
-        $offsets = range(0, 29);
-        shuffle($offsets);
-        $offsets = array_slice($offsets, 0, 10);
-        sort($offsets);
         $youtube = $channel['provider'] === 'youtube';
         $yt = data('youtube');
         $titleMax = (int) $yt['title_max'];
@@ -392,12 +414,12 @@ final class ChannelHandler
         $copied = [];
         $pdo->beginTransaction();
         try {
-            if (self::countPosts($uid) + 10 > 1000) {
+            if (self::countPosts($uid) + count($slots) > 1000) {
                 throw new RuntimeException('You have reached the limit of 1,000 posts. Delete a few to add more.');
             }
-            foreach ($offsets as $i => $offset) {
+            foreach ($slots as $i => $slot) {
                 $item = $chosen[$i];
-                $at = $start->modify('+' . $offset . ' days')->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+                $at = $slot->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
                 $mediaId = null;
                 if (!$youtube && $item['image'] !== '' && preg_match('/^[a-z0-9-]+\.webp$/', $item['image'])) {
                     $made = Media::copyReady($uid, $imageRoot . '/' . $item['image'], $item['image']);
@@ -439,10 +461,11 @@ final class ChannelHandler
             error_log(sprintf('[%s] template fill channel %d: %s', gmdate('c'), (int) $channel['id'], $e->getMessage()));
             self::notice($back, $e instanceof RuntimeException ? $e->getMessage() : 'Those posts could not be scheduled. Please try again.');
         }
+        $n = count($slots);
         $message = match ($channel['provider']) {
-            'linkedin' => '10 posts scheduled across the next 30 days. LinkedIn publishes each one at its time.',
-            'youtube' => '10 posts scheduled across the next 30 days. Add a video to each one before its time.',
-            default => '10 posts scheduled across the next 30 days. They stay in the queue as plans you can edit.',
+            'linkedin' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. LinkedIn publishes each one at its time.',
+            'youtube' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. Add a video to each one before its time.',
+            default => $n . ' posts scheduled, one for every open day through the next 30 days, including today. They stay in the queue as plans you can edit.',
         };
         self::notice($back, $message);
     }
