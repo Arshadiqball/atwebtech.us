@@ -1142,6 +1142,7 @@ p.cp-field--wide { margin-top: -6px; }
 .cp-tpl-list { display: grid; gap: 8px; }
 .cp-tpl-list li { display: grid; gap: 4px; padding: 0 0 10px; border: 1px solid var(--a-line); border-radius: 10px; overflow: hidden; }
 .cp-tpl-list img { width: 100%; aspect-ratio: 16 / 9; object-fit: cover; background: var(--a-soft); }
+.cp-tpl-list .ws-chip { justify-self: start; margin: 10px 12px 0; }
 .cp-tpl-list b { padding: 8px 12px 0; font-size: 13.5px; font-weight: 600; }
 .cp-tpl-list li > b:first-child { padding-top: 10px; }
 .cp-tpl-list p { padding: 0 12px; color: var(--ink-2); font-size: 12.5px; }

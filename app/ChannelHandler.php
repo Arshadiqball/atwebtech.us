@@ -421,7 +421,7 @@ final class ChannelHandler
                 $item = $chosen[$i];
                 $at = $slot->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
                 $mediaId = null;
-                if (!$youtube && $item['image'] !== '' && preg_match('/^[a-z0-9-]+\.webp$/', $item['image'])) {
+                if (!in_array($channel['provider'], ['youtube', 'tiktok'], true) && $item['image'] !== '' && preg_match('/^[a-z0-9-]+\.webp$/', $item['image'])) {
                     $made = Media::copyReady($uid, $imageRoot . '/' . $item['image'], $item['image']);
                     $mediaId = $made['id'];
                     $copied[] = $made['file'];
@@ -490,6 +490,9 @@ final class ChannelHandler
         };
         foreach ($library['networks'][$provider][1] ?? [] as $post) {
             $add($post[1], $post[2], $provider, $post[3] ?? '');
+        }
+        if ($provider === 'youtube' || $provider === 'tiktok') {
+            return $pool;
         }
         foreach ($library['interests'] as $key => $group) {
             foreach ($group[1] as $post) {

@@ -263,7 +263,7 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
       <a href="/app/create?tab=templates">All networks<?= icon('x') ?></a>
     </header>
     <ul class="tpl-grid" role="list">
-<?php foreach ($group[1] as $i => $post) { $renderTemplate($network . '-' . $i, '📝', $post[1], $post[2], false, $images[$network], $network, $post[3] ?? ''); } ?>
+<?php foreach ($group[1] as $i => $post) { $renderTemplate($network . '-' . $i, in_array($network, ['youtube', 'tiktok'], true) ? '🎬' : '📝', $post[1], $post[2], false, in_array($network, ['youtube', 'tiktok'], true) ? '' : $images[$network], $network, $post[3] ?? ''); } ?>
     </ul>
   </section>
 

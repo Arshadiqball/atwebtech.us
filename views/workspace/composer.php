@@ -33,6 +33,28 @@ $featured = $library['items'];
 $interests = $library['interests'];
 $tplNetworks = $library['networks'];
 $images = $library['images'];
+$templateNetwork = '';
+foreach (array_keys($picked) as $pickedKey) {
+    $pickedProvider = null;
+    if (str_starts_with((string) $pickedKey, 'n:')) {
+        $pickedProvider = substr((string) $pickedKey, 2);
+    } elseif (str_starts_with((string) $pickedKey, 'c:')) {
+        foreach ($accounts as $account) {
+            if ((int) $account['id'] === (int) substr((string) $pickedKey, 2)) {
+                $pickedProvider = $account['provider'];
+            }
+        }
+    }
+    if ($templateNetwork === '' && $pickedProvider !== null) {
+        $templateNetwork = $pickedProvider;
+    } elseif ($templateNetwork !== $pickedProvider) {
+        $templateNetwork = '';
+        break;
+    }
+}
+if (!in_array($templateNetwork, ['youtube', 'tiktok'], true)) {
+    $templateNetwork = '';
+}
 $personal = Workspace::personalTemplates($uid);
 $ai = Assistant::enabled();
 $err = static fn (string $key): string => isset($errors[$key]) ? '' : ' hidden';
@@ -216,7 +238,7 @@ $media = $p['media'];
           <select class="idea-input" id="<?= $px ?>-network" data-cp-network>
             <option value="">All networks</option>
 <?php foreach ($tplNetworks as $key => $group): ?>
-            <option value="<?= e($key) ?>"><?= e($group[0]) ?></option>
+            <option value="<?= e($key) ?>"<?= $key === $templateNetwork ? ' selected' : '' ?>><?= e($group[0]) ?></option>
 <?php endforeach; ?>
           </select>
         </label>
@@ -228,7 +250,7 @@ $media = $p['media'];
 <?php endforeach; ?>
           </select>
         </label>
-        <p class="cp-panel-lede">Choose a network or an interest. Use puts the text and photo into your post so you can rewrite them.</p>
+        <p class="cp-panel-lede" data-cp-tpl-lede><?= $templateNetwork !== '' ? 'These are video scripts. Record your own video and attach that file. Use does not add a photo.' : 'Choose a network or an interest. Use puts the text and photo into your post so you can rewrite them.' ?></p>
         <ul class="cp-tpl-list" role="list">
 <?php foreach ($personal as $tpl): ?>
           <li data-cp-topic="" data-cp-network=""><b><?= e($tpl['title']) ?></b><p><?= e(mb_strimwidth($tpl['prompt'], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl['prompt']) ?>">Use</button></li>
@@ -239,8 +261,8 @@ $media = $p['media'];
 <?php foreach ($interests as $key => $group): foreach ($group[1] as $post): ?>
           <li data-cp-topic="<?= e($key) ?>" data-cp-network="" hidden><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($post[0]) ?></b><p><?= e(mb_strimwidth($post[1], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[1]) ?>" data-cp-image="/assets/img/templates/<?= e($images[$key]) ?>">Use</button></li>
 <?php endforeach; endforeach; ?>
-<?php foreach ($tplNetworks as $net => $group): foreach ($group[1] as $post): ?>
-          <li data-cp-topic="<?= e($post[0]) ?>" data-cp-network="<?= e($net) ?>" hidden><img src="/assets/img/templates/<?= e($images[$net]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($post[1]) ?></b><p><?= e(mb_strimwidth($post[2], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[2]) ?>" data-cp-image="/assets/img/templates/<?= e($images[$net]) ?>"<?= isset($post[3]) ? ' data-cp-title="' . e($post[3]) . '"' : '' ?>>Use</button></li>
+<?php foreach ($tplNetworks as $net => $group): $videoNet = in_array($net, ['youtube', 'tiktok'], true); foreach ($group[1] as $post): ?>
+          <li data-cp-topic="<?= e($post[0]) ?>" data-cp-network="<?= e($net) ?>"<?= $net === $templateNetwork ? '' : ' hidden' ?>><?php if (!$videoNet): ?><img src="/assets/img/templates/<?= e($images[$net]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><?php else: ?><span class="ws-chip">Video</span><?php endif; ?><b><?= e($post[1]) ?></b><p><?= e(mb_strimwidth($post[2], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[2]) ?>"<?php if (!$videoNet): ?> data-cp-image="/assets/img/templates/<?= e($images[$net]) ?>"<?php endif; ?><?= isset($post[3]) ? ' data-cp-title="' . e($post[3]) . '"' : '' ?>>Use</button></li>
 <?php endforeach; endforeach; ?>
         </ul>
         <p class="cp-panel-lede" data-cp-tpl-empty hidden>No starting points for that network and interest. Try another interest, or set interest back to All interests.</p>

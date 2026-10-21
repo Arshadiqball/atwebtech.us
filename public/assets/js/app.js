@@ -1154,9 +1154,16 @@
       });
       const empty = $('[data-cp-tpl-empty]', form);
       if (empty) empty.hidden = shown > 0;
+      const lede = $('[data-cp-tpl-lede]', form);
+      if (lede) {
+        lede.textContent = net === 'youtube' || net === 'tiktok'
+          ? 'These are video scripts. Record your own video and attach that file. Use does not add a photo.'
+          : 'Choose a network or an interest. Use puts the text and photo into your post so you can rewrite them.';
+      }
     };
     if (interest) interest.addEventListener('change', applyTemplates);
     if (network) network.addEventListener('change', applyTemplates);
+    if (network && network.value !== '') applyTemplates();
     const search = $('[data-cp-search]', form);
     search.addEventListener('input', () => {
       const q = search.value.trim().toLowerCase();
