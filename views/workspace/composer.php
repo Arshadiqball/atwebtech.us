@@ -28,7 +28,10 @@ if ($p['date'] === '' || $p['time'] === '') {
 }
 $px = $dialog ? 'dc' : 'pc';
 $editing = (int) $p['id'] > 0;
-$featured = data('templates')['items'];
+$library = data('templates');
+$featured = $library['items'];
+$interests = $library['interests'];
+$images = $library['images'];
 $personal = Workspace::personalTemplates($uid);
 $ai = Assistant::enabled();
 $err = static fn (string $key): string => isset($errors[$key]) ? '' : ' hidden';
@@ -208,14 +211,25 @@ $media = $p['media'];
     <aside class="cp-side" data-cp-side hidden>
       <section class="cp-panel" data-cp-panel="templates" hidden aria-label="Templates">
         <h3>Templates</h3>
-        <p class="cp-panel-lede">Pick a prompt to start from. It goes into your post so you can rewrite it.</p>
+        <label class="cp-interest" for="<?= $px ?>-interest">Interest
+          <select class="idea-input" id="<?= $px ?>-interest" data-cp-interest>
+            <option value="">All interests</option>
+<?php foreach ($interests as $key => $group): ?>
+            <option value="<?= e($key) ?>"><?= e($group[0]) ?></option>
+<?php endforeach; ?>
+          </select>
+        </label>
+        <p class="cp-panel-lede">Choose an interest to see starting points you can rewrite. These are original prompts, not posts copied from other accounts.</p>
         <ul class="cp-tpl-list" role="list">
 <?php foreach ($personal as $tpl): ?>
-          <li><b><?= e($tpl['title']) ?></b><p><?= e(mb_strimwidth($tpl['prompt'], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl['prompt']) ?>">Use</button></li>
+          <li data-cp-topic=""><b><?= e($tpl['title']) ?></b><p><?= e(mb_strimwidth($tpl['prompt'], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl['prompt']) ?>">Use</button></li>
 <?php endforeach; ?>
-<?php foreach ($featured as $tpl): ?>
-          <li><b><?= e($tpl[2]) ?></b><p><?= e(mb_strimwidth($tpl[3], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl[3]) ?>">Use</button></li>
+<?php foreach ($featured as $key => $tpl): ?>
+          <li data-cp-topic=""><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($tpl[2]) ?></b><p><?= e(mb_strimwidth($tpl[3], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl[3]) ?>">Use</button></li>
 <?php endforeach; ?>
+<?php foreach ($interests as $key => $group): foreach ($group[1] as $post): ?>
+          <li data-cp-topic="<?= e($key) ?>" hidden><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($post[0]) ?></b><p><?= e(mb_strimwidth($post[1], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[1]) ?>">Use</button></li>
+<?php endforeach; endforeach; ?>
         </ul>
         <a class="ws-link" href="/app/create?tab=templates">Manage templates</a>
       </section>

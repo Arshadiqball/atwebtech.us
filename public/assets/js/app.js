@@ -1134,6 +1134,11 @@
       const open = pops.find((d) => d.open);
       if (e.key === 'Escape' && open) { e.preventDefault(); e.stopPropagation(); open.open = false; $('summary', open).focus(); }
     });
+    const interest = $('[data-cp-interest]', form);
+    if (interest) interest.addEventListener('change', () => {
+      const value = interest.value;
+      $$('[data-cp-topic]', form).forEach((li) => { li.hidden = value === '' ? li.dataset.cpTopic !== '' : li.dataset.cpTopic !== value; });
+    });
     const search = $('[data-cp-search]', form);
     search.addEventListener('input', () => {
       const q = search.value.trim().toLowerCase();
