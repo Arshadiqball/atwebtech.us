@@ -340,6 +340,152 @@ final class ChannelHandler
         });
     }
 
+    /** Place 10 template posts on random days across the next 30 days. */
+    public static function fillFromTemplates(string $id): never
+    {
+        $user = Auth::member();
+        $uid = (int) $user['id'];
+        if (!ctype_digit($id)) {
+            not_found();
+        }
+        $channel = Channels::find($uid, (int) $id);
+        if ($channel === null) {
+            not_found();
+        }
+        $back = '/app/channels/' . (int) $channel['id'];
+        $pool = self::templatePool((string) $channel['provider']);
+        if (!$pool) {
+            self::notice($back, 'No templates are short enough for this network.');
+        }
+        $chosen = [];
+        while (count($chosen) < 10) {
+            $bag = $pool;
+            shuffle($bag);
+            foreach ($bag as $item) {
+                $chosen[] = $item;
+                if (count($chosen) === 10) {
+                    break;
+                }
+            }
+        }
+        $tz = Workspace::timezone($user);
+        $start = new DateTimeImmutable('tomorrow 18:00', $tz);
+        $offsets = range(0, 29);
+        shuffle($offsets);
+        $offsets = array_slice($offsets, 0, 10);
+        sort($offsets);
+        $youtube = $channel['provider'] === 'youtube';
+        $yt = data('youtube');
+        $titleMax = (int) $yt['title_max'];
+        $meta = $youtube ? json_encode([
+            'category' => $yt['default_category'],
+            'visibility' => 'public',
+            'license' => 'youtube',
+            'notify' => true,
+            'embeddable' => true,
+            'kids' => false,
+            'synthetic' => false,
+        ]) : null;
+        $imageRoot = BASE_PATH . '/public/assets/img/templates';
+        $pdo = Database::connection();
+        $insert = $pdo->prepare('INSERT INTO posts (user_id, channel, channel_id, body, title, meta, tags, media_id, first_comment, status, planned_at, idea_id, created_at, updated_at) VALUES (:uid, :channel, :cid, :body, :title, :meta, :tags, :media, :first, :status, :planned, :idea, :created, :now)');
+        $copied = [];
+        $pdo->beginTransaction();
+        try {
+            if (self::countPosts($uid) + 10 > 1000) {
+                throw new RuntimeException('You have reached the limit of 1,000 posts. Delete a few to add more.');
+            }
+            foreach ($offsets as $i => $offset) {
+                $item = $chosen[$i];
+                $at = $start->modify('+' . $offset . ' days')->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
+                $mediaId = null;
+                if (!$youtube && $item['image'] !== '' && preg_match('/^[a-z0-9-]+\.webp$/', $item['image'])) {
+                    $made = Media::copyReady($uid, $imageRoot . '/' . $item['image'], $item['image']);
+                    $mediaId = $made['id'];
+                    $copied[] = $made['file'];
+                }
+                $title = null;
+                if ($youtube) {
+                    $title = mb_substr(trim($item['post_title'] !== '' ? $item['post_title'] : $item['title']), 0, $titleMax);
+                }
+                $now = Database::now();
+                $insert->execute([
+                    'uid' => $uid,
+                    'channel' => $channel['provider'],
+                    'cid' => (int) $channel['id'],
+                    'body' => $item['body'],
+                    'title' => $title !== '' ? $title : null,
+                    'meta' => $meta,
+                    'tags' => null,
+                    'media' => $mediaId,
+                    'first' => null,
+                    'status' => 'planned',
+                    'planned' => $at,
+                    'idea' => null,
+                    'created' => $now,
+                    'now' => $now,
+                ]);
+            }
+            $pdo->commit();
+        } catch (Throwable $e) {
+            if ($pdo->inTransaction()) {
+                $pdo->rollBack();
+            }
+            foreach ($copied as $file) {
+                if (is_file($file)) {
+                    unlink($file);
+                }
+            }
+            error_log(sprintf('[%s] template fill channel %d: %s', gmdate('c'), (int) $channel['id'], $e->getMessage()));
+            self::notice($back, $e instanceof RuntimeException ? $e->getMessage() : 'Those posts could not be scheduled. Please try again.');
+        }
+        $message = match ($channel['provider']) {
+            'linkedin' => '10 posts scheduled across the next 30 days. LinkedIn publishes each one at its time.',
+            'youtube' => '10 posts scheduled across the next 30 days. Add a video to each one before its time.',
+            default => '10 posts scheduled across the next 30 days. They stay in the queue as plans you can edit.',
+        };
+        self::notice($back, $message);
+    }
+
+    /** @return list<array{title:string, body:string, image:string, post_title:string}> */
+    private static function templatePool(string $provider): array
+    {
+        $library = data('templates');
+        $limit = (int) (data('workspace')['limits'][$provider] ?? data('workspace')['post_max']);
+        $pool = [];
+        $add = static function (string $title, string $body, string $imageKey, string $postTitle = '') use (&$pool, $library, $limit): void {
+            $body = trim($body);
+            if ($body === '' || mb_strlen($body) > $limit) {
+                return;
+            }
+            $pool[] = [
+                'title' => $title,
+                'body' => $body,
+                'image' => (string) ($library['images'][$imageKey] ?? ''),
+                'post_title' => $postTitle,
+            ];
+        };
+        foreach ($library['networks'][$provider][1] ?? [] as $post) {
+            $add($post[1], $post[2], $provider, $post[3] ?? '');
+        }
+        foreach ($library['interests'] as $key => $group) {
+            foreach ($group[1] as $post) {
+                $add($post[0], $post[1], $key);
+            }
+        }
+        foreach ($library['items'] as $key => $item) {
+            $add($item[2], $item[3], $key);
+        }
+        return $pool;
+    }
+
+    private static function countPosts(int $uid): int
+    {
+        $stmt = Database::connection()->prepare('SELECT COUNT(*) FROM posts WHERE user_id = :uid');
+        $stmt->execute(['uid' => $uid]);
+        return (int) $stmt->fetchColumn();
+    }
+
     public static function disconnect(string $id): never
     {
         $uid = (int) Auth::member()['id'];

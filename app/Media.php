@@ -178,6 +178,51 @@ final class Media
         return is_file($path) ? $path : null;
     }
 
+    /** Copy a template image into this member’s private media so a scheduled post can use it. */
+    /** @return array{id:int, file:string} */
+    public static function copyReady(int $uid, string $absolute, string $name): array
+    {
+        if (!is_file($absolute)) {
+            throw new RuntimeException('That template image is missing.');
+        }
+        $mime = (string) (new finfo(FILEINFO_MIME_TYPE))->file($absolute);
+        $type = self::TYPES[$mime] ?? null;
+        if ($type === null || $type[0] !== 'image' || @getimagesize($absolute) === false) {
+            throw new RuntimeException('That template image is not a supported picture.');
+        }
+        $size = filesize($absolute);
+        if ($size === false || $size < 1 || $size > self::MAX['image']) {
+            throw new RuntimeException('That template image is too large.');
+        }
+        if (self::usage($uid) + $size > self::QUOTA) {
+            throw new RuntimeException('Your media storage is full (2 GB). Delete or publish some posts and try again.');
+        }
+        $dir = self::root() . '/' . $uid;
+        if (!is_dir($dir) && !mkdir($dir, 0750, true) && !is_dir($dir)) {
+            throw new RuntimeException('Uploads aren’t available right now.');
+        }
+        $relative = $uid . '/' . bin2hex(random_bytes(16)) . '.' . $type[1];
+        if (!copy($absolute, self::root() . '/' . $relative)) {
+            throw new RuntimeException('Uploads aren’t available right now.');
+        }
+        $now = Database::now();
+        $pdo = Database::connection();
+        $pdo->prepare('INSERT INTO media (user_id, kind, mime, size, expected_size, original_name, path, status, created_at, updated_at) VALUES (:uid, :kind, :mime, :size, :expected, :name, :path, :status, :now, :now2)')
+            ->execute([
+                'uid' => $uid,
+                'kind' => 'image',
+                'mime' => $mime,
+                'size' => $size,
+                'expected' => $size,
+                'name' => mb_substr($name, 0, 190),
+                'path' => $relative,
+                'status' => 'ready',
+                'now' => $now,
+                'now2' => $now,
+            ]);
+        return ['id' => (int) $pdo->lastInsertId(), 'file' => self::root() . '/' . $relative];
+    }
+
     public static function describe(?array $media): ?array
     {
         if ($media === null) {

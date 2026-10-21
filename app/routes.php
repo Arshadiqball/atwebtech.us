@@ -320,6 +320,7 @@ return [
     ['POST', '/app/channels/{id}/goal', [ChannelHandler::class, 'goal']],
     ['POST', '/app/channels/{id}/schedule', [ChannelHandler::class, 'schedule']],
     ['POST', '/app/channels/{id}/intro', [ChannelHandler::class, 'closeIntro']],
+    ['POST', '/app/channels/{id}/fill', [ChannelHandler::class, 'fillFromTemplates']],
     ['POST', '/app/channels/{id}/disconnect', [ChannelHandler::class, 'disconnect']],
     ['POST', '/app/media', [Media::class, 'start']],
     ['POST', '/app/media/{id}/chunk', [Media::class, 'chunk']],

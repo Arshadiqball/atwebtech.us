@@ -41,6 +41,9 @@ final class Publisher
 
         $sql = 'SELECT p.id FROM posts p WHERE p.status = :planned AND p.channel_id IS NOT NULL AND p.planned_at <= :now';
         $params = ['planned' => 'planned', 'now' => $now];
+        if ($providers === null) {
+            $sql .= " AND EXISTS (SELECT 1 FROM channels c WHERE c.id = p.channel_id AND c.provider IN ('linkedin', 'youtube'))";
+        }
         if ($providers !== null) {
             $allowed = array_values(array_filter($providers, static fn (string $p): bool => in_array($p, ['linkedin', 'youtube'], true)));
             if (!$allowed) {
