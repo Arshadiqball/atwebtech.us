@@ -905,6 +905,8 @@ textarea.idea-input { resize: vertical; line-height: 1.5; }
 .chl-text a { color: var(--ink); text-decoration: none; }
 .chl-text a:hover { text-decoration: underline; }
 .chl-text small { color: var(--muted); font-size: 12.5px; }
+.chl-actions { display: flex; align-items: center; gap: 6px; flex: none; }
+.chl-actions form { margin: 0; }
 .ch-sub { color: var(--muted); font-size: 12.5px; }
 .ch-layout { display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 8px 24px; padding-right: 24px; }
 .ch-layout .q { padding-top: 10px; }

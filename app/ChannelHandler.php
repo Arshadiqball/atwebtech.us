@@ -96,6 +96,10 @@ final class ChannelHandler
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'Facebook Page access wasn’t granted. Tick the Page permissions to connect.');
             }
+            if ($provider === 'pinterest' && !str_contains($tokens['scope'], 'user_accounts:read')) {
+                Channels::revoke($tokens['access_token'], $provider);
+                self::notice('/app/channels', 'Pinterest account access wasn’t granted. Allow the account permission, then try again.');
+            }
             $accounts = Channels::accounts($provider, $tokens['access_token']);
             if (!$accounts && $provider === 'linkedin') {
                 $accounts = Channels::profileFromIdToken((string) ($tokens['id_token'] ?? ''));
@@ -441,6 +445,15 @@ final class ChannelHandler
                 return 'In the Facebook app, the redirect URI must be exactly https://atwebtech.us/app/channels/callback/facebook';
             }
             return 'Facebook refused the sign-in. Use an account that is an admin of the app and that manages a Page, then try again.';
+        }
+        if ($provider === 'pinterest') {
+            if (str_contains($text, 'redirect')) {
+                return 'In the Pinterest app, the redirect URI must be exactly https://atwebtech.us/app/channels/callback/pinterest';
+            }
+            return 'Pinterest refused the sign-in. Set that redirect on the app, then try again.';
+        }
+        if ($provider !== 'linkedin') {
+            return 'The sign-in was refused. Please try again.';
         }
         if (str_contains($text, 'client authentication') || str_contains($text, 'invalid_client')) {
             return 'LinkedIn did not accept the app secret on this server. Save the full secret, including the characters at the end, then try again.';

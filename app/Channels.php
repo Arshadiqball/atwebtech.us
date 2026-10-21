@@ -83,6 +83,35 @@ final class Channels
             'threads' => 'Threads',
             default => 'Google',
         };
+        if ($channel['provider'] === 'pinterest') {
+            if ($refresh === null || $refresh === '') {
+                throw new ChannelAuthException('Pinterest access expired. Reconnect the channel.');
+            }
+            $pin = config('oauth.pinterest');
+            try {
+                $data = self::request('POST', 'https://api.pinterest.com/v5/oauth/token', [
+                    'grant_type' => 'refresh_token',
+                    'refresh_token' => $refresh,
+                ], null, ['Authorization: Basic ' . base64_encode($pin['client_id'] . ':' . $pin['client_secret'])]);
+            } catch (ChannelApiException $e) {
+                if ($e->status === 400 || $e->status === 401) {
+                    throw new ChannelAuthException('Pinterest access expired. Reconnect the channel.');
+                }
+                throw $e;
+            }
+            if (empty($data['access_token']) || !is_string($data['access_token'])) {
+                throw new RuntimeException('Refresh response had no access token.');
+            }
+            $nextRefresh = is_string($data['refresh_token'] ?? null) && $data['refresh_token'] !== '' ? Security::seal($data['refresh_token']) : $channel['refresh_token'];
+            Database::connection()->prepare('UPDATE channels SET access_token = :access, refresh_token = :refresh, token_expires_at = :expires, updated_at = :now WHERE id = :id')->execute([
+                'access' => Security::seal($data['access_token']),
+                'refresh' => $nextRefresh,
+                'expires' => gmdate('Y-m-d H:i:s', time() + max(3600, (int) ($data['expires_in'] ?? 2592000))),
+                'now' => Database::now(),
+                'id' => (int) $channel['id'],
+            ]);
+            return $data['access_token'];
+        }
         if ($channel['provider'] === 'instagram' || $channel['provider'] === 'threads') {
             $label = $channel['provider'] === 'threads' ? 'Threads' : 'Instagram';
             if ($access === null) {
@@ -354,9 +383,13 @@ final class Channels
             'facebook' => config('oauth.facebook'),
             'instagram' => config('oauth.instagram'),
             'threads' => config('oauth.threads'),
+            'pinterest' => config('oauth.pinterest'),
             default => config('oauth.google'),
         };
         $redirect = $redirectUri ?: self::redirectUri($provider);
+        if ($provider === 'pinterest') {
+            return self::pinterestToken($code, $redirect, $creds);
+        }
         if ($provider === 'threads') {
             return self::threadsToken($code, $redirect, $creds);
         }
@@ -458,6 +491,30 @@ final class Channels
             ];
         }
         return $out;
+    }
+
+    /** Exchange a Pinterest authorization code. The app id and secret go in the Basic header, not the form. */
+    private static function pinterestToken(string $code, string $redirect, array $creds): array
+    {
+        $data = self::request('POST', 'https://api.pinterest.com/v5/oauth/token', [
+            'grant_type' => 'authorization_code',
+            'code' => $code,
+            'redirect_uri' => $redirect,
+        ], null, ['Authorization: Basic ' . base64_encode($creds['client_id'] . ':' . $creds['client_secret'])]);
+        $token = (string) ($data['access_token'] ?? '');
+        if ($token === '') {
+            throw new RuntimeException('Pinterest didn’t return an access token.');
+        }
+        $scope = trim((string) ($data['scope'] ?? ''));
+        if ($scope === '') {
+            $scope = 'user_accounts:read,boards:read,pins:read,pins:write';
+        }
+        return [
+            'access_token' => $token,
+            'refresh_token' => is_string($data['refresh_token'] ?? null) ? $data['refresh_token'] : null,
+            'expires_at' => gmdate('Y-m-d H:i:s', time() + max(3600, (int) ($data['expires_in'] ?? 2592000))),
+            'scope' => mb_substr($scope, 0, 500),
+        ];
     }
 
     /** The Pinterest account for an access token. Sandbox tokens only work against the sandbox host. */
@@ -997,7 +1054,7 @@ final class Channels
         }
         $data = json_decode((string) $body, true);
         if ($status < 200 || $status >= 300) {
-            $reason = is_array($data) ? (string) ($data['error_description'] ?? ($data['error']['message'] ?? (is_string($data['error'] ?? null) ? $data['error'] : ''))) : '';
+            $reason = is_array($data) ? (string) ($data['error_description'] ?? ($data['error']['message'] ?? (is_string($data['error'] ?? null) ? $data['error'] : ($data['message'] ?? '')))) : '';
             throw new ChannelApiException(sprintf('HTTP %d from %s %s', $status, parse_url($url, PHP_URL_HOST), mb_substr(strip_tags($reason), 0, 200)), $status);
         }
         return is_array($data) ? $data : [];
