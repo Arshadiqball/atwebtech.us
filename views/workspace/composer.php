@@ -33,7 +33,7 @@ $featured = $library['items'];
 $interests = $library['interests'];
 $tplNetworks = $library['networks'];
 $images = $library['images'];
-$templateNetwork = '';
+$videoNets = [];
 foreach (array_keys($picked) as $pickedKey) {
     $pickedProvider = null;
     if (str_starts_with((string) $pickedKey, 'n:')) {
@@ -45,16 +45,12 @@ foreach (array_keys($picked) as $pickedKey) {
             }
         }
     }
-    if ($templateNetwork === '' && $pickedProvider !== null) {
-        $templateNetwork = $pickedProvider;
-    } elseif ($templateNetwork !== $pickedProvider) {
-        $templateNetwork = '';
-        break;
+    if (in_array($pickedProvider, ['youtube', 'tiktok'], true)) {
+        $videoNets[$pickedProvider] = true;
     }
 }
-if (!in_array($templateNetwork, ['youtube', 'tiktok'], true)) {
-    $templateNetwork = '';
-}
+$templateNetwork = count($videoNets) === 1 ? (string) array_key_first($videoNets) : '';
+$videos = $library['videos'];
 $personal = Workspace::personalTemplates($uid);
 $ai = Assistant::enabled();
 $err = static fn (string $key): string => isset($errors[$key]) ? '' : ' hidden';
@@ -65,7 +61,7 @@ foreach (array_keys($picked) as $key) {
 }
 $media = $p['media'];
 ?>
-<form class="cp" action="/app/posts" method="post" novalidate data-cp<?= !empty($p['image']) && !$media ? ' data-cp-start-image="' . e($p['image']) . '"' : '' ?>>
+<form class="cp" action="/app/posts" method="post" novalidate data-cp<?= !empty($p['video']) && !$media ? ' data-cp-start-image="' . e($p['video']) . '" data-cp-start-type="video/mp4"' : (!empty($p['image']) && !$media ? ' data-cp-start-image="' . e($p['image']) . '"' : '') ?>>
   <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
   <input type="hidden" name="id" value="<?= (int) $p['id'] ?>" data-field="id">
   <input type="hidden" name="idea" value="<?= (int) $p['idea'] ?>" data-field="idea">
@@ -250,19 +246,22 @@ $media = $p['media'];
 <?php endforeach; ?>
           </select>
         </label>
-        <p class="cp-panel-lede" data-cp-tpl-lede><?= $templateNetwork !== '' ? 'These are video scripts. Record your own video and attach that file. Use does not add a photo.' : 'Choose a network or an interest. Use puts the text and photo into your post so you can rewrite them.' ?></p>
+        <p class="cp-panel-lede" data-cp-tpl-lede><?= $videoNets ? 'These templates are short videos. Use puts the video and the script into your post so you can change them.' : 'Choose a network or an interest. Use puts the text and photo into your post so you can rewrite them.' ?></p>
         <ul class="cp-tpl-list" role="list">
 <?php foreach ($personal as $tpl): ?>
-          <li data-cp-topic="" data-cp-network=""><b><?= e($tpl['title']) ?></b><p><?= e(mb_strimwidth($tpl['prompt'], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl['prompt']) ?>">Use</button></li>
+          <li data-cp-topic="" data-cp-network=""<?= $videoNets ? ' hidden' : '' ?>><b><?= e($tpl['title']) ?></b><p><?= e(mb_strimwidth($tpl['prompt'], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl['prompt']) ?>">Use</button></li>
 <?php endforeach; ?>
 <?php foreach ($featured as $key => $tpl): ?>
-          <li data-cp-topic="" data-cp-network=""><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($tpl[2]) ?></b><p><?= e(mb_strimwidth($tpl[3], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl[3]) ?>" data-cp-image="/assets/img/templates/<?= e($images[$key]) ?>">Use</button></li>
+          <li data-cp-topic="" data-cp-network=""<?= $videoNets ? ' hidden' : '' ?>><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($tpl[2]) ?></b><p><?= e(mb_strimwidth($tpl[3], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($tpl[3]) ?>" data-cp-image="/assets/img/templates/<?= e($images[$key]) ?>">Use</button></li>
 <?php endforeach; ?>
 <?php foreach ($interests as $key => $group): foreach ($group[1] as $post): ?>
           <li data-cp-topic="<?= e($key) ?>" data-cp-network="" hidden><img src="/assets/img/templates/<?= e($images[$key]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><b><?= e($post[0]) ?></b><p><?= e(mb_strimwidth($post[1], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[1]) ?>" data-cp-image="/assets/img/templates/<?= e($images[$key]) ?>">Use</button></li>
 <?php endforeach; endforeach; ?>
-<?php foreach ($tplNetworks as $net => $group): $videoNet = in_array($net, ['youtube', 'tiktok'], true); foreach ($group[1] as $post): ?>
-          <li data-cp-topic="<?= e($post[0]) ?>" data-cp-network="<?= e($net) ?>"<?= $net === $templateNetwork ? '' : ' hidden' ?>><?php if (!$videoNet): ?><img src="/assets/img/templates/<?= e($images[$net]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><?php else: ?><span class="ws-chip">Video</span><?php endif; ?><b><?= e($post[1]) ?></b><p><?= e(mb_strimwidth($post[2], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[2]) ?>"<?php if (!$videoNet): ?> data-cp-image="/assets/img/templates/<?= e($images[$net]) ?>"<?php endif; ?><?= isset($post[3]) ? ' data-cp-title="' . e($post[3]) . '"' : '' ?>>Use</button></li>
+<?php foreach ($tplNetworks as $net => $group): $videoNet = in_array($net, ['youtube', 'tiktok'], true); foreach ($group[1] as $i => $post):
+    $clip = $videoNet ? (string) ($videos[$net][$i] ?? '') : '';
+    $showVideo = $videoNets && isset($videoNets[$net]);
+?>
+          <li data-cp-topic="<?= e($post[0]) ?>" data-cp-network="<?= e($net) ?>"<?= $showVideo ? '' : ' hidden' ?>><?php if ($clip !== ''): ?><video src="/assets/video/templates/<?= e($clip) ?>" muted playsinline autoplay loop preload="metadata"></video><?php elseif (!$videoNet): ?><img src="/assets/img/templates/<?= e($images[$net]) ?>" alt="" width="640" height="360" loading="lazy" decoding="async"><?php endif; ?><b><?= e($post[1]) ?></b><p><?= e(mb_strimwidth($post[2], 0, 110, '…')) ?></p><button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($post[2]) ?>"<?php if ($clip !== ''): ?> data-cp-video="/assets/video/templates/<?= e($clip) ?>"<?php elseif (!$videoNet): ?> data-cp-image="/assets/img/templates/<?= e($images[$net]) ?>"<?php endif; ?><?= isset($post[3]) ? ' data-cp-title="' . e($post[3]) . '"' : '' ?>>Use</button></li>
 <?php endforeach; endforeach; ?>
         </ul>
         <p class="cp-panel-lede" data-cp-tpl-empty hidden>No starting points for that network and interest. Try another interest, or set interest back to All interests.</p>

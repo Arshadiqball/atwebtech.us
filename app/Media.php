@@ -178,21 +178,116 @@ final class Media
         return is_file($path) ? $path : null;
     }
 
-    /** Copy a template image into this member’s private media so a scheduled post can use it. */
+    /** A short-lived public JPEG address Instagram can fetch while publishing. */
+    public static function shareUrl(int $id): string
+    {
+        $exp = time() + 7200;
+        $sig = Security::keyedHash($id . '.' . $exp);
+        $origin = public_origin();
+        if (parse_url($origin, PHP_URL_HOST) !== 'atwebtech.us') {
+            $origin = 'https://atwebtech.us';
+        }
+        return $origin . '/media/ig/' . $id . '/' . $exp . '/' . $sig;
+    }
+
+    /** Serve one ready image as a JPEG when the signed address is still valid. */
+    public static function publicJpeg(string $id, string $exp, string $sig): never
+    {
+        $valid = ctype_digit($id) && ctype_digit($exp) && ctype_xdigit($sig) && strlen($sig) === 64
+            && hash_equals(Security::keyedHash($id . '.' . $exp), $sig)
+            && (int) $exp >= time()
+            && (int) $exp <= time() + 86400;
+        $media = null;
+        if ($valid) {
+            $stmt = Database::connection()->prepare('SELECT * FROM media WHERE id = :id AND status = :status AND kind = :kind');
+            $stmt->execute(['id' => (int) $id, 'status' => 'ready', 'kind' => 'image']);
+            $media = $stmt->fetch() ?: null;
+        }
+        $file = $media ? self::file($media) : null;
+        $jpeg = $file ? self::jpegBytes($file) : null;
+        if ($jpeg === null) {
+            not_found();
+        }
+        header('Content-Type: image/jpeg');
+        header('Content-Length: ' . strlen($jpeg));
+        header('Cache-Control: private, max-age=300');
+        header('X-Robots-Tag: noindex');
+        header("Content-Security-Policy: default-src 'none'; sandbox");
+        echo $jpeg;
+        exit;
+    }
+
+    /** Instagram feed photos are JPEG, between 4:5 and 1.91:1, and at most 8 MB. */
+    private static function jpegBytes(string $path): ?string
+    {
+        $info = @getimagesize($path);
+        if ($info === false) {
+            return null;
+        }
+        $src = match ($info[2]) {
+            IMAGETYPE_JPEG => @imagecreatefromjpeg($path),
+            IMAGETYPE_PNG => @imagecreatefrompng($path),
+            IMAGETYPE_WEBP => @imagecreatefromwebp($path),
+            IMAGETYPE_GIF => @imagecreatefromgif($path),
+            default => false,
+        };
+        if ($src === false) {
+            return null;
+        }
+        $width = imagesx($src);
+        $height = imagesy($src);
+        if ($width < 1 || $height < 1) {
+            return null;
+        }
+        $ratio = $width / $height;
+        $target = min(1.91, max(0.8, $ratio));
+        if ($ratio > $target) {
+            $cropW = (int) round($height * $target);
+            $cropH = $height;
+            $cropX = (int) (($width - $cropW) / 2);
+            $cropY = 0;
+        } else {
+            $cropW = $width;
+            $cropH = (int) round($width / $target);
+            $cropX = 0;
+            $cropY = (int) (($height - $cropH) / 2);
+        }
+        $cropW = min($width, max(1, $cropW));
+        $cropH = min($height, max(1, $cropH));
+        $cropX = min($width - $cropW, max(0, $cropX));
+        $cropY = min($height - $cropH, max(0, $cropY));
+        $outW = min(1440, max(320, $cropW));
+        $outH = max(1, (int) round($outW / $target));
+        $dst = imagecreatetruecolor($outW, $outH);
+        $white = imagecolorallocate($dst, 255, 255, 255);
+        imagefill($dst, 0, 0, $white);
+        imagecopyresampled($dst, $src, 0, 0, $cropX, $cropY, $outW, $outH, $cropW, $cropH);
+        $quality = 86;
+        $bytes = '';
+        do {
+            ob_start();
+            imagejpeg($dst, null, $quality);
+            $bytes = (string) ob_get_clean();
+            $quality -= 12;
+        } while (strlen($bytes) > 8 * 1024 * 1024 && $quality >= 50);
+        return $bytes !== '' && strlen($bytes) <= 8 * 1024 * 1024 ? $bytes : null;
+    }
+
+    /** Copy a template image or video into this member’s private media so a scheduled post can use it. */
     /** @return array{id:int, file:string} */
     public static function copyReady(int $uid, string $absolute, string $name): array
     {
         if (!is_file($absolute)) {
-            throw new RuntimeException('That template image is missing.');
+            throw new RuntimeException('That template file is missing.');
         }
         $mime = (string) (new finfo(FILEINFO_MIME_TYPE))->file($absolute);
         $type = self::TYPES[$mime] ?? null;
-        if ($type === null || $type[0] !== 'image' || @getimagesize($absolute) === false) {
-            throw new RuntimeException('That template image is not a supported picture.');
+        if ($type === null || ($type[0] === 'image' && @getimagesize($absolute) === false)) {
+            throw new RuntimeException('That template file is not a supported image or video.');
         }
         $size = filesize($absolute);
-        if ($size === false || $size < 1 || $size > self::MAX['image']) {
-            throw new RuntimeException('That template image is too large.');
+        if ($size === false || $size < 1 || $size > self::MAX[$type[0]]) {
+            throw new RuntimeException($type[0] === 'video' ? 'That template video is too large.' : 'That template image is too large.');
         }
         if (self::usage($uid) + $size > self::QUOTA) {
             throw new RuntimeException('Your media storage is full (2 GB). Delete or publish some posts and try again.');
@@ -210,7 +305,7 @@ final class Media
         $pdo->prepare('INSERT INTO media (user_id, kind, mime, size, expected_size, original_name, path, status, created_at, updated_at) VALUES (:uid, :kind, :mime, :size, :expected, :name, :path, :status, :now, :now2)')
             ->execute([
                 'uid' => $uid,
-                'kind' => 'image',
+                'kind' => $type[0],
                 'mime' => $mime,
                 'size' => $size,
                 'expected' => $size,

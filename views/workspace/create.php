@@ -31,9 +31,11 @@ if ($tab === 'ideas'): ?>
 <?php endif;
 $actions = (string) ob_get_clean();
 
-$renderTemplate = static function (string $key, string $emoji, string $title, string $prompt, bool $own = false, string $image = '', string $channel = '', string $postTitle = '') use ($token, $excerpt): void {
+$renderTemplate = static function (string $key, string $emoji, string $title, string $prompt, bool $own = false, string $image = '', string $channel = '', string $postTitle = '', string $video = '') use ($token, $excerpt): void {
     $compose = ['body' => $prompt];
-    if ($image !== '') {
+    if ($video !== '') {
+        $compose['video'] = '/assets/video/templates/' . $video;
+    } elseif ($image !== '') {
         $compose['image'] = '/assets/img/templates/' . $image;
     }
     if ($channel !== '') {
@@ -44,7 +46,9 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
     }
     ?>
       <li class="tpl-card">
-<?php if ($image !== ''): ?>
+<?php if ($video !== ''): ?>
+        <video src="/assets/video/templates/<?= e($video) ?>" muted playsinline autoplay loop preload="metadata"></video>
+<?php elseif ($image !== ''): ?>
         <img src="/assets/img/templates/<?= e($image) ?>" alt="" width="640" height="360" loading="lazy" decoding="async">
 <?php else: ?>
         <span class="tpl-emoji" aria-hidden="true"><?= e($emoji) ?></span>
@@ -263,7 +267,7 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
       <a href="/app/create?tab=templates">All networks<?= icon('x') ?></a>
     </header>
     <ul class="tpl-grid" role="list">
-<?php foreach ($group[1] as $i => $post) { $renderTemplate($network . '-' . $i, in_array($network, ['youtube', 'tiktok'], true) ? '🎬' : '📝', $post[1], $post[2], false, in_array($network, ['youtube', 'tiktok'], true) ? '' : $images[$network], $network, $post[3] ?? ''); } ?>
+<?php foreach ($group[1] as $i => $post) { $videoNet = in_array($network, ['youtube', 'tiktok'], true); $renderTemplate($network . '-' . $i, $videoNet ? '🎬' : '📝', $post[1], $post[2], false, $videoNet ? '' : $images[$network], $network, $post[3] ?? '', $videoNet ? (string) ($library['videos'][$network][$i] ?? '') : ''); } ?>
     </ul>
   </section>
 

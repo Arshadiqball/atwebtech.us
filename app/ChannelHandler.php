@@ -421,7 +421,12 @@ final class ChannelHandler
                 $item = $chosen[$i];
                 $at = $slot->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
                 $mediaId = null;
-                if (!in_array($channel['provider'], ['youtube', 'tiktok'], true) && $item['image'] !== '' && preg_match('/^[a-z0-9-]+\.webp$/', $item['image'])) {
+                $videoNet = in_array($channel['provider'], ['youtube', 'tiktok'], true);
+                if ($videoNet && preg_match('/^[a-z0-9-]+\.mp4$/', (string) ($item['video'] ?? ''))) {
+                    $made = Media::copyReady($uid, BASE_PATH . '/public/assets/video/templates/' . $item['video'], $item['video']);
+                    $mediaId = $made['id'];
+                    $copied[] = $made['file'];
+                } elseif (!$videoNet && $item['image'] !== '' && preg_match('/^[a-z0-9-]+\.webp$/', $item['image'])) {
                     $made = Media::copyReady($uid, $imageRoot . '/' . $item['image'], $item['image']);
                     $mediaId = $made['id'];
                     $copied[] = $made['file'];
@@ -464,19 +469,24 @@ final class ChannelHandler
         $n = count($slots);
         $message = match ($channel['provider']) {
             'linkedin' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. LinkedIn publishes each one at its time.',
-            'youtube' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. Add a video to each one before its time.',
+            'instagram' => $channel['can_publish']
+                ? $n . ' posts scheduled, one for every open day through the next 30 days, including today. Instagram publishes each photo at its time.'
+                : $n . ' posts scheduled, one for every open day through the next 30 days, including today. Publishing isn’t on for this Instagram account, so they stay as plans until you reconnect and allow content publishing.',
+            'youtube' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. Each one includes a short starter video. Until Google finishes reviewing the app, YouTube keeps those uploads private.',
+            'tiktok' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. Each one includes a short starter video. TikTok publishing is not built yet, so they stay as plans you can edit.',
             default => $n . ' posts scheduled, one for every open day through the next 30 days, including today. They stay in the queue as plans you can edit.',
         };
         self::notice($back, $message);
     }
 
-    /** @return list<array{title:string, body:string, image:string, post_title:string}> */
+    /** @return list<array{title:string, body:string, image:string, video:string, post_title:string}> */
     private static function templatePool(string $provider): array
     {
         $library = data('templates');
         $limit = (int) (data('workspace')['limits'][$provider] ?? data('workspace')['post_max']);
+        $videoNet = $provider === 'youtube' || $provider === 'tiktok';
         $pool = [];
-        $add = static function (string $title, string $body, string $imageKey, string $postTitle = '') use (&$pool, $library, $limit): void {
+        $add = static function (string $title, string $body, string $imageKey, string $postTitle = '', string $video = '') use (&$pool, $library, $limit): void {
             $body = trim($body);
             if ($body === '' || mb_strlen($body) > $limit) {
                 return;
@@ -485,11 +495,13 @@ final class ChannelHandler
                 'title' => $title,
                 'body' => $body,
                 'image' => (string) ($library['images'][$imageKey] ?? ''),
+                'video' => $video,
                 'post_title' => $postTitle,
             ];
         };
-        foreach ($library['networks'][$provider][1] ?? [] as $post) {
-            $add($post[1], $post[2], $provider, $post[3] ?? '');
+        foreach ($library['networks'][$provider][1] ?? [] as $i => $post) {
+            $clip = $videoNet ? (string) ($library['videos'][$provider][$i] ?? '') : '';
+            $add($post[1], $post[2], $videoNet ? '' : $provider, $post[3] ?? '', $clip);
         }
         if ($provider === 'youtube' || $provider === 'tiktok') {
             return $pool;

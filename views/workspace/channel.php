@@ -47,7 +47,11 @@ $next = $queue['next'] ?? null;
         <input type="hidden" name="_token" value="<?= e($token) ?>">
         <button type="submit" class="ws-btn" data-confirm="<?= e(match ($channel['provider']) {
             'linkedin' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. LinkedIn publishes each one at 6:00 PM.',
-            'youtube' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Add a video to each one. YouTube does not publish a post that has no video.',
+            'instagram' => $channel['can_publish']
+                ? 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Each post includes its photo. Instagram publishes it at 6:00 PM.'
+                : 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Publishing isn’t on for this account yet, so they stay as plans until you reconnect and allow content publishing.',
+            'youtube' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Each post includes a short starter video. Until Google finishes reviewing the app, YouTube keeps those uploads private.',
+            'tiktok' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Each post includes a short starter video. TikTok publishing is not built yet, so they stay as plans you can edit.',
             default => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. This network is saved as a plan and is not published automatically.',
         }) ?>">Every day</button>
       </form>
@@ -96,12 +100,14 @@ $next = $queue['next'] ?? null;
     </div>
   </div>
 
-<?php if (!$channel['can_publish'] && in_array($channel['provider'], ['youtube', 'linkedin'], true)): ?>
+<?php if (!$channel['can_publish'] && in_array($channel['provider'], ['youtube', 'linkedin', 'instagram'], true)): ?>
   <div class="ch-banner" role="status">
     <?= icon('warning-circle') ?>
-    <p><b>Reconnect to publish.</b> <?= $channel['provider'] === 'linkedin'
-        ? 'Allow atwebtech to create posts on your LinkedIn Profile (the “Share on LinkedIn” permission) so scheduled posts can go out.'
-        : 'Video upload was not granted. Reconnect and tick “Manage your YouTube videos” on the Google screen. If that choice is missing, add the youtube.upload scope in Google Cloud, then reconnect.' ?></p>
+    <p><b>Reconnect to publish.</b> <?= match ($channel['provider']) {
+        'linkedin' => 'Allow atwebtech to create posts on your LinkedIn Profile (the “Share on LinkedIn” permission) so scheduled posts can go out.',
+        'instagram' => 'Content publishing wasn’t granted, so these posts stay as plans and are not sent. Reconnect and allow Instagram content publishing.',
+        default => 'Video upload was not granted. Reconnect and tick “Manage your YouTube videos” on the Google screen. If that choice is missing, add the youtube.upload scope in Google Cloud, then reconnect.',
+    } ?></p>
     <form action="/app/channels/connect/<?= e($channel['provider']) ?>" method="post">
       <input type="hidden" name="_token" value="<?= e($token) ?>">
       <input type="hidden" name="reconnect" value="1">

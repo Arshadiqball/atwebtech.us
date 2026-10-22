@@ -45,3 +45,6 @@ Stack trace:
 [12-Oct-2026 05:35:02 UTC] Migration failed: SQLSTATE[HY000] [1044] Access denied for user 'atwebtec_us'@'localhost' to database 'atwebtech_us'
 [12-Oct-2026 05:35:02 UTC] Migration failed: SQLSTATE[HY000] [1044] Access denied for user 'atwebtec_us'@'localhost' to database 'atwebtech_us'
 [12-Oct-2026 05:35:05 UTC] Migration failed: SQLSTATE[HY000] [1044] Access denied for user 'atwebtec_us'@'localhost' to database 'atwebtec_us'
+[22-Oct-2026 05:17:51 UTC] PHP Deprecated:  Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in Command line code on line 4
+[22-Oct-2026 05:17:51 UTC] PHP Deprecated:  Function imagedestroy() is deprecated since 8.5, as it has no effect since PHP 8.0 in /Users/mac/Documents/atwebtech/atwebtechus/app/Media.php on line 262
+[22-Oct-2026 05:17:51 UTC] PHP Deprecated:  Function imagedestroy() is deprecated since 8.5, as it has no effect since PHP 8.0 in /Users/mac/Documents/atwebtech/atwebtechus/app/Media.php on line 271

@@ -42,10 +42,10 @@ final class Publisher
         $sql = 'SELECT p.id FROM posts p WHERE p.status = :planned AND p.channel_id IS NOT NULL AND p.planned_at <= :now';
         $params = ['planned' => 'planned', 'now' => $now];
         if ($providers === null) {
-            $sql .= " AND EXISTS (SELECT 1 FROM channels c WHERE c.id = p.channel_id AND c.provider IN ('linkedin', 'youtube'))";
+            $sql .= " AND EXISTS (SELECT 1 FROM channels c WHERE c.id = p.channel_id AND c.provider IN ('linkedin', 'youtube', 'instagram'))";
         }
         if ($providers !== null) {
-            $allowed = array_values(array_filter($providers, static fn (string $p): bool => in_array($p, ['linkedin', 'youtube'], true)));
+            $allowed = array_values(array_filter($providers, static fn (string $p): bool => in_array($p, ['linkedin', 'youtube', 'instagram'], true)));
             if (!$allowed) {
                 return ['sent' => 0, 'failed' => 0, 'retry' => 0];
             }
@@ -85,13 +85,15 @@ final class Publisher
             if ($channel === null) {
                 throw new PublishError('The channel was disconnected.');
             }
-            if (!in_array($channel['provider'], ['youtube', 'linkedin'], true)) {
+            if (!in_array($channel['provider'], ['youtube', 'linkedin', 'instagram'], true)) {
                 throw new PublishError('Publishing to this network isn’t built yet.');
             }
             if (!$channel['can_publish']) {
-                throw new PublishError($channel['provider'] === 'linkedin'
-                    ? 'Reconnect this channel and allow atwebtech to create posts on your LinkedIn Profile.'
-                    : 'Reconnect this channel and allow uploads so atwebtech can publish.');
+                throw new PublishError(match ($channel['provider']) {
+                    'linkedin' => 'Reconnect this channel and allow atwebtech to create posts on your LinkedIn Profile.',
+                    'instagram' => 'Reconnect this Instagram account and allow content publishing.',
+                    default => 'Reconnect this channel and allow uploads so atwebtech can publish.',
+                });
             }
             $media = $post['media_id'] ? Media::ready((int) $post['user_id'], (int) $post['media_id']) : null;
             $file = $media ? Media::file($media) : null;
@@ -123,6 +125,20 @@ final class Publisher
                     ->execute(['sent' => 'sent', 'at' => Database::now(), 'ext' => $urn, 'url' => 'https://www.linkedin.com/feed/update/' . $urn, 'cerr' => $commentError, 'now' => Database::now(), 'id' => $id]);
                 return 'sent';
             }
+            if ($channel['provider'] === 'instagram') {
+                if ($media === null || $media['kind'] !== 'image' || $file === null) {
+                    throw new PublishError('Instagram needs a photo. Attach one and schedule the post again.');
+                }
+                $sent = Channels::instagramPublish(
+                    Channels::accessToken($channel),
+                    (string) $channel['external_id'],
+                    Media::shareUrl((int) $media['id']),
+                    mb_substr(trim((string) $post['body']), 0, 2200)
+                );
+                $pdo->prepare('UPDATE posts SET status = :sent, sent_at = :at, external_id = :ext, external_url = :url, error = NULL, updated_at = :now WHERE id = :id')
+                    ->execute(['sent' => 'sent', 'at' => Database::now(), 'ext' => $sent['id'], 'url' => $sent['url'] !== '' ? $sent['url'] : null, 'now' => Database::now(), 'id' => $id]);
+                return 'sent';
+            }
             if ($media === null || $media['kind'] !== 'video' || $file === null) {
                 throw new PublishError('YouTube needs a video. Attach one and schedule the post again.');
             }
@@ -146,13 +162,20 @@ final class Publisher
             return 'sent';
         } catch (Throwable $e) {
             $retry = $e instanceof ChannelApiException && $e->transient() && (int) $post['attempts'] < self::MAX_ATTEMPTS;
-            $li = ($channel['provider'] ?? '') === 'linkedin';
+            $provider = $channel['provider'] ?? '';
             $message = match (true) {
                 $e instanceof PublishError, $e instanceof ChannelAuthException => $e->getMessage(),
-                $e instanceof ChannelApiException && $e->status === 401 => ($li ? 'LinkedIn' : 'Google') . ' turned down atwebtech’s access. Reconnect the channel, then retry.',
-                $e instanceof ChannelApiException && $e->status === 403 => $li ? 'LinkedIn refused the post. Check that sharing is allowed, then retry.' : 'YouTube refused the upload (daily upload quota or channel permissions). Try again later.',
-                $e instanceof ChannelApiException && $e->status === 400 => $li ? 'LinkedIn rejected the post. Check the text and image, then retry.' : 'YouTube rejected the video details. Check the title and file, then retry.',
-                default => $li ? 'LinkedIn didn’t accept the post. Please retry.' : 'YouTube didn’t accept the upload. Please retry.',
+                $e instanceof ChannelApiException && $provider === 'instagram' && $e->status === 401 => 'Instagram turned down atwebtech’s access. Reconnect the channel, then retry.',
+                $e instanceof ChannelApiException && $provider === 'instagram' && $e->status === 403 => 'Instagram refused to publish. Reconnect and allow content publishing, then retry.',
+                $e instanceof ChannelApiException && $provider === 'instagram' => 'Instagram refused the photo. Attach a JPG or PNG under 8 MB, then retry.',
+                $e instanceof ChannelApiException && $e->status === 401 => ($provider === 'linkedin' ? 'LinkedIn' : 'Google') . ' turned down atwebtech’s access. Reconnect the channel, then retry.',
+                $e instanceof ChannelApiException && $e->status === 403 => $provider === 'linkedin' ? 'LinkedIn refused the post. Check that sharing is allowed, then retry.' : 'YouTube refused the upload (daily upload quota or channel permissions). Try again later.',
+                $e instanceof ChannelApiException && $e->status === 400 => $provider === 'linkedin' ? 'LinkedIn rejected the post. Check the text and image, then retry.' : 'YouTube rejected the video details. Check the title and file, then retry.',
+                default => match ($provider) {
+                    'linkedin' => 'LinkedIn didn’t accept the post. Please retry.',
+                    'instagram' => 'Instagram didn’t accept the photo. Please retry.',
+                    default => 'YouTube didn’t accept the upload. Please retry.',
+                },
             };
             error_log(sprintf('[%s] publish post %d failed: %s', gmdate('c'), $id, $e->getMessage()));
             if ($retry) {

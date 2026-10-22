@@ -223,7 +223,9 @@ return [
                 $prefill['idea'] = (int) $idea['id'];
             } elseif (isset($_GET['template']) && ($template = WorkspaceHandler::findTemplate($uid, (string) $_GET['template']))) {
                 $prefill['body'] = $template['prompt'];
-                if (!empty($template['image'])) {
+                if (!empty($template['video'])) {
+                    $prefill['video'] = $template['video'];
+                } elseif (!empty($template['image'])) {
                     $prefill['image'] = $template['image'];
                 }
                 if (!empty($template['post_title'])) {
@@ -326,6 +328,7 @@ return [
     ['POST', '/app/media/{id}/chunk', [Media::class, 'chunk']],
     ['POST', '/app/media/{id}/complete', [Media::class, 'complete']],
     ['GET', '/app/media/{id}', [Media::class, 'serve']],
+    ['GET', '/media/ig/{id}/{exp}/{sig}', [Media::class, 'publicJpeg']],
     ['POST', '/app/ai/generate', [Assistant::class, 'generate']],
     ['GET', '/app/{slug}', static function (string $slug): void {
         $sections = data('workspace')['sections'];

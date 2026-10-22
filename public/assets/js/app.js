@@ -933,6 +933,7 @@
     let media = null;
     let uploading = false;
     let pendingImage = false;
+    let applyTemplates = () => {};
     const emptyFrame = $('[data-pv-media]', form).innerHTML;
 
     const setPanel = (name) => {
@@ -1017,20 +1018,23 @@
       $('[data-cp-plan-hint]', form).hidden = !list.some((t) => t.value.startsWith('n:'));
       targets().forEach((t) => { const label = $(`label[for="${t.id}"]`, form); if (label) label.classList.toggle('is-on', t.checked); });
       const tags = f.tags.value.split(',').map((s) => s.trim()).filter(Boolean);
+      if (typeof applyTemplates === 'function') applyTemplates();
       $('[data-cp-tags-label]', form).textContent = tags.length ? tags.join(', ') : 'Tags';
       const publishYt = list.some((t) => t.value.startsWith('c:') && t.dataset.provider === 'youtube');
       const publishLi = list.some((t) => t.value.startsWith('c:') && t.dataset.provider === 'linkedin');
+      const publishIg = list.some((t) => t.value.startsWith('c:') && t.dataset.provider === 'instagram' && t.dataset.publish === '1');
       const angle = yt && /[<>]/.test(f.title.value + area.value);
       const angleErr = $('[data-error-for="title"]', form);
       if (angle) { angleErr.textContent = 'YouTube titles and descriptions can’t contain < or >.'; angleErr.hidden = false; angleErr.dataset.live = '1'; } else if (angleErr.dataset.live) { angleErr.hidden = true; delete angleErr.dataset.live; }
-      const conflict = publishYt && publishLi;
+      const conflict = publishYt && (publishLi || publishIg);
       const ready = list.length > 0 && left >= 0 && !uploading && !angle && !conflict
         && (area.value.trim() !== '' || media)
         && (!publishYt || (f.title.value.trim() !== '' && media && media.kind === 'video'))
         && (!publishLi || (area.value.trim() !== '' && (!media || media.kind === 'image')))
+        && (!publishIg || (media && media.kind === 'image'))
         && f.date.value !== '' && f.time.value !== '';
       schedule.disabled = !ready;
-      schedule.title = ready ? '' : (conflict ? 'YouTube and LinkedIn need separate posts' : publishYt ? 'Add a title and a video, and pick a time' : publishLi ? 'Write the post and pick a time. Image optional, no video.' : 'Write something and pick a time');
+      schedule.title = ready ? '' : (conflict ? 'YouTube needs its own post, separate from Instagram or LinkedIn' : publishYt ? 'Add a title and a video, and pick a time' : publishIg && (!media || media.kind !== 'image') ? 'Attach a photo and pick a time' : publishLi ? 'Write the post and pick a time. Image optional, no video.' : 'Write something and pick a time');
       $$('button[value="draft"]', form).forEach((b) => { b.disabled = uploading; });
       preview();
     };
@@ -1137,27 +1141,33 @@
     });
     const interest = $('[data-cp-interest]', form);
     const network = $('[data-cp-network]', form);
-    const applyTemplates = () => {
+    const videoTargets = () => [...new Set(picked().map((t) => t.dataset.provider).filter((p) => p === 'youtube' || p === 'tiktok'))];
+    applyTemplates = () => {
       if (!interest && !network) return;
       const topic = interest ? interest.value : '';
       const net = network ? network.value : '';
+      const forced = net === '' ? videoTargets() : [];
+      const videoMode = net === 'youtube' || net === 'tiktok' || forced.length > 0;
       let shown = 0;
       $$('[data-cp-topic]', form).forEach((li) => {
         const liTopic = li.dataset.cpTopic || '';
         const liNet = li.dataset.cpNetwork || '';
-        const show = net === '' && topic === '' ? liNet === '' && liTopic === ''
-          : net !== '' && topic === '' ? liNet === net
-            : net === '' ? liNet === '' && liTopic === topic
-              : liNet === net && liTopic === topic;
+        const show = forced.length
+          ? forced.includes(liNet) && (topic === '' || liTopic === topic)
+          : net === '' && topic === '' ? liNet === '' && liTopic === ''
+            : net !== '' && topic === '' ? liNet === net
+              : net === '' ? liNet === '' && liTopic === topic
+                : liNet === net && liTopic === topic;
         li.hidden = !show;
+        li.querySelectorAll('video').forEach((clip) => { if (show) clip.play().catch(() => {}); else clip.pause(); });
         if (show) shown += 1;
       });
       const empty = $('[data-cp-tpl-empty]', form);
       if (empty) empty.hidden = shown > 0;
       const lede = $('[data-cp-tpl-lede]', form);
       if (lede) {
-        lede.textContent = net === 'youtube' || net === 'tiktok'
-          ? 'These are video scripts. Record your own video and attach that file. Use does not add a photo.'
+        lede.textContent = videoMode
+          ? 'These templates are short videos. Use puts the video and the script into your post so you can change them.'
           : 'Choose a network or an interest. Use puts the text and photo into your post so you can rewrite them.';
       }
     };
@@ -1171,20 +1181,21 @@
     });
     $('[data-cp-none]', form).addEventListener('click', () => { targets().forEach((t) => { t.checked = false; }); sync(); });
 
-    const attachImage = (src) => {
+    const attachImage = (src, fallbackType = 'image/webp') => {
       if (!src || uploading || pendingImage) return;
       pendingImage = true;
       fetch(src, { credentials: 'same-origin' })
-        .then((res) => { if (!res.ok) throw new Error('That image could not be added.'); return res.blob(); })
+        .then((res) => { if (!res.ok) throw new Error('That file could not be added.'); return res.blob(); })
         .then((blob) => {
           pendingImage = false;
           if (uploading) return;
-          const name = src.split('/').pop() || 'template.webp';
-          upload(new File([blob], name, { type: blob.type || 'image/webp' }));
+          const name = src.split('/').pop() || (fallbackType === 'video/mp4' ? 'template.mp4' : 'template.webp');
+          const type = blob.type && blob.type !== 'application/octet-stream' ? blob.type : fallbackType;
+          upload(new File([blob], name, { type }));
         })
         .catch((err) => {
           pendingImage = false;
-          mediaError(err.message || 'That image could not be added.');
+          mediaError(err.message || 'That file could not be added.');
         });
     };
 
@@ -1197,7 +1208,8 @@
         if (use.dataset.cpTitle) f.title.value = use.dataset.cpTitle;
         area.focus();
         sync();
-        attachImage(use.dataset.cpImage);
+        const file = use.dataset.cpVideo || use.dataset.cpImage;
+        if (file) attachImage(file, use.dataset.cpVideo ? 'video/mp4' : 'image/webp');
         return;
       }
       const tab = e.target.closest('[data-cp-tab]');
@@ -1256,7 +1268,7 @@
     media = initialMedia;
     if (window.matchMedia('(min-width: 1100px)').matches) setPanel('preview');
     sync();
-    if (form.dataset.cpStartImage && !media) attachImage(form.dataset.cpStartImage);
+    if (form.dataset.cpStartImage && !media) attachImage(form.dataset.cpStartImage, form.dataset.cpStartType || 'image/webp');
 
     return {
       sync,
@@ -1280,7 +1292,8 @@
         mediaError('');
         $('[data-cp-progress]', form).hidden = true;
         showMedia(data.media || null);
-        if (!data.media && data.image) attachImage(data.image);
+        if (!data.media && data.video) attachImage(data.video, 'video/mp4');
+        else if (!data.media && data.image) attachImage(data.image);
         $('[data-compose-title]', form).textContent = data.id ? 'Edit Post' : 'Create Post';
         $('[data-compose-delete]', form).hidden = !data.id;
         $('[data-cp-another-wrap]', form).hidden = !dialog || Boolean(data.id);

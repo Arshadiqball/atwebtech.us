@@ -245,10 +245,12 @@ final class WorkspaceHandler
         $limit = (int) $settings['post_max'];
         $youtube = false;
         $linkedin = false;
+        $instagram = false;
         foreach ($targets as $target) {
             $limit = min($limit, (int) ($settings['limits'][$target['provider']] ?? $settings['post_max']));
             $youtube = $youtube || $target['provider'] === 'youtube';
             $linkedin = $linkedin || $target['provider'] === 'linkedin';
+            $instagram = $instagram || ($target['provider'] === 'instagram' && $target['channel'] && $target['channel']['can_publish']);
         }
         if ($input['body'] === '' && $media === null) {
             $errors['body'] = 'Write something or attach a file before saving.';
@@ -271,8 +273,11 @@ final class WorkspaceHandler
         if ($linkedin && $media !== null && $media['kind'] !== 'image') {
             $errors['media'] = 'LinkedIn posts from atwebtech can include an image, not a video.';
         }
-        if ($youtube && $linkedin) {
-            $errors['targets'] = 'YouTube needs a video and LinkedIn needs text (and an optional image). Schedule them as separate posts.';
+        if ($instagram && $media !== null && $media['kind'] !== 'image') {
+            $errors['media'] = 'Instagram posts need a photo, not a video.';
+        }
+        if ($youtube && ($linkedin || $instagram)) {
+            $errors['targets'] = 'YouTube needs a video. Schedule it separately from Instagram or LinkedIn.';
         }
         if ($linkedin && mb_strlen($input['first_comment']) > 1250) {
             $errors['first_comment'] = 'A first comment can be up to 1,250 characters.';
@@ -304,6 +309,9 @@ final class WorkspaceHandler
                     if ($input['body'] === '') {
                         $errors['body'] ??= 'Write the post you want to publish on LinkedIn.';
                     }
+                }
+                if ($channel['provider'] === 'instagram' && $channel['can_publish'] && ($media === null || $media['kind'] !== 'image')) {
+                    $errors['media'] ??= sprintf('Attach a photo before scheduling to %s.', $channel['name']);
                 }
             }
         }
@@ -443,7 +451,14 @@ final class WorkspaceHandler
         if (preg_match('/^(instagram|facebook|tiktok|linkedin|youtube|pinterest|threads|x)-(\d+)$/', $key, $hit)) {
             $post = $library['networks'][$hit[1]][1][(int) $hit[2]] ?? null;
             if ($post !== null) {
-                return ['title' => $post[1], 'prompt' => $post[2], 'image' => $imageFor($hit[1]), 'post_title' => $post[3] ?? ''];
+                $clip = in_array($hit[1], ['youtube', 'tiktok'], true) ? (string) ($library['videos'][$hit[1]][(int) $hit[2]] ?? '') : '';
+                return [
+                    'title' => $post[1],
+                    'prompt' => $post[2],
+                    'image' => $clip === '' ? $imageFor($hit[1]) : '',
+                    'video' => $clip !== '' ? '/assets/video/templates/' . $clip : '',
+                    'post_title' => $post[3] ?? '',
+                ];
             }
         }
         if (preg_match('/^p(\d+)$/', $key, $m)) {

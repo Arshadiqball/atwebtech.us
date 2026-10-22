@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-/** Connected social channels. YouTube, a personal LinkedIn Profile, TikTok, Pinterest, X, a Facebook Page, an Instagram professional account, and a Threads profile (name and picture) can connect. */
+/** Connected social channels. YouTube, a personal LinkedIn Profile, and an Instagram professional account can publish. TikTok, Pinterest, X, a Facebook Page, and a Threads profile connect for name and picture. */
 final class Channels
 {
     public const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
@@ -61,6 +61,7 @@ final class Channels
         $row['can_publish'] = match ($row['provider']) {
             'youtube' => self::youtubeCanPublish($scopes),
             'linkedin' => str_contains($scopes, self::LINKEDIN_SHARE),
+            'instagram' => str_contains($scopes, 'instagram_business_content_publish'),
             default => false,
         };
         return $row;
@@ -857,7 +858,7 @@ final class Channels
         ]];
     }
 
-    /** Exchange an Instagram code for a long-lived token. Publishing is not available yet. */
+    /** Exchange an Instagram code for a long-lived token. */
     private static function instagramToken(string $code, string $redirect, array $creds): array
     {
         $short = self::request('POST', 'https://api.instagram.com/oauth/access_token', [
@@ -894,7 +895,7 @@ final class Channels
         ];
     }
 
-    /** The signed-in Instagram professional account: name and picture. Publishing is not available yet. */
+    /** The signed-in Instagram professional account: name and picture. */
     public static function instagramAccount(string $accessToken): array
     {
         try {
@@ -927,6 +928,63 @@ final class Channels
             'avatar' => self::safeAvatar((string) ($user['profile_picture_url'] ?? '')),
             'kind' => $kind,
         ]];
+    }
+
+    /**
+     * Publish one photo to an Instagram professional account.
+     *
+     * @return array{id:string, url:string}
+     */
+    public static function instagramPublish(string $token, string $igId, string $imageUrl, string $caption): array
+    {
+        if (!preg_match('/^[0-9]+$/', $igId)) {
+            throw new PublishError('This Instagram account can’t be published to. Reconnect it and try again.');
+        }
+        $created = self::request('POST', 'https://graph.instagram.com/v23.0/' . $igId . '/media', [
+            'image_url' => $imageUrl,
+            'caption' => $caption,
+        ], $token);
+        $creation = (string) ($created['id'] ?? '');
+        if ($creation === '' || !preg_match('/^[0-9]+$/', $creation)) {
+            throw new PublishError('Instagram didn’t accept the photo.');
+        }
+        $status = 'IN_PROGRESS';
+        for ($i = 0; $i < 8; $i++) {
+            $check = self::request('GET', 'https://graph.instagram.com/v23.0/' . $creation . '?' . http_build_query([
+                'fields' => 'status_code',
+            ]), null, $token);
+            $status = (string) ($check['status_code'] ?? '');
+            if ($status === 'FINISHED' || $status === 'ERROR' || $status === 'EXPIRED') {
+                break;
+            }
+            sleep(2);
+        }
+        if ($status === 'ERROR' || $status === 'EXPIRED') {
+            throw new PublishError('Instagram couldn’t use that photo. Attach a JPG or PNG under 8 MB and retry.');
+        }
+        if ($status !== 'FINISHED') {
+            throw new ChannelApiException('Instagram is still processing the photo.', 0);
+        }
+        $published = self::request('POST', 'https://graph.instagram.com/v23.0/' . $igId . '/media_publish', [
+            'creation_id' => $creation,
+        ], $token);
+        $mediaId = (string) ($published['id'] ?? '');
+        if ($mediaId === '' || !preg_match('/^[0-9]+$/', $mediaId)) {
+            throw new PublishError('Instagram didn’t publish the photo.');
+        }
+        $permalink = '';
+        try {
+            $info = self::request('GET', 'https://graph.instagram.com/v23.0/' . $mediaId . '?' . http_build_query([
+                'fields' => 'permalink',
+            ]), null, $token);
+            $permalink = (string) ($info['permalink'] ?? '');
+        } catch (Throwable) {
+            $permalink = '';
+        }
+        if ($permalink !== '' && !str_starts_with($permalink, 'https://www.instagram.com/')) {
+            $permalink = '';
+        }
+        return ['id' => $mediaId, 'url' => $permalink];
     }
 
     /** Exchange a Facebook code for a long-lived user token. Page tokens are stored separately. */
