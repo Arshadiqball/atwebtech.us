@@ -6,8 +6,11 @@ declare(strict_types=1);
 final class Assistant
 {
     private const PROMPT_MAX = 1000;
-    private const BATCH = 10;
+    /** Posts counted as one generation against the daily allowance. */
+    public const BATCH = 10;
     public const RUN_MAX = 30;
+    /** Posts per OpenAI call by length, sized so one call answers well inside shared hosting's request time. */
+    public const CHUNK = ['short' => 5, 'medium' => 3, 'long' => 2];
 
     public const MODES = [
         'random' => ['Random', 'Fresh, varied angles on your topic', 'sparkle'],
@@ -156,13 +159,14 @@ final class Assistant
     }
 
     /**
-     * Write a run of distinct posts, in batches of BATCH per OpenAI call.
+     * Write one chunk of distinct posts in a single OpenAI call. `avoid` holds openings of posts already written in the run.
      *
      * @param array{mode:string, topic:string, details:string, provider:string, tone:string, length:string, language:string,
-     *              hashtags:bool, emojis:bool, cta:bool, question:bool, rules:string, dates:list<string>, trends:list<array{topic:string, headline:string}>} $brief
+     *              hashtags:bool, emojis:bool, cta:bool, question:bool, rules:string, dates:list<string>, avoid:list<string>,
+     *              trends:list<array{topic:string, headline:string}>} $brief
      * @return list<array{title:string, body:string}>
      */
-    public static function posts(int $userId, array $brief): array
+    public static function posts(array $brief): array
     {
         $network = data('integrations');
         $network = array_column($network, 'name', 'slug')[$brief['provider']] ?? 'social media';
@@ -207,49 +211,39 @@ final class Assistant
             }
         }
 
-        $posts = [];
-        $total = count($brief['dates']);
-        while (count($posts) < $total) {
-            $dates = array_slice($brief['dates'], count($posts), self::BATCH);
-            $ask = $context . "\n" . match ($brief['mode']) {
-                'random' => sprintf('Write %d posts. Pick a different, unexpected angle and format for each one (tip, short story, myth vs fact, behind the scenes, checklist, lesson learned, question, prediction).', count($dates)),
-                'trending' => sprintf('Write %d posts that tie the topic to the trends above. Only use a trend when the link to the topic is genuine and tasteful; skip tragedies, deaths, crime and politics. Use nothing about a trend beyond what its headline says. Use a different trend for each post where possible; if too few fit, write timely posts about what people in this niche are talking about right now, without inventing news.', count($dates)),
-                default => sprintf('Write %d distinct posts that each follow the brief from a different angle.', count($dates)),
-            };
-            $ask .= "\nThe posts go out on these dates, in order: " . implode(', ', $dates) . '.';
-            if ($posts) {
-                $ask .= "\nThese posts are already written, so do not repeat their angles or openings:\n";
-                foreach ($posts as $p) {
-                    $ask .= '- ' . mb_substr(preg_replace('/\s+/', ' ', $p['body']), 0, 90) . "\n";
-                }
-            }
-            RateLimiter::hit('ai-minute', 'user:' . $userId);
-            RateLimiter::hit('ai-day', 'user:' . $userId);
-            $raw = self::complete([
-                ['role' => 'system', 'content' => $system],
-                ['role' => 'user', 'content' => $ask],
-            ], ['max_tokens' => min(12000, 300 + count($dates) * (int) ceil($target / 2.5)), 'timeout' => 90, 'json' => true]);
-            $data = json_decode($raw, true);
-            $batch = [];
-            foreach ((array) ($data['posts'] ?? []) as $p) {
-                $body = trim((string) ($p['body'] ?? ''));
-                if ($body === '') {
-                    continue;
-                }
-                $batch[] = [
-                    'title' => $youtube ? mb_substr(trim((string) ($p['title'] ?? '')), 0, 100) : '',
-                    'body' => mb_substr($body, 0, $limit),
-                ];
-            }
-            if (!$batch) {
-                throw new RuntimeException('OpenAI returned no usable posts.');
-            }
-            array_push($posts, ...array_slice($batch, 0, count($dates)));
-            if (count($batch) < count($dates)) {
-                break;
+        $dates = $brief['dates'];
+        $ask = $context . "\n" . match ($brief['mode']) {
+            'random' => sprintf('Write %d posts. Pick a different, unexpected angle and format for each one (tip, short story, myth vs fact, behind the scenes, checklist, lesson learned, question, prediction).', count($dates)),
+            'trending' => sprintf('Write %d posts that tie the topic to the trends above. Only use a trend when the link to the topic is genuine and tasteful; skip tragedies, deaths, crime and politics. Use nothing about a trend beyond what its headline says. Use a different trend for each post where possible; if too few fit, write timely posts about what people in this niche are talking about right now, without inventing news.', count($dates)),
+            default => sprintf('Write %d distinct posts that each follow the brief from a different angle.', count($dates)),
+        };
+        $ask .= "\nThe posts go out on these dates, in order: " . implode(', ', $dates) . '.';
+        if ($brief['avoid']) {
+            $ask .= "\nThese posts are already written, so do not repeat their angles or openings:\n";
+            foreach ($brief['avoid'] as $opening) {
+                $ask .= '- ' . $opening . "\n";
             }
         }
-        return $posts;
+        $raw = self::complete([
+            ['role' => 'system', 'content' => $system],
+            ['role' => 'user', 'content' => $ask],
+        ], ['max_tokens' => 300 + count($dates) * (int) ceil($target / 2.5), 'timeout' => 30, 'json' => true]);
+        $data = json_decode($raw, true);
+        $posts = [];
+        foreach ((array) ($data['posts'] ?? []) as $p) {
+            $body = trim((string) ($p['body'] ?? ''));
+            if ($body === '') {
+                continue;
+            }
+            $posts[] = [
+                'title' => $youtube ? mb_substr(trim((string) ($p['title'] ?? '')), 0, 100) : '',
+                'body' => mb_substr($body, 0, $limit),
+            ];
+        }
+        if (!$posts) {
+            throw new RuntimeException('OpenAI returned no usable posts.');
+        }
+        return array_slice($posts, 0, count($dates));
     }
 
     /** @param array{max_tokens?:int, timeout?:int, json?:bool} $options */

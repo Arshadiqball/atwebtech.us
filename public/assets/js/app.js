@@ -1513,11 +1513,27 @@
         setupModal.dataset.busy = '1';
         [back, submit].forEach((b) => { b.disabled = true; });
         status.classList.add('is-busy');
-        status.textContent = `Writing ${count} ${count === 1 ? 'post' : 'posts'}… this can take up to a minute.`;
-        try {
-          const res = await fetch(gen.getAttribute('action'), { method: 'POST', body: new FormData(gen), headers: { Accept: 'application/json', 'X-Requested-With': 'fetch' }, credentials: 'same-origin' });
+        status.textContent = `Planning ${count} ${count === 1 ? 'post' : 'posts'}…`;
+        const post = async (url, body) => {
+          const res = await fetch(url, { method: 'POST', body, headers: { Accept: 'application/json', 'X-Requested-With': 'fetch' }, credentials: 'same-origin' });
           const data = await res.json().catch(() => ({}));
-          if (res.ok && data.status === 'success') {
+          return res.ok ? data : { ...data, status: 'error' };
+        };
+        try {
+          let data = await post(gen.getAttribute('action'), new FormData(gen));
+          if (data.status === 'run') {
+            const { run, url, total } = data;
+            let done = 0;
+            do {
+              status.textContent = `Writing posts… ${done} of ${total} done`;
+              const body = new FormData();
+              body.append('_token', gen.elements._token.value);
+              body.append('run', run);
+              data = await post(url, body);
+              done = Number(data.done) || done;
+            } while (data.status === 'progress');
+          }
+          if (data.status === 'success') {
             try { sessionStorage.setItem('awt-toast', data.message); } catch (er) { /* storage unavailable */ }
             window.location.href = data.redirect;
             return;

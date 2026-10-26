@@ -452,31 +452,20 @@ final class ChannelHandler
             $fail($problem, 4, 429);
         }
 
-        if (wants_json()) {
-            session_write_close();
+        // Without JavaScript the whole run happens in this request, so keep it to one chunk.
+        if (!wants_json()) {
+            $slots = array_slice($slots, 0, Assistant::CHUNK[$in['length']]);
         }
-        set_time_limit(240);
         try {
             $trends = $in['mode'] === 'trending' ? Assistant::trends($in['region']) : [];
         } catch (Throwable $e) {
             error_log(sprintf('[%s] google trends %s failed: %s', gmdate('c'), $in['region'], $e->getMessage()));
             $fail('Google Trends didn’t answer just now. Try again, or pick Random or Prompt.', 1, 502);
         }
-        try {
-            $written = Assistant::posts($uid, [
-                'mode' => $in['mode'], 'topic' => $in['topic'], 'details' => $in['details'], 'provider' => $provider,
-                'tone' => $in['tone'], 'length' => $in['length'], 'language' => $in['language'],
-                'hashtags' => $in['hashtags'], 'emojis' => $in['emojis'], 'cta' => $in['cta'], 'question' => $in['question'],
-                'rules' => $in['rules'], 'trends' => $trends,
-                'dates' => array_map(static fn (DateTimeImmutable $s): string => $s->format('D j M Y'), $slots),
-            ]);
-        } catch (Throwable $e) {
-            error_log(sprintf('[%s] ai run failed for user %d: %s', gmdate('c'), $uid, $e->getMessage()));
-            $e->getMessage() === 'invalid_api_key'
-                ? $fail('OpenAI rejected the API key on this server. Replace it, then try again.', 4, 401)
-                : $fail('The AI couldn’t write those posts just now. Please try again.', 4, 502);
+        RateLimiter::hit('ai-minute', 'user:' . $uid);
+        for ($i = (int) ceil(count($slots) / Assistant::BATCH); $i > 0; $i--) {
+            RateLimiter::hit('ai-day', 'user:' . $uid);
         }
-        $slots = array_slice($slots, 0, count($written));
 
         $pool = $in['media'] && in_array($provider, ['instagram', 'youtube', 'tiktok'], true) ? self::templatePool($provider) : [];
         $chosen = [];
@@ -485,6 +474,117 @@ final class ChannelHandler
             shuffle($bag);
             array_push($chosen, ...array_slice($bag, 0, count($slots) - count($chosen)));
         }
+        $run = [
+            'id' => bin2hex(random_bytes(12)),
+            'channel' => (int) $channel['id'],
+            'brief' => [
+                'mode' => $in['mode'], 'topic' => $in['topic'], 'details' => $in['details'], 'provider' => $provider,
+                'tone' => $in['tone'], 'length' => $in['length'], 'language' => $in['language'],
+                'hashtags' => $in['hashtags'], 'emojis' => $in['emojis'], 'cta' => $in['cta'], 'question' => $in['question'],
+                'rules' => $in['rules'], 'trends' => $trends,
+            ],
+            'tz' => $tz->getName(),
+            'slots' => array_map(static fn (DateTimeImmutable $s): string => $s->format(DATE_ATOM), $slots),
+            'media' => array_map(static fn (array $c): array => ['image' => (string) $c['image'], 'video' => (string) $c['video']], $chosen),
+            'pool' => (bool) $pool,
+            'asked' => $in['count'],
+            'save' => $in['save'],
+            'done' => 0,
+            'avoid' => [],
+            'busy' => 0,
+            'expires' => time() + 3600,
+        ];
+
+        if (wants_json()) {
+            $_SESSION['_gen'] = $run;
+            json_response(['status' => 'run', 'run' => $run['id'], 'total' => count($slots), 'url' => $back . '/generate/step']);
+        }
+        try {
+            self::writeChunk($uid, $channel, $run);
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] ai run failed for user %d: %s', gmdate('c'), $uid, $e->getMessage()));
+            $fail(self::chunkError($e), 4, 502);
+        }
+        $done = self::runSummary($channel, $run, null);
+        self::notice($done['redirect'], $done['message']);
+    }
+
+    /** One step of an AI Generate run: write and save the next small chunk, so no request runs long. */
+    public static function generateStep(string $id): never
+    {
+        $user = Auth::member();
+        $uid = (int) $user['id'];
+        $run = $_SESSION['_gen'] ?? null;
+        if (!is_array($run) || !ctype_digit($id) || (int) $id !== $run['channel'] || !hash_equals($run['id'], (string) ($_POST['run'] ?? '')) || $run['expires'] < time()) {
+            json_response(['status' => 'error', 'message' => 'This generation is no longer running. Start it again.', 'step' => 4], 410);
+        }
+        $channel = Channels::find($uid, $run['channel']);
+        if ($channel === null) {
+            unset($_SESSION['_gen']);
+            not_found();
+        }
+        if ($run['busy'] > time()) {
+            json_response(['status' => 'error', 'message' => 'Still writing the previous posts. One moment.', 'step' => 4], 409);
+        }
+        $_SESSION['_gen']['busy'] = time() + 60;
+        session_write_close();
+        set_time_limit(60);
+
+        $error = null;
+        try {
+            self::writeChunk($uid, $channel, $run);
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] ai run step failed for user %d: %s', gmdate('c'), $uid, $e->getMessage()));
+            $error = self::chunkError($e);
+        }
+        Security::startSession();
+        if ($error === null && $run['done'] < count($run['slots'])) {
+            $run['busy'] = 0;
+            $_SESSION['_gen'] = $run;
+            json_response(['status' => 'progress', 'done' => $run['done'], 'total' => count($run['slots'])]);
+        }
+        unset($_SESSION['_gen']);
+        if ($run['done'] === 0) {
+            json_response(['status' => 'error', 'message' => $error, 'step' => 4], 502);
+        }
+        json_response(['status' => 'success'] + self::runSummary($channel, $run, $error));
+    }
+
+    private static function chunkError(Throwable $e): string
+    {
+        return $e->getMessage() === 'invalid_api_key'
+            ? 'OpenAI rejected the API key on this server. Replace it, then try again.'
+            : 'The AI couldn’t write those posts just now. Please try again.';
+    }
+
+    /** Write the run's next chunk with one short OpenAI call, save it, and advance the run. */
+    private static function writeChunk(int $uid, array $channel, array &$run): void
+    {
+        $tz = new DateTimeZone($run['tz']);
+        $slots = array_map(
+            static fn (string $s): DateTimeImmutable => (new DateTimeImmutable($s))->setTimezone($tz),
+            array_slice($run['slots'], $run['done'], Assistant::CHUNK[$run['brief']['length']])
+        );
+        $written = Assistant::posts($run['brief'] + [
+            'dates' => array_map(static fn (DateTimeImmutable $s): string => $s->format('D j M Y'), $slots),
+            'avoid' => $run['avoid'],
+        ]);
+        $slots = array_slice($slots, 0, count($written));
+        self::saveGenerated($uid, $channel, $slots, $written, array_slice($run['media'], $run['done'], count($slots)), $run['save']);
+        $run['done'] += count($written);
+        foreach ($written as $p) {
+            $run['avoid'][] = mb_substr((string) preg_replace('/\s+/', ' ', $p['body']), 0, 90);
+        }
+    }
+
+    /**
+     * @param list<DateTimeImmutable> $slots
+     * @param list<array{title:string, body:string}> $written
+     * @param list<array{image:string, video:string}> $chosen
+     */
+    private static function saveGenerated(int $uid, array $channel, array $slots, array $written, array $chosen, string $status): void
+    {
+        $provider = (string) $channel['provider'];
         $youtube = $provider === 'youtube';
         $yt = data('youtube');
         $titleMax = (int) $yt['title_max'];
@@ -532,7 +632,7 @@ final class ChannelHandler
                     'tags' => null,
                     'media' => $mediaId,
                     'first' => null,
-                    'status' => $in['save'],
+                    'status' => $status,
                     'planned' => $at,
                     'idea' => null,
                     'created' => $now,
@@ -549,28 +649,41 @@ final class ChannelHandler
                     unlink($file);
                 }
             }
-            error_log(sprintf('[%s] ai run insert channel %d: %s', gmdate('c'), (int) $channel['id'], $e->getMessage()));
-            $fail('Those posts could not be saved. Please try again.', 4, 500);
+            throw $e;
         }
-        $n = count($slots);
-        $range = $slots[0]->format('j M') . ($n > 1 ? ' to ' . $slots[$n - 1]->format('j M') : '');
-        $short = $n < $in['count'] ? sprintf(' Only %d of the %d posts you asked for fit the open days.', $n, $in['count']) : '';
-        if ($in['save'] === 'draft') {
+    }
+
+    /**
+     * Closing message for a finished (or stopped) run.
+     *
+     * @return array{message:string, redirect:string}
+     */
+    private static function runSummary(array $channel, array $run, ?string $error): array
+    {
+        $provider = (string) $channel['provider'];
+        $tz = new DateTimeZone($run['tz']);
+        $n = $run['done'];
+        $first = (new DateTimeImmutable($run['slots'][0]))->setTimezone($tz);
+        $last = (new DateTimeImmutable($run['slots'][$n - 1]))->setTimezone($tz);
+        $range = $first->format('j M') . ($n > 1 ? ' to ' . $last->format('j M') : '');
+        $short = match (true) {
+            $error !== null => sprintf(' The AI stopped after %d of %d, so generate again for the rest.', $n, count($run['slots'])),
+            $n < $run['asked'] => sprintf(' Only %d of the %d posts you asked for %s.', $n, $run['asked'], wants_json() ? 'fit the open days' : 'were written; turn on JavaScript for longer runs'),
+            default => '',
+        };
+        if ($run['save'] === 'draft') {
             $message = sprintf('%d AI %s saved to Drafts, dated %s. Review and schedule them when ready.', $n, $n === 1 ? 'draft' : 'drafts', $range) . $short;
         } else {
             $publishes = $channel['can_publish'] && in_array($provider, ['linkedin', 'instagram', 'youtube'], true);
-            $missingMedia = in_array($provider, ['instagram', 'youtube', 'tiktok'], true) && !$pool;
-            $message = sprintf('%d AI %s scheduled, %s at %s.', $n, $n === 1 ? 'post' : 'posts', $range, $slots[0]->format('g:i A'))
+            $missingMedia = in_array($provider, ['instagram', 'youtube', 'tiktok'], true) && !$run['pool'];
+            $message = sprintf('%d AI %s scheduled, %s at %s.', $n, $n === 1 ? 'post' : 'posts', $range, $first->format('g:i A'))
                 . match (true) {
                     !$publishes => ' This channel doesn’t publish automatically yet, so they stay as plans you can edit.',
                     $missingMedia => ' Add a ' . ($provider === 'instagram' ? 'photo' : 'video') . ' to each before its time, or it can’t be published.',
                     default => '',
                 } . $short;
         }
-        if (wants_json()) {
-            json_response(['status' => 'success', 'message' => $message, 'redirect' => $back . ($in['save'] === 'draft' ? '?tab=drafts' : '')]);
-        }
-        self::notice($back . ($in['save'] === 'draft' ? '?tab=drafts' : ''), $message);
+        return ['message' => $message, 'redirect' => '/app/channels/' . (int) $channel['id'] . ($run['save'] === 'draft' ? '?tab=drafts' : '')];
     }
 
     /** @return list<array{title:string, body:string, image:string, video:string, post_title:string}> */

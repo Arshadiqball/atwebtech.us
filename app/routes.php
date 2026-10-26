@@ -326,6 +326,7 @@ return [
     ['POST', '/app/channels/{id}/schedule', [ChannelHandler::class, 'schedule']],
     ['POST', '/app/channels/{id}/intro', [ChannelHandler::class, 'closeIntro']],
     ['POST', '/app/channels/{id}/generate', [ChannelHandler::class, 'generate']],
+    ['POST', '/app/channels/{id}/generate/step', [ChannelHandler::class, 'generateStep']],
     ['POST', '/app/channels/{id}/disconnect', [ChannelHandler::class, 'disconnect']],
     ['POST', '/app/media', [Media::class, 'start']],
     ['POST', '/app/media/{id}/chunk', [Media::class, 'chunk']],
