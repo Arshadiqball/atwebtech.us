@@ -6,13 +6,17 @@ final class RateLimiter
 {
     public static function tooManyAttempts(string $action, string $fingerprint, ?int $max = null, ?int $windowMinutes = null): bool
     {
+        return self::attempts($action, $fingerprint, $windowMinutes) >= ($max ?? (int) config('forms.rate_limit_max'));
+    }
+
+    public static function attempts(string $action, string $fingerprint, ?int $windowMinutes = null): int
+    {
         $window = $windowMinutes ?? (int) config('forms.rate_limit_window');
-        $windowStart = gmdate('Y-m-d H:i:s', time() - $window * 60);
         $stmt = Database::connection()->prepare(
             'SELECT COUNT(*) FROM form_attempts WHERE action = :action AND fingerprint = :fp AND created_at >= :since'
         );
-        $stmt->execute(['action' => $action, 'fp' => $fingerprint, 'since' => $windowStart]);
-        return (int) $stmt->fetchColumn() >= ($max ?? (int) config('forms.rate_limit_max'));
+        $stmt->execute(['action' => $action, 'fp' => $fingerprint, 'since' => gmdate('Y-m-d H:i:s', time() - $window * 60)]);
+        return (int) $stmt->fetchColumn();
     }
 
     public static function hit(string $action, string $fingerprint): void

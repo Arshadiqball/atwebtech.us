@@ -1443,12 +1443,95 @@
     const first = $('input:checked', setupModal) || $('input:not([type="hidden"]), a.ws-btn', setupModal);
     if (first) first.focus();
     document.body.classList.add('menu-open');
-    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') window.location.href = close.href; });
-    setupModal.addEventListener('click', (e) => { if (e.target === setupModal) window.location.href = close.href; });
+    const leave = () => { if (!setupModal.dataset.busy) window.location.href = close.href; };
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') leave(); });
+    setupModal.addEventListener('click', (e) => { if (e.target === setupModal) leave(); });
     const custom = $('[data-goal-custom]', setupModal);
     if (custom) {
       setupModal.addEventListener('change', (e) => {
         if (e.target === custom) $('input[name="custom"]', setupModal).focus();
+      });
+    }
+
+    const gen = $('[data-gen]', setupModal);
+    if (gen) {
+      const steps = $$('[data-gen-step]', gen);
+      const dots = $$('[data-gen-dot]', setupModal);
+      const back = $('[data-gen-back]', setupModal);
+      const next = $('[data-gen-next]', setupModal);
+      const submit = $('[data-gen-submit]', setupModal);
+      const status = $('[data-gen-status]', setupModal);
+      const err = $('[data-gen-error]', setupModal);
+      const details = $('[data-gen-details]', gen);
+      let step = Math.min(steps.length, Math.max(1, Number(gen.dataset.step) || 1));
+      const show = (n, focus) => {
+        step = n;
+        steps.forEach((s) => s.classList.toggle('is-current', Number(s.dataset.genStep) === n));
+        dots.forEach((d) => {
+          const i = Number(d.dataset.genDot);
+          d.classList.toggle('is-done', i < n);
+          if (i === n) d.setAttribute('aria-current', 'step'); else d.removeAttribute('aria-current');
+        });
+        back.hidden = n === 1;
+        next.hidden = n === steps.length;
+        submit.hidden = n !== steps.length;
+        if (focus) {
+          const current = steps[n - 1];
+          const field = $('input:checked, input:not([type="hidden"]):not([type="checkbox"]), select, textarea', current);
+          if (field) field.focus();
+        }
+      };
+      const valid = (n) => {
+        const bad = $$('input, select, textarea', steps[n - 1]).find((el) => !el.checkValidity());
+        if (bad) { bad.reportValidity(); return false; }
+        if (n === 4 && !$$('input[name="days[]"]:checked', gen).length) {
+          err.textContent = 'Pick at least one day of the week.';
+          err.hidden = false;
+          return false;
+        }
+        return true;
+      };
+      const syncMode = () => {
+        const prompt = gen.elements.mode.value === 'prompt';
+        details.required = prompt;
+        if (prompt) details.minLength = 10; else details.removeAttribute('minlength');
+      };
+      gen.classList.add('is-stepped');
+      syncMode();
+      show(step, false);
+      gen.addEventListener('change', (e) => { if (e.target.name === 'mode') syncMode(); });
+      back.addEventListener('click', () => { err.hidden = true; show(step - 1, true); });
+      next.addEventListener('click', () => { if (valid(step)) { err.hidden = true; show(step + 1, true); } });
+      gen.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (step < steps.length) { next.click(); return; }
+        for (let i = 1; i <= steps.length; i += 1) {
+          if (!valid(i)) { if (i !== step) { show(i, false); valid(i); } return; }
+        }
+        const count = Number(gen.elements.count.value) || 0;
+        err.hidden = true;
+        setupModal.dataset.busy = '1';
+        [back, submit].forEach((b) => { b.disabled = true; });
+        status.classList.add('is-busy');
+        status.textContent = `Writing ${count} ${count === 1 ? 'post' : 'posts'}… this can take up to a minute.`;
+        try {
+          const res = await fetch(gen.getAttribute('action'), { method: 'POST', body: new FormData(gen), headers: { Accept: 'application/json', 'X-Requested-With': 'fetch' }, credentials: 'same-origin' });
+          const data = await res.json().catch(() => ({}));
+          if (res.ok && data.status === 'success') {
+            try { sessionStorage.setItem('awt-toast', data.message); } catch (er) { /* storage unavailable */ }
+            window.location.href = data.redirect;
+            return;
+          }
+          err.textContent = data.message || 'The posts couldn’t be generated. Please try again.';
+          if (data.step) show(Number(data.step), false);
+        } catch (er) {
+          err.textContent = 'The connection dropped. Check your network and try again.';
+        }
+        err.hidden = false;
+        delete setupModal.dataset.busy;
+        [back, submit].forEach((b) => { b.disabled = false; });
+        status.classList.remove('is-busy');
+        status.textContent = '';
       });
     }
   }
@@ -1669,6 +1752,177 @@
       $$('[data-day-on]', slotsForm).forEach((on) => { on.checked = false; });
       $$('.set-day', slotsForm).forEach((col) => col.classList.remove('is-on'));
       $$('input[type="time"]', slotsForm).forEach((i) => { if (i.name) { i.value = ''; i.disabled = true; } });
+    });
+  }
+
+  /* Sarah, the website chatbot ---------------------------------------- */
+  const bot = $('[data-chatbot]');
+  if (bot && typeof HTMLDialogElement === 'function') {
+    const dialog = $('dialog', bot);
+    const launch = $('[data-sb-open]', bot);
+    const log = $('[data-sb-log]', bot);
+    const form = $('[data-sb-form]', bot);
+    const input = $('[data-sb-input]', bot);
+    const send = $('[data-sb-send]', bot);
+    const file = $('[data-sb-file]', bot);
+    const preview = $('[data-sb-preview]', bot);
+    const errEl = $('[data-sb-error]', bot);
+    const meter = $('[data-sb-meter]', bot);
+    let loaded = false;
+    let busy = false;
+    let left = 1;
+    let image = '';
+
+    const rich = (text) => {
+      const frag = document.createDocumentFragment();
+      const re = /\[([^\]\n]{1,80})\]\((\/[A-Za-z0-9/_\-?=&#.%]*)\)/g;
+      let last = 0;
+      let m;
+      while ((m = re.exec(text))) {
+        frag.append(text.slice(last, m.index));
+        const a = document.createElement('a');
+        a.href = m[2];
+        a.textContent = m[1];
+        frag.append(a);
+        last = re.lastIndex;
+      }
+      frag.append(text.slice(last));
+      return frag;
+    };
+    const add = (role, text, img) => {
+      const el = document.createElement('div');
+      el.className = `sb-msg sb-msg--${role === 'user' ? 'user' : 'bot'}`;
+      if (img) { const i = document.createElement('img'); i.src = img; i.alt = 'Attached screenshot'; el.append(i); }
+      if (role === 'user') el.append(text); else el.append(rich(text));
+      log.append(el);
+      log.scrollTop = log.scrollHeight;
+      return el;
+    };
+    const setMeta = (data) => {
+      if (typeof data.left !== 'number') return;
+      left = data.left;
+      meter.hidden = false;
+      $('[data-sb-bar]', bot).style.width = `${Math.min(100, ((data.limit - data.left) / data.limit) * 100)}%`;
+      $('[data-sb-left]', bot).textContent = `${data.left} ${data.left === 1 ? 'message' : 'messages'} left`;
+      input.disabled = left <= 0;
+      input.placeholder = left <= 0 ? 'No messages left today' : 'Write a message…';
+      send.disabled = left <= 0 || busy;
+    };
+    const showError = (msg) => { errEl.textContent = msg; errEl.hidden = !msg; };
+    const render = (data) => {
+      log.textContent = '';
+      add('bot', bot.dataset.welcome);
+      (data.messages || []).forEach((msg) => add(msg.role, msg.text));
+      setMeta(data);
+    };
+    const call = async (url, body) => {
+      const res = await fetch(url, {
+        method: body ? 'POST' : 'GET',
+        body,
+        headers: { Accept: 'application/json', 'X-Requested-With': 'fetch', 'X-CSRF-Token': bot.dataset.token },
+        credentials: 'same-origin',
+      });
+      const data = await res.json().catch(() => ({}));
+      return { ok: res.ok && data.status === 'ok', data };
+    };
+    const open = async () => {
+      dialog.showModal();
+      launch.setAttribute('aria-expanded', 'true');
+      input.focus();
+      if (loaded) return;
+      loaded = true;
+      add('bot', bot.dataset.welcome);
+      try {
+        const { ok, data } = await call('/chat');
+        if (ok) render(data);
+      } catch (e) { /* the welcome message is enough to start */ }
+    };
+    const clearImage = () => { image = ''; file.value = ''; preview.hidden = true; };
+
+    launch.addEventListener('click', open);
+    dialog.addEventListener('close', () => { launch.setAttribute('aria-expanded', 'false'); launch.focus(); });
+    dialog.addEventListener('click', (e) => { if (e.target === dialog) dialog.close(); });
+    $('[data-sb-close]', bot).addEventListener('click', () => dialog.close());
+    $('[data-sb-reset]', bot).addEventListener('click', async () => {
+      if (busy) return;
+      showError('');
+      clearImage();
+      const body = new FormData();
+      body.append('_token', bot.dataset.token);
+      try {
+        const { ok, data } = await call('/chat/reset', body);
+        if (ok) render(data);
+      } catch (e) { showError('The connection dropped. Please try again.'); }
+      input.focus();
+    });
+
+    file.addEventListener('change', () => {
+      const f = file.files[0];
+      if (!f) return;
+      if (!/^image\/(png|jpeg|webp)$/.test(f.type) || f.size > 15 * 1024 * 1024) { showError('Attach a PNG, JPG or WebP image.'); file.value = ''; return; }
+      const img = new Image();
+      const reader = new FileReader();
+      img.onload = () => {
+        const scale = Math.min(1, 1280 / Math.max(img.width, img.height));
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        image = canvas.toDataURL('image/jpeg', 0.85);
+        $('[data-sb-preview-img]', bot).src = image;
+        preview.hidden = false;
+        showError('');
+        input.focus();
+      };
+      img.onerror = () => { showError('That image couldn’t be read.'); file.value = ''; };
+      reader.onload = () => { img.src = reader.result; };
+      reader.onerror = img.onerror;
+      reader.readAsDataURL(f);
+    });
+    $('[data-sb-unattach]', bot).addEventListener('click', () => { clearImage(); input.focus(); });
+
+    const grow = () => { input.style.height = ''; input.style.height = `${Math.min(140, input.scrollHeight + 2)}px`; };
+    input.addEventListener('input', grow);
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) { e.preventDefault(); form.requestSubmit(); }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (busy || left <= 0 || (!text && !image)) return;
+      busy = true;
+      send.disabled = true;
+      showError('');
+      add('user', text, image);
+      const body = new FormData();
+      body.append('_token', bot.dataset.token);
+      body.append('message', text);
+      if (image) body.append('image', image);
+      input.value = '';
+      grow();
+      clearImage();
+      const typing = document.createElement('div');
+      typing.className = 'sb-msg sb-msg--bot sb-typing';
+      typing.setAttribute('aria-label', 'Sarah is typing');
+      typing.innerHTML = '<i></i><i></i><i></i>';
+      log.append(typing);
+      log.scrollTop = log.scrollHeight;
+      try {
+        const { ok, data } = await call('/chat', body);
+        typing.remove();
+        if (ok) add('bot', data.reply); else showError(data.message || 'Sarah couldn’t answer just now. Please try again.');
+        setMeta(data);
+      } catch (er) {
+        typing.remove();
+        showError('The connection dropped. Check your network and try again.');
+      }
+      busy = false;
+      send.disabled = left <= 0;
+      if (!input.disabled) input.focus();
     });
   }
 

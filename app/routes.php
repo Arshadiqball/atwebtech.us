@@ -100,6 +100,9 @@ return [
 
     ['POST', '/waitlist', [FormHandler::class, 'waitlist']],
     ['POST', '/contact', [FormHandler::class, 'contact']],
+    ['GET', '/chat', [Chatbot::class, 'state']],
+    ['POST', '/chat', [Chatbot::class, 'message']],
+    ['POST', '/chat/reset', [Chatbot::class, 'reset']],
 
     ['GET', '/signup', static function (): void {
         if (Auth::check()) {
@@ -300,7 +303,7 @@ return [
             $days = max(28, min(ChannelHandler::QUEUE_DAYS, (int) ($_GET['days'] ?? 28)));
             return [
                 'channel' => $channel,
-                'setup' => Workspace::pick('setup', ['', 'goal', 'times', 'schedule']),
+                'setup' => Workspace::pick('setup', ['', 'goal', 'times', 'schedule', 'generate']),
                 'tab' => $tab,
                 'view' => $view,
                 'days' => $days,
@@ -322,7 +325,7 @@ return [
     ['POST', '/app/channels/{id}/goal', [ChannelHandler::class, 'goal']],
     ['POST', '/app/channels/{id}/schedule', [ChannelHandler::class, 'schedule']],
     ['POST', '/app/channels/{id}/intro', [ChannelHandler::class, 'closeIntro']],
-    ['POST', '/app/channels/{id}/fill', [ChannelHandler::class, 'fillFromTemplates']],
+    ['POST', '/app/channels/{id}/generate', [ChannelHandler::class, 'generate']],
     ['POST', '/app/channels/{id}/disconnect', [ChannelHandler::class, 'disconnect']],
     ['POST', '/app/media', [Media::class, 'start']],
     ['POST', '/app/media/{id}/chunk', [Media::class, 'chunk']],
@@ -398,6 +401,15 @@ return [
         ], [
             'title' => 'Subscribers | atwebtech',
             'description' => 'Waitlist emails for future updates.',
+            'layout' => 'app',
+            'noindex' => true,
+            'admin' => true,
+        ]);
+    }],
+    ['GET', '/admin/knowledge', static function (): void {
+        View::render('admin-knowledge', ['user' => Auth::requireAdmin(), 'knowledge' => Chatbot::knowledge()], [
+            'title' => 'Chatbot knowledge | atwebtech',
+            'description' => 'What the website chatbot knows.',
             'layout' => 'app',
             'noindex' => true,
             'admin' => true,

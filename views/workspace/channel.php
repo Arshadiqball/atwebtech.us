@@ -43,18 +43,7 @@ $next = $queue['next'] ?? null;
         <a href="<?= e($url(['tab' => 'queue', 'view' => 'list'])) ?>"<?= $tab === 'queue' && $view === 'list' ? ' aria-current="page"' : '' ?>><?= icon('rows') ?>List</a>
         <a href="<?= e($url(['tab' => 'queue', 'view' => 'calendar'])) ?>"<?= $tab === 'queue' && $view === 'calendar' ? ' aria-current="page"' : '' ?>><?= icon('calendar-blank') ?>Calendar</a>
       </nav>
-      <form action="<?= e($self) ?>/fill" method="post">
-        <input type="hidden" name="_token" value="<?= e($token) ?>">
-        <button type="submit" class="ws-btn" data-confirm="<?= e(match ($channel['provider']) {
-            'linkedin' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. LinkedIn publishes each one at 6:00 PM.',
-            'instagram' => $channel['can_publish']
-                ? 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Each post includes its photo. Instagram publishes it at 6:00 PM.'
-                : 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Publishing isn’t on for this account yet, so they stay as plans until you reconnect and allow content publishing.',
-            'youtube' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Each post includes a short starter video. Until Google finishes reviewing the app, YouTube keeps those uploads private.',
-            'tiktok' => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. Each post includes a short starter video. TikTok publishing is not built yet, so they stay as plans you can edit.',
-            default => 'Put one template post on every day for the next 30 days, including today? Days that already have a post are left as they are. This network is saved as a plan and is not published automatically.',
-        }) ?>">Every day</button>
-      </form>
+      <a class="ws-btn" href="<?= e($self) ?>?setup=generate"><?= icon('sparkle') ?>AI Generate</a>
       <a class="ws-btn ws-btn--dark" href="/app/publish/new?target=<?= e($target) ?>" data-compose="<?= $newPost ?>"><?= icon('plus') ?>New Post</a>
     </div>
   </header>
@@ -169,7 +158,7 @@ $next = $queue['next'] ?? null;
 
 <?php if ($setup !== ''): ?>
 <div class="ch-modal" role="dialog" aria-modal="true" aria-labelledby="ch-modal-title" data-ch-modal>
-  <div class="ch-modal-box<?= $setup === 'schedule' ? ' ch-modal-box--wide' : '' ?>">
+  <div class="ch-modal-box<?= $setup === 'schedule' || $setup === 'generate' ? ' ch-modal-box--wide' : '' ?>">
     <a class="ws-icon-btn ch-modal-close" href="<?= e($self) ?>"><?= icon('x') ?><span class="sr-only">Close</span></a>
 <?php if ($setup === 'goal'): ?>
     <div class="ch-confetti" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
@@ -205,6 +194,157 @@ $next = $queue['next'] ?? null;
     <footer class="ch-modal-foot">
       <a class="ch-modal-link" href="/faq"><?= icon('question') ?>What are suggested times?</a>
       <button type="submit" form="goal-form" class="ws-btn ws-btn--green">Next<?= icon('arrow-right') ?></button>
+    </footer>
+<?php elseif ($setup === 'generate'):
+    $genState = View::formState('generate');
+    $old = $genState['old'] ?? [];
+    $mode = (string) ($old['mode'] ?? 'random');
+    $flag = static fn (string $key, bool $default): string => ($genState ? !empty($old[$key]) : $default) ? ' checked' : '';
+    $pick = static fn (string $key, string $default): string => (string) ($old[$key] ?? $default);
+    $pickedDays = array_map('intval', (array) ($old['days'] ?? [1, 2, 3, 4, 5, 6, 7]));
+    $mediaNet = in_array($channel['provider'], ['instagram', 'youtube', 'tiktok'], true);
+    $today = (new DateTimeImmutable('now', $tz))->format('Y-m-d');
+?>
+    <div class="ch-modal-body gen">
+      <h2 id="ch-modal-title">Generate posts with AI</h2>
+      <p>Four quick steps. The AI writes the posts for <?= e($channel['name']) ?> and puts them on the days and time you choose.</p>
+      <ol class="gen-steps" aria-label="Steps">
+        <li data-gen-dot="1">Method</li>
+        <li data-gen-dot="2">Topic</li>
+        <li data-gen-dot="3">Rules</li>
+        <li data-gen-dot="4">Schedule</li>
+      </ol>
+<?php if (!Assistant::enabled()): ?>
+      <p class="composer-note"><?= icon('info') ?>The AI Assistant isn’t switched on for this workspace yet. Add an OpenAI API key on the server to use it.</p>
+<?php endif; ?>
+      <p class="composer-error" role="alert" data-gen-error<?= $genState ? '' : ' hidden' ?>><?= e((string) ($genState['message'] ?? '')) ?></p>
+      <form class="gen-form" id="gen-form" action="<?= e($self) ?>/generate" method="post" data-gen data-step="<?= max(1, min(4, (int) ($old['step'] ?? 1))) ?>">
+        <input type="hidden" name="_token" value="<?= e($token) ?>">
+
+        <fieldset class="gen-step" data-gen-step="1">
+          <legend>How should the AI come up with posts?</legend>
+          <div class="gen-modes">
+<?php foreach (Assistant::MODES as $key => [$label, $text, $ic]): ?>
+            <label class="gen-mode">
+              <input type="radio" name="mode" value="<?= e($key) ?>" required<?= $mode === $key ? ' checked' : '' ?>>
+              <span class="gen-mode-icon gen-mode-icon--<?= e($key) ?>"><?= icon($ic) ?></span>
+              <b><?= e($label) ?></b>
+              <small><?= e($text) ?></small>
+            </label>
+<?php endforeach; ?>
+          </div>
+        </fieldset>
+
+        <fieldset class="gen-step" data-gen-step="2">
+          <legend>What are the posts about?</legend>
+          <div class="idea-field">
+            <label for="gen-topic">Topic name</label>
+            <input class="idea-input" id="gen-topic" name="topic" minlength="2" maxlength="120" required placeholder="e.g. Website tips for local businesses" value="<?= e($pick('topic', '')) ?>">
+          </div>
+          <div class="idea-field">
+            <label for="gen-details"><span class="gen-if-prompt">Prompt</span><span class="gen-if-not-prompt">Details <small>(optional)</small></span></label>
+            <textarea class="idea-input" id="gen-details" name="details" rows="4" maxlength="1000" placeholder="Who you are, who you help, what you offer, and anything the posts should mention." data-gen-details<?= $mode === 'prompt' ? ' required minlength="10"' : '' ?>><?= e($pick('details', '')) ?></textarea>
+            <small class="gen-hint gen-if-prompt">Every post follows this brief, each from a different angle. Include the offer, audience, and anything that must be said.</small>
+            <small class="gen-hint gen-if-not-prompt">The AI won’t invent prices, results or reviews. Facts you leave out become [placeholders].</small>
+          </div>
+          <div class="idea-field gen-if-trending">
+            <label for="gen-region">Trends from</label>
+            <select class="idea-input" id="gen-region" name="region">
+<?php foreach (Assistant::TREND_REGIONS as $code => $country): ?>
+              <option value="<?= e($code) ?>"<?= $pick('region', Assistant::trendRegion($tz)) === $code ? ' selected' : '' ?>><?= e($country) ?></option>
+<?php endforeach; ?>
+            </select>
+            <small class="gen-hint">Uses today’s trending Google searches in this country. Trends that don’t fit your topic are skipped.</small>
+          </div>
+        </fieldset>
+
+        <fieldset class="gen-step" data-gen-step="3">
+          <legend>Generation rules</legend>
+          <div class="gen-row">
+            <div class="idea-field">
+              <label for="gen-tone">Tone</label>
+              <select class="idea-input" id="gen-tone" name="tone">
+<?php foreach (Assistant::TONES as $key => $text): ?>
+                <option value="<?= e($key) ?>"<?= $pick('tone', 'friendly') === $key ? ' selected' : '' ?>><?= e(ucfirst($text)) ?></option>
+<?php endforeach; ?>
+              </select>
+            </div>
+            <div class="idea-field">
+              <label for="gen-length">Length</label>
+              <select class="idea-input" id="gen-length" name="length">
+<?php foreach (Assistant::LENGTHS as $key => [$text]): ?>
+                <option value="<?= e($key) ?>"<?= $pick('length', $channel['provider'] === 'x' || $channel['provider'] === 'threads' ? 'short' : 'medium') === $key ? ' selected' : '' ?>><?= e(ucfirst($key)) ?></option>
+<?php endforeach; ?>
+              </select>
+            </div>
+            <div class="idea-field">
+              <label for="gen-language">Language</label>
+              <select class="idea-input" id="gen-language" name="language">
+<?php foreach (Assistant::LANGUAGES as $lang): ?>
+                <option<?= $pick('language', 'English') === $lang ? ' selected' : '' ?>><?= e($lang) ?></option>
+<?php endforeach; ?>
+              </select>
+            </div>
+          </div>
+          <div class="gen-checks">
+            <label class="gen-check"><input type="checkbox" name="hashtags" value="1"<?= $flag('hashtags', true) ?>>Add hashtags</label>
+            <label class="gen-check"><input type="checkbox" name="emojis" value="1"<?= $flag('emojis', false) ?>>Use emojis</label>
+            <label class="gen-check"><input type="checkbox" name="cta" value="1"<?= $flag('cta', true) ?>>End with a call to action</label>
+            <label class="gen-check"><input type="checkbox" name="question" value="1"<?= $flag('question', false) ?>>Ask the audience a question</label>
+<?php if ($mediaNet): ?>
+            <label class="gen-check gen-check--wide"><input type="checkbox" name="media" value="1"<?= $flag('media', true) ?>>Attach a starter <?= $channel['provider'] === 'instagram' ? 'photo' : 'video' ?> from the template library, so each post can publish</label>
+<?php endif; ?>
+          </div>
+          <div class="idea-field">
+            <label for="gen-rules">Other rules <small>(optional)</small></label>
+            <textarea class="idea-input" id="gen-rules" name="rules" rows="3" maxlength="500" placeholder="e.g. Never mention competitors. Sign off with “— Team AT”."><?= e($pick('rules', '')) ?></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset class="gen-step" data-gen-step="4">
+          <legend>When should they go out?</legend>
+          <div class="gen-row">
+            <div class="idea-field">
+              <label for="gen-count">Number of posts</label>
+              <input class="idea-input" id="gen-count" type="number" name="count" min="1" max="<?= Assistant::RUN_MAX ?>" inputmode="numeric" required value="<?= e($pick('count', '7')) ?>">
+            </div>
+            <div class="idea-field">
+              <label for="gen-start">Starting</label>
+              <input class="idea-input" id="gen-start" type="date" name="start" min="<?= e($today) ?>" required value="<?= e($pick('start', $today)) ?>">
+            </div>
+            <div class="idea-field">
+              <label for="gen-time">Time <small>(<?= e(Workspace::timezoneLabel($tz)) ?>)</small></label>
+              <input class="idea-input" id="gen-time" type="time" name="time" required value="<?= e($pick('time', '18:00')) ?>">
+            </div>
+          </div>
+          <fieldset class="gen-days">
+            <legend>Post on</legend>
+<?php foreach ([1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'] as $d => $dayName): ?>
+            <label class="gen-day"><input type="checkbox" name="days[]" value="<?= $d ?>"<?= in_array($d, $pickedDays, true) ? ' checked' : '' ?>><span><?= e($dayName) ?></span></label>
+<?php endforeach; ?>
+          </fieldset>
+          <label class="gen-check"><input type="checkbox" name="skip" value="1"<?= $flag('skip', true) ?>>Skip days that already have a scheduled post</label>
+          <fieldset class="gen-save">
+            <legend>Save them as</legend>
+            <label class="gen-mode gen-mode--row">
+              <input type="radio" name="save" value="planned"<?= $pick('save', 'planned') !== 'draft' ? ' checked' : '' ?>>
+              <b>Scheduled posts</b>
+              <small>Go straight into the queue</small>
+            </label>
+            <label class="gen-mode gen-mode--row">
+              <input type="radio" name="save" value="draft"<?= $pick('save', 'planned') === 'draft' ? ' checked' : '' ?>>
+              <b>Drafts</b>
+              <small>Review each one first</small>
+            </label>
+          </fieldset>
+        </fieldset>
+      </form>
+    </div>
+    <footer class="ch-modal-foot gen-foot">
+      <button type="button" class="ws-btn" data-gen-back hidden><?= icon('arrow-left') ?>Back</button>
+      <span class="gen-status" role="status" data-gen-status></span>
+      <button type="button" class="ws-btn ws-btn--green" data-gen-next hidden>Next<?= icon('arrow-right') ?></button>
+      <button type="submit" form="gen-form" class="ws-btn ws-btn--green" data-gen-submit<?= Assistant::enabled() ? '' : ' disabled' ?>><?= icon('sparkle') ?>Generate posts</button>
     </footer>
 <?php elseif ($setup === 'schedule'):
     $byDay = [];

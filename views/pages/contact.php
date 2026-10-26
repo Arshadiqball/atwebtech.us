@@ -78,7 +78,7 @@ $errorEl = static function (string $name) use ($id, $errors): string {
         <select class="input"<?= $fieldAttrs('topic') ?> required>
           <option value="">Choose a topic</option>
 <?php foreach (FormHandler::CONTACT_TOPICS as $value => $label): ?>
-          <option value="<?= e($value) ?>"<?= ($old['topic'] ?? '') === $value ? ' selected' : '' ?>><?= e($label) ?></option>
+          <option value="<?= e($value) ?>"<?= ($old['topic'] ?? ($_GET['topic'] ?? '')) === $value ? ' selected' : '' ?>><?= e($label) ?></option>
 <?php endforeach; ?>
         </select>
         <?= $errorEl('topic') ?>

@@ -266,3 +266,22 @@
   .adm-facts { margin-inline: 16px; }
   .adm-read-head h2 { font-size: 26px; }
 }
+
+/* Chatbot knowledge */
+.adm-kb { width: min(760px, 100%); margin: 0 auto; padding: 32px 20px 56px; overflow: auto; }
+.adm-kb-head { display: flex; align-items: center; gap: 16px; margin-bottom: 22px; }
+.adm-kb-head img { flex: none; width: 56px; height: 56px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 1px var(--a-line); }
+.adm-kb-head h1 { font: 500 26px/1.15 var(--font-display); letter-spacing: -0.02em; }
+.adm-kb-head p { margin-top: 4px; color: var(--ink-2); font-size: 14px; }
+.adm-kb-list { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.adm-kb-item { border-radius: 12px; background: var(--a-panel); box-shadow: 0 6px 18px -12px rgb(0 0 0 / 0.25), 0 0 0 1px var(--a-line); }
+.adm-kb-item summary { display: flex; align-items: center; gap: 12px; padding: 15px 18px; cursor: pointer; list-style: none; }
+.adm-kb-item summary::-webkit-details-marker { display: none; }
+.adm-kb-item summary b { font-size: 15px; font-weight: 600; }
+.adm-kb-item summary:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 12px; }
+.adm-kb-dot { width: 9px; height: 9px; border-radius: 50%; background: #5B5CF5; box-shadow: 0 0 0 4px rgb(91 92 245 / 0.15); }
+.adm-kb-count { margin-left: auto; color: var(--muted); font-size: 13px; }
+.adm-kb-item ul { display: grid; gap: 8px; margin: 0; padding: 0 18px 18px 40px; color: var(--ink-2); font-size: 14px; line-height: 1.5; }
+.adm-kb-item a { color: var(--ink); }
+.adm-kb-note { margin-top: 18px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.adm-kb-note code { padding: 1px 5px; border-radius: 5px; background: var(--a-soft); font-size: 12.5px; }

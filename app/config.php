@@ -45,6 +45,7 @@ return [
         'email' => (string) Env::get('CONTACT_EMAIL', 'info@atwebtech.us'),
         'phone' => (string) Env::get('CONTACT_PHONE', '+1 (480) 743-4017'),
         'address' => (string) Env::get('CONTACT_ADDRESS', '3672 S 16th Ave, Tucson, AZ 85713, US'),
+        'hours' => (string) Env::get('SUPPORT_HOURS', ''),
     ],
     'admin' => [
         'emails' => (string) Env::get('ADMIN_EMAILS', ''),
@@ -58,6 +59,7 @@ return [
         'key' => (string) Env::get('OPENAI_API_KEY', ''),
         'model' => (string) Env::get('OPENAI_MODEL', 'gpt-4o-mini'),
         'daily_limit' => max(1, (int) Env::get('AI_DAILY_LIMIT', 30)),
+        'chat_limit' => max(1, (int) Env::get('CHAT_DAILY_LIMIT', 12)),
     ],
     'oauth' => [
         'google' => [

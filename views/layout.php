@@ -45,5 +45,6 @@ $ogImage = str_starts_with($meta['og_image'], 'http') ? $meta['og_image'] : abso
 <?= $content ?>
   </main>
   <?php partial('partials/footer'); ?>
+  <?php partial('partials/chatbot'); ?>
 </body>
 </html>

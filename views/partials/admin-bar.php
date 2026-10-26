@@ -1,6 +1,6 @@
 <?php
 /** @var array $user */
-/** @var string $section messages | subscribers */
+/** @var string $section messages | subscribers | knowledge */
 ?>
 <header class="adm-bar">
   <a class="adm-logo" href="/admin" aria-label="Admin home"><?php partial('partials/logo'); ?></a>
@@ -8,6 +8,7 @@
   <nav class="adm-nav" aria-label="Admin">
     <a href="/admin"<?= $section === 'messages' ? ' aria-current="page"' : '' ?>>Messages</a>
     <a href="/admin/subscribers"<?= $section === 'subscribers' ? ' aria-current="page"' : '' ?>>Subscribers</a>
+    <a href="/admin/knowledge"<?= $section === 'knowledge' ? ' aria-current="page"' : '' ?>>Chatbot</a>
   </nav>
   <div class="adm-tools">
 <?php if ((int) ($user['id'] ?? 0) > 0): ?>

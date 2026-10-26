@@ -340,8 +340,8 @@ final class ChannelHandler
         });
     }
 
-    /** Place one template post on each of the next 30 days, including today. */
-    public static function fillFromTemplates(string $id): never
+    /** AI Generate: write a run of posts with OpenAI and put them on the chosen days and time. */
+    public static function generate(string $id): never
     {
         $user = Auth::member();
         $uid = (int) $user['id'];
@@ -353,50 +353,139 @@ final class ChannelHandler
             not_found();
         }
         $back = '/app/channels/' . (int) $channel['id'];
-        $pool = self::templatePool((string) $channel['provider']);
-        if (!$pool) {
-            self::notice($back, 'No templates are short enough for this network.');
-        }
+        $provider = (string) $channel['provider'];
         $tz = Workspace::timezone($user);
         $now = new DateTimeImmutable('now', $tz);
-        $soon = $now->modify('+15 minutes');
+
+        $in = [
+            'mode' => (string) ($_POST['mode'] ?? ''),
+            'topic' => trim((string) ($_POST['topic'] ?? '')),
+            'details' => trim((string) ($_POST['details'] ?? '')),
+            'region' => (string) ($_POST['region'] ?? ''),
+            'tone' => (string) ($_POST['tone'] ?? ''),
+            'length' => (string) ($_POST['length'] ?? ''),
+            'language' => (string) ($_POST['language'] ?? ''),
+            'hashtags' => ($_POST['hashtags'] ?? '') === '1',
+            'emojis' => ($_POST['emojis'] ?? '') === '1',
+            'cta' => ($_POST['cta'] ?? '') === '1',
+            'question' => ($_POST['question'] ?? '') === '1',
+            'media' => ($_POST['media'] ?? '') === '1',
+            'rules' => trim((string) ($_POST['rules'] ?? '')),
+            'count' => (int) ($_POST['count'] ?? 0),
+            'start' => (string) ($_POST['start'] ?? ''),
+            'days' => array_values(array_unique(array_filter(array_map('intval', (array) ($_POST['days'] ?? [])), static fn (int $d): bool => $d >= 1 && $d <= 7))),
+            'time' => (string) ($_POST['time'] ?? ''),
+            'skip' => ($_POST['skip'] ?? '') === '1',
+            'save' => ($_POST['save'] ?? '') === 'draft' ? 'draft' : 'planned',
+        ];
+        $fail = static function (string $message, int $step, int $status = 422) use ($back, $in): never {
+            if (wants_json()) {
+                json_response(['status' => 'error', 'message' => $message, 'step' => $step], $status);
+            }
+            flash('form', ['form' => 'generate', 'status' => 'error', 'message' => $message, 'errors' => [], 'old' => $in + ['step' => $step]]);
+            redirect($back . '?setup=generate');
+        };
+
+        if (!Assistant::enabled()) {
+            $fail('The AI Assistant isn’t switched on for this workspace yet.', 1, 503);
+        }
+        if (!isset(Assistant::MODES[$in['mode']])) {
+            $fail('Choose how the posts should be generated.', 1);
+        }
+        if (mb_strlen($in['topic']) < 2 || mb_strlen($in['topic']) > 120) {
+            $fail('Give the topic a name between 2 and 120 characters.', 2);
+        }
+        if (mb_strlen($in['details']) > 1000) {
+            $fail('Keep the details under 1,000 characters.', 2);
+        }
+        if ($in['mode'] === 'prompt' && mb_strlen($in['details']) < 10) {
+            $fail('Write the prompt the posts should follow.', 2);
+        }
+        if ($in['mode'] === 'trending' && !isset(Assistant::TREND_REGIONS[$in['region']])) {
+            $fail('Choose the region to take trends from.', 2);
+        }
+        if (!isset(Assistant::TONES[$in['tone']]) || !isset(Assistant::LENGTHS[$in['length']]) || !in_array($in['language'], Assistant::LANGUAGES, true)) {
+            $fail('Choose a tone, length and language.', 3);
+        }
+        if (mb_strlen($in['rules']) > 500) {
+            $fail('Keep your rules under 500 characters.', 3);
+        }
+        $start = DateTimeImmutable::createFromFormat('!Y-m-d', $in['start'], $tz);
+        if ($in['count'] < 1 || $in['count'] > Assistant::RUN_MAX) {
+            $fail(sprintf('Ask for between 1 and %d posts.', Assistant::RUN_MAX), 4);
+        }
+        if ($start === false || $start < $now->setTime(0, 0) || $start > $now->modify('+1 year')) {
+            $fail('Choose a start date between today and a year from now.', 4);
+        }
+        if (!$in['days']) {
+            $fail('Pick at least one day of the week.', 4);
+        }
+        if (!preg_match('/^([01]\d|2[0-3]):([0-5]\d)$/', $in['time'], $hm)) {
+            $fail('Choose a posting time like 09:30 or 18:00.', 4);
+        }
+
         $taken = [];
-        $stmt = Database::connection()->prepare('SELECT planned_at FROM posts WHERE user_id = :uid AND channel_id = :cid AND status = :planned AND planned_at >= :from');
-        $stmt->execute([
-            'uid' => $uid,
-            'cid' => (int) $channel['id'],
-            'planned' => 'planned',
-            'from' => $now->setTime(0, 0)->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'),
-        ]);
-        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $planned) {
-            $taken[Workspace::local((string) $planned, $tz)->format('Y-m-d')] = true;
+        if ($in['skip']) {
+            $stmt = Database::connection()->prepare('SELECT planned_at FROM posts WHERE user_id = :uid AND channel_id = :cid AND status IN (\'planned\', \'publishing\') AND planned_at >= :from');
+            $stmt->execute(['uid' => $uid, 'cid' => (int) $channel['id'], 'from' => $start->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s')]);
+            foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $planned) {
+                $taken[Workspace::local((string) $planned, $tz)->format('Y-m-d')] = true;
+            }
         }
         $slots = [];
-        for ($d = 0; $d < 30; $d++) {
-            $at = $now->setTime(0, 0)->modify('+' . $d . ' days')->setTime(18, 0);
-            if (isset($taken[$at->format('Y-m-d')])) {
+        $soon = $now->modify('+10 minutes');
+        for ($d = 0; $d < 400 && count($slots) < $in['count']; $d++) {
+            $at = $start->modify('+' . $d . ' days')->setTime((int) $hm[1], (int) $hm[2]);
+            if ($at <= $soon || isset($taken[$at->format('Y-m-d')]) || !in_array((int) $at->format('N'), $in['days'], true)) {
                 continue;
-            }
-            if ($at <= $now) {
-                $at = $soon;
             }
             $slots[] = $at;
         }
         if (!$slots) {
-            self::notice($back, 'Every day for the next 30 days already has a post, including today.');
+            $fail('None of those days are open. Pick other days, a later time, or turn off “Skip days that already have a post”.', 4);
         }
+        if (self::countPosts($uid) + count($slots) > 1000) {
+            $fail('You have reached the limit of 1,000 posts. Delete a few to add more.', 4);
+        }
+        $problem = Assistant::allowanceProblem($uid, (int) ceil(count($slots) / 10));
+        if ($problem !== null) {
+            $fail($problem, 4, 429);
+        }
+
+        if (wants_json()) {
+            session_write_close();
+        }
+        set_time_limit(240);
+        try {
+            $trends = $in['mode'] === 'trending' ? Assistant::trends($in['region']) : [];
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] google trends %s failed: %s', gmdate('c'), $in['region'], $e->getMessage()));
+            $fail('Google Trends didn’t answer just now. Try again, or pick Random or Prompt.', 1, 502);
+        }
+        try {
+            $written = Assistant::posts($uid, [
+                'mode' => $in['mode'], 'topic' => $in['topic'], 'details' => $in['details'], 'provider' => $provider,
+                'tone' => $in['tone'], 'length' => $in['length'], 'language' => $in['language'],
+                'hashtags' => $in['hashtags'], 'emojis' => $in['emojis'], 'cta' => $in['cta'], 'question' => $in['question'],
+                'rules' => $in['rules'], 'trends' => $trends,
+                'dates' => array_map(static fn (DateTimeImmutable $s): string => $s->format('D j M Y'), $slots),
+            ]);
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] ai run failed for user %d: %s', gmdate('c'), $uid, $e->getMessage()));
+            $e->getMessage() === 'invalid_api_key'
+                ? $fail('OpenAI rejected the API key on this server. Replace it, then try again.', 4, 401)
+                : $fail('The AI couldn’t write those posts just now. Please try again.', 4, 502);
+        }
+        $slots = array_slice($slots, 0, count($written));
+
+        $pool = $in['media'] && in_array($provider, ['instagram', 'youtube', 'tiktok'], true) ? self::templatePool($provider) : [];
         $chosen = [];
-        while (count($chosen) < count($slots)) {
+        while ($pool && count($chosen) < count($slots)) {
             $bag = $pool;
             shuffle($bag);
-            foreach ($bag as $item) {
-                $chosen[] = $item;
-                if (count($chosen) === count($slots)) {
-                    break;
-                }
-            }
+            array_push($chosen, ...array_slice($bag, 0, count($slots) - count($chosen)));
         }
-        $youtube = $channel['provider'] === 'youtube';
+        $youtube = $provider === 'youtube';
         $yt = data('youtube');
         $titleMax = (int) $yt['title_max'];
         $meta = $youtube ? json_encode([
@@ -414,14 +503,11 @@ final class ChannelHandler
         $copied = [];
         $pdo->beginTransaction();
         try {
-            if (self::countPosts($uid) + count($slots) > 1000) {
-                throw new RuntimeException('You have reached the limit of 1,000 posts. Delete a few to add more.');
-            }
             foreach ($slots as $i => $slot) {
-                $item = $chosen[$i];
+                $item = $chosen[$i] ?? ['image' => '', 'video' => ''];
                 $at = $slot->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s');
                 $mediaId = null;
-                $videoNet = in_array($channel['provider'], ['youtube', 'tiktok'], true);
+                $videoNet = in_array($provider, ['youtube', 'tiktok'], true);
                 if ($videoNet && preg_match('/^[a-z0-9-]+\.mp4$/', (string) ($item['video'] ?? ''))) {
                     $made = Media::copyReady($uid, BASE_PATH . '/public/assets/video/templates/' . $item['video'], $item['video']);
                     $mediaId = $made['id'];
@@ -433,20 +519,20 @@ final class ChannelHandler
                 }
                 $title = null;
                 if ($youtube) {
-                    $title = mb_substr(trim($item['post_title'] !== '' ? $item['post_title'] : $item['title']), 0, $titleMax);
+                    $title = mb_substr(trim($written[$i]['title'] !== '' ? $written[$i]['title'] : strtok($written[$i]['body'], "\n")), 0, $titleMax);
                 }
                 $now = Database::now();
                 $insert->execute([
                     'uid' => $uid,
-                    'channel' => $channel['provider'],
+                    'channel' => $provider,
                     'cid' => (int) $channel['id'],
-                    'body' => $item['body'],
+                    'body' => $written[$i]['body'],
                     'title' => $title !== '' ? $title : null,
                     'meta' => $meta,
                     'tags' => null,
                     'media' => $mediaId,
                     'first' => null,
-                    'status' => 'planned',
+                    'status' => $in['save'],
                     'planned' => $at,
                     'idea' => null,
                     'created' => $now,
@@ -463,20 +549,28 @@ final class ChannelHandler
                     unlink($file);
                 }
             }
-            error_log(sprintf('[%s] template fill channel %d: %s', gmdate('c'), (int) $channel['id'], $e->getMessage()));
-            self::notice($back, $e instanceof RuntimeException ? $e->getMessage() : 'Those posts could not be scheduled. Please try again.');
+            error_log(sprintf('[%s] ai run insert channel %d: %s', gmdate('c'), (int) $channel['id'], $e->getMessage()));
+            $fail('Those posts could not be saved. Please try again.', 4, 500);
         }
         $n = count($slots);
-        $message = match ($channel['provider']) {
-            'linkedin' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. LinkedIn publishes each one at its time.',
-            'instagram' => $channel['can_publish']
-                ? $n . ' posts scheduled, one for every open day through the next 30 days, including today. Instagram publishes each photo at its time.'
-                : $n . ' posts scheduled, one for every open day through the next 30 days, including today. Publishing isn’t on for this Instagram account, so they stay as plans until you reconnect and allow content publishing.',
-            'youtube' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. Each one includes a short starter video. Until Google finishes reviewing the app, YouTube keeps those uploads private.',
-            'tiktok' => $n . ' posts scheduled, one for every open day through the next 30 days, including today. Each one includes a short starter video. TikTok publishing is not built yet, so they stay as plans you can edit.',
-            default => $n . ' posts scheduled, one for every open day through the next 30 days, including today. They stay in the queue as plans you can edit.',
-        };
-        self::notice($back, $message);
+        $range = $slots[0]->format('j M') . ($n > 1 ? ' to ' . $slots[$n - 1]->format('j M') : '');
+        $short = $n < $in['count'] ? sprintf(' Only %d of the %d posts you asked for fit the open days.', $n, $in['count']) : '';
+        if ($in['save'] === 'draft') {
+            $message = sprintf('%d AI %s saved to Drafts, dated %s. Review and schedule them when ready.', $n, $n === 1 ? 'draft' : 'drafts', $range) . $short;
+        } else {
+            $publishes = $channel['can_publish'] && in_array($provider, ['linkedin', 'instagram', 'youtube'], true);
+            $missingMedia = in_array($provider, ['instagram', 'youtube', 'tiktok'], true) && !$pool;
+            $message = sprintf('%d AI %s scheduled, %s at %s.', $n, $n === 1 ? 'post' : 'posts', $range, $slots[0]->format('g:i A'))
+                . match (true) {
+                    !$publishes => ' This channel doesn’t publish automatically yet, so they stay as plans you can edit.',
+                    $missingMedia => ' Add a ' . ($provider === 'instagram' ? 'photo' : 'video') . ' to each before its time, or it can’t be published.',
+                    default => '',
+                } . $short;
+        }
+        if (wants_json()) {
+            json_response(['status' => 'success', 'message' => $message, 'redirect' => $back . ($in['save'] === 'draft' ? '?tab=drafts' : '')]);
+        }
+        self::notice($back . ($in['save'] === 'draft' ? '?tab=drafts' : ''), $message);
     }
 
     /** @return list<array{title:string, body:string, image:string, video:string, post_title:string}> */

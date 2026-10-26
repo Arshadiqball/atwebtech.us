@@ -1216,6 +1216,66 @@ p.cp-field--wide { margin-top: -6px; }
 .sch-day legend { float: left; padding: 0; font-size: 13.5px; font-weight: 500; }
 .sch-day input.idea-input { height: 36px; }
 
+/* AI Generate modal */
+.ch-modal-body.gen { justify-items: stretch; gap: 10px; padding: 28px 28px 20px; text-align: left; }
+.gen > h2, .gen > p { max-width: none; padding-right: 36px; }
+.gen-steps { display: none; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; margin: 6px 0 4px; padding: 0; list-style: none; }
+.gen:has(.gen-form.is-stepped) .gen-steps { display: grid; }
+.gen-steps li { display: grid; gap: 6px; color: var(--muted); font-size: 12.5px; font-weight: 500; }
+.gen-steps li::before { content: ""; height: 4px; border-radius: 4px; background: var(--a-line); transition: background-color .2s; }
+.gen-steps li.is-done::before, .gen-steps li[aria-current="step"]::before { background: #3FA45B; }
+.gen-steps li[aria-current="step"] { color: var(--ink); }
+.gen-form { display: grid; gap: 22px; }
+.gen-form.is-stepped .gen-step:not(.is-current) { display: none; }
+.gen-step { display: grid; gap: 14px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.gen-step > legend { float: left; width: 100%; margin-bottom: 2px; padding: 0; font: 600 15px/1.3 var(--font-display); }
+.gen-step .idea-field > label { margin-bottom: 6px; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.gen-step .idea-field > label small { font-weight: 400; color: var(--muted); }
+.gen-hint { margin-top: 6px; color: var(--muted); font-size: 12.5px; line-height: 1.4; }
+.gen-form:not(:has([name="mode"][value="prompt"]:checked)) .gen-if-prompt,
+.gen-form:has([name="mode"][value="prompt"]:checked) .gen-if-not-prompt,
+.gen-form:not(:has([name="mode"][value="trending"]:checked)) .gen-if-trending { display: none; }
+.gen-modes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.gen-mode { position: relative; display: grid; align-content: start; gap: 4px; padding: 14px; border: 1px solid var(--a-line); border-radius: 10px; background: var(--a-panel); cursor: pointer; transition: border-color .15s, box-shadow .15s; }
+.gen-mode:hover { border-color: var(--a-line-strong); }
+.gen-mode:has(input:checked) { border-color: #3FA45B; box-shadow: 0 0 0 1px #3FA45B; }
+.gen-mode:has(input:focus-visible) { outline: 2px solid var(--ink); outline-offset: 2px; }
+.gen-mode input { position: absolute; top: 12px; right: 12px; width: 16px; height: 16px; margin: 0; accent-color: #3FA45B; }
+.gen-mode b { margin-top: 6px; font-size: 14px; font-weight: 600; }
+.gen-mode small { color: var(--ink-2); font-size: 12.5px; line-height: 1.4; }
+.gen-mode-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 8px; }
+.gen-mode-icon .icon { width: 18px; height: 18px; }
+.gen-mode-icon--random { background: #EEE6FF; color: #6D45D0; }
+.gen-mode-icon--trending { background: #FFE7D6; color: #C2561C; }
+.gen-mode-icon--prompt { background: #D8F3EF; color: #13806F; }
+[data-theme="dark"] .gen-mode-icon { filter: saturate(.8) brightness(.9); }
+.gen-mode--row { padding: 12px 40px 12px 14px; }
+.gen-mode--row b { margin-top: 0; }
+.gen-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.gen-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; }
+.gen-check { display: flex; align-items: flex-start; gap: 9px; font-size: 13.5px; line-height: 1.4; cursor: pointer; }
+.gen-check input { flex: none; width: 16px; height: 16px; margin: 1px 0 0; accent-color: #3FA45B; }
+.gen-check--wide { grid-column: 1 / -1; }
+.gen-days, .gen-save { display: flex; flex-wrap: wrap; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
+.gen-days > legend, .gen-save > legend { float: left; width: 100%; margin-bottom: 6px; padding: 0; font-size: 13px; font-weight: 500; color: var(--ink-2); }
+.gen-save { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.gen-save > legend { float: none; grid-column: 1 / -1; }
+.gen-day { position: relative; cursor: pointer; }
+.gen-day input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+.gen-day span { display: grid; place-items: center; min-width: 48px; height: 36px; padding: 0 10px; border: 1px solid var(--a-line); border-radius: 8px; font-size: 13px; font-weight: 500; color: var(--ink-2); transition: background-color .15s, border-color .15s, color .15s; }
+.gen-day:hover span { border-color: var(--a-line-strong); }
+.gen-day input:checked + span { border-color: #3FA45B; background: var(--green-soft); color: var(--green-ink); }
+[data-theme="dark"] .gen-day input:checked + span { color: #BDEBC9; }
+.gen-day input:focus-visible + span { outline: 2px solid var(--ink); outline-offset: 2px; }
+.gen-foot { justify-content: flex-start; }
+.gen-foot [data-gen-next], .gen-foot [data-gen-submit] { margin-left: auto; }
+.gen-foot [hidden] { display: none; }
+.gen-status { color: var(--ink-2); font-size: 13px; }
+.gen-status:empty { display: none; }
+.gen-status.is-busy::before { content: ""; display: inline-block; width: 12px; height: 12px; margin-right: 8px; vertical-align: -1px; border: 2px solid var(--a-line); border-top-color: #3FA45B; border-radius: 50%; animation: gen-spin .8s linear infinite; }
+@keyframes gen-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .gen-status.is-busy::before { animation-duration: 2.4s; } }
+
 /* Queue states */
 .q-badge { flex: none; padding: 2px 8px; border-radius: 99px; background: var(--a-soft); color: var(--ink-2); font-size: 11.5px; font-weight: 500; white-space: nowrap; }
 .q-badge.is-ok { background: var(--green-soft); color: var(--green-ink); }
@@ -1260,6 +1320,14 @@ div.q-post:hover { box-shadow: none; }
   .ch-banner { margin: 0 14px 14px; flex-wrap: wrap; }
   .sch-day { grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .sch-day legend { grid-column: 1 / -1; float: none; }
+  .ch-modal-body.gen { padding: 22px 16px 16px; }
+  .gen-modes, .gen-row { grid-template-columns: minmax(0, 1fr); }
+  .gen-mode:not(.gen-mode--row) { grid-template-columns: auto minmax(0, 1fr); column-gap: 12px; padding-right: 40px; }
+  .gen-mode:not(.gen-mode--row) .gen-mode-icon { grid-row: span 2; }
+  .gen-mode:not(.gen-mode--row) b { margin-top: 0; }
+  .gen-checks, .gen-save { grid-template-columns: minmax(0, 1fr); }
+  .gen-day { flex: 1 0 calc(25% - 8px); }
+  .gen-day span { min-width: 0; }
   .q-acts { width: 100%; justify-content: flex-end; }
   .wsp--cp { padding: 12px 10px 48px; }
 }

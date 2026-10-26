@@ -14,6 +14,7 @@ final class FormHandler
 
     public const CONTACT_TOPICS = [
         'general' => 'General question',
+        'demo' => 'Book a demo',
         'product' => 'Product feedback',
         'partnership' => 'Partnership',
         'press' => 'Press',

@@ -29,6 +29,7 @@ require BASE_PATH . '/app/Channels.php';
 require BASE_PATH . '/app/ChannelHandler.php';
 require BASE_PATH . '/app/Media.php';
 require BASE_PATH . '/app/Assistant.php';
+require BASE_PATH . '/app/Chatbot.php';
 require BASE_PATH . '/app/Publisher.php';
 require BASE_PATH . '/app/Migrator.php';
 
