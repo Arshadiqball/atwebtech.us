@@ -233,10 +233,6 @@ final class Channels
 
     public static function redirectUri(string $provider): string
     {
-        // Login Kit on the live TikTok app is registered as the site origin, not /app/channels/callback/tiktok.
-        if ($provider === 'tiktok') {
-            return self::baseUrl();
-        }
         return self::baseUrl() . '/app/channels/callback/' . $provider;
     }
 
