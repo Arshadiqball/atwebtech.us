@@ -341,7 +341,7 @@ final class Channels
             return 'https://www.tiktok.com/v2/auth/authorize/?' . http_build_query([
                 'client_key' => config('oauth.tiktok.client_key'),
                 'response_type' => 'code',
-                'scope' => self::TIKTOK_BASIC . ',' . self::TIKTOK_PUBLISH,
+                'scope' => self::TIKTOK_BASIC,
                 'redirect_uri' => $redirectUri,
                 'state' => $state,
                 'code_challenge' => $challenge,
@@ -438,7 +438,7 @@ final class Channels
         }
         $fallback = match ($provider) {
             'linkedin' => self::LINKEDIN_SIGNIN . ' ' . self::LINKEDIN_SHARE,
-            'tiktok' => self::TIKTOK_BASIC . ',' . self::TIKTOK_PUBLISH,
+            'tiktok' => self::TIKTOK_BASIC,
             'x' => self::X_SCOPES,
             default => self::YOUTUBE_SCOPE,
         };

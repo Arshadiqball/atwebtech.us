@@ -117,7 +117,7 @@ final class ChannelHandler
             Channels::revoke($tokens['access_token'], $provider);
             self::notice('/app/channels', match ($provider) {
                 'linkedin' => 'We couldn’t read this LinkedIn Profile. Try another account, or try again in a few minutes.',
-                'tiktok' => 'We couldn’t read this TikTok account. Use a TikTok login that is added as a sandbox target user, then try again.',
+                'tiktok' => 'We couldn’t read this TikTok account. Try the same TikTok login again in a few minutes.',
                 'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
                 'x' => 'We couldn’t read this X account. Try again in a few minutes.',
                 'facebook' => 'This Facebook account doesn’t manage a Page. Create a Page, or sign in with an account that manages one, then try again.',
