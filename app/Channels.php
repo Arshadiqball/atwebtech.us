@@ -233,6 +233,10 @@ final class Channels
 
     public static function redirectUri(string $provider): string
     {
+        // Login Kit on the live TikTok app is registered as the site origin, not /app/channels/callback/tiktok.
+        if ($provider === 'tiktok') {
+            return self::baseUrl();
+        }
         return self::baseUrl() . '/app/channels/callback/' . $provider;
     }
 
@@ -337,15 +341,13 @@ final class Channels
             ], '', '&', PHP_QUERY_RFC3986);
         }
         if ($provider === 'tiktok') {
-            $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
+            // Web Login Kit: no PKCE. Desktop Login Kit is the flow that sends code_challenge.
             return 'https://www.tiktok.com/v2/auth/authorize/?' . http_build_query([
                 'client_key' => config('oauth.tiktok.client_key'),
                 'response_type' => 'code',
                 'scope' => self::TIKTOK_BASIC,
                 'redirect_uri' => $redirectUri,
                 'state' => $state,
-                'code_challenge' => $challenge,
-                'code_challenge_method' => 'S256',
                 'disable_auto_auth' => '1',
             ], '', '&', PHP_QUERY_RFC3986);
         }
@@ -416,7 +418,6 @@ final class Channels
                     'code' => $code,
                     'grant_type' => 'authorization_code',
                     'redirect_uri' => $redirect,
-                    'code_verifier' => $verifier,
                 ]
                 : [
                     'grant_type' => 'authorization_code',

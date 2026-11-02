@@ -25,14 +25,22 @@ $org = [
 ];
 
 return [
-    ['GET', '/', page('home', 'atwebtech | Plan your social content in one workspace', 'Meet atwebtech: a simpler way to plan social content, organize ideas, and build a more consistent online presence. Join the waitlist.', [], [
-        'schema' => [$org, [
-            '@context' => 'https://schema.org',
-            '@type' => 'WebSite',
-            'name' => 'atwebtech',
-            'url' => absolute_url('/'),
-        ]],
-    ])],
+    ['GET', '/', static function () use ($org): void {
+        $flow = $_SESSION['_oauth'] ?? null;
+        if (is_array($flow) && ($flow['provider'] ?? '') === 'tiktok' && (isset($_GET['code']) || isset($_GET['error']))) {
+            ChannelHandler::callback('tiktok');
+        }
+        View::render('home', [], [
+            'title' => 'atwebtech | Plan your social content in one workspace',
+            'description' => 'Meet atwebtech: a simpler way to plan social content, organize ideas, and build a more consistent online presence. Join the waitlist.',
+            'schema' => [$org, [
+                '@context' => 'https://schema.org',
+                '@type' => 'WebSite',
+                'name' => 'atwebtech',
+                'url' => absolute_url('/'),
+            ]],
+        ]);
+    }],
 
     ['GET', '/demo', page('demo', 'Interactive product demo | atwebtech', 'Explore interactive demonstrations of the atwebtech calendar, idea board, inbox, analytics, and AI workflow using sample data.')],
 
