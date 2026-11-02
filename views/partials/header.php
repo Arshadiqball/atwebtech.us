@@ -1,12 +1,8 @@
 <?php
 $site = data('site');
 $menus = [
-    'features' => ['label' => 'Features', 'items' => $site['features'], 'cols' => 2, 'more' => ['See all features', '/features']],
-    'integrations' => ['label' => 'Integrations', 'items' => null, 'more' => ['Integration status', '/integrations']],
-    'solutions' => ['label' => 'Solutions', 'items' => $site['solutions'], 'cols' => 2, 'more' => ['All solutions', '/solutions']],
-    'resources' => ['label' => 'Resources', 'items' => $site['resources'], 'cols' => 2, 'more' => null],
+    'features' => ['label' => 'Features', 'items' => $site['features'], 'more' => ['See all features', '/features']],
 ];
-$channels = integrations();
 ?>
 <header class="site-header" data-header>
   <div class="header-inner">
@@ -20,7 +16,6 @@ $channels = integrations();
             <?= e($menu['label']) ?><?= icon('caret-down', 'icon nav-caret') ?>
           </button>
           <div class="mega mega--<?= e($key) ?>" id="menu-<?= e($key) ?>" hidden>
-<?php if ($menu['items'] !== null): ?>
             <ul class="mega-grid" role="list">
 <?php foreach ($menu['items'] as $item): ?>
               <li>
@@ -34,20 +29,6 @@ $channels = integrations();
               </li>
 <?php endforeach; ?>
             </ul>
-<?php else: ?>
-            <p class="mega-intro">Channels we plan to support. Each one shows its current status.</p>
-            <ul class="mega-channels" role="list">
-<?php foreach ($channels as $ch): ?>
-              <li>
-                <a class="mega-channel" href="/integrations#<?= e($ch['slug']) ?>">
-                  <?= channel_icon($ch['slug']) ?>
-                  <span class="mega-channel-name"><?= e($ch['name']) ?></span>
-                  <span class="status status--<?= e($ch['status']) ?>"><?= $ch['status'] === 'available' ? 'Available' : 'Planned' ?></span>
-                </a>
-              </li>
-<?php endforeach; ?>
-            </ul>
-<?php endif; ?>
 <?php if ($menu['more']): ?>
             <a class="mega-more" href="<?= e($menu['more'][1]) ?>"><?= e($menu['more'][0]) ?><?= icon('arrow-right') ?></a>
 <?php endif; ?>
@@ -82,7 +63,7 @@ $channels = integrations();
           <?= e($menu['label']) ?><?= icon('caret-down', 'icon nav-caret') ?>
         </button>
         <ul class="m-list" id="m-<?= e($key) ?>" role="list" hidden>
-<?php foreach ($menu['items'] ?? array_map(static fn ($c) => ['label' => $c['name'] . ($c['status'] === 'available' ? '' : ' (planned)'), 'href' => '/integrations#' . $c['slug']], $channels) as $item): ?>
+<?php foreach ($menu['items'] as $item): ?>
           <li><a href="<?= e($item['href']) ?>"<?= aria_current($item['href']) ?>><?= e($item['label']) ?></a></li>
 <?php endforeach; ?>
 <?php if ($menu['more']): ?>
