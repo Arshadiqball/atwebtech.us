@@ -233,6 +233,10 @@ final class Channels
 
     public static function redirectUri(string $provider): string
     {
+        // The Live TikTok app registers only the site origin. The callback path is not on that app.
+        if ($provider === 'tiktok') {
+            return self::baseUrl();
+        }
         return self::baseUrl() . '/app/channels/callback/' . $provider;
     }
 
