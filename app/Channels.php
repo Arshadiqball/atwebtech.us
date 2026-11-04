@@ -1019,39 +1019,81 @@ final class Channels
         ];
     }
 
-    /** Pages this Facebook account manages. Each row keeps that Page’s own token. Publishing is not available yet. */
+    /** Pages this Facebook account manages, then Groups it can post in. A Page keeps its own token. A Group uses the user token. */
     public static function facebookPages(string $accessToken): array
     {
-        try {
-            $data = self::request('GET', 'https://graph.facebook.com/v23.0/me/accounts?' . http_build_query([
-                'fields' => 'id,name,access_token,picture',
-                'limit' => 50,
-            ]), null, $accessToken);
-        } catch (Throwable $e) {
-            error_log(sprintf('[%s] facebook page lookup failed: %s', gmdate('c'), $e->getMessage()));
-            return [];
-        }
+        return array_merge(self::facebookPageList($accessToken), self::facebookGroupList($accessToken));
+    }
+
+    /** @return list<array{id: string, name: string, avatar: ?string, kind: string, token: string}> */
+    private static function facebookPageList(string $accessToken): array
+    {
         $out = [];
-        foreach (is_array($data['data'] ?? null) ? $data['data'] : [] as $page) {
-            if (!is_array($page)) {
-                continue;
-            }
+        foreach (self::facebookEdge($accessToken, 'me/accounts', 'id,name,access_token,picture') as $page) {
             $id = (string) ($page['id'] ?? '');
             $name = trim((string) ($page['name'] ?? ''));
             $pageToken = (string) ($page['access_token'] ?? '');
             if ($id === '' || strlen($id) > 191 || !preg_match('/^[0-9]+$/', $id) || $name === '' || $pageToken === '') {
                 continue;
             }
-            $picture = (string) ($page['picture']['data']['url'] ?? '');
             $out[] = [
                 'id' => $id,
                 'name' => mb_substr($name, 0, 190),
-                'avatar' => self::safeAvatar($picture),
+                'avatar' => self::safeAvatar((string) ($page['picture']['data']['url'] ?? '')),
                 'kind' => 'Page',
                 'token' => $pageToken,
             ];
         }
         return $out;
+    }
+
+    /** @return list<array{id: string, name: string, avatar: ?string, kind: string}> */
+    private static function facebookGroupList(string $accessToken): array
+    {
+        $out = [];
+        foreach (self::facebookEdge($accessToken, 'me/groups', 'id,name,administrator,picture') as $group) {
+            if (array_key_exists('administrator', $group) && $group['administrator'] === false) {
+                continue;
+            }
+            $id = (string) ($group['id'] ?? '');
+            $name = trim((string) ($group['name'] ?? ''));
+            if ($id === '' || strlen($id) > 191 || !preg_match('/^[0-9]+$/', $id) || $name === '') {
+                continue;
+            }
+            $out[] = [
+                'id' => $id,
+                'name' => mb_substr($name, 0, 190),
+                'avatar' => self::safeAvatar((string) ($group['picture']['data']['url'] ?? '')),
+                'kind' => 'Group',
+            ];
+        }
+        return $out;
+    }
+
+    /** @return list<array<string, mixed>> */
+    private static function facebookEdge(string $accessToken, string $edge, string $fields): array
+    {
+        $url = 'https://graph.facebook.com/v23.0/' . $edge . '?' . http_build_query([
+            'fields' => $fields,
+            'limit' => 100,
+        ]);
+        $rows = [];
+        try {
+            for ($page = 0; $page < 5 && $url !== ''; $page++) {
+                $data = self::request('GET', $url, null, $accessToken);
+                foreach (is_array($data['data'] ?? null) ? $data['data'] : [] as $row) {
+                    if (is_array($row)) {
+                        $rows[] = $row;
+                    }
+                }
+                $next = (string) ($data['paging']['next'] ?? '');
+                $host = strtolower((string) (parse_url($next, PHP_URL_HOST) ?? ''));
+                $url = $next !== '' && ($host === 'graph.facebook.com' || str_ends_with($host, '.facebook.com')) ? $next : '';
+            }
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] facebook %s lookup failed: %s', gmdate('c'), $edge, $e->getMessage()));
+        }
+        return $rows;
     }
 
     private static function request(string $method, string $url, ?array $form = null, ?string $bearer = null, array $headers = []): array

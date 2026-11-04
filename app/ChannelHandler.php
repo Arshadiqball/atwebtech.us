@@ -120,7 +120,7 @@ final class ChannelHandler
                 'tiktok' => 'We couldn’t read this TikTok account. Try the same TikTok login again in a few minutes.',
                 'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
                 'x' => 'We couldn’t read this X account. Try again in a few minutes.',
-                'facebook' => 'This Facebook account doesn’t manage a Page. Create a Page, or sign in with an account that manages one, then try again.',
+                'facebook' => 'This Facebook account doesn’t manage a Page or a Group we can read. Create a Page, or sign in with an account that manages a Page or Group, then try again.',
                 'instagram' => 'This Instagram account can’t be connected. Switch it to a Professional account (Business or Creator), and make sure that account is an admin of the app, then try again.',
                 'threads' => 'We couldn’t read this Threads profile. Use the Threads account that is a tester on the app, then try again.',
                 default => 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.',
@@ -835,7 +835,7 @@ final class ChannelHandler
             if (str_contains($text, 'redirect')) {
                 return 'In the Facebook app, the redirect URI must be exactly https://atwebtech.us/app/channels/callback/facebook';
             }
-            return 'Facebook refused the sign-in. Use an account that is an admin of the app and that manages a Page, then try again.';
+            return 'Facebook refused the sign-in. Use an account that is an admin of the app and that manages a Page or Group, then try again.';
         }
         if ($provider === 'pinterest') {
             if (str_contains($text, 'redirect')) {

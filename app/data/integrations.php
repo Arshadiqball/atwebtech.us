@@ -8,7 +8,7 @@ declare(strict_types=1);
 
 return [
     ['slug' => 'instagram', 'name' => 'Instagram', 'icon' => 'instagram', 'color' => '#E4405F', 'formats' => 'Feed posts, carousels, Reels', 'accounts' => 'Business or Creator'],
-    ['slug' => 'facebook', 'name' => 'Facebook', 'icon' => 'facebook', 'color' => '#0866FF', 'formats' => 'Page posts, link posts', 'accounts' => 'Page'],
+    ['slug' => 'facebook', 'name' => 'Facebook', 'icon' => 'facebook', 'color' => '#0866FF', 'formats' => 'Page posts, link posts', 'accounts' => 'Page or Group'],
     ['slug' => 'tiktok', 'name' => 'TikTok', 'icon' => 'tiktok', 'color' => '#111111', 'formats' => 'Short video', 'accounts' => 'Business or Personal'],
     ['slug' => 'linkedin', 'name' => 'LinkedIn', 'icon' => 'text:in', 'color' => '#0A66C2', 'formats' => 'Profile posts', 'accounts' => 'Profile'],
     ['slug' => 'youtube', 'name' => 'YouTube', 'icon' => 'youtube', 'color' => '#FF0000', 'formats' => 'Shorts, community posts', 'accounts' => 'Channel'],
