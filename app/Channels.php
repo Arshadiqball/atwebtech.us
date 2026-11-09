@@ -11,7 +11,7 @@ final class Channels
     public const LINKEDIN_SHARE = 'w_member_social';
     public const TIKTOK_BASIC = 'user.info.basic';
     public const TIKTOK_PUBLISH = 'video.publish';
-    public const X_SCOPES = 'users.read tweet.read tweet.write offline.access';
+    public const X_SCOPES = 'users.read tweet.read tweet.write media.write offline.access';
     public const FACEBOOK_SCOPES = 'pages_show_list,pages_manage_posts';
     public const INSTAGRAM_SCOPES = 'instagram_business_basic,instagram_business_content_publish';
     public const THREADS_SCOPES = 'threads_basic,threads_content_publish';
@@ -22,6 +22,8 @@ final class Channels
     ];
     public const MAX_GOAL = 14;
     private const AVATAR_HOSTS = ['yt3.ggpht.com', 'yt3.googleusercontent.com', 'media.licdn.com', 'media-exp1.licdn.com', 'media-exp2.licdn.com', 'pbs.twimg.com'];
+    /** Networks atwebtech can publish to. Others can be connected, and their posts wait as plans. */
+    public const PUBLISHES = ['youtube', 'linkedin', 'instagram', 'facebook', 'threads', 'x', 'pinterest'];
     private const DAYS = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
 
     public static function connectable(string $provider): bool
@@ -62,6 +64,10 @@ final class Channels
             'youtube' => self::youtubeCanPublish($scopes),
             'linkedin' => str_contains($scopes, self::LINKEDIN_SHARE),
             'instagram' => str_contains($scopes, 'instagram_business_content_publish'),
+            'facebook' => ($row['kind'] ?? '') === 'Page' && str_contains($scopes, 'pages_manage_posts'),
+            'threads' => str_contains($scopes, 'threads_content_publish'),
+            'x' => str_contains($scopes, 'tweet.write'),
+            'pinterest' => str_contains($scopes, 'pins:write'),
             default => false,
         };
         return $row;
@@ -1019,10 +1025,13 @@ final class Channels
         ];
     }
 
-    /** Pages this Facebook account manages, then Groups it can post in. A Page keeps its own token. A Group uses the user token. */
+    /**
+     * Pages this Facebook account manages. Each Page keeps its own token.
+     * Groups are not offered: Meta removed the Groups publishing API in April 2024.
+     */
     public static function facebookPages(string $accessToken): array
     {
-        return array_merge(self::facebookPageList($accessToken), self::facebookGroupList($accessToken));
+        return self::facebookPageList($accessToken);
     }
 
     /** @return list<array{id: string, name: string, avatar: ?string, kind: string, token: string}> */
@@ -1042,29 +1051,6 @@ final class Channels
                 'avatar' => self::safeAvatar((string) ($page['picture']['data']['url'] ?? '')),
                 'kind' => 'Page',
                 'token' => $pageToken,
-            ];
-        }
-        return $out;
-    }
-
-    /** @return list<array{id: string, name: string, avatar: ?string, kind: string}> */
-    private static function facebookGroupList(string $accessToken): array
-    {
-        $out = [];
-        foreach (self::facebookEdge($accessToken, 'me/groups', 'id,name,administrator,picture') as $group) {
-            if (array_key_exists('administrator', $group) && $group['administrator'] === false) {
-                continue;
-            }
-            $id = (string) ($group['id'] ?? '');
-            $name = trim((string) ($group['name'] ?? ''));
-            if ($id === '' || strlen($id) > 191 || !preg_match('/^[0-9]+$/', $id) || $name === '') {
-                continue;
-            }
-            $out[] = [
-                'id' => $id,
-                'name' => mb_substr($name, 0, 190),
-                'avatar' => self::safeAvatar((string) ($group['picture']['data']['url'] ?? '')),
-                'kind' => 'Group',
             ];
         }
         return $out;

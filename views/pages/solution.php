@@ -52,7 +52,7 @@ $others = array_filter(data('site')['solutions'], static fn ($s) => $s['href'] !
   <div class="container">
     <div class="notice" role="note">
       <?= icon('info') ?>
-      <p><b>Free to start</b><a href="/signup">Create a free account</a> to plan ideas, set posting schedules, and publish to LinkedIn and YouTube today, no credit card required. More channels, the community inbox, and team approvals are coming soon; see <a href="/integrations">integrations</a> for channel status.</p>
+      <p><b>Free to start</b><a href="/signup">Create a free account</a> to plan ideas, set posting schedules, and publish to Instagram, Facebook, LinkedIn, YouTube, Pinterest, Threads, and X today, no credit card required. TikTok, the community inbox, and team approvals are coming soon; see <a href="/integrations">integrations</a> for channel status.</p>
     </div>
   </div>
 </section>

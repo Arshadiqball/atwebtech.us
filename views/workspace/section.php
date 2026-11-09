@@ -15,7 +15,7 @@
     <li class="ws-channel" id="<?= e($ch['slug']) ?>">
       <span class="ws-ch ws-ch--lg" style="--c: <?= e($ch['color']) ?>"><?= brand_mark($ch['icon'], $ch['name'], true) ?></span>
       <span class="ws-channel-text"><b><?= e($ch['name']) ?></b><small><?= e($ch['formats']) ?></small></span>
-      <span class="status status--<?= e($ch['status']) ?>"><?= $ch['status'] === 'available' ? 'Available' : 'Planned' ?></span>
+      <span class="status status--<?= e($ch['status']) ?>"><?= e(integration_label($ch['status'])) ?></span>
     </li>
 <?php endforeach; ?>
   </ul>

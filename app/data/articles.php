@@ -207,7 +207,7 @@ HTML,
     ],
     'getting-started' => [
         'title' => 'Getting started with atwebtech',
-        'description' => 'Create a free account, connect LinkedIn or YouTube, set a posting schedule, plan your ideas, and schedule your first posts.',
+        'description' => 'Create a free account, connect your social accounts, set a posting schedule, plan your ideas, and schedule your first posts.',
         'category' => 'Guide',
         'read' => '4 min read',
         'panel' => 'yellow',
@@ -219,8 +219,8 @@ HTML,
 <h2>1. Create a free account</h2>
 <p><a href="/signup">Sign up</a> with your email and a password. The Free plan includes up to 3 channels, 10 scheduled posts per channel, and 100 ideas, with no credit card required. Once you are in, we recommend turning on two-factor authentication in your account settings.</p>
 
-<h2>2. Connect LinkedIn or YouTube</h2>
-<p>Open <strong>Channels</strong> in your workspace and connect a LinkedIn personal profile or a YouTube channel. You sign in with the platform directly, and atwebtech only gets the access it needs to publish for you. Other channels, including Instagram, Facebook, and TikTok, are coming soon; the <a href="/integrations">integrations page</a> shows the current status.</p>
+<h2>2. Connect your channels</h2>
+<p>Open <strong>Channels</strong> in your workspace and connect Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, or X. You sign in with the platform directly, and atwebtech only gets the access it needs to publish for you; the <a href="/integrations">integrations page</a> shows the current status.</p>
 
 <h2>3. Set a posting schedule</h2>
 <p>In each channel's settings, open <strong>Posting Schedule</strong> and choose its posting times, such as Tuesday and Thursday at 9:00 a.m. When you add a post to the queue, it takes the next open slot, so you keep a steady rhythm without picking a time for every post.</p>

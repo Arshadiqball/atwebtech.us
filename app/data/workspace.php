@@ -22,7 +22,7 @@ return [
         'channels' => [
             'label' => 'Channels', 'icon' => 'plus', 'href' => '/app/channels', 'nav' => false,
             'title' => 'Connect a channel',
-            'text' => 'YouTube and a personal LinkedIn Profile can be connected and published to. Company Pages and the other networks are not available yet.',
+            'text' => 'Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, and X can be connected and published to. TikTok connects now, with publishing coming soon.',
             'demo' => null, 'feature' => '/integrations',
         ],
     ],

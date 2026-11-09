@@ -6,6 +6,7 @@ $articles = data('articles');
 $pricing = data('pricing');
 $yearlyRate = static fn (string $plan): string => (string) round($pricing['plans'][$plan]['rate'] * $pricing['yearly_months'] / 12, 2);
 $newNames = array_map(static fn ($c) => $c['name'], $available);
+$nameList = count($newNames) > 1 ? implode(', ', array_slice($newNames, 0, -1)) . ' and ' . end($newNames) : implode('', $newNames);
 ?>
 <section class="hero hero--launch" aria-labelledby="hero-title">
   <div class="aurora" aria-hidden="true"><span class="aurora-blob a1"></span><span class="aurora-blob a2"></span><span class="aurora-blob a3"></span></div>
@@ -14,7 +15,7 @@ $newNames = array_map(static fn ($c) => $c['name'], $available);
 <?php if ($newNames): ?>
     <a class="announce" href="/integrations">
       <span class="announce-tag">New</span>
-      <span>Publish to <?= e(implode(' and ', $newNames)) ?> from atwebtech</span>
+      <span><?= count($newNames) > 3 ? 'Now publishing to ' . count($newNames) . ' networks, including ' . e(implode(', ', array_slice($newNames, 0, 3))) : 'Publish to ' . e($nameList) . ' from atwebtech' ?></span>
       <?= icon('arrow-right') ?>
     </a>
 <?php endif; ?>

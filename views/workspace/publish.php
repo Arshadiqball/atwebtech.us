@@ -66,7 +66,7 @@ ob_start(); ?>
   </div>
 
 <?php if ($tab === 'queue'): ?>
-  <p class="wsp-note"><?= icon('info') ?><span><?= $publishing ? 'Posts for a connected YouTube channel or LinkedIn Profile publish automatically at their time. Posts for other networks are plans only and are never sent.' : 'Only connected YouTube channels and LinkedIn Profiles publish automatically. Everything else in your queue is a plan and is never sent.' ?></span></p>
+  <p class="wsp-note"><?= icon('info') ?><span><?= $publishing ? 'Posts for connected channels publish automatically at their time. Posts for networks you haven’t connected, and for TikTok, are plans only and are never sent.' : 'Connect a channel to publish automatically. Until then, everything in your queue is a plan and is never sent.' ?></span></p>
 <?php endif; ?>
 
 <?php if ($tab === 'queue' && $view === 'list'): ?>

@@ -19,7 +19,7 @@ return [
             ['title' => 'Tailor each post for its channel', 'text' => 'A single idea rarely fits every platform word for word. The composer keeps one version per channel, each with its own caption, format, and timing, while still grouping them as one campaign.'],
             ['title' => 'Preview before anything goes out', 'text' => 'Selecting a post opens a preview panel with the caption, image, channel, and status. It is the place to check that the post reads well before it moves forward.'],
         ],
-        'status' => 'Available in the workspace. Schedule and publish to LinkedIn and YouTube today, with a posting schedule for each channel; more channels are coming soon. The calendar above uses sample data.',
+        'status' => 'Available in the workspace. Schedule and publish to Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, and X today, with a posting schedule for each channel. The calendar above uses sample data.',
         'related' => ['content-planner', 'analytics', 'collaboration'],
         'meta_title' => 'Publishing calendar | atwebtech',
         'meta_description' => 'Plan upcoming social posts in a clear week and month calendar, tailor content for each channel, and preview posts before they move forward.',

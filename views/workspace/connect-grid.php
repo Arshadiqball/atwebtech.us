@@ -15,7 +15,7 @@ $linked = $linked ?? [];
     <form action="/app/channels/connect/<?= e($ch['slug']) ?>" method="post">
       <input type="hidden" name="_token" value="<?= e($token) ?>">
       <button type="submit" class="cg-card">
-<?php if (in_array($ch['slug'], $linked, true)): ?><span class="ws-chip cg-chip cg-chip--on">Connected</span><?php endif; ?>
+<?php if (in_array($ch['slug'], $linked, true)): ?><span class="ws-chip cg-chip cg-chip--on">Connected</span><?php elseif ($ch['status'] === 'beta'): ?><span class="ws-chip cg-chip" title="Connect now. Posts are saved and go out once publishing is switched on.">Posting soon</span><?php endif; ?>
         <span class="cg-icon" style="--c: <?= e($ch['color']) ?>"><?= brand_mark($ch['icon'], $ch['name'], true) ?></span>
         <b><?= e($ch['name']) ?></b><small><?= e($ch['accounts']) ?></small>
       </button>

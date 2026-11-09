@@ -161,13 +161,33 @@ function partial(string $name, array $vars = []): void
     View::partial($name, $vars);
 }
 
-function integrations(): array
+/**
+ * Networks the workspace supports, with a status worked out from the code and the configured app keys:
+ * available = connect and publish, beta = connect now and posts are saved until publishing ships,
+ * planned = not connectable yet. Pass true to add the roadmap networks (marketing pages only).
+ */
+function integrations(bool $withUpcoming = false): array
 {
-    $available = array_filter(array_map('trim', explode(',', (string) config('integrations.available'))));
-    return array_map(static function (array $item) use ($available): array {
-        $item['status'] = in_array($item['slug'], $available, true) ? 'available' : 'planned';
+    $list = array_map(static function (array $item): array {
+        $item['status'] = match (true) {
+            !Channels::connectable($item['slug']) => 'planned',
+            in_array($item['slug'], Channels::PUBLISHES, true) => 'available',
+            default => 'beta',
+        };
         return $item;
     }, data('integrations'));
+    if ($withUpcoming) {
+        foreach (data('integrations-upcoming') as $item) {
+            $list[] = $item + ['status' => 'planned', 'upcoming' => true, 'accounts' => ''];
+        }
+    }
+    return $list;
+}
+
+/** Badge text for an integration status. */
+function integration_label(string $status): string
+{
+    return ['available' => 'Available', 'beta' => 'Publishing soon'][$status] ?? 'Coming soon';
 }
 
 function redirect(string $location, int $status = 303): never

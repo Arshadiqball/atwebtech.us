@@ -1686,3 +1686,16 @@ select.input { appearance: none; padding-right: 40px; background-image: linear-g
 .plan-card--featured { box-shadow: 0 40px 70px -40px rgb(22 163 74 / 0.55), 0 0 0 2px var(--brand); }
 .plan-sub-cta { margin-top: 10px; font-size: 14.5px; color: var(--muted); }
 .plan-sub-cta a { color: var(--ink-2); text-underline-offset: 3px; }
+
+/* Integration statuses */
+.status--beta { background: #FFF1D6; color: #7A4B00; }
+.int-summary { display: flex; flex-wrap: wrap; gap: 12px; }
+.int-summary li { display: inline-flex; align-items: center; gap: 10px; padding: 12px 18px 12px 12px; border-radius: 16px; background: var(--white); box-shadow: 0 0 0 1px var(--line); font-size: 16px; color: var(--ink-2); }
+.int-summary b { font: 600 22px/1 var(--font-display); color: var(--ink); }
+.int-legal { margin-top: 14px; font-size: 14px; color: var(--muted); }
+.int-list-sec { padding-top: 28px; }
+.int-card .int-note { margin-top: -6px; font-size: 14px; }
+.int-card--available { box-shadow: 0 0 0 1px rgb(22 163 74 / 0.35), 0 18px 36px -30px rgb(22 163 74 / 0.6); }
+.int-card--planned .ch { filter: saturate(.85); }
+.ch .brand-glyph { fill: currentColor; }
+#snapchat .ch { color: #111; }

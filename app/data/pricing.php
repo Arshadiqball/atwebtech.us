@@ -22,6 +22,7 @@ return [
             'rate' => 0,
             'badge' => null,
             'included' => [
+                ['Up to 3 channels', 'Connect up to 3 social profiles, Facebook Pages, or Pinterest accounts. Each one counts as a channel.'],
                 ['10 scheduled posts per channel, refilled as posts go out', 'Each channel can hold up to 10 scheduled posts at a time. When one is published, the slot opens again.'],
                 ['100 ideas', 'Save up to 100 ideas in the content planner.'],
                 ['1 user account', 'One person can sign in and manage the workspace.'],
@@ -36,6 +37,7 @@ return [
             'rate' => 6,
             'badge' => 'Recommended',
             'included' => [
+                ['Unlimited channels and Pages', 'Connect as many profiles, Facebook Pages, and boards as you manage. You pay per channel, and every channel after the tenth costs less.'],
                 ['Unlimited scheduled posts per channel', 'No cap on how many posts each channel can have scheduled.'],
                 ['Unlimited ideas', 'Keep every idea in the planner.'],
                 ['1 user account', 'One person can sign in and manage the workspace.'],
@@ -51,6 +53,7 @@ return [
             'rate' => 12,
             'badge' => null,
             'included' => [
+                ['Unlimited channels and Pages', 'Connect as many profiles, Facebook Pages, and boards as your team manages. You pay per channel, and every channel after the tenth costs less.'],
                 ['Unlimited scheduled posts per channel', 'No cap on how many posts each channel can have scheduled.'],
                 ['Unlimited ideas', 'Keep every idea in the planner.'],
                 ['Unlimited team members', 'Invite as many people as you need at no extra cost.'],
@@ -75,6 +78,9 @@ return [
             ['AI writing assistance', 'Suggest ideas, refine drafts, and organize a plan.', true, true, true],
         ],
         'Publishing' => [
+            ['Connected channels', 'Each social profile, Facebook Page, or Pinterest account counts as one channel.', 'Up to 3', 'Unlimited, priced per channel', 'Unlimited, priced per channel'],
+            ['Networks you can publish to', 'Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, and X.', '7', '7', '7'],
+            ['Trending ideas', 'This week’s trending videos, stories, and searches, inside the composer.', true, true, true],
             ['Scheduled posts per channel', 'How many posts each channel can have scheduled at one time.', '10', 'Unlimited', 'Unlimited'],
             ['Visual content calendar', 'See your schedule across weeks or months.', true, true, true],
             ['Queue', 'A running list of upcoming posts you can reorder.', true, true, true],

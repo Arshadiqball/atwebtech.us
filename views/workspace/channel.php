@@ -89,12 +89,21 @@ $next = $queue['next'] ?? null;
     </div>
   </div>
 
-<?php if (!$channel['can_publish'] && in_array($channel['provider'], ['youtube', 'linkedin', 'instagram'], true)): ?>
+<?php if ($channel['provider'] === 'facebook' && ($channel['kind'] ?? '') === 'Group'): ?>
+  <div class="ch-banner" role="status">
+    <?= icon('info') ?>
+    <p><b>Facebook Groups can’t be posted to.</b> Meta shut down Group posting for all apps in 2024. Use this Group for planning, then share posts there yourself, or connect a Facebook Page.</p>
+  </div>
+<?php elseif (!$channel['can_publish'] && in_array($channel['provider'], Channels::PUBLISHES, true)): ?>
   <div class="ch-banner" role="status">
     <?= icon('warning-circle') ?>
     <p><b>Reconnect to publish.</b> <?= match ($channel['provider']) {
         'linkedin' => 'Allow atwebtech to create posts on your LinkedIn Profile (the “Share on LinkedIn” permission) so scheduled posts can go out.',
         'instagram' => 'Content publishing wasn’t granted, so these posts stay as plans and are not sent. Reconnect and allow Instagram content publishing.',
+        'facebook' => 'Posting permission wasn’t granted for this Page. Reconnect and allow atwebtech to create posts on it.',
+        'threads' => 'Publishing wasn’t granted, so these posts stay as plans. Reconnect and allow Threads content publishing.',
+        'x' => 'Posting wasn’t granted. Reconnect and allow atwebtech to post for you.',
+        'pinterest' => 'This connection can read Pinterest but not create Pins. Reconnect Pinterest to allow creating Pins.',
         default => 'Video upload was not granted. Reconnect and tick “Manage your YouTube videos” on the Google screen. If that choice is missing, add the youtube.upload scope in Google Cloud, then reconnect.',
     } ?></p>
     <form action="/app/channels/connect/<?= e($channel['provider']) ?>" method="post">

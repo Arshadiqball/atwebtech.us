@@ -93,6 +93,12 @@ $notice = flash('notice');
     </div>
 
     <div class="ws-side-foot">
+<?php if (!$allowance['paid']): ?>
+      <a class="ws-upgrade ws-label" href="/app/billing">
+        <span class="ws-upgrade-icon"><?= icon('rocket-launch') ?></span>
+        <span><b>Upgrade your plan</b><small>Unlimited channels, Pages, and posts</small></span>
+      </a>
+<?php endif; ?>
 <?php if ($onboarding['checklist_closed_at'] === null): ?>
       <div class="ws-progress" data-dismissible>
         <a class="ws-progress-link" href="/app/channels"><?= $allowance['source'] === 'admin' ? count($connected) . ' channels connected' : count($connected) . '/' . $channelLimit . ' channels connected' ?></a>

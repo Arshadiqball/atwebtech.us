@@ -1173,6 +1173,49 @@
     };
     if (interest) interest.addEventListener('change', applyTemplates);
     if (network) network.addEventListener('change', applyTemplates);
+
+    /* Trending: same Network and Interest filters, plus a source chip row */
+    const trendBox = $('[data-cp-trends]', form);
+    const tplView = $('[data-cp-tpl-view]', form);
+    let trendSource = '';
+    const netNames = { instagram: 'Instagram', facebook: 'Facebook', tiktok: 'TikTok', linkedin: 'LinkedIn', pinterest: 'Pinterest', threads: 'Threads', x: 'X' };
+    const applyTrends = () => {
+      if (!trendBox) return;
+      const topic = interest ? interest.value : '';
+      const net = network ? network.value : '';
+      const items = $$('[data-tr-source]', trendBox);
+      const hasYoutube = items.some((li) => li.dataset.trSource === 'youtube');
+      const source = trendSource || (net === 'youtube' && hasYoutube ? 'youtube' : '');
+      let shown = 0;
+      items.forEach((li) => {
+        const show = li.dataset.trTopic === topic && (source === '' || li.dataset.trSource === source);
+        li.hidden = !show;
+        if (show) shown += 1;
+      });
+      $$('[data-tr-src]', trendBox).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.trSrc === source)));
+      const empty = $('[data-tr-empty]', trendBox);
+      if (empty) empty.hidden = shown > 0;
+      const note = $('[data-tr-note]', trendBox);
+      if (note) {
+        note.textContent = netNames[net]
+          ? `${netNames[net]} doesn’t share trending posts with apps, so these are this week’s top trends from across the web. Use adds a starting point you can rewrite.`
+          : 'What people are watching, reading, and searching this week. Use adds a starting point you can rewrite in your own words.';
+      }
+    };
+    const setMode = (mode) => {
+      if (!trendBox || !tplView) return;
+      const trending = mode === 'trending';
+      trendBox.hidden = !trending;
+      tplView.hidden = trending;
+      $$('[data-cp-mode]', form).forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.cpMode === mode)));
+      if (trending) applyTrends();
+    };
+    if (trendBox) {
+      $$('[data-cp-mode]', form).forEach((b) => b.addEventListener('click', () => setMode(b.dataset.cpMode)));
+      $$('[data-tr-src]', trendBox).forEach((b) => b.addEventListener('click', () => { trendSource = b.dataset.trSrc; applyTrends(); }));
+      if (interest) interest.addEventListener('change', applyTrends);
+      if (network) network.addEventListener('change', () => { trendSource = ''; applyTrends(); });
+    }
     if (network && network.value !== '') applyTemplates();
     const search = $('[data-cp-search]', form);
     search.addEventListener('input', () => {

@@ -28,6 +28,8 @@ require BASE_PATH . '/app/AccountHandler.php';
 require BASE_PATH . '/app/Workspace.php';
 require BASE_PATH . '/app/WorkspaceHandler.php';
 require BASE_PATH . '/app/Channels.php';
+require BASE_PATH . '/app/Posting.php';
+require BASE_PATH . '/app/Trends.php';
 require BASE_PATH . '/app/ChannelHandler.php';
 require BASE_PATH . '/app/Media.php';
 require BASE_PATH . '/app/Assistant.php';

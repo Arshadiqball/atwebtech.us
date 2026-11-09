@@ -120,7 +120,7 @@ final class ChannelHandler
                 'tiktok' => 'We couldn’t read this TikTok account. Try the same TikTok login again in a few minutes.',
                 'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
                 'x' => 'We couldn’t read this X account. Try again in a few minutes.',
-                'facebook' => 'This Facebook account doesn’t manage a Page or a Group we can read. Create a Page, or sign in with an account that manages a Page or Group, then try again.',
+                'facebook' => 'This Facebook account doesn’t manage a Page we can read. Create a Page, or sign in with an account that manages one, then try again. (Facebook no longer lets apps post to Groups.)',
                 'instagram' => 'This Instagram account can’t be connected. Switch it to a Professional account (Business or Creator), and make sure that account is an admin of the app, then try again.',
                 'threads' => 'We couldn’t read this Threads profile. Use the Threads account that is a tester on the app, then try again.',
                 default => 'This Google account doesn’t have a YouTube channel. Create one on YouTube or pick another account, then try again.',
@@ -679,7 +679,7 @@ final class ChannelHandler
         if ($run['save'] === 'draft') {
             $message = sprintf('%d AI %s saved to Drafts, dated %s. Review and schedule them when ready.', $n, $n === 1 ? 'draft' : 'drafts', $range) . $short;
         } else {
-            $publishes = $channel['can_publish'] && in_array($provider, ['linkedin', 'instagram', 'youtube'], true);
+            $publishes = $channel['can_publish'] && in_array($provider, Channels::PUBLISHES, true);
             $missingMedia = in_array($provider, ['instagram', 'youtube', 'tiktok'], true) && !$run['pool'];
             $message = sprintf('%d AI %s scheduled, %s at %s.', $n, $n === 1 ? 'post' : 'posts', $range, $first->format('g:i A'))
                 . match (true) {

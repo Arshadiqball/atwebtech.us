@@ -52,6 +52,15 @@ foreach (array_keys($picked) as $pickedKey) {
 $templateNetwork = count($videoNets) === 1 ? (string) array_key_first($videoNets) : '';
 $videos = $library['videos'];
 $personal = Workspace::personalTemplates($uid);
+$trends = Trends::forComposer();
+$trendsAt = Trends::updatedAt();
+$trendUse = static function (array $t): string {
+    return match ($t['source']) {
+        'google' => 'Everyone is searching for ' . $t['title'] . " this week.\n\n[How it connects to your audience, in 2–3 lines]",
+        'youtube' => 'Trending on YouTube: “' . $t['title'] . "”\n\n[Your take or what your audience can learn from it]\n\n" . $t['url'],
+        default => 'This is getting a lot of attention this week: “' . $t['title'] . "”\n\n[What you think, in 2–3 lines]\n\n" . $t['url'],
+    };
+};
 $ai = Assistant::enabled();
 $err = static fn (string $key): string => isset($errors[$key]) ? '' : ' hidden';
 $limitOf = static fn (string $provider): int => (int) ($settings['limits'][$provider] ?? $settings['post_max']);
@@ -230,6 +239,10 @@ $media = $p['media'];
     <aside class="cp-side" data-cp-side hidden>
       <section class="cp-panel" data-cp-panel="templates" hidden aria-label="Templates">
         <h3>Templates</h3>
+        <div class="cp-mode" role="group" aria-label="Show">
+          <button type="button" class="cp-mode-btn" aria-pressed="true" data-cp-mode="templates"><?= icon('file-text') ?>Templates</button>
+          <button type="button" class="cp-mode-btn" aria-pressed="false" data-cp-mode="trending"><?= icon('trend-up') ?>Trending</button>
+        </div>
         <label class="cp-interest" for="<?= $px ?>-network">Network
           <select class="idea-input" id="<?= $px ?>-network" data-cp-network>
             <option value="">All networks</option>
@@ -246,6 +259,39 @@ $media = $p['media'];
 <?php endforeach; ?>
           </select>
         </label>
+        <div class="cp-trends" data-cp-trends hidden>
+          <div class="cp-trend-src" role="group" aria-label="Source">
+            <button type="button" class="ws-chip" aria-pressed="true" data-tr-src="">All</button>
+<?php foreach (Trends::SOURCES as $key => $label): ?>
+            <button type="button" class="ws-chip" aria-pressed="false" data-tr-src="<?= e($key) ?>"><?= e($label) ?></button>
+<?php endforeach; ?>
+          </div>
+          <p class="cp-panel-lede" data-tr-note>What people are watching, reading, and searching this week. Use adds a starting point you can rewrite in your own words.</p>
+<?php if ($trends): ?>
+          <ul class="cp-tpl-list cp-trend-list" role="list">
+<?php foreach ($trends as $t): ?>
+            <li class="cp-trend" data-tr-source="<?= e($t['source']) ?>" data-tr-topic="<?= e($t['interest']) ?>"<?= $t['interest'] !== '' ? ' hidden' : '' ?>>
+<?php if ($t['image_url']): ?>
+              <a class="cp-trend-thumb" href="<?= e($t['url']) ?>" target="_blank" rel="noopener noreferrer"><img src="<?= e($t['image_url']) ?>" alt="" width="320" height="180" loading="lazy" decoding="async" referrerpolicy="no-referrer"></a>
+<?php endif; ?>
+              <span class="cp-trend-meta"><span class="cp-trend-src-tag cp-trend-src-tag--<?= e($t['source']) ?>"><?= e(Trends::SOURCES[$t['source']] ?? $t['source']) ?></span><?php if ($t['metric_label']): ?><span><?= e($t['metric_label']) ?></span><?php endif; ?></span>
+              <b><a href="<?= e($t['url']) ?>" target="_blank" rel="noopener noreferrer"><?= e($t['title']) ?></a></b>
+<?php if ($t['summary']): ?>
+              <p><?= e(mb_strimwidth($t['summary'], 0, 120, '…')) ?></p>
+<?php endif; ?>
+              <button type="button" class="ws-btn ws-btn--sm" data-cp-use="<?= e($trendUse($t)) ?>">Use</button>
+            </li>
+<?php endforeach; ?>
+          </ul>
+          <p class="cp-panel-lede" data-tr-empty hidden>Nothing trending for that choice this week. Try All interests or another source.</p>
+<?php if ($trendsAt): ?>
+          <p class="cp-trend-updated">Updated <?= e((new DateTimeImmutable($trendsAt, new DateTimeZone('UTC')))->setTimezone(Workspace::timezone($user))->format('M j')) ?> · refreshed every week</p>
+<?php endif; ?>
+<?php else: ?>
+          <p class="cp-panel-lede">Trending posts appear here after the weekly refresh runs.</p>
+<?php endif; ?>
+        </div>
+        <div data-cp-tpl-view>
         <p class="cp-panel-lede" data-cp-tpl-lede><?= $videoNets ? 'These templates are short videos. Use puts the video and the script into your post so you can change them.' : 'Choose a network or an interest. Use puts the text and photo into your post so you can rewrite them.' ?></p>
         <ul class="cp-tpl-list" role="list">
 <?php foreach ($personal as $tpl): ?>
@@ -266,6 +312,7 @@ $media = $p['media'];
         </ul>
         <p class="cp-panel-lede" data-cp-tpl-empty hidden>No starting points for that network and interest. Try another interest, or set interest back to All interests.</p>
         <a class="ws-link" href="/app/create?tab=templates">Manage templates</a>
+        </div>
       </section>
 
       <section class="cp-panel" data-cp-panel="ai" hidden aria-label="AI Assistant">

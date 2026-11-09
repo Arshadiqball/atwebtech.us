@@ -44,7 +44,7 @@ $compose ??= '{}';
   <div class="wsp-empty">
     <span class="wsp-empty-icon"><?= icon('paper-plane-tilt') ?></span>
     <h2>Nothing sent yet</h2>
-    <p>Posts atwebtech publishes to a connected YouTube channel or LinkedIn Profile appear here with a link. Plan-only posts for other networks are never sent.</p>
+    <p>Posts atwebtech publishes for you appear here with a link to the live post. Plan-only posts, for networks that aren’t connected, are never sent.</p>
   </div>
 <?php else: ?>
   <div class="wsp-empty">

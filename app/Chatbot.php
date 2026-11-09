@@ -117,7 +117,7 @@ final class Chatbot
         $kb = data('knowledge');
         $text = static fn (string $html): string => trim(preg_replace('/\s+/', ' ', html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8')) ?? '');
 
-        $publishes = ['linkedin', 'instagram', 'youtube'];
+        $publishes = Channels::PUBLISHES;
         $channels = [];
         $connectable = [];
         foreach (data('integrations') as $i) {
