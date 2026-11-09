@@ -196,10 +196,10 @@ Code: `app/Posting.php`, called from `app/Publisher.php`.
 
 ## Trending (composer)
 
-The composer's Templates panel has a **Trending** view, filtered by the same Network and Interest dropdowns plus a source row. The data is real and refreshed weekly by `bin/trends.php`:
+The composer's Templates panel has a **Trending** view, filtered by the same Network and Interest dropdowns plus a source row. The data is real and refreshed weekly by `bin/trends.php`. In production the GitHub Actions workflow `.github/workflows/trends.yml` runs it over SSH every Monday at 14:00 UTC (and on demand from the Actions tab), logging to `storage/logs/trends.log`. On other hosts, use cron:
 
 ```
-0 6 * * 1 /usr/bin/php /path/to/atwebtech/bin/trends.php >> /path/to/atwebtech/storage/logs/trends.log 2>&1
+0 14 * * 1 /usr/bin/php /path/to/atwebtech/bin/trends.php >> /path/to/atwebtech/storage/logs/trends.log 2>&1
 ```
 
 - **Sources:** YouTube most popular videos in the US by category, Hacker News top stories of the week by topic, Reddit top posts of the week in topic communities (public RSS), and Google Trends searches in the US. Interests map to categories, searches and communities in `Trends::MAP`.
@@ -237,6 +237,42 @@ Turn it on by setting `META_PIXEL_ID` and `META_CAPI_TOKEN` in the server `.env`
 - Visitors whose browser sends Global Privacy Control get no Pixel and no server events. The privacy policy describes all of this.
 - To check it, set `META_TEST_EVENT_CODE` from Events Manager → Test events, use the site, and watch events arrive; then clear the code. `META_TEST_BASE` points the server calls at a local fake for automated tests and is ignored in production.
 - Code: `app/Meta.php`, `public/assets/js/meta-pixel.js`.
+
+## Workspace tools (hashtags, feeds, reports, queue)
+
+- **Hashtag groups** (Create → Hashtags): save groups and insert them from the composer's **#** button. Free: 3 groups; paid: unlimited. Input is cleaned to `#tag` form, max 30 per group.
+- **Feeds** (Create → Feeds): follow a blog or news site by its address; the RSS/Atom feed is found automatically. New articles become "Create post" / "Save idea" cards. Free: 3 feeds; paid: 25. Fetching only reaches public hosts (private and local addresses are refused, DNS is pinned per request), with a 2 MB and 15 s limit. Refresh hourly from cron:
+  `15 * * * * /usr/bin/php /path/to/atwebtech/bin/feeds.php >> /path/to/atwebtech/storage/logs/feeds.log 2>&1`
+- **Link tracking (UTM)** (Account → Link tracking, Essentials/Team): when a post publishes, links get `utm_source` (network), `utm_medium=social`, `utm_campaign`, `utm_content=post-{id}`; links that already have UTM tags are left alone. Stored in `users.utm_tracking_enabled` / `utm_tracking_campaign` (the existing `users.utm_*` columns record how the person signed up).
+- **Reports** (Insights → Export, Essentials/Team): CSV of published posts, and a printable report (save as PDF from the browser). Spreadsheet formulas in exported text are neutralised.
+- **Campaigns** (Insights): each post tag is a campaign, with published, scheduled, failed and draft counts.
+- **Queue actions** (Channel settings → General): pause/resume a channel's queue (the publisher skips paused channels), shuffle scheduled posts, remove failed posts, delete all drafts, empty the queue.
+- **Bulk upload** (Channel settings → General): CSV with `date,time,text[,title,tags]`, up to 200 rows, in the user's time zone; text networks only (LinkedIn, Facebook, Threads, X, TikTok). Nothing is scheduled if any row is invalid. Template: `/assets/files/bulk-upload-template.csv`.
+- Code: `app/Toolkit.php` (`Hashtags`, `Feeds`, `Utm`, `Reports`, `QueueTools`). Data: migration `015`.
+
+## Insights (network stats)
+
+`app/Metrics.php` reads followers and per-post stats from each network and stores them in `post_metrics` and `channel_followers` (migration `016`). It runs inside `bin/publish.php` after publishing, in batches of up to 10 channels a minute, refreshing each channel every 3 hours and posts sent in the last 90 days. Insights, channel Insights and the CSV export show the totals; cards say which networks report each metric, and channels that need a reconnect are listed with a Reconnect button.
+
+| Network | Stats | Permission |
+|---|---|---|
+| Instagram | followers, likes, comments; views, reach, shares, saves, Reels watch time | `instagram_business_manage_insights` (requested by default) |
+| Facebook Pages | followers, reactions, comments, shares, views, reach, video stats | add `pages_read_engagement` and `read_insights` to the Facebook Login for Business configuration |
+| Threads | followers, views, likes, replies, reposts and quotes | `threads_manage_insights` (requested by default) |
+| X | followers, impressions, likes, replies, reposts, bookmarks | `tweet.read` (already granted); needs an X API plan with read access |
+| YouTube | subscribers, views, likes, comments; watch time and shares with YouTube Analytics | `yt-analytics.readonly`, opt in with `STATS_PERMISSIONS=instagram,threads,youtube` |
+| Pinterest | followers, impressions, saves, reactions, comments | `pins:read`, `user_accounts:read` (already granted) |
+| LinkedIn profiles, TikTok | none: no stats API for apps | |
+
+Existing channels pick up new permissions when they are reconnected.
+
+## Cron jobs (production)
+
+| Schedule | Command | Purpose |
+|---|---|---|
+| `* * * * *` | `php bin/publish.php` | Publish due posts, then refresh network stats for Insights |
+| `15 * * * *` | `php bin/feeds.php` | Check followed feeds |
+| `0 14 * * 1` | `php bin/trends.php` | Refresh the Trending list (run by GitHub Actions, `trends.yml`, no server cron needed) |
 
 ## AI Assistant
 

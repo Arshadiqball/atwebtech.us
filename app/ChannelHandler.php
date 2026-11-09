@@ -317,7 +317,7 @@ final class ChannelHandler
         exit;
     }
 
-    /** Community (Coming soon inbox) and Insights (sent-post counts only) for one channel. */
+    /** Community (Coming soon inbox) and Insights (network stats) for one channel. */
     public static function subPage(string $id, string $section): void
     {
         if (!ctype_digit($id)) {

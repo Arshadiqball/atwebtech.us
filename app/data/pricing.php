@@ -88,7 +88,9 @@ return [
             ['Duplicate posts', 'Copy a post and adapt it for another channel or date.', true, true, true],
             ['First comment scheduling', 'Schedule a first comment to go out with a post.', false, true, true],
             ['Channel groups', 'Group channels for quick selection when scheduling.', false, true, true],
-            ['Hashtag manager', 'Save groups of hashtags and reuse them.', false, true, true],
+            ['Hashtag manager', 'Save groups of hashtags and insert them from the composer.', '3 groups', 'Unlimited', 'Unlimited'],
+            ['RSS feeds', 'Follow blogs and news sites and turn new articles into posts.', '3 feeds', '25 feeds', '25 feeds'],
+            ['Bulk scheduling', 'Upload a CSV file to schedule many posts at once.', true, true, true],
         ],
         'Community' => [
             ['Community inbox', 'Read and reply to comments from connected channels in one place.', true, true, true],

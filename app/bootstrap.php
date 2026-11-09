@@ -34,6 +34,8 @@ require BASE_PATH . '/app/Bio.php';
 require BASE_PATH . '/app/Approvals.php';
 require BASE_PATH . '/app/Crm.php';
 require BASE_PATH . '/app/Meta.php';
+require BASE_PATH . '/app/Toolkit.php';
+require BASE_PATH . '/app/Metrics.php';
 require BASE_PATH . '/app/ChannelHandler.php';
 require BASE_PATH . '/app/Media.php';
 require BASE_PATH . '/app/Assistant.php';

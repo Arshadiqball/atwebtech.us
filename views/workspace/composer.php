@@ -182,7 +182,16 @@ $media = $p['media'];
 <?php endforeach; ?>
             </div>
           </details>
-          <button type="button" class="ws-icon-btn" data-cp-insert="#" title="Add a hashtag"><?= icon('hash') ?><span class="sr-only">Add a hashtag</span></button>
+          <details class="cp-pop cp-hash" data-cp-pop>
+            <summary class="ws-icon-btn" title="Hashtags"><?= icon('hash') ?><span class="sr-only">Hashtags</span></summary>
+            <div class="cp-pop-panel cp-hash-panel">
+              <button type="button" class="cp-hash-item" data-cp-insert="#"><b>#</b><small>Type a new hashtag</small></button>
+<?php foreach (Hashtags::groups($uid) as $hg): ?>
+              <button type="button" class="cp-hash-item" data-cp-insert="<?= e(' ' . $hg['tags']) ?>"><b><?= e($hg['name']) ?></b><small><?= e(mb_strimwidth((string) $hg['tags'], 0, 60, '…')) ?></small></button>
+<?php endforeach; ?>
+              <a class="cp-hash-manage" href="/app/create?tab=hashtags"><?= icon('pencil-simple') ?>Manage hashtag groups</a>
+            </div>
+          </details>
           <button type="button" class="ws-icon-btn" data-cp-open="ai" title="AI Assistant"><?= icon('magic-wand') ?><span class="sr-only">AI Assistant</span></button>
           <span class="composer-count" id="<?= $px ?>-count" data-count></span>
         </div>

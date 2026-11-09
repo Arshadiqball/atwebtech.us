@@ -80,6 +80,7 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
     <nav class="wsp-tabs" aria-label="Create">
       <a href="/app/create"<?= $tab === 'ideas' ? ' aria-current="page"' : '' ?>>Ideas</a>
       <a href="/app/create?tab=templates"<?= $tab === 'templates' ? ' aria-current="page"' : '' ?>>Templates</a>
+      <a href="/app/create?tab=hashtags"<?= $tab === 'hashtags' ? ' aria-current="page"' : '' ?>>Hashtags</a>
       <a href="/app/create?tab=feeds"<?= $tab === 'feeds' ? ' aria-current="page"' : '' ?>>Feeds</a>
     </nav>
 <?php if ($tab === 'ideas'): ?>
@@ -310,12 +311,9 @@ $renderTemplate = static function (string $key, string $emoji, string $title, st
   </section>
 <?php endif; ?>
 
+<?php elseif ($tab === 'hashtags'): ?>
+<?php partial('workspace/hashtags', ['user' => $user, 'groups' => $hashtagGroups, 'limit' => $hashtagLimit]); ?>
 <?php else: ?>
-  <div class="wsp-empty">
-    <span class="wsp-empty-icon"><?= icon('book-open') ?></span>
-    <h2>Feeds <span class="ws-soon">Coming soon</span></h2>
-    <p>Follow blogs and news sites so there's always something worth sharing. Feeds aren't available yet. Until then, save links as ideas.</p>
-    <a class="ws-btn" href="/app/create/idea" data-idea-open="{}"><?= icon('plus') ?>New Idea</a>
-  </div>
+<?php partial('workspace/feeds', ['user' => $user, 'feeds' => $feeds, 'items' => $feedItems, 'limit' => $feedLimit]); ?>
 <?php endif; ?>
 </div>

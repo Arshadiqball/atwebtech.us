@@ -110,3 +110,70 @@ Stack trace:
 #1 /private/tmp/claude-501/-Users-mac--claude-spares-spare-9Q6luU/206db1c5-eea9-400a-ae4a-7c4a43199c39/scratchpad/posting_test.php(19): Posting::facebook('PAGETOKEN', '1234', 'Hello Page', NULL, NULL)
 #2 {main}
   thrown in /Users/mac/Documents/atwebtech/atwebtechus/app/Posting.php on line 238
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign' in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php:98
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(98): PDO->exec('ALTER TABLE use...')
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(53): Migrator::apply('mysql', Array)
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/bootstrap.php(53): Migrator::run()
+#3 /private/tmp/claude-501/-Users-mac--claude-spares-spare-9Q6luU/206db1c5-eea9-400a-ae4a-7c4a43199c39/scratchpad/billing_setup.php(7): require('/Users/mac/Docu...')
+#4 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php on line 98
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:35 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:36 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign' in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php:98
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(98): PDO->exec('ALTER TABLE use...')
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(53): Migrator::apply('mysql', Array)
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/bootstrap.php(53): Migrator::run()
+#3 Command line code(1): require('/Users/mac/Docu...')
+#4 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php on line 98
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign' in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php:98
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(98): PDO->exec('ALTER TABLE use...')
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(53): Migrator::apply('mysql', Array)
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/bootstrap.php(53): Migrator::run()
+#3 Command line code(1): require('/Users/mac/Docu...')
+#4 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php on line 98
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 10:38:37 UTC] Migration failed: SQLSTATE[42S21]: Column already exists: 1060 Duplicate column name 'utm_campaign'
+[09-Nov-2026 14:04:22 UTC] [2026-11-09T14:04:22+00:00] publish post 91 failed: This post missed its time (7 Nov, 14:04 UTC), so atwebtech held it back rather than send it late. Retry to send it now, or reschedule it.
+[09-Nov-2026 14:04:22 UTC] [2026-11-09T14:04:22+00:00] publish post 92 failed: Request failed: Failed to connect to 127.0.0.1:9 after 1 ms: Could not connect to server
+[09-Nov-2026 14:10:25 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[23000]: Integrity constraint violation: 1452 Cannot add or update a child row: a foreign key constraint fails (`atwebtec_us`.`channels`, CONSTRAINT `fk_channels_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE) in Command line code:5
+Stack trace:
+#0 Command line code(5): PDOStatement->execute(Array)
+#1 Command line code(6): {closure:Command line code:5}('instagram', 'Shop IG')
+#2 {main}
+  thrown in Command line code on line 5
+[09-Nov-2026 14:11:48 UTC] [2026-11-09T14:11:48+00:00] metrics channel 25: HTTP 401 from graph.instagram.com Invalid OAuth access token - Cannot parse access token
+[09-Nov-2026 14:11:48 UTC] [2026-11-09T14:11:48+00:00] metrics channel 26: Threads needs the insights permission.

@@ -36,7 +36,7 @@ final class Trends
         'gadgets' => ['yt' => '28', 'hn' => 'hardware', 'reddit' => ['gadgets']],
         'cloud' => ['yt' => '28', 'hn' => 'cloud', 'reddit' => ['cloudcomputing', 'devops']],
         'startups' => ['yt' => '28', 'hn' => 'startup', 'reddit' => ['startups', 'Entrepreneur']],
-        'productivity' => ['yt' => '27', 'hn' => 'tools', 'reddit' => ['productivity']],
+        'productivity' => ['yt' => '26', 'hn' => 'tools', 'reddit' => ['productivity']],
     ];
     private const PER_SET = 8;
     private const USER_AGENT = 'Mozilla/5.0 (compatible; atwebtech-trends/1.0; +https://atwebtech.us)';

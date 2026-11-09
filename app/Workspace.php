@@ -326,6 +326,8 @@ final class Workspace
             'drafts' => $counts['drafts'],
             'posts' => $posts,
             'series' => array_values($series),
+            'metrics' => Metrics::summary((int) $user['id'], $channelId, $fromUtc, $toUtc, $prevFromUtc, $prevToUtc),
+            'post_metrics' => Metrics::forPosts(array_column($posts, 'id')),
         ];
     }
 

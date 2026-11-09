@@ -145,20 +145,31 @@ $linkedin = $channel['provider'] === 'linkedin';
     </div>
     <div class="set-row">
       <div>
-        <h2>Campaign tracking <span class="ws-soon">Coming soon</span></h2>
-        <p>Google Analytics tags for posts aren’t built yet. Choose a link shortener first — that part isn’t available either.</p>
+        <h2>Campaign tracking (UTM)</h2>
+        <p>Add Google Analytics UTM tags to the links in your posts automatically. It's one setting for all channels, under <a href="/app/account#utm">Account → Link tracking</a>.</p>
       </div>
     </div>
   </section>
 
-  <section class="set-block">
-    <div class="set-row">
+  <section class="set-block" id="bulk">
+    <form class="set-row set-row--stack" action="/app/channels/<?= (int) $channel['id'] ?>/queue-tools" method="post" enctype="multipart/form-data">
+      <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+      <input type="hidden" name="action" value="bulk">
       <div>
-        <h2>Bulk Post Upload <span class="ws-soon">Coming soon</span></h2>
-        <p>Scheduling many posts from a CSV file isn’t built yet. Add posts one at a time from Create Post.</p>
+        <h2>Bulk Post Upload</h2>
+<?php if (in_array($channel['provider'], QueueTools::TEXT_NETWORKS, true)): ?>
+        <p>Schedule up to <?= QueueTools::MAX_ROWS ?> posts at once from a CSV file with the columns <code>date</code> (YYYY-MM-DD), <code>time</code> (HH:MM, 24-hour, your time zone), <code>text</code>, and optionally <code>tags</code>. <a href="/assets/files/bulk-upload-template.csv" download>Download the template</a>.</p>
+<?php $bulkForm = View::formState('bulk'); if ($bulkForm && $bulkForm['status'] === 'error'): ?>
+        <p class="bill-warn"><?= icon('warning-circle') ?><span><?= e($bulkForm['message']) ?><?php if (!empty($bulkForm['errors']['rows'])): ?><br><?= nl2br(e($bulkForm['errors']['rows'])) ?><?php endif; ?></span></p>
+<?php endif; ?>
+        <input class="idea-input" type="file" name="csv" accept=".csv,text/csv" required style="margin-top:10px;padding-top:7px">
       </div>
-      <button type="button" class="ws-btn set-control" disabled>Bulk Upload</button>
-    </div>
+      <button type="submit" class="ws-btn ws-btn--dark set-control"><?= icon('upload-simple') ?>Upload and schedule</button>
+<?php else: ?>
+        <p>Bulk upload is for text posts. This network needs a photo or video on every post, so add those one at a time from Create Post.</p>
+      </div>
+<?php endif; ?>
+    </form>
   </section>
 
 <?php if ($linkedin): ?>
@@ -180,42 +191,35 @@ $linkedin = $channel['provider'] === 'linkedin';
   </section>
 <?php endif; ?>
 
-  <section class="set-block">
+  <section class="set-block" id="queue-actions">
     <h2 class="set-group">Queue Actions</h2>
-    <div class="set-row">
+<?php $qa = static function (string $action, string $label, string $class = '', string $confirm = '') use ($channel): string {
+    return '<form action="/app/channels/' . (int) $channel['id'] . '/queue-tools" method="post"><input type="hidden" name="_token" value="' . e(Security::csrfToken()) . '"><button type="submit" name="action" value="' . e($action) . '" class="ws-btn set-control ' . e($class) . '"' . ($confirm !== '' ? ' data-confirm="' . e($confirm) . '"' : '') . '>' . e($label) . '</button></form>';
+}; ?>
+    <form class="set-row" action="/app/channels/<?= (int) $channel['id'] ?>/queue-tools" method="post">
+      <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+      <input type="hidden" name="action" value="pause">
       <div>
-        <h2>Pause Queue <span class="ws-soon">Coming soon</span></h2>
-        <p>Stopping all posts from sending on this channel isn’t built yet. Scheduled posts still go out at their time.</p>
+        <h2>Pause Queue<?php if (!empty($channel['paused_at'])): ?> <span class="ws-soon">Paused</span><?php endif; ?></h2>
+        <p><?= !empty($channel['paused_at']) ? 'Nothing on this channel publishes while paused. Resume to send posts that are due.' : 'Stop every post on this channel from publishing until you resume. Nothing is deleted.' ?></p>
       </div>
-      <label class="set-switch is-disabled"><input type="checkbox" disabled><span aria-hidden="true"></span><span class="sr-only">Off</span></label>
+      <button type="submit" name="paused" value="<?= empty($channel['paused_at']) ? '1' : '' ?>" class="ws-btn set-control"><?= empty($channel['paused_at']) ? 'Pause queue' : 'Resume queue' ?></button>
+    </form>
+    <div class="set-row">
+      <div><h2>Shuffle Queue</h2><p>Mix up the order of scheduled posts. The time slots stay the same.</p></div>
+      <?= $qa('shuffle', 'Shuffle queue') ?>
     </div>
     <div class="set-row">
-      <div>
-        <h2>Shuffle Queue <span class="ws-soon">Coming soon</span></h2>
-        <p>Randomising queued posts isn’t built yet. Times stay in the order you set.</p>
-      </div>
-      <button type="button" class="ws-btn set-control" disabled>Shuffle Queue</button>
+      <div><h2>Clean Queue</h2><p>Remove every post on this channel that failed to publish.</p></div>
+      <?= $qa('clean', 'Remove failed posts', '', 'Delete all failed posts on this channel?') ?>
     </div>
     <div class="set-row">
-      <div>
-        <h2>Clean Queue <span class="ws-soon">Coming soon</span></h2>
-        <p>A one-tap clean-up of failed posts isn’t built yet. Failed posts stay under Needs attention, where you can retry or edit them.</p>
-      </div>
-      <button type="button" class="ws-btn set-control" disabled>Clean Queue</button>
+      <div><h2>Delete All Drafts</h2><p>Delete every draft for this channel. This can't be undone.</p></div>
+      <?= $qa('drafts', 'Delete drafts', 'ws-btn--danger', 'Delete all drafts for this channel? This cannot be undone.') ?>
     </div>
     <div class="set-row">
-      <div>
-        <h2>Delete All Drafts <span class="ws-soon">Coming soon</span></h2>
-        <p>Bulk-deleting drafts for this channel isn’t built yet. Open a draft to delete it.</p>
-      </div>
-      <button type="button" class="ws-btn ws-btn--danger set-control" disabled>Delete Drafts</button>
-    </div>
-    <div class="set-row">
-      <div>
-        <h2>Empty Queue <span class="ws-soon">Coming soon</span></h2>
-        <p>Clearing every scheduled post on this channel isn’t built yet. Delete posts from the queue one at a time.</p>
-      </div>
-      <button type="button" class="ws-btn ws-btn--danger set-control" disabled>Empty Queue</button>
+      <div><h2>Empty Queue</h2><p>Remove every scheduled post and post waiting for approval on this channel. This can't be undone.</p></div>
+      <?= $qa('empty', 'Empty queue', 'ws-btn--danger', 'Remove every scheduled post on this channel? This cannot be undone.') ?>
     </div>
   </section>
 <?php endif; ?>

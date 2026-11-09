@@ -198,7 +198,7 @@ function feature_state(string $slug): array
         'content-planner' => ['live', '/app/create', 'Open the Content Planner'],
         'ai-assistant' => ['live', '/app/publish/new', 'Write a post with AI'],
         'link-in-bio' => ['live', '/app/link-in-bio', 'Build your Link in Bio'],
-        'analytics' => ['partial', '/app/insights', 'Open Insights'],
+        'analytics' => ['live', '/app/insights', 'Open Insights'],
         'community' => ['soon', null, null],
         'collaboration' => ['partial', '/app/publish?tab=approvals', 'Open Approvals'],
     ];

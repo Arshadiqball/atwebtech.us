@@ -182,7 +182,7 @@ return [
         ]);
     }],
     ['GET', '/app/create', static function (): void {
-        $tab = Workspace::pick('tab', ['ideas', 'templates', 'feeds']);
+        $tab = Workspace::pick('tab', ['ideas', 'templates', 'hashtags', 'feeds']);
         Workspace::render('create', 'workspace/create', 'Create', static function (array $user) use ($tab): array {
             $uid = (int) $user['id'];
             return [
@@ -195,6 +195,11 @@ return [
                 'q' => mb_substr(trim((string) ($_GET['q'] ?? '')), 0, 80),
                 'board' => $tab === 'ideas' ? Workspace::board($uid) : null,
                 'personal' => Workspace::personalTemplates($uid),
+                'hashtagGroups' => $tab === 'hashtags' ? Hashtags::groups($uid) : [],
+                'hashtagLimit' => Hashtags::limit($uid),
+                'feeds' => $tab === 'feeds' ? Feeds::list($uid) : [],
+                'feedItems' => $tab === 'feeds' ? Feeds::items($uid, (int) ($_GET['feed'] ?? 0)) : [],
+                'feedLimit' => Feeds::limit($uid),
             ];
         });
     }],
@@ -237,6 +242,8 @@ return [
                     not_found();
                 }
                 $prefill = Workspace::composeData($post, Workspace::timezone($user), $uid) + ['idea' => (int) $post['idea_id']];
+            } elseif (isset($_GET['text']) && is_string($_GET['text'])) {
+                $prefill['body'] = mb_substr(trim($_GET['text']), 0, 5000);
             } elseif (isset($_GET['idea']) && ($idea = Workspace::idea($uid, (int) $_GET['idea']))) {
                 $prefill['body'] = trim($idea['title'] . "\n\n" . $idea['body']);
                 $prefill['idea'] = (int) $idea['id'];
@@ -263,7 +270,9 @@ return [
     ['GET', '/app/insights', static function (): void {
         Workspace::render('insights', 'workspace/insights', 'Insights', static function (array $user): array {
             $range = Workspace::pick('range', ['30d', '7d', 'mtd', 'last-month', 'custom']);
-            return ['insights' => Workspace::insights($user, $range)];
+            $in = Workspace::insights($user, $range);
+            $utc = new DateTimeZone('UTC');
+            return ['insights' => $in, 'campaigns' => Reports::campaigns((int) $user['id'], $in['from']->setTimezone($utc)->format('Y-m-d H:i:s'), $in['to']->setTimezone($utc)->format('Y-m-d H:i:s'))];
         });
     }],
     ['POST', '/app/ideas', [WorkspaceHandler::class, 'idea']],
@@ -284,6 +293,10 @@ return [
     ['GET', '/l/{handle}', [Bio::class, 'show']],
     ['GET', '/l/{handle}/{id}', [Bio::class, 'go']],
     ['POST', '/app/approvals', [Approvals::class, 'handle']],
+    ['POST', '/app/hashtags', [Hashtags::class, 'handle']],
+    ['GET', '/app/insights/export', [Reports::class, 'export']],
+    ['POST', '/app/feeds', [Feeds::class, 'handle']],
+    ['POST', '/app/account/utm', [Utm::class, 'save']],
     ['GET', '/review/{token}', [Approvals::class, 'show']],
     ['POST', '/review/{token}', [Approvals::class, 'decide']],
     ['GET', '/upgrade', [BillingHandler::class, 'upgrade']],
@@ -296,7 +309,7 @@ return [
     ['POST', '/stripe/webhook', [Billing::class, 'webhook']],
     ['GET', '/app/account', static function (): void {
         Workspace::render('account', 'workspace/account', 'Account', static function (array $user): array {
-            return ['twoFactor' => TwoFactor::pageState((int) $user['id'])];
+            return ['twoFactor' => TwoFactor::pageState((int) $user['id']), 'utm' => Utm::settings((int) $user['id'])];
         });
     }],
     ['POST', '/app/account/two-factor/start', [AccountHandler::class, 'twoFactorStart']],
@@ -372,6 +385,7 @@ return [
     ['POST', '/app/channels/{id}/generate', [ChannelHandler::class, 'generate']],
     ['POST', '/app/channels/{id}/generate/step', [ChannelHandler::class, 'generateStep']],
     ['POST', '/app/channels/{id}/disconnect', [ChannelHandler::class, 'disconnect']],
+    ['POST', '/app/channels/{id}/queue-tools', [QueueTools::class, 'handle']],
     ['POST', '/app/media', [Media::class, 'start']],
     ['POST', '/app/media/{id}/chunk', [Media::class, 'chunk']],
     ['POST', '/app/media/{id}/complete', [Media::class, 'complete']],

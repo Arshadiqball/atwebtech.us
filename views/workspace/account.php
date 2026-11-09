@@ -49,6 +49,19 @@ $regenErrors = $regen['errors'] ?? [];
     </div>
   </section>
 
+  <section class="set-block" id="utm" aria-labelledby="utm-title">
+    <form class="set-row set-row--stack" action="/app/account/utm" method="post">
+      <input type="hidden" name="_token" value="<?= e($token) ?>">
+      <div>
+        <h2 id="utm-title">Link tracking (UTM) <?php if (!Channels::allowance((int) $user['id'])['paid']): ?><span class="ws-soon">Essentials and Team</span><?php endif; ?></h2>
+        <p>When a post publishes, atwebtech adds <code>utm_source</code> (the network), <code>utm_medium=social</code>, <code>utm_campaign</code>, and <code>utm_content</code> to its links, so Google Analytics shows which posts bring visitors. Links that already have UTM tags are left alone.</p>
+        <label class="bio-toggle" style="margin-top:12px"><input type="checkbox" name="utm_enabled" value="1"<?= $utm['enabled'] ? ' checked' : '' ?>><span><b>Add UTM tags to links</b><small>Applies to posts published from now on.</small></span></label>
+        <label class="bio-field" style="margin-top:12px;max-width:360px"><span>Campaign name</span><input class="idea-input" name="utm_campaign" maxlength="80" value="<?= e($utm['campaign']) ?>" placeholder="atwebtech"></label>
+      </div>
+      <button type="submit" class="ws-btn ws-btn--dark">Save link tracking</button>
+    </form>
+  </section>
+
   <section class="set-block" aria-labelledby="tfa-title">
     <div class="set-row set-row--stack">
       <div>

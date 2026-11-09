@@ -9,6 +9,8 @@ final class Publisher
 
     public const MAX_ATTEMPTS = 3;
     private const STALE_MINUTES = 90;
+    /** Posts more than this late are held back instead of going out days after their moment. */
+    private const MISSED_HOURS = 24;
 
     /**
      * Send due posts during a page view. LinkedIn is fast enough to do here.
@@ -41,23 +43,19 @@ final class Publisher
         $pdo->prepare('UPDATE posts SET status = :planned, updated_at = :now WHERE status = :publishing AND updated_at < :stale')
             ->execute(['planned' => 'planned', 'now' => $now, 'publishing' => 'publishing', 'stale' => gmdate('Y-m-d H:i:s', time() - self::STALE_MINUTES * 60)]);
 
-        $sql = 'SELECT p.id FROM posts p WHERE p.status = :planned AND p.channel_id IS NOT NULL AND p.planned_at <= :now';
+        $sql = 'SELECT p.id FROM posts p JOIN channels c ON c.id = p.channel_id WHERE p.status = :planned AND p.channel_id IS NOT NULL AND p.planned_at <= :now AND c.paused_at IS NULL';
         $params = ['planned' => 'planned', 'now' => $now];
-        if ($providers === null) {
-            $sql .= " AND EXISTS (SELECT 1 FROM channels c WHERE c.id = p.channel_id AND c.provider IN ('linkedin', 'youtube', 'instagram'))";
-        }
-        if ($providers !== null) {
-            $allowed = array_values(array_filter($providers, static fn (string $p): bool => in_array($p, ['linkedin', 'youtube', 'instagram'], true)));
-            if (!$allowed) {
-                return ['sent' => 0, 'failed' => 0, 'retry' => 0];
-            }
+        $allowed = array_values(array_filter($providers ?? Channels::PUBLISHES, static fn (string $p): bool => in_array($p, Channels::PUBLISHES, true)));
+        if ($allowed) {
             $marks = [];
             foreach ($allowed as $i => $provider) {
                 $key = 'provider' . $i;
                 $marks[] = ':' . $key;
                 $params[$key] = $provider;
             }
-            $sql .= ' AND EXISTS (SELECT 1 FROM channels c WHERE c.id = p.channel_id AND c.provider IN (' . implode(', ', $marks) . '))';
+            $sql .= ' AND c.provider IN (' . implode(', ', $marks) . ')';
+        } else {
+            return ['sent' => 0, 'failed' => 0, 'retry' => 0];
         }
         $sql .= ' ORDER BY p.planned_at LIMIT ' . max(1, $batch);
         $due = $pdo->prepare($sql);
@@ -93,6 +91,10 @@ final class Publisher
             if ($channel['provider'] === 'facebook' && ($channel['kind'] ?? '') === 'Group') {
                 throw new PublishError('Facebook no longer lets apps post to Groups. Share this post in the Group yourself, or move it to a Page.');
             }
+            $due = strtotime((string) $post['planned_at'] . ' UTC');
+            if ($due !== false && $due < time() - self::MISSED_HOURS * 3600) {
+                throw new PublishError('This post missed its time (' . gmdate('j M, H:i', $due) . ' UTC), so atwebtech held it back rather than send it late. Retry to send it now, or reschedule it.');
+            }
             if (!$channel['can_publish']) {
                 throw new PublishError(match ($channel['provider']) {
                     'linkedin' => 'Reconnect this channel and allow atwebtech to create posts on your LinkedIn Profile.',
@@ -103,6 +105,10 @@ final class Publisher
                     'pinterest' => 'Reconnect Pinterest with full access so atwebtech can create Pins.',
                     default => 'Reconnect this channel and allow uploads so atwebtech can publish.',
                 });
+            }
+            $utm = Utm::settings((int) $post['user_id']);
+            if ($utm['enabled'] && Channels::allowance((int) $post['user_id'])['paid']) {
+                $post['body'] = Utm::apply((string) $post['body'], (string) $channel['provider'], $utm['campaign'] !== '' ? $utm['campaign'] : (string) strtok((string) ($post['tags'] ?? ''), ','), (int) $post['id']);
             }
             $media = $post['media_id'] ? Media::ready((int) $post['user_id'], (int) $post['media_id']) : null;
             $file = $media ? Media::file($media) : null;

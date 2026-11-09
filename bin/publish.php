@@ -22,3 +22,18 @@ if (array_sum($result) + $cleaned > 0) {
     printf("[%s] sent %d, retry %d, failed %d, cleaned %d uploads\n", gmdate('c'), $result['sent'], $result['retry'], $result['failed'], $cleaned);
 }
 flock($lock, LOCK_UN);
+fclose($lock);
+
+// Network stats for Insights, in small batches with their own lock so publishing is never held up.
+$statsLock = fopen(BASE_PATH . '/storage/logs/metrics.lock', 'c');
+if ($statsLock && flock($statsLock, LOCK_EX | LOCK_NB)) {
+    try {
+        $stats = Metrics::run(40);
+        if ($stats['channels'] > 0) {
+            printf("[%s] stats: %d channels, %d posts, %d errors\n", gmdate('c'), $stats['channels'], $stats['posts'], $stats['errors']);
+        }
+    } catch (Throwable $e) {
+        error_log(sprintf('[%s] metrics run failed: %s', gmdate('c'), $e->getMessage()));
+    }
+    flock($statsLock, LOCK_UN);
+}

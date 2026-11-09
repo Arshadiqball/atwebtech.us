@@ -1,0 +1,44 @@
+name: Refresh trending
+
+# Refreshes the composer's Trending list on the live server once a week
+# (Mondays 14:00 UTC, the time of the first run). Run it by hand from the Actions tab at any time.
+# Uses the same SSH secrets as the Deploy workflow.
+
+on:
+  schedule:
+    - cron: '0 14 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: trends-production
+  cancel-in-progress: false
+
+env:
+  DEPLOY_HOST: vda2000.is.cc
+  DEPLOY_USER: atwebtec
+  DEPLOY_PATH: domains/atwebtech.us/public_html
+
+jobs:
+  refresh:
+    name: Refresh trending posts
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 30
+    steps:
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Run bin/trends.php
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o ServerAliveInterval=30 "$DEPLOY_USER@$DEPLOY_HOST" bash -s <<EOF
+          set -e
+          cd "$DEPLOY_PATH"
+          mkdir -p storage/logs
+          PHP=\$(command -v php8.3 || command -v php8.2 || command -v /usr/local/bin/php || command -v php)
+          \$PHP bin/trends.php 2>&1 | grep -v 'i360' | tee -a storage/logs/trends.log
+          EOF

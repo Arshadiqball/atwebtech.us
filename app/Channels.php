@@ -15,6 +15,12 @@ final class Channels
     public const FACEBOOK_SCOPES = 'pages_show_list,pages_manage_posts';
     public const INSTAGRAM_SCOPES = 'instagram_business_basic,instagram_business_content_publish';
     public const THREADS_SCOPES = 'threads_basic,threads_content_publish';
+    /** Read-only stats permissions, requested for Insights when STATS_PERMISSIONS lists the network. */
+    public const STATS_SCOPES = [
+        'instagram' => 'instagram_business_manage_insights',
+        'threads' => 'threads_manage_insights',
+        'youtube' => 'https://www.googleapis.com/auth/yt-analytics.readonly',
+    ];
     public const GOALS = [
         1 => ['Keep it steady', '1 time/week', 'purple'],
         3 => ['Build a presence', '3 times/week', 'orange'],
@@ -43,14 +49,14 @@ final class Channels
 
     public static function forUser(int $uid): array
     {
-        $stmt = Database::connection()->prepare('SELECT id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, created_at FROM channels WHERE user_id = :uid ORDER BY id');
+        $stmt = Database::connection()->prepare('SELECT id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, created_at FROM channels WHERE user_id = :uid ORDER BY id');
         $stmt->execute(['uid' => $uid]);
         return array_map([self::class, 'hydrate'], $stmt->fetchAll());
     }
 
     public static function find(int $uid, int $id): ?array
     {
-        $stmt = Database::connection()->prepare('SELECT id, user_id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, access_token, refresh_token, token_expires_at, created_at FROM channels WHERE id = :id AND user_id = :uid');
+        $stmt = Database::connection()->prepare('SELECT id, user_id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, access_token, refresh_token, token_expires_at, created_at FROM channels WHERE id = :id AND user_id = :uid');
         $stmt->execute(['id' => $id, 'uid' => $uid]);
         $row = $stmt->fetch();
         return $row ? self::hydrate($row) : null;
@@ -312,7 +318,7 @@ final class Channels
                 'client_id' => config('oauth.threads.client_id'),
                 'redirect_uri' => $redirectUri,
                 'response_type' => 'code',
-                'scope' => self::THREADS_SCOPES,
+                'scope' => self::withStats('threads', self::THREADS_SCOPES, ','),
                 'state' => $state,
             ], '', '&', PHP_QUERY_RFC3986);
         }
@@ -321,7 +327,7 @@ final class Channels
                 'client_id' => config('oauth.instagram.client_id'),
                 'redirect_uri' => $redirectUri,
                 'response_type' => 'code',
-                'scope' => self::INSTAGRAM_SCOPES,
+                'scope' => self::withStats('instagram', self::INSTAGRAM_SCOPES, ','),
                 'state' => $state,
             ], '', '&', PHP_QUERY_RFC3986);
         }
@@ -372,7 +378,7 @@ final class Channels
             'client_id' => config('oauth.google.client_id'),
             'redirect_uri' => $redirectUri,
             'response_type' => 'code',
-            'scope' => self::YOUTUBE_SCOPE . ' ' . self::UPLOAD_SCOPE,
+            'scope' => self::withStats('youtube', self::YOUTUBE_SCOPE . ' ' . self::UPLOAD_SCOPE, ' '),
             'access_type' => 'offline',
             'include_granted_scopes' => $fresh ? 'false' : 'true',
             'prompt' => ($switchAccount || $fresh) ? 'select_account consent' : 'consent',
@@ -380,6 +386,19 @@ final class Channels
             'code_challenge' => $challenge,
             'code_challenge_method' => 'S256',
         ], '', '&', PHP_QUERY_RFC3986);
+    }
+
+    /**
+     * Adds the network's stats permission when STATS_PERMISSIONS (comma list, "all" or "none") includes it.
+     * Instagram and Threads are on by default; YouTube Analytics is opt-in because Google reviews new scopes.
+     */
+    public static function withStats(string $provider, string $scopes, string $glue): string
+    {
+        $on = array_map('trim', explode(',', strtolower((string) Env::get('STATS_PERMISSIONS', 'instagram,threads'))));
+        if (!isset(self::STATS_SCOPES[$provider]) || (!in_array('all', $on, true) && !in_array($provider, $on, true))) {
+            return $scopes;
+        }
+        return $scopes . $glue . self::STATS_SCOPES[$provider];
     }
 
     /** Swap an authorization code for tokens. */

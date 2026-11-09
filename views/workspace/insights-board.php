@@ -30,23 +30,46 @@ foreach (array_values($series) as $i => $pt) {
 }
 $target = isset($channel) ? 'c:' . (int) $channel['id'] : '';
 $compose = e(json_encode($target !== '' ? ['targets' => [$target]] : []));
-$soon = [
-    'Followers' => 'Follower counts from the network aren’t available.',
-    'Reactions' => 'Reactions aren’t collected.',
-    'Comments' => 'Comments aren’t collected.',
-    'Eng. Rate' => 'Engagement rate needs reactions and impressions we don’t have.',
-    'Impressions' => 'Impressions aren’t collected.',
-    'Shares' => 'Shares aren’t collected.',
-    'Reach' => 'Reach isn’t collected.',
-    'Video views' => 'Video views aren’t collected.',
-    'Watch time' => 'Watch time isn’t collected.',
-    'Unique viewers' => 'Unique viewers aren’t collected.',
+$m = $insights['metrics'];
+$names = array_column(integrations(), 'name', 'slug');
+$networkList = static function (array $slugs) use ($names): string {
+    $list = array_map(static fn (string $p): string => $names[$p] ?? ucfirst($p), $slugs);
+    return count($list) > 1 ? implode(', ', array_slice($list, 0, -1)) . ' and ' . end($list) : (string) ($list[0] ?? '');
+};
+$cards = [
+    'followers' => ['Followers', 'Followers across your connected channels today. The change is since the start of this period.'],
+    'reactions' => ['Reactions', 'Likes and reactions on posts atwebtech sent in this period.'],
+    'comments' => ['Comments', 'Comments and replies on posts atwebtech sent in this period.'],
+    'eng_rate' => ['Eng. Rate', 'Reactions, comments, shares and saves divided by impressions (or video views).'],
+    'impressions' => ['Impressions', 'How many times your posts were seen, as each network reports views.'],
+    'shares' => ['Shares', 'Shares, reposts and quotes of your posts.'],
+    'reach' => ['Reach', 'Unique accounts that saw your posts.'],
+    'video_views' => ['Video views', 'Views of your videos.'],
+    'watch_time' => ['Watch time', 'Total time people spent watching your videos.'],
+    'unique_viewers' => ['Unique viewers', 'Unique people who watched your videos.'],
 ];
+$fmt = static function (string $key, $v): string {
+    if ($v === null) {
+        return '—';
+    }
+    if ($key === 'eng_rate') {
+        return rtrim(rtrim(number_format((float) $v, 2), '0'), '.') . '%';
+    }
+    if ($key === 'watch_time') {
+        $s = (int) $v;
+        return $s >= 3600 ? floor($s / 3600) . 'h ' . floor($s % 3600 / 60) . 'm' : ($s >= 60 ? floor($s / 60) . 'm ' . $s % 60 . 's' : $s . 's');
+    }
+    $v = (int) $v;
+    return $v >= 1000000 ? round($v / 1000000, 1) . 'M' : ($v >= 10000 ? round($v / 1000, 1) . 'K' : number_format($v));
+};
+$m['now']['watch_time'] = $m['now']['watch_seconds'];
+$m['prev']['watch_time'] = $m['prev']['watch_seconds'];
+
 ?>
   <section class="in-path" aria-labelledby="in-path-title">
     <div>
       <h2 id="in-path-title">A path to growth with weekly takeaways</h2>
-      <p>The more you post, the more we can show you. atwebtech only counts posts it sent. Network analytics (followers, reactions, impressions) are not available.</p>
+      <p>The more you post, the more we can show you. Followers and post stats come from each network and update every few hours<?= $m['checked'] ? ' (last checked ' . e(Workspace::local((string) $m['checked'], Workspace::timezone($user))->format('j M, g:i A')) . ')' : '' ?>. Stats cover posts atwebtech sent.</p>
       <a class="ws-btn ws-btn--green" href="/app/publish/new<?= $target !== '' ? '?target=' . e($target) : '' ?>" data-compose="<?= $compose ?>">Create Post</a>
     </div>
     <ul class="in-tips" role="list">
@@ -97,17 +120,56 @@ $soon = [
         <b class="in-value"><?= (int) $insights['sent'] ?></b>
         <span class="in-trend"><?= $delta === 0 ? 'Same as the previous period' : (($delta > 0 ? '+' : '') . $delta . ' vs the previous period') ?></span>
       </li>
-<?php foreach ($soon as $name => $why): ?>
-      <li class="in-card is-soon">
-        <span class="in-card-head"><?= e($name) ?> <span class="ws-soon">Coming soon</span>
-          <span class="tip"><button type="button" class="tip-btn" aria-describedby="in-tip-<?= e(strtolower(preg_replace('/[^a-z]+/i', '-', $name))) ?>" aria-label="About <?= e($name) ?>"><?= icon('info') ?></button>
-          <span class="tip-body" role="tooltip" id="in-tip-<?= e(strtolower(preg_replace('/[^a-z]+/i', '-', $name))) ?>"><?= e($why) ?></span></span>
+<?php foreach ($cards as $key => [$name, $about]):
+    $metricKey = $key === 'watch_time' ? 'watch_seconds' : ($key === 'eng_rate' ? 'impressions' : $key);
+    $reporters = Metrics::reporters($metricKey, $m['networks']);
+    $value = $m['now'][$key] ?? null;
+    $before = $m['prev'][$key] ?? null;
+    $tipId = 'in-tip-' . str_replace('_', '-', $key);
+    if ($value !== null) {
+        $diff = $before !== null ? $value - $before : null;
+        $trend = $diff === null || $diff == 0 ? ($diff === null ? 'No earlier data to compare' : 'Same as the previous period')
+            : (($diff > 0 ? '+' : '−') . ($key === 'eng_rate' ? rtrim(rtrim(number_format(abs($diff), 2), '0'), '.') . ' pts' : $fmt($key, abs($diff))) . ' vs the previous period');
+    } elseif (!$m['networks']) {
+        $trend = 'Connect a channel to see this';
+    } elseif (!$reporters) {
+        $trend = $networkList($m['networks']) . (count($m['networks']) > 1 ? ' don’t' : ' doesn’t') . ' report this';
+    } elseif (array_filter($m['issues'], static fn (array $i): bool => in_array($i['channel']['provider'], $reporters, true))) {
+        $trend = 'Needs a reconnect, see below';
+    } elseif (in_array($key, ['video_views', 'watch_time', 'unique_viewers'], true)) {
+        $trend = 'No video stats in this period';
+    } else {
+        $trend = 'No data for this period yet';
+    }
+    $about .= $reporters ? ' Reported by ' . $networkList($reporters) . '.' : '';
+?>
+      <li class="in-card<?= $value === null ? ' is-empty' : '' ?>">
+        <span class="in-card-head"><?= e($name) ?>
+          <span class="tip"><button type="button" class="tip-btn" aria-describedby="<?= e($tipId) ?>" aria-label="About <?= e($name) ?>"><?= icon('info') ?></button>
+          <span class="tip-body" role="tooltip" id="<?= e($tipId) ?>"><?= e($about) ?></span></span>
         </span>
-        <b class="in-value">—</b>
-        <span class="in-trend">Not collected</span>
+        <b class="in-value"><?= e($fmt($key, $value)) ?></b>
+        <span class="in-trend"><?= e($trend) ?></span>
       </li>
 <?php endforeach; ?>
     </ul>
+<?php if ($m['issues']): ?>
+    <ul class="in-issues" role="list">
+<?php foreach ($m['issues'] as $issue): $ch = $issue['channel']; ?>
+      <li>
+        <?= icon('warning-circle') ?>
+        <span><b><?= e($ch['name']) ?></b> (<?= e($names[$ch['provider']] ?? $ch['provider']) ?>): <?= e($issue['message']) ?></span>
+<?php if (Channels::connectable($ch['provider']) && !str_starts_with($issue['message'], 'X only')): ?>
+        <form action="/app/channels/connect/<?= e($ch['provider']) ?>" method="post">
+          <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+          <input type="hidden" name="reconnect" value="1">
+          <button type="submit" class="ws-btn ws-btn--sm"><?= icon('arrows-clockwise') ?>Reconnect</button>
+        </form>
+<?php endif; ?>
+      </li>
+<?php endforeach; ?>
+    </ul>
+<?php endif; ?>
   </section>
 
   <section class="in-panel" aria-labelledby="in-perf">
@@ -118,7 +180,20 @@ $soon = [
       <li>
         <div>
           <p><?= e(mb_strlen((string) $post['body']) > 140 ? rtrim(mb_substr((string) $post['body'], 0, 140)) . '…' : ((string) $post['body'] !== '' ? $post['body'] : ($post['title'] ?? 'Untitled'))) ?></p>
-          <small>Sent <?= e($post['sent_at'] ? Workspace::local((string) $post['sent_at'], Workspace::timezone($user))->format('j M Y, g:i A') : '') ?></small>
+          <small>Sent <?= e($post['sent_at'] ? Workspace::local((string) $post['sent_at'], Workspace::timezone($user))->format('j M Y, g:i A') : '') ?> · <?= e($names[$post['channel']] ?? $post['channel']) ?></small>
+<?php $pm = $insights['post_metrics'][$post['id']] ?? null; $chips = [];
+if ($pm) {
+    foreach (['impressions' => 'views', 'video_views' => 'video views', 'reach' => 'reached', 'reactions' => 'reactions', 'comments' => 'comments', 'shares' => 'shares', 'saves' => 'saves'] as $f => $word) {
+        if ($pm[$f] !== null && !($f === 'video_views' && $pm['impressions'] !== null && $pm['impressions'] == $pm['video_views'])) {
+            $chips[] = $fmt($f, $pm[$f]) . ' ' . $word;
+        }
+    }
+} ?>
+<?php if ($chips): ?>
+          <span class="in-post-stats"><?= e(implode(' · ', $chips)) ?></span>
+<?php elseif ($pm && $pm['error']): ?>
+          <span class="in-post-stats"><?= e($pm['error']) ?></span>
+<?php endif; ?>
         </div>
 <?php if ($post['external_url']): ?>
         <a class="ws-btn ws-btn--sm" href="<?= e($post['external_url']) ?>" target="_blank" rel="noopener noreferrer">View</a>
@@ -135,7 +210,7 @@ $soon = [
   </section>
 
   <section class="in-panel" aria-labelledby="in-metrics">
-    <h2 id="in-metrics">Metrics <small>Posts atwebtech sent. Other lines stay Coming soon.</small></h2>
+    <h2 id="in-metrics">Metrics <small>Posts atwebtech sent per day</small></h2>
     <div class="in-chart" role="img" aria-label="Posts sent per day in this period">
       <svg viewBox="0 0 <?= $w ?> <?= $h ?>" width="100%" height="200">
         <line x1="<?= $pad ?>" y1="<?= $h - $pad ?>" x2="<?= $w - $pad ?>" y2="<?= $h - $pad ?>" stroke="currentColor" opacity=".15"/>
@@ -144,6 +219,6 @@ $soon = [
         <text x="<?= explode(',', $points[$i])[0] ?>" y="<?= $h - 8 ?>" text-anchor="middle" font-size="11" fill="currentColor" opacity=".55"><?= e($pt['day']) ?></text>
 <?php endforeach; ?>
       </svg>
-      <p class="wsp-muted">Green line: posts sent. Followers and engagement are not on this chart.</p>
+      <p class="wsp-muted">Green line: posts sent. Follower and engagement totals are in the Summary above.</p>
     </div>
   </section>
