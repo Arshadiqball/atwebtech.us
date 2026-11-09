@@ -2,6 +2,7 @@
 $site = data('site');
 $menus = [
     'features' => ['label' => 'Features', 'items' => $site['features'], 'more' => ['See all features', '/features']],
+    'solutions' => ['label' => 'Solutions', 'items' => $site['solutions'], 'more' => ['See all solutions', '/solutions']],
 ];
 ?>
 <header class="site-header" data-header>
@@ -35,14 +36,17 @@ $menus = [
           </div>
         </li>
 <?php endforeach; ?>
+        <li class="nav-item"><a class="nav-link" href="/integrations"<?= aria_current('/integrations') ?>>Integrations</a></li>
         <li class="nav-item"><a class="nav-link" href="/pricing"<?= aria_current('/pricing') ?>>Pricing</a></li>
       </ul>
     </nav>
 
     <div class="header-actions">
       <a class="header-login" href="<?= Auth::check() ? '/app' : '/login' ?>"><?= Auth::check() ? 'Open workspace' : 'Log in' ?></a>
-      <a class="btn btn--outline btn--sm header-demo" href="/demo">View demo</a>
-      <a class="btn btn--green btn--sm" href="/join">Join the waitlist</a>
+      <a class="btn btn--outline btn--sm header-demo" href="/demo">Live demo</a>
+<?php if (!Auth::check()): ?>
+      <a class="btn btn--primary btn--sm header-start" href="/signup">Start free<?= icon('arrow-right') ?></a>
+<?php endif; ?>
       <button type="button" class="menu-toggle" aria-expanded="false" aria-controls="mobile-menu" data-menu-open>
         <?= icon('list', 'icon icon--lg') ?><span class="sr-only">Open menu</span>
       </button>
@@ -72,12 +76,15 @@ $menus = [
         </ul>
       </div>
 <?php endforeach; ?>
+      <a class="m-link" href="/integrations"<?= aria_current('/integrations') ?>>Integrations</a>
       <a class="m-link" href="/pricing"<?= aria_current('/pricing') ?>>Pricing</a>
     </nav>
     <div class="mobile-menu-actions">
       <a class="btn btn--outline btn--block" href="<?= Auth::check() ? '/app' : '/login' ?>"><?= Auth::check() ? 'Open workspace' : 'Log in' ?></a>
-      <a class="btn btn--outline btn--block" href="/demo">View demo</a>
-      <a class="btn btn--green btn--block" href="/join" data-menu-close-link>Join the waitlist</a>
+      <a class="btn btn--outline btn--block" href="/demo">Live demo</a>
+<?php if (!Auth::check()): ?>
+      <a class="btn btn--primary btn--block" href="/signup">Start free<?= icon('arrow-right') ?></a>
+<?php endif; ?>
     </div>
   </div>
 </header>

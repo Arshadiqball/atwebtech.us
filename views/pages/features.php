@@ -6,9 +6,9 @@ $nav = data('site')['features'];
   <div class="container">
     <p class="eyebrow">Features</p>
     <h1 class="h-page">One workspace for the whole content routine.</h1>
-    <p class="lead">From the first idea to the conversation after a post goes live, atwebtech is designed to keep each step clear and connected.</p>
+    <p class="lead">From the first idea to the conversation after a post goes live, atwebtech keeps each step clear and connected.</p>
     <div class="btn-row">
-      <a class="btn btn--green" href="#join">Join the waitlist</a>
+      <a class="btn btn--green" href="/signup">Start free</a>
       <a class="btn btn--outline" href="/demo">View demo</a>
     </div>
   </div>
@@ -28,8 +28,8 @@ $nav = data('site')['features'];
       <a class="link-card" href="/integrations">
         <span class="link-card-icon" style="background: var(--sand)"><?= icon('squares-four') ?></span>
         <h2 class="h-small">Integrations</h2>
-        <p>See which social channels are planned and the current status of each connection.</p>
-        <span class="link-arrow">See integration status<?= icon('arrow-right') ?></span>
+        <p>See which social channels you can connect today and which are coming soon.</p>
+        <span class="link-arrow">See all channels<?= icon('arrow-right') ?></span>
       </a>
       <a class="link-card" href="/demo">
         <span class="link-card-icon" style="background: var(--ink); color: var(--bg)"><?= icon('eye') ?></span>

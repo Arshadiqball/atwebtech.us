@@ -19,9 +19,9 @@ return [
         ['label' => 'Marketing Teams', 'desc' => 'Plan campaigns with shared visibility', 'href' => '/solutions/marketing-teams', 'icon' => 'megaphone'],
     ],
     'resources' => [
-        ['label' => 'Getting started', 'desc' => 'What you can do with atwebtech today', 'href' => '/resources/getting-started', 'icon' => 'rocket-launch'],
+        ['label' => 'Getting started', 'desc' => 'Set up your workspace and first posts', 'href' => '/resources/getting-started', 'icon' => 'rocket-launch'],
         ['label' => 'Guides', 'desc' => 'Practical articles for everyday social work', 'href' => '/resources', 'icon' => 'book-open'],
-        ['label' => 'FAQ', 'desc' => 'Answers about the product and its status', 'href' => '/faq', 'icon' => 'question'],
+        ['label' => 'FAQ', 'desc' => 'Answers about plans, channels, and features', 'href' => '/faq', 'icon' => 'question'],
         ['label' => 'Contact', 'desc' => 'Send the team a question or feedback', 'href' => '/contact', 'icon' => 'envelope-simple'],
     ],
     'footer' => [

@@ -207,32 +207,35 @@ HTML,
     ],
     'getting-started' => [
         'title' => 'Getting started with atwebtech',
-        'description' => 'What atwebtech is, what you can do today, how the interactive demo works, and how to join the waitlist for launch updates.',
+        'description' => 'Create a free account, connect LinkedIn or YouTube, set a posting schedule, plan your ideas, and schedule your first posts.',
         'category' => 'Guide',
-        'read' => '3 min read',
+        'read' => '4 min read',
         'panel' => 'yellow',
         'icon' => 'rocket-launch',
-        'summary' => 'What exists today, how to explore the demo, and how to hear about early access.',
+        'summary' => 'Set up your free workspace and schedule your first posts in a few minutes.',
         'body' => <<<'HTML'
-<p>atwebtech is a social media workspace in development. It is being designed to help creators, small businesses, agencies, and marketing teams plan content, organize ideas, and keep a consistent presence across channels.</p>
+<p>atwebtech brings your ideas, drafts, and posting calendar into one workspace. This guide walks you through setup, from a new account to your first scheduled post.</p>
 
-<h2>What you can do today</h2>
-<ul>
-  <li><strong>Explore the interactive demo.</strong> The <a href="/demo">demo page</a> shows the calendar, idea board, community inbox, analytics, and AI workflow using sample data. Everything runs in your browser and nothing is saved or sent.</li>
-  <li><strong>Join the waitlist.</strong> Add your email to any waitlist form on this site to receive product updates and early-access news.</li>
-  <li><strong>Read the guides.</strong> Our <a href="/resources">resources</a> cover practical topics such as weekly content calendars and choosing metrics.</li>
-  <li><strong>Contact the team.</strong> Questions, feedback, and partnership enquiries are welcome through the <a href="/contact">contact form</a>.</li>
-</ul>
+<h2>1. Create a free account</h2>
+<p><a href="/signup">Sign up</a> with your email and a password. The Free plan includes up to 3 channels, 10 scheduled posts per channel, and 100 ideas, with no credit card required. Once you are in, we recommend turning on two-factor authentication in your account settings.</p>
 
-<h2>What is not available yet</h2>
-<p>There is no live workspace or account sign-in yet. You cannot connect social accounts, publish posts, read real comments, or view real analytics through atwebtech today. AI responses shown on this site are scripted examples.</p>
-<p>The <a href="/integrations">integrations page</a> shows the status of each planned channel, and is updated as connections become available.</p>
+<h2>2. Connect LinkedIn or YouTube</h2>
+<p>Open <strong>Channels</strong> in your workspace and connect a LinkedIn personal profile or a YouTube channel. You sign in with the platform directly, and atwebtech only gets the access it needs to publish for you. Other channels, including Instagram, Facebook, and TikTok, are coming soon; the <a href="/integrations">integrations page</a> shows the current status.</p>
 
-<h2>How the demo works</h2>
-<p>Each demonstration is labelled. You can switch calendar views, filter channels, move idea cards between stages, open inbox conversations, change analytics date ranges, and step through example AI conversations. Changes reset when you reload the page.</p>
+<h2>3. Set a posting schedule</h2>
+<p>In each channel's settings, open <strong>Posting Schedule</strong> and choose its posting times, such as Tuesday and Thursday at 9:00 a.m. When you add a post to the queue, it takes the next open slot, so you keep a steady rhythm without picking a time for every post.</p>
 
-<h2>Hearing about launch</h2>
-<p>When you join the waitlist, we store your email address so we can send atwebtech product and early-access updates. See the <a href="/privacy">privacy policy</a> for details, and use the contact form if you would like your email removed.</p>
+<h2>4. Plan your ideas</h2>
+<p>Under <strong>Create</strong>, use the Ideas board to capture anything worth posting. Drag cards between columns as they move from rough idea to draft to ready, and add tags for formats or themes so you can balance the mix. Templates give you a starting point when you are short on inspiration.</p>
+
+<h2>5. Write and schedule your posts</h2>
+<p>Open the composer, choose your channels, and tailor the text for each one. If the AI writing assistant is available in your workspace, use it to draft or tighten a caption, then edit it in your own voice. Add the post to the queue, or pick a date and time on the calendar. atwebtech publishes it for you at the scheduled time.</p>
+
+<h2>6. Check your progress</h2>
+<p><strong>Insights</strong> shows how many posts atwebtech has published for you, by channel and over time. Network analytics such as followers and impressions are coming soon.</p>
+
+<h2>Want to look around first?</h2>
+<p>The <a href="/demo">interactive demo</a> lets you try the calendar, idea board, inbox, and analytics with sample data, right in your browser. Questions? Reach the team through the <a href="/contact">contact form</a>.</p>
 HTML,
     ],
 ];

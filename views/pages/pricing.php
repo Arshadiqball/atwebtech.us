@@ -31,7 +31,9 @@ $planKeys = array_keys($plans);
 
 <section class="pr-hero" aria-labelledby="pricing-title">
   <div class="container">
-    <h1 class="pr-title" id="pricing-title">Flexible pricing for every workspace</h1>
+    <p class="eyebrow text-center">Pricing</p>
+    <h1 class="pr-title" id="pricing-title">Start free. <span class="grad">Pay per channel</span> as you grow.</h1>
+    <p class="pr-sub">No credit card to get started. Save two months with yearly billing.</p>
 
     <h2 class="sr-only">Plans</h2>
     <form class="pr-controls" action="/pricing" method="get" data-pricing-controls>
@@ -76,7 +78,13 @@ $planKeys = array_keys($plans);
 <?php endif; ?>
         </p>
         <p class="plan-note"<?= $p['rate'] === 0 ? '' : ' data-plan-note="' . e($key) . '"' ?>><?= $p['rate'] === 0 ? 'Connect up to ' . (int) $cfg['free_channels'] . ' channels' : e($quote['note']) ?></p>
-        <a class="btn btn--dark plan-cta" href="<?= e($planHref($key)) ?>" data-plan-cta="<?= e($key) ?>">Join the waitlist<?= icon('arrow-right') ?><span class="sr-only"> for <?= e($p['name']) ?></span></a>
+<?php if ($p['rate'] === 0): ?>
+        <a class="btn btn--primary plan-cta" href="/signup">Start free<?= icon('arrow-right') ?></a>
+        <p class="plan-sub-cta">No credit card required</p>
+<?php else: ?>
+        <a class="btn <?= $p['badge'] ? 'btn--primary' : 'btn--dark' ?> plan-cta" href="/signup">Start free, upgrade later<?= icon('arrow-right') ?></a>
+        <p class="plan-sub-cta"><a href="<?= e($planHref($key)) ?>" data-plan-cta="<?= e($key) ?>">Get notified when <?= e($p['name']) ?> opens</a></p>
+<?php endif; ?>
         <h4 class="plan-included">What's included</h4>
         <ul class="plan-features" role="list">
 <?php foreach ($p['included'] as $j => [$feature, $desc]): $tipId = 'tip-' . $key . '-' . $j; ?>
@@ -95,7 +103,7 @@ $planKeys = array_keys($plans);
     <p class="sr-only" aria-live="polite" data-pricing-live></p>
 
     <div class="pr-after">
-      <p class="pr-disclaimer">Planned launch pricing in US dollars. atwebtech is in development, so choosing a plan adds you to the waitlist. No payment is taken.</p>
+      <p class="pr-disclaimer">Prices in US dollars. Every account starts on the Free plan. Paid plans are opening soon, and you can upgrade from your workspace when they do.</p>
       <a class="btn btn--dark btn--sm" href="#compare">Compare plans<?= icon('arrow-down') ?></a>
     </div>
   </div>
@@ -145,7 +153,7 @@ $planKeys = array_keys($plans);
           <th scope="col" class="cmp-plan<?= $p['badge'] ? ' cmp-col--featured' : '' ?>">
             <?php if ($p['badge']): ?><span class="plan-badge-pill"><?= e($p['badge']) ?></span><?php endif; ?>
             <span class="cmp-plan-name"><?= e($p['name']) ?></span>
-            <a class="btn btn--outline btn--xs" href="<?= e($planHref($key)) ?>" data-plan-cta="<?= e($key) ?>">Join<span class="sr-only"> the waitlist for <?= e($p['name']) ?></span><?= icon('arrow-right') ?></a>
+            <a class="btn btn--outline btn--xs" href="/signup">Start free<span class="sr-only"> with <?= e($p['name']) ?> in mind</span><?= icon('arrow-right') ?></a>
           </th>
 <?php endforeach; ?>
         </tr>

@@ -11,7 +11,7 @@ $nav = array_column(data('site')['features'], null, 'href');
     <h1 class="h-page"><?= e($feature['title']) ?></h1>
     <p class="lead"><?= e($feature['intro']) ?></p>
     <div class="btn-row">
-      <a class="btn btn--green" href="#join">Join the waitlist</a>
+      <a class="btn btn--green" href="/signup">Start free</a>
       <a class="btn btn--outline" href="/demo">View demo</a>
     </div>
   </div>
@@ -20,7 +20,7 @@ $nav = array_column(data('site')['features'], null, 'href');
 <?php if (!empty($feature['demo'])): ?>
       <div class="showcase-panel panel--<?= e($feature['panel']) ?>">
 <?php if ($feature['demo'] === 'demos/ai-chat'): ?>
-        <div class="ai-card"><div class="ai-visual"><?php partial($feature['demo']); ?></div><div class="ai-copy"><p class="eyebrow eyebrow--light">How it could work</p><ul class="ai-steps" role="list"><?php foreach ($feature['points'] as $p): ?><li><b><?= e($p['title']) ?>.</b> <?= e($p['text']) ?></li><?php endforeach; ?></ul></div></div>
+        <div class="ai-card"><div class="ai-visual"><?php partial($feature['demo']); ?></div><div class="ai-copy"><p class="eyebrow eyebrow--light">How it works</p><ul class="ai-steps" role="list"><?php foreach ($feature['points'] as $p): ?><li><b><?= e($p['title']) ?>.</b> <?= e($p['text']) ?></li><?php endforeach; ?></ul></div></div>
 <?php else: ?>
         <?php partial($feature['demo']); ?>
 <?php endif; ?>
@@ -38,7 +38,7 @@ $nav = array_column(data('site')['features'], null, 'href');
   <div class="container">
     <div class="notice" role="note">
       <?= icon('info') ?>
-      <p><b>Current status</b><?= e($feature['status']) ?></p>
+      <p><b>Availability</b><?= e($feature['status']) ?></p>
     </div>
   </div>
 </section>

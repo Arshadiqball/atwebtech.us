@@ -30,7 +30,7 @@ $errors = $state['errors'] ?? [];
     </nav>
   </main>
   <aside class="auth-aside" aria-label="About atwebtech">
-    <span class="auth-badge">Early access</span>
+    <span class="auth-badge">Account security</span>
     <h2 class="auth-aside-title">A second step at sign-in</h2>
     <p class="auth-aside-sub">The code changes every 30 seconds. A recovery code works once, if you can’t reach the app.</p>
   </aside>

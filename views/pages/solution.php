@@ -11,7 +11,7 @@ $others = array_filter(data('site')['solutions'], static fn ($s) => $s['href'] !
     <h1 class="h-page"><?= e($solution['title']) ?></h1>
     <p class="lead"><?= e($solution['intro']) ?></p>
     <div class="btn-row">
-      <a class="btn btn--green" href="#join">Join the waitlist</a>
+      <a class="btn btn--green" href="/signup">Start free</a>
       <a class="btn btn--outline" href="/demo">View demo</a>
     </div>
   </div>
@@ -19,7 +19,7 @@ $others = array_filter(data('site')['solutions'], static fn ($s) => $s['href'] !
 
 <section class="section">
   <div class="container">
-    <div class="section-head"><h2 class="h-section">Where atwebtech is designed to help</h2></div>
+    <div class="section-head"><h2 class="h-section">Where atwebtech helps</h2></div>
     <div class="points">
 <?php foreach ($solution['challenges'] as $i => $c): ?>
       <div class="point">
@@ -34,7 +34,7 @@ $others = array_filter(data('site')['solutions'], static fn ($s) => $s['href'] !
 
 <section class="section">
   <div class="container">
-    <div class="section-head"><h2 class="h-section">Features that fit</h2><p>Each feature below includes an interactive demonstration or illustration of how it is designed to work.</p></div>
+    <div class="section-head"><h2 class="h-section">Features that fit</h2><p>Each feature page shows how it works, with an interactive preview or illustration.</p></div>
     <div class="card-grid card-grid--4">
 <?php foreach ($solution['features'] as $fs): $f = $features[$fs]; ?>
       <a class="link-card" href="/features/<?= e($fs) ?>">
@@ -52,14 +52,14 @@ $others = array_filter(data('site')['solutions'], static fn ($s) => $s['href'] !
   <div class="container">
     <div class="notice" role="note">
       <?= icon('info') ?>
-      <p><b>Current status</b>atwebtech is in development. You can explore the <a href="/demo">interactive demo</a> and join the waitlist today; connecting social accounts and publishing are not available yet.</p>
+      <p><b>Free to start</b><a href="/signup">Create a free account</a> to plan ideas, set posting schedules, and publish to LinkedIn and YouTube today, no credit card required. More channels, the community inbox, and team approvals are coming soon; see <a href="/integrations">integrations</a> for channel status.</p>
     </div>
   </div>
 </section>
 
 <section class="section">
   <div class="container">
-    <div class="section-head"><h2 class="h-section">Also designed for</h2></div>
+    <div class="section-head"><h2 class="h-section">Also built for</h2></div>
     <div class="card-grid">
 <?php foreach ($others as $o): ?>
       <a class="link-card" href="<?= e($o['href']) ?>">

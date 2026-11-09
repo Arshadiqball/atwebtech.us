@@ -82,9 +82,9 @@ $id = $mode;
   </main>
 
   <aside class="auth-aside" aria-label="About atwebtech">
-    <span class="auth-badge">Early access</span>
+    <span class="auth-badge">Free plan</span>
     <h2 class="auth-aside-title">Plan your content in one workspace</h2>
-    <p class="auth-aside-sub">Your account is ready today. Publishing, the inbox, and insights are being built, and each one is marked until it's live.</p>
+    <p class="auth-aside-sub">Plan ideas, set posting schedules, and publish to LinkedIn and YouTube. Free for up to 3 channels, no credit card required.</p>
     <div class="auth-preview" aria-hidden="true">
       <div class="ap-side">
         <span class="ap-logo"><?php partial('partials/logo-mark'); ?></span>

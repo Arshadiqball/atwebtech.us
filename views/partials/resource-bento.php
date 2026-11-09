@@ -37,9 +37,9 @@ $order = ['weekly-content-calendar', 'adapting-ideas-for-each-channel', 'choosin
       </span>
 <?php else: ?>
       <span class="art-sheet art-start">
-        <span class="art-check"><?= icon('check-circle') ?>Explore the demo</span>
-        <span class="art-check"><?= icon('check-circle') ?>Join the waitlist</span>
-        <span class="art-check art-check--todo"><?= icon('clock') ?>Launch updates by email</span>
+        <span class="art-check"><?= icon('check-circle') ?>Create a free account</span>
+        <span class="art-check"><?= icon('check-circle') ?>Connect LinkedIn or YouTube</span>
+        <span class="art-check art-check--todo"><?= icon('clock') ?>Schedule your first post</span>
       </span>
 <?php endif; ?>
     </span>

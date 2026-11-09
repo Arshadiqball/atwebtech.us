@@ -23,7 +23,7 @@ return [
         'icon' => 'storefront',
         'panel' => 'yellow',
         'title' => 'Show up consistently, even with a small team.',
-        'intro' => 'Social media is one job among many. atwebtech is designed to make it a manageable weekly routine rather than a daily scramble.',
+        'intro' => 'Social media is one job among many. atwebtech turns it into a manageable weekly routine instead of a daily scramble.',
         'challenges' => [
             ['title' => 'Little time to plan', 'text' => 'Set aside one session a week to plan posts across channels, then let the calendar keep you on track.'],
             ['title' => 'Different channels, different audiences', 'text' => 'Adapt one announcement for each channel without rewriting it from scratch every time.'],

@@ -2,8 +2,8 @@
 <section class="page-hero">
   <div class="container">
     <p class="eyebrow">Solutions</p>
-    <h1 class="h-page">Designed for the people behind the posts.</h1>
-    <p class="lead">Whether you post for yourself, your business, your clients, or your company, atwebtech is being built around the same goal: a clear plan you can keep.</p>
+    <h1 class="h-page">Built for the people behind the posts.</h1>
+    <p class="lead">Whether you post for yourself, your business, your clients, or your company, atwebtech gives you the same thing: a clear plan you can actually keep.</p>
   </div>
 </section>
 

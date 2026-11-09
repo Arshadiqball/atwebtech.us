@@ -5,8 +5,8 @@ $availableCount = count(array_filter($channels, static fn ($c) => $c['status'] =
 <section class="page-hero">
   <div class="container">
     <p class="eyebrow">Integrations</p>
-    <h1 class="h-page">The channels we plan to support.</h1>
-    <p class="lead">Each channel is listed with its current status. A channel is marked Available only once its integration has been built, tested, and approved where the platform requires it.</p>
+    <h1 class="h-page">Connect the channels you post to.</h1>
+    <p class="lead">Every channel is labeled honestly. Available means you can connect it and publish from atwebtech today. Coming soon means we are working on it.</p>
   </div>
 </section>
 
@@ -15,9 +15,9 @@ $availableCount = count(array_filter($channels, static fn ($c) => $c['status'] =
     <div class="notice" role="note">
       <?= icon('info') ?>
 <?php if ($availableCount === 0): ?>
-      <p><b>No channels are connected yet</b>atwebtech is in development, so every channel below is planned. atwebtech is not affiliated with or endorsed by these platforms; names and logos belong to their owners.</p>
+      <p><b>New channels are coming soon</b>You can still plan ideas, draft posts, and build your calendar in a <a href="/signup">free account</a> today. atwebtech is not affiliated with or endorsed by these platforms; names and logos belong to their owners.</p>
 <?php else: ?>
-      <p><b><?= $availableCount ?> of <?= count($channels) ?> channels available</b>Planned channels are still in development. atwebtech is not affiliated with or endorsed by these platforms; names and logos belong to their owners.</p>
+      <p><b><?= $availableCount ?> of <?= count($channels) ?> channels available now</b>Connect available channels from your <a href="/signup">free account</a>; the rest are coming soon. atwebtech is not affiliated with or endorsed by these platforms; names and logos belong to their owners.</p>
 <?php endif; ?>
     </div>
   </div>
@@ -32,9 +32,9 @@ $availableCount = count(array_filter($channels, static fn ($c) => $c['status'] =
         <?= channel_icon($ch['slug'], 'ch--lg') ?>
         <div>
           <h3><?= e($ch['name']) ?></h3>
-          <span class="status status--<?= e($ch['status']) ?>"><?= $ch['status'] === 'available' ? 'Available' : 'Planned' ?></span>
+          <span class="status status--<?= e($ch['status']) ?>"><?= $ch['status'] === 'available' ? 'Available' : 'Coming soon' ?></span>
         </div>
-        <p>Intended formats: <?= e($ch['formats']) ?>.</p>
+        <p>Formats: <?= e($ch['formats']) ?>.</p>
       </li>
 <?php endforeach; ?>
     </ul>
@@ -45,7 +45,7 @@ $availableCount = count(array_filter($channels, static fn ($c) => $c['status'] =
   <div class="container detail-rows">
     <div class="detail-row">
       <h2 class="h-card">How a channel becomes available</h2>
-      <p>Each platform has its own developer program, permissions, and review process. A channel moves from Planned to Available after the connection is built, tested with real accounts, and approved by the platform where approval is required. Waitlist members will hear about new channels first.</p>
+      <p>Each platform has its own developer program, permissions, and review process. A channel moves from Coming soon to Available once the connection is tested with real accounts and approved by the platform where approval is required. This page updates as each new channel goes live.</p>
     </div>
     <div class="detail-row">
       <h2 class="h-card">Missing a channel you rely on?</h2>

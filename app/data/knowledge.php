@@ -20,7 +20,7 @@ return [
         'Never use exaggerated claims such as “guaranteed growth”, “best in the world”, or invented customer results.',
     ],
     'policies' => [
-        'Privacy: atwebtech stores only what each form or feature needs (for example the email for the waitlist, or name, email and message for the contact form). Details are in the [privacy policy](/privacy).',
+        'Privacy: atwebtech stores only what each form or feature needs (for example the email for product updates, or name, email and message for the contact form). Details are in the [privacy policy](/privacy).',
         'Data deletion: email the contact address or use [the contact form](/contact) with the subject “Delete my data” and the account email. Workspace account, connected channel records, posts and uploads are deleted, and the visitor is emailed when it is done. See [data deletion](/data-deletion).',
         'Disconnecting a channel inside the workspace revokes atwebtech’s access to it.',
         'The [terms of use](/terms) are still a draft.',

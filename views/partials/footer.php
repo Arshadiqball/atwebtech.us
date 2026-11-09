@@ -16,7 +16,8 @@
     <div class="footer-bottom">
       <div class="footer-brand">
         <a href="/" class="footer-logo" aria-label="atwebtech home"><?php partial('partials/logo', ['size' => 'xl']); ?></a>
-        <p>A social media workspace in development, designed to help creators and businesses plan content, organize ideas, and keep a consistent presence.</p>
+        <p>The social media workspace for creators and small teams. Plan content, organize ideas, and publish on schedule.</p>
+        <a class="btn btn--green btn--sm footer-cta" href="/signup">Start free</a>
       </div>
       <p class="footer-legal">
         Copyright &copy; <?= e(date('Y')) ?> atwebtech

@@ -71,5 +71,5 @@ $planError = $errors['plan'] ?? '';
     <?= icon($state['status'] === 'success' ? 'check-circle' : 'warning-circle') ?><span><?= e($state['message']) ?></span>
 <?php endif; ?>
   </div>
-  <p class="wl-note" id="<?= e($id) ?>-note">By joining, you agree to receive atwebtech launch emails. See our <a href="/privacy">privacy policy</a>.</p>
+  <p class="wl-note" id="<?= e($id) ?>-note">We will only email you about atwebtech product news. See our <a href="/privacy">privacy policy</a>.</p>
 </form>

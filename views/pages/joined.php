@@ -1,17 +1,18 @@
 <?php $joined = flash('joined') === '1'; ?>
 <section class="page-hero">
   <div class="container">
-    <p class="eyebrow"><?= $joined ? 'You are on the list' : 'Waitlist' ?></p>
-    <h1 class="h-page"><?= $joined ? 'We will email you when there is news.' : 'Join the list to hear from us.' ?></h1>
+    <p class="eyebrow"><?= $joined ? 'You are subscribed' : 'Product updates' ?></p>
+    <h1 class="h-page"><?= $joined ? 'Thanks. We will keep you posted.' : 'Get atwebtech product updates.' ?></h1>
     <p class="lead"><?= $joined
-        ? 'Your email is saved for atwebtech product and early-access updates. You can create an account now if you want to use the workspace.'
-        : 'This page confirms a waitlist signup. Add your email on the join page and we will bring you back here.' ?></p>
+        ? 'Your email is saved for atwebtech product updates. Want to start planning now? Create a free account and use the workspace today.'
+        : 'This page confirms an updates signup. Add your email on the updates page, or create a free account to get started right away.' ?></p>
     <div class="btn-row">
 <?php if ($joined): ?>
-      <a class="btn btn--green" href="/signup">Create an account</a>
-      <a class="btn btn--outline" href="/demo">Explore the demo</a>
+      <a class="btn btn--green" href="/signup">Start free</a>
+      <a class="btn btn--outline" href="/demo">View demo</a>
 <?php else: ?>
-      <a class="btn btn--green" href="/join">Join the waitlist</a>
+      <a class="btn btn--green" href="/signup">Start free</a>
+      <a class="btn btn--outline" href="/join">Get product updates</a>
 <?php endif; ?>
     </div>
   </div>

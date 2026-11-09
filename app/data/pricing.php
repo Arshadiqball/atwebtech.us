@@ -108,13 +108,13 @@ return [
     ],
 
     'faq' => [
-        ['Can I sign up for a plan today?', '<p>Not yet. atwebtech is still in development, so no plan can be purchased and no payment is taken. Choose a plan above to join the waitlist, and we will email you when early access opens.</p>'],
+        ['Can I sign up today?', '<p>Yes. Create a free account and start planning and scheduling right away, with no credit card. Paid plans are opening soon. Use "Get notified" under Essentials or Team and we will email you as soon as you can upgrade.</p>'],
         ['What counts as a channel?', '<p>A channel is one social account you connect, such as a single Instagram profile, Facebook page, or LinkedIn page. A link in bio page also counts as one channel. If you manage three brands with an Instagram and a Facebook account each, that is six channels.</p>'],
         ['How does per-channel pricing work?', '<p>Paid plans are priced per channel, so you only pay for the accounts you manage. Channels 1 to 10 are billed at the plan rate ($6 a month on Essentials, $12 a month on Team). Every channel after the tenth is $4 a month on either plan, so your average cost per channel goes down as you grow.</p>'],
         ['What are the billing options?', '<p>Paid plans can be billed monthly or yearly. Yearly billing costs the same as 10 months, so you save the equivalent of two months.</p>'],
         ['Is there a free plan?', '<p>Yes. The Free plan includes up to 3 channels, 10 scheduled posts per channel at a time, 100 ideas, and core analytics, with no time limit.</p>'],
         ['What is the scheduled post limit for each plan?', '<p>On the Free plan each channel can hold 10 scheduled posts at a time. When a post is published, that slot becomes available again. Paid plans have no limit on scheduled posts per channel.</p>'],
-        ['Which channels can I connect?', '<p>We plan to support Instagram, Facebook, TikTok, LinkedIn, YouTube, Pinterest, Threads, X, and Google Business Profile. No channel connections are live yet. The <a href="/integrations">integrations page</a> shows the current status of each one.</p>'],
-        ['Could these prices change before launch?', '<p>These are our planned launch prices. If anything changes before plans go on sale, waitlist members will hear about it first.</p>'],
+        ['Which channels can I connect?', '<p>atwebtech is built for Instagram, Facebook, TikTok, LinkedIn, YouTube, Pinterest, Threads, X, and Google Business Profile. Each network is switched on once its connection is approved by the platform. The <a href="/integrations">integrations page</a> shows which ones are live today.</p>'],
+        ['Can I cancel or change plans?', '<p>Yes. You can stay on Free as long as you like. Paid plans will be billed monthly or yearly, and you can add or remove channels at any time.</p>'],
     ],
 ];

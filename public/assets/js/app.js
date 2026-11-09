@@ -1959,4 +1959,34 @@
       }
     });
   }
+
+  /* 3D hero: the product tilts back and flattens as you scroll -------- */
+  const stage = $('[data-tilt-scroll]');
+  const canAnimate = !reduceMotion.matches && window.matchMedia('(min-width: 761px)').matches;
+  if (stage && canAnimate) {
+    let ticking = false;
+    const update = () => {
+      ticking = false;
+      const rect = stage.getBoundingClientRect();
+      const progress = Math.min(Math.max(1 - (window.innerHeight - rect.top) / (window.innerHeight * 0.75), 0), 1);
+      stage.style.setProperty('--tilt', progress.toFixed(3));
+    };
+    window.addEventListener('scroll', () => {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
+  }
+
+  /* 3D hover tilt on feature cards ------------------------------------ */
+  if (canAnimate && window.matchMedia('(hover: hover)').matches) {
+    $$('[data-tilt]').forEach((card) => {
+      card.addEventListener('pointermove', (ev) => {
+        const r = card.getBoundingClientRect();
+        const x = (ev.clientX - r.left) / r.width - 0.5;
+        const y = (ev.clientY - r.top) / r.height - 0.5;
+        card.style.transform = `perspective(1400px) rotateX(${(-y * 4).toFixed(2)}deg) rotateY(${(x * 5).toFixed(2)}deg) translateY(-4px)`;
+      });
+      card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+    });
+  }
 })();
