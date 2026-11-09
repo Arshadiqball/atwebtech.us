@@ -46,7 +46,6 @@ final class ChannelHandler
             'linkedin' => 'LinkedIn',
             'tiktok' => 'TikTok',
             'pinterest' => 'Pinterest',
-            'x' => 'X',
             'facebook' => 'Facebook',
             'instagram' => 'Instagram',
             'threads' => 'Threads',
@@ -79,10 +78,6 @@ final class ChannelHandler
             if ($provider === 'tiktok' && !str_contains($tokens['scope'], Channels::TIKTOK_BASIC)) {
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'TikTok profile access wasn’t granted. Tick the profile permission to connect.');
-            }
-            if ($provider === 'x' && !str_contains($tokens['scope'], 'users.read')) {
-                Channels::revoke($tokens['access_token'], $provider);
-                self::notice('/app/channels', 'X profile access wasn’t granted. Tick the profile permission to connect.');
             }
             if ($provider === 'threads' && !str_contains($tokens['scope'], 'threads_basic')) {
                 Channels::revoke($tokens['access_token'], $provider);
@@ -119,7 +114,6 @@ final class ChannelHandler
                 'linkedin' => 'We couldn’t read this LinkedIn Profile. Try another account, or try again in a few minutes.',
                 'tiktok' => 'We couldn’t read this TikTok account. Try the same TikTok login again in a few minutes.',
                 'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
-                'x' => 'We couldn’t read this X account. Try again in a few minutes.',
                 'facebook' => 'This Facebook account doesn’t manage a Page we can read. Create a Page, or sign in with an account that manages one, then try again. (Facebook no longer lets apps post to Groups.)',
                 'instagram' => 'This Instagram account can’t be connected. Switch it to a Professional account (Business or Creator), and make sure that account is an admin of the app, then try again.',
                 'threads' => 'We couldn’t read this Threads profile. Use the Threads account that is a tester on the app, then try again.',
@@ -818,12 +812,6 @@ final class ChannelHandler
     private static function connectRefusal(string $message, string $provider = 'linkedin'): string
     {
         $text = strtolower($message);
-        if ($provider === 'x') {
-            if (str_contains($text, 'redirect')) {
-                return 'In the X app, the callback URL must be exactly https://atwebtech.us/app/channels/callback/x';
-            }
-            return 'X refused the sign-in. Turn on OAuth 2.0 for a Web App with Read and write, then try again.';
-        }
         if ($provider === 'threads') {
             if (str_contains($text, 'redirect')) {
                 return 'In the Threads app, the redirect URI must be exactly https://atwebtech.us/app/channels/callback/threads';

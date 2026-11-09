@@ -84,7 +84,7 @@ $id = $mode;
   <aside class="auth-aside" aria-label="About atwebtech">
     <span class="auth-badge">Free plan</span>
     <h2 class="auth-aside-title">Plan your content in one workspace</h2>
-    <p class="auth-aside-sub">Plan ideas, set posting schedules, and publish to Instagram, Facebook, LinkedIn, YouTube, Pinterest, Threads, and X. Free for up to 3 channels, no credit card required.</p>
+    <p class="auth-aside-sub">Plan ideas, set posting schedules, and publish to Instagram, Facebook, LinkedIn, YouTube, Pinterest, and Threads. Free for up to 3 channels, no credit card required.</p>
     <div class="auth-preview" aria-hidden="true">
       <div class="ap-side">
         <span class="ap-logo"><?php partial('partials/logo-mark'); ?></span>

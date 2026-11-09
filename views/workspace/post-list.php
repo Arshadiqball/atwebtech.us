@@ -28,7 +28,7 @@ $compose ??= '{}';
 <?php endif; ?>
 <?php else: ?>
 <?php if (!empty($post['review_note'])): ?>
-        <p class="ap-note"><?= icon('chat-circle-text') ?><span><b>Changes requested<?= !empty($post['reviewed_by']) ? ' by ' . e($post['reviewed_by']) : '' ?>:</b> <?= e($post['review_note']) ?></span></p>
+        <p class="ap-note"><?= icon('chat-circle-text') ?><span><b><?= empty($post['reviewed_at']) ? 'Note' : 'Changes requested' . (!empty($post['reviewed_by']) ? ' by ' . e($post['reviewed_by']) : '') ?>:</b> <?= e($post['review_note']) ?></span></p>
 <?php endif; ?>
         <small>Edited <?= e(Workspace::local($post['updated_at'], $tz)->format('j M, g:i A')) ?><?= $post['media_id'] ? ' · file attached' : '' ?></small>
 <?php endif; ?>

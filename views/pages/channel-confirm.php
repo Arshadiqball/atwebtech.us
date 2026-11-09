@@ -44,10 +44,9 @@ $token = Security::csrfToken();
       <p class="cc-fine"><?= match ($pending['provider']) {
           'linkedin' => 'atwebtech can create posts on this LinkedIn Profile. It can’t see your messages, and Company Pages aren’t available yet. You can disconnect at any time.',
           'tiktok' => 'atwebtech can read this TikTok account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
-          'x' => 'atwebtech can read this X account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
-          'facebook' => 'atwebtech can read the name and picture of each Facebook Page and Group you select. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
+          'facebook' => 'atwebtech can publish the posts you schedule to each Facebook Page you select. It can’t read your messages. You can disconnect at any time.',
           'instagram' => 'atwebtech can publish photos you schedule to this Instagram account. A post needs a photo. It can’t read your messages. You can disconnect at any time.',
-          'threads' => 'atwebtech can read this Threads profile’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
+          'threads' => 'atwebtech can publish the posts you schedule to this Threads profile and read their stats. It can’t read your messages. You can disconnect at any time.',
           'pinterest' => !empty($pending['sandbox'])
               ? 'This is the Pinterest sandbox account. atwebtech can read its name and picture. Publishing isn’t available yet, and this is not a live Pinterest profile. You can disconnect at any time.'
               : 'atwebtech can read this Pinterest account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',

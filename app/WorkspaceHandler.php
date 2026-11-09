@@ -329,10 +329,10 @@ final class WorkspaceHandler
                 if ($channel['provider'] === 'pinterest' && $channel['can_publish'] && ($media === null || $media['kind'] !== 'image')) {
                     $errors['media'] ??= sprintf('Attach a photo before scheduling a Pin to %s.', $channel['name']);
                 }
-                if (in_array($channel['provider'], ['threads', 'x'], true) && $channel['can_publish'] && $media !== null && $media['kind'] !== 'image') {
-                    $errors['media'] ??= sprintf('%s posts from atwebtech can include a photo, not a video.', $channel['provider'] === 'x' ? 'X' : 'Threads');
+                if ($channel['provider'] === 'threads' && $channel['can_publish'] && $media !== null && $media['kind'] !== 'image') {
+                    $errors['media'] ??= 'Threads posts from atwebtech can include a photo, not a video.';
                 }
-                if (in_array($channel['provider'], ['facebook', 'threads', 'x'], true) && $channel['can_publish'] && $media === null && $input['body'] === '') {
+                if (in_array($channel['provider'], ['facebook', 'threads'], true) && $channel['can_publish'] && $media === null && $input['body'] === '') {
                     $errors['body'] ??= 'Write the post you want to publish.';
                 }
                 if ($channel['provider'] === 'facebook' && ($channel['kind'] ?? '') === 'Group') {

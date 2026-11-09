@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-/** Connected social channels. YouTube, a personal LinkedIn Profile, and an Instagram professional account can publish. TikTok, Pinterest, X, a Facebook Page, and a Threads profile connect for name and picture. */
+/** Connected social channels. YouTube, LinkedIn Profiles, Instagram professional accounts, Facebook Pages, Threads and Pinterest can publish; TikTok connects for name and picture. */
 final class Channels
 {
     public const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
@@ -11,7 +11,6 @@ final class Channels
     public const LINKEDIN_SHARE = 'w_member_social';
     public const TIKTOK_BASIC = 'user.info.basic';
     public const TIKTOK_PUBLISH = 'video.publish';
-    public const X_SCOPES = 'users.read tweet.read tweet.write media.write offline.access';
     public const FACEBOOK_SCOPES = 'pages_show_list,pages_manage_posts';
     public const INSTAGRAM_SCOPES = 'instagram_business_basic,instagram_business_content_publish';
     public const THREADS_SCOPES = 'threads_basic,threads_content_publish';
@@ -27,9 +26,9 @@ final class Channels
         5 => ['Reach new heights', '5 times/week', 'teal'],
     ];
     public const MAX_GOAL = 14;
-    private const AVATAR_HOSTS = ['yt3.ggpht.com', 'yt3.googleusercontent.com', 'media.licdn.com', 'media-exp1.licdn.com', 'media-exp2.licdn.com', 'pbs.twimg.com'];
+    private const AVATAR_HOSTS = ['yt3.ggpht.com', 'yt3.googleusercontent.com', 'media.licdn.com', 'media-exp1.licdn.com', 'media-exp2.licdn.com'];
     /** Networks atwebtech can publish to. Others can be connected, and their posts wait as plans. */
-    public const PUBLISHES = ['youtube', 'linkedin', 'instagram', 'facebook', 'threads', 'x', 'pinterest'];
+    public const PUBLISHES = ['youtube', 'linkedin', 'instagram', 'facebook', 'threads', 'pinterest'];
     private const DAYS = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
 
     public static function connectable(string $provider): bool
@@ -39,7 +38,6 @@ final class Channels
             'linkedin' => config('oauth.linkedin.client_id') !== '' && config('oauth.linkedin.client_secret') !== '',
             'tiktok' => config('oauth.tiktok.client_key') !== '' && config('oauth.tiktok.client_secret') !== '',
             'pinterest' => self::pinterestOAuthReady() || config('oauth.pinterest.sandbox_token') !== '',
-            'x' => config('oauth.x.client_id') !== '' && config('oauth.x.client_secret') !== '',
             'facebook' => config('oauth.facebook.client_id') !== '' && config('oauth.facebook.client_secret') !== '' && config('oauth.facebook.config_id') !== '',
             'instagram' => config('oauth.instagram.client_id') !== '' && config('oauth.instagram.client_secret') !== '',
             'threads' => config('oauth.threads.client_id') !== '' && config('oauth.threads.client_secret') !== '',
@@ -72,7 +70,6 @@ final class Channels
             'instagram' => str_contains($scopes, 'instagram_business_content_publish'),
             'facebook' => ($row['kind'] ?? '') === 'Page' && str_contains($scopes, 'pages_manage_posts'),
             'threads' => str_contains($scopes, 'threads_content_publish'),
-            'x' => str_contains($scopes, 'tweet.write'),
             'pinterest' => str_contains($scopes, 'pins:write'),
             default => false,
         };
@@ -90,7 +87,6 @@ final class Channels
         $network = match ($channel['provider']) {
             'linkedin' => 'LinkedIn',
             'tiktok' => 'TikTok',
-            'x' => 'X',
             'facebook' => 'Facebook',
             'instagram' => 'Instagram',
             'threads' => 'Threads',
@@ -158,16 +154,14 @@ final class Channels
         $creds = match ($channel['provider']) {
             'linkedin' => config('oauth.linkedin'),
             'tiktok' => config('oauth.tiktok'),
-            'x' => config('oauth.x'),
             default => config('oauth.google'),
         };
         $refreshFields = match ($channel['provider']) {
             'tiktok' => ['client_key' => $creds['client_key'], 'client_secret' => $creds['client_secret'], 'refresh_token' => $refresh, 'grant_type' => 'refresh_token'],
-            'x' => ['grant_type' => 'refresh_token', 'refresh_token' => $refresh, 'client_id' => $creds['client_id']],
             default => ['client_id' => $creds['client_id'], 'client_secret' => $creds['client_secret'], 'refresh_token' => $refresh, 'grant_type' => 'refresh_token'],
         };
         try {
-            $data = self::request('POST', self::endpoint($channel['provider'], 'token'), $refreshFields, null, $channel['provider'] === 'x' ? [self::xAuthorization()] : []);
+            $data = self::request('POST', self::endpoint($channel['provider'], 'token'), $refreshFields);
             if ($channel['provider'] === 'tiktok') {
                 $data = self::tiktokTokenBody($data);
             }
@@ -261,16 +255,6 @@ final class Channels
     /** API hosts. Outside production, a *_OAUTH_TEST_BASE value points at a local fake. */
     private static function endpoint(string $provider, string $name): string
     {
-        if ($provider === 'x') {
-            $test = config('app.is_production') ? '' : rtrim((string) Env::get('X_OAUTH_TEST_BASE', ''), '/');
-            $base = $test !== '' ? $test : 'https://api.x.com';
-            return match ($name) {
-                'token' => $base . '/2/oauth2/token',
-                'revoke' => $base . '/2/oauth2/revoke',
-                'user' => $base . '/2/users/me',
-                default => throw new RuntimeException('Unknown X endpoint.'),
-            };
-        }
         if ($provider === 'tiktok') {
             $test = config('app.is_production') ? '' : rtrim((string) Env::get('TIKTOK_OAUTH_TEST_BASE', ''), '/');
             return match ($name) {
@@ -340,18 +324,6 @@ final class Channels
                 'config_id' => config('oauth.facebook.config_id'),
             ], '', '&', PHP_QUERY_RFC3986);
         }
-        if ($provider === 'x') {
-            $challenge = rtrim(strtr(base64_encode(hash('sha256', $verifier, true)), '+/', '-_'), '=');
-            return 'https://x.com/i/oauth2/authorize?' . http_build_query([
-                'response_type' => 'code',
-                'client_id' => config('oauth.x.client_id'),
-                'redirect_uri' => $redirectUri,
-                'scope' => self::X_SCOPES,
-                'state' => $state,
-                'code_challenge' => $challenge,
-                'code_challenge_method' => 'S256',
-            ], '', '&', PHP_QUERY_RFC3986);
-        }
         if ($provider === 'tiktok') {
             // Web Login Kit: no PKCE. Desktop Login Kit is the flow that sends code_challenge.
             return 'https://www.tiktok.com/v2/auth/authorize/?' . http_build_query([
@@ -407,7 +379,6 @@ final class Channels
         $creds = match ($provider) {
             'linkedin' => config('oauth.linkedin'),
             'tiktok' => config('oauth.tiktok'),
-            'x' => config('oauth.x'),
             'facebook' => config('oauth.facebook'),
             'instagram' => config('oauth.instagram'),
             'threads' => config('oauth.threads'),
@@ -427,37 +398,27 @@ final class Channels
         if ($provider === 'facebook') {
             return self::facebookToken($code, $redirect, $creds);
         }
-        if ($provider === 'x') {
-            $data = self::request('POST', self::endpoint('x', 'token'), [
+        $fields = $provider === 'tiktok'
+            ? [
+                'client_key' => $creds['client_key'],
+                'client_secret' => $creds['client_secret'],
+                'code' => $code,
+                'grant_type' => 'authorization_code',
+                'redirect_uri' => $redirect,
+            ]
+            : [
                 'grant_type' => 'authorization_code',
                 'code' => $code,
                 'redirect_uri' => $redirect,
-                'code_verifier' => $verifier,
                 'client_id' => $creds['client_id'],
-            ], null, [self::xAuthorization()]);
-        } else {
-            $fields = $provider === 'tiktok'
-                ? [
-                    'client_key' => $creds['client_key'],
-                    'client_secret' => $creds['client_secret'],
-                    'code' => $code,
-                    'grant_type' => 'authorization_code',
-                    'redirect_uri' => $redirect,
-                ]
-                : [
-                    'grant_type' => 'authorization_code',
-                    'code' => $code,
-                    'redirect_uri' => $redirect,
-                    'client_id' => $creds['client_id'],
-                    'client_secret' => $creds['client_secret'],
-                ];
-            if ($provider === 'youtube') {
-                $fields['code_verifier'] = $verifier;
-            }
-            $data = self::request('POST', self::endpoint($provider, 'token'), $fields);
-            if ($provider === 'tiktok') {
-                $data = self::tiktokTokenBody($data);
-            }
+                'client_secret' => $creds['client_secret'],
+            ];
+        if ($provider === 'youtube') {
+            $fields['code_verifier'] = $verifier;
+        }
+        $data = self::request('POST', self::endpoint($provider, 'token'), $fields);
+        if ($provider === 'tiktok') {
+            $data = self::tiktokTokenBody($data);
         }
         if (empty($data['access_token']) || !is_string($data['access_token'])) {
             throw new RuntimeException('Token response had no access token.');
@@ -465,7 +426,6 @@ final class Channels
         $fallback = match ($provider) {
             'linkedin' => self::LINKEDIN_SIGNIN . ' ' . self::LINKEDIN_SHARE,
             'tiktok' => self::TIKTOK_BASIC,
-            'x' => self::X_SCOPES,
             default => self::YOUTUBE_SCOPE,
         };
         $scope = trim((string) ($data['scope'] ?? ''));
@@ -491,7 +451,6 @@ final class Channels
             'linkedin' => self::linkedinProfile($accessToken),
             'tiktok' => self::tiktokAccount($accessToken),
             'pinterest' => self::pinterestAccount($accessToken),
-            'x' => self::xAccount($accessToken),
             'facebook' => self::facebookPages($accessToken),
             'instagram' => self::instagramAccount($accessToken),
             'threads' => self::threadsAccount($accessToken),
@@ -740,17 +699,6 @@ final class Channels
             }
             return;
         }
-        if ($provider === 'x') {
-            try {
-                self::request('POST', self::endpoint('x', 'revoke'), [
-                    'token' => $token,
-                    'token_type_hint' => 'access_token',
-                ], null, [self::xAuthorization()]);
-            } catch (Throwable $e) {
-                error_log(sprintf('[%s] token revoke failed: %s', gmdate('c'), $e->getMessage()));
-            }
-            return;
-        }
         try {
             $form = ['token' => $token];
             if ($provider === 'linkedin') {
@@ -782,45 +730,6 @@ final class Channels
             || str_ends_with($host, '.fbsbx.com')
             || str_ends_with($host, '.cdninstagram.com');
         return ($parts['scheme'] ?? '') === 'https' && $allowed && strlen($url) <= 500 ? $url : null;
-    }
-
-    private static function xAuthorization(): string
-    {
-        $id = rawurlencode((string) config('oauth.x.client_id'));
-        $secret = rawurlencode((string) config('oauth.x.client_secret'));
-        return 'Authorization: Basic ' . base64_encode($id . ':' . $secret);
-    }
-
-    /** The signed-in X account: display name and profile picture. Publishing is not available yet. */
-    public static function xAccount(string $accessToken): array
-    {
-        try {
-            $data = self::request('GET', self::endpoint('x', 'user') . '?' . http_build_query([
-                'user.fields' => 'id,name,username,profile_image_url',
-            ]), null, $accessToken);
-        } catch (Throwable $e) {
-            error_log(sprintf('[%s] x user lookup failed: %s', gmdate('c'), $e->getMessage()));
-            return [];
-        }
-        $user = $data['data'] ?? null;
-        if (!is_array($user)) {
-            return [];
-        }
-        $id = (string) ($user['id'] ?? '');
-        if ($id === '' || strlen($id) > 191 || !preg_match('/^[0-9]+$/', $id)) {
-            return [];
-        }
-        $name = trim((string) ($user['name'] ?? ''));
-        if ($name === '') {
-            $name = trim((string) ($user['username'] ?? ''));
-        }
-        $avatar = str_replace('_normal.', '_400x400.', (string) ($user['profile_image_url'] ?? ''));
-        return [[
-            'id' => $id,
-            'name' => mb_substr($name !== '' ? $name : 'X', 0, 190),
-            'avatar' => self::safeAvatar($avatar),
-            'kind' => 'Profile',
-        ]];
     }
 
     /** Exchange a Threads code for a long-lived token. Publishing is not available yet. */

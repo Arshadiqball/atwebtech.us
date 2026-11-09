@@ -18,7 +18,7 @@ $totalClicks = array_sum(array_map(static fn ($l) => (int) $l['clicks'], $bioLin
       <span class="ws-avatar tfa-avatar" aria-hidden="true"><?= icon('link-simple') ?></span>
       <div>
         <h1>Link in Bio</h1>
-        <p class="set-kicker">One link for every profile. Put it in your Instagram, TikTok, and X bio.</p>
+        <p class="set-kicker">One link for every profile. Put it in your Instagram, TikTok, and Threads bio.</p>
       </div>
     </div>
 <?php if ($bioPage && $bioPage['published']): ?>

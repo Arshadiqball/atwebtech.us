@@ -16,7 +16,7 @@ Modeled on what Metricool does publicly (researched 9 Nov 2026), adapted to atwe
 
 ## Paid acquisition (Meta) — first 30 days
 
-1. **Week 1 (now):** Leads campaign, US, $20/day, optimize for Complete registration. 3 creatives (Plan a week, 7 networks, Stop posting last minute) × formats (1:1, 4:5, 9:16 + Reels video). Let Meta pick the winner.
+1. **Week 1 (now):** Leads campaign, US, $20/day, optimize for Complete registration. 3 creatives (Plan a week, 6 networks, Stop posting last minute) × formats (1:1, 4:5, 9:16 + Reels video). Let Meta pick the winner.
 2. **Week 2:** Pause the weakest creative. Raise budget 20% on the winner every 3 days while cost per sign-up stays under your target.
 3. **Week 3:** Retargeting ad set: people who visited the site or pricing but didn't sign up (Pixel audiences), $5/day.
 4. **Week 4:** Lookalike audience (1%) from people who signed up, once you have 100+ sign-ups.
@@ -38,9 +38,9 @@ Targets to watch in the admin CRM (Dashboard → Sources → "Meta ads"): cost p
 | ad-*-1x1.png | 1080×1080 | Feed (Facebook, Instagram) |
 | ad-*-4x5.png | 1080×1350 | Feed, best for Instagram |
 | ad-*-9x16.png | 1080×1920 | Stories and Reels |
-| ad-seven-networks-1x1-dark.png | 1080×1080 | Dark variant for testing |
+| ad-six-networks-1x1-dark.png | 1080×1080 | Dark variant for testing |
 | video-reels-9x16.mp4 | 15 s, 1080×1920 | Reels and Stories |
 | video-feed-1x1.mp4 | 15 s, 1080×1080 | Feed video |
 
-Ad text (primary text): "Still posting last minute? atwebtech gives you one calendar for Instagram, Facebook, LinkedIn, YouTube, Pinterest, Threads, and X, an AI writer, and auto-publishing at your best times. Free plan, no credit card."
+Ad text (primary text): "Still posting last minute? atwebtech gives you one calendar for Instagram, Facebook, LinkedIn, YouTube, Pinterest, and Threads, an AI writer, and auto-publishing at your best times. Free plan, no credit card."
 Headline: "Plan a week of posts in one sitting". Description: "Free plan. No credit card." Button: Sign up.

@@ -14,7 +14,7 @@
     </div>
     <div class="detail-row">
       <h2 class="h-card">What you can do today</h2>
-      <p>Create a <a href="/signup">free account</a> and you get a workspace with an ideas board, templates, a multi-channel composer, and a queue and calendar with posting schedules. atwebtech publishes to Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, and X today, with more channels on the way; the <a href="/integrations">integrations page</a> shows what is available and what is coming soon. Want a look first? Try the <a href="/demo">interactive demo</a>.</p>
+      <p>Create a <a href="/signup">free account</a> and you get a workspace with an ideas board, templates, a multi-channel composer, and a queue and calendar with posting schedules. atwebtech publishes to Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, and Threads today, with more channels on the way; the <a href="/integrations">integrations page</a> shows what is available and what is coming soon. Want a look first? Try the <a href="/demo">interactive demo</a>.</p>
     </div>
     <div class="detail-row">
       <h2 class="h-card">Tell us what you need</h2>

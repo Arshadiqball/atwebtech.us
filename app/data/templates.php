@@ -46,7 +46,6 @@ return [
         'youtube' => 'net-youtube.webp',
         'pinterest' => 'net-pinterest.webp',
         'threads' => 'net-threads.webp',
-        'x' => 'net-x.webp',
     ],
     'videos' => [
         'youtube' => ['desk.mp4', 'screen.mp4', 'phone.mp4', 'lens.mp4', 'desk.mp4', 'screen.mp4', 'phone.mp4', 'lens.mp4'],
@@ -97,11 +96,6 @@ return [
             ['ai', 'A first pass, then a real read', 'I let an AI tool draft the first pass. I still read every line before it goes anywhere.'],
             ['software', 'The case you did not try', 'The review comment I leave most often: show me the case you did not try.'],
             ['startups', 'The fix they named', 'We shipped the small fix a customer named before we built the feature we wanted to announce.'],
-        ]],
-        'x' => ['X', [
-            ['ai', 'Draft, then rewrite', 'I use an AI tool for a first draft. I still check the facts and rewrite the last lines myself before I post.'],
-            ['security', 'Three changes on a new laptop', 'New laptop, three changes before I sign in to work: updates on, a password manager, and the accounts that do not need to stay logged in.'],
-            ['software', 'Reproduce it once', 'Before I change code, I reproduce the bug once and write down the steps. Guessing is what made the last one take all day.'],
         ]],
     ],
     'interests' => [

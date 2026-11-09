@@ -7,7 +7,7 @@ return [
     // Caption limits used by the post composer, in characters.
     'limits' => [
         'instagram' => 2200, 'facebook' => 5000, 'tiktok' => 2200, 'linkedin' => 3000, 'youtube' => 5000,
-        'pinterest' => 500, 'threads' => 500, 'x' => 280, 'google-business-profile' => 1500,
+        'pinterest' => 500, 'threads' => 500, 'google-business-profile' => 1500,
     ],
     'post_max' => 5000,
     // Suggested posting times for the queue (24h, in the user's time zone).
@@ -24,7 +24,7 @@ return [
         'channels' => [
             'label' => 'Channels', 'icon' => 'plus', 'href' => '/app/channels', 'nav' => false,
             'title' => 'Connect a channel',
-            'text' => 'Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, and X can be connected and published to. TikTok connects now, with publishing coming soon.',
+            'text' => 'Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, and Threads can be connected and published to. TikTok connects now, with publishing coming soon.',
             'demo' => null, 'feature' => '/integrations',
         ],
     ],

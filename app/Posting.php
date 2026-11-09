@@ -3,17 +3,16 @@
 declare(strict_types=1);
 
 /**
- * Publishing to Facebook Pages, Threads, X and Pinterest.
+ * Publishing to Facebook Pages, Threads and Pinterest.
  * Each method returns ['id' => network post ID, 'url' => public link or ''].
  * Images are handed to Meta and Pinterest as short-lived signed links (Media::shareUrl);
- * X and Facebook videos are uploaded as files.
+ * Facebook videos are uploaded as files.
  */
 final class Posting
 {
     private const GRAPH = 'https://graph.facebook.com/v23.0';
     private const GRAPH_VIDEO = 'https://graph-video.facebook.com/v23.0';
     private const THREADS = 'https://graph.threads.net/v1.0';
-    private const X = 'https://api.x.com';
     private const PINTEREST = 'https://api.pinterest.com';
 
     /** @param array|null $media a ready media row, with $file its path on disk */
@@ -110,36 +109,6 @@ final class Posting
         } catch (Throwable) {
         }
         return ['id' => $id, 'url' => $url];
-    }
-
-    public static function x(string $token, string $scopes, string $text, ?array $media, ?string $file): array
-    {
-        if ($media === null && trim($text) === '') {
-            throw new PublishError('Posts on X need some text or a photo.');
-        }
-        $payload = ['text' => $text];
-        if ($media !== null) {
-            if ($media['kind'] !== 'image') {
-                throw new PublishError('Posts on X from atwebtech can include a photo, not a video. Attach a photo or remove the file, then retry.');
-            }
-            if ($file === null) {
-                throw new PublishError('The photo is missing. Attach it again, then retry.');
-            }
-            if (!str_contains($scopes, 'media.write')) {
-                throw new PublishError('Reconnect this X account to allow photo uploads, then retry. Text-only posts work without reconnecting.');
-            }
-            $upload = self::send('POST', self::base(self::X) . '/2/media/upload', [
-                'media' => new CURLFile($file, (string) $media['mime'], 'image'),
-                'media_category' => 'tweet_image',
-            ], $token, timeout: 60);
-            $mediaId = (string) ($upload['data']['id'] ?? ($upload['id'] ?? ($upload['media_id_string'] ?? '')));
-            self::requireId($mediaId, 'X didn’t accept the photo.');
-            $payload['media'] = ['media_ids' => [$mediaId]];
-        }
-        $sent = self::send('POST', self::base(self::X) . '/2/tweets', $payload, $token, json: true);
-        $id = (string) ($sent['data']['id'] ?? '');
-        self::requireId($id, 'X didn’t accept the post.');
-        return ['id' => $id, 'url' => 'https://x.com/i/web/status/' . $id];
     }
 
     public static function pinterest(string $token, string $title, string $text, ?array $media, ?string $file): array

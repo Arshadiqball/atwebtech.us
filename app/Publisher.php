@@ -5,7 +5,7 @@ declare(strict_types=1);
 /** Sends due posts to their connected channel. Driven by bin/publish.php from cron. */
 final class Publisher
 {
-    private const NAMES = ['facebook' => 'Facebook', 'threads' => 'Threads', 'x' => 'X', 'pinterest' => 'Pinterest'];
+    private const NAMES = ['facebook' => 'Facebook', 'threads' => 'Threads', 'pinterest' => 'Pinterest'];
 
     public const MAX_ATTEMPTS = 3;
     private const STALE_MINUTES = 90;
@@ -101,7 +101,6 @@ final class Publisher
                     'instagram' => 'Reconnect this Instagram account and allow content publishing.',
                     'facebook' => 'Reconnect this Facebook Page and allow atwebtech to create posts.',
                     'threads' => 'Reconnect this Threads profile and allow content publishing.',
-                    'x' => 'Reconnect this X account and allow atwebtech to post.',
                     'pinterest' => 'Reconnect Pinterest with full access so atwebtech can create Pins.',
                     default => 'Reconnect this channel and allow uploads so atwebtech can publish.',
                 });
@@ -154,13 +153,12 @@ final class Publisher
                     ->execute(['sent' => 'sent', 'at' => Database::now(), 'ext' => $sent['id'], 'url' => $sent['url'] !== '' ? $sent['url'] : null, 'now' => Database::now(), 'id' => $id]);
                 return 'sent';
             }
-            if (in_array($channel['provider'], ['facebook', 'threads', 'x', 'pinterest'], true)) {
+            if (in_array($channel['provider'], ['facebook', 'threads', 'pinterest'], true)) {
                 $text = trim((string) $post['body']);
                 $token = Channels::accessToken($channel);
                 $sent = match ($channel['provider']) {
                     'facebook' => Posting::facebook($token, (string) $channel['external_id'], $text, $media, $file),
                     'threads' => Posting::threads($token, (string) $channel['external_id'], $text, $media, $file),
-                    'x' => Posting::x($token, (string) $channel['scopes'], $text, $media, $file),
                     'pinterest' => Posting::pinterest($token, (string) ($post['title'] ?? ''), $text, $media, $file),
                 };
                 $pdo->prepare('UPDATE posts SET status = :sent, sent_at = :at, external_id = :ext, external_url = :url, error = NULL, updated_at = :now WHERE id = :id')
@@ -197,7 +195,6 @@ final class Publisher
                 $e instanceof ChannelApiException && $provider === 'instagram' && $e->status === 403 => 'Instagram refused to publish. Reconnect and allow content publishing, then retry.',
                 $e instanceof ChannelApiException && $provider === 'instagram' => 'Instagram refused the photo. Attach a JPG or PNG under 8 MB, then retry.',
                 $e instanceof ChannelApiException && isset(self::NAMES[$provider]) && in_array($e->status, [401, 403], true) => self::NAMES[$provider] . ' turned down atwebtech’s access. Reconnect the channel, then retry.',
-                $e instanceof ChannelApiException && $provider === 'x' && $e->status === 429 => 'X’s posting limit was reached. atwebtech will retry shortly.',
                 $e instanceof ChannelApiException && isset(self::NAMES[$provider]) && $e->status === 400 => self::NAMES[$provider] . ' rejected the post. Check the text length and attachment, then retry.',
                 $e instanceof ChannelApiException && $e->status === 401 => ($provider === 'linkedin' ? 'LinkedIn' : 'Google') . ' turned down atwebtech’s access. Reconnect the channel, then retry.',
                 $e instanceof ChannelApiException && $e->status === 403 => $provider === 'linkedin' ? 'LinkedIn refused the post. Check that sharing is allowed, then retry.' : 'YouTube refused the upload (daily upload quota or channel permissions). Try again later.',
@@ -205,7 +202,7 @@ final class Publisher
                 default => match ($provider) {
                     'linkedin' => 'LinkedIn didn’t accept the post. Please retry.',
                     'instagram' => 'Instagram didn’t accept the photo. Please retry.',
-                    'facebook', 'threads', 'x', 'pinterest' => self::NAMES[$provider] . ' didn’t accept the post. Please retry.',
+                    'facebook', 'threads', 'pinterest' => self::NAMES[$provider] . ' didn’t accept the post. Please retry.',
                     default => 'YouTube didn’t accept the upload. Please retry.',
                 },
             };

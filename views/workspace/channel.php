@@ -103,7 +103,6 @@ $next = $queue['next'] ?? null;
         'instagram' => 'Content publishing wasn’t granted, so these posts stay as plans and are not sent. Reconnect and allow Instagram content publishing.',
         'facebook' => 'Posting permission wasn’t granted for this Page. Reconnect and allow atwebtech to create posts on it.',
         'threads' => 'Publishing wasn’t granted, so these posts stay as plans. Reconnect and allow Threads content publishing.',
-        'x' => 'Posting wasn’t granted. Reconnect and allow atwebtech to post for you.',
         'pinterest' => 'This connection can read Pinterest but not create Pins. Reconnect Pinterest to allow creating Pins.',
         default => 'Video upload was not granted. Reconnect and tick “Manage your YouTube videos” on the Google screen. If that choice is missing, add the youtube.upload scope in Google Cloud, then reconnect.',
     } ?></p>
@@ -281,7 +280,7 @@ $next = $queue['next'] ?? null;
               <label for="gen-length">Length</label>
               <select class="idea-input" id="gen-length" name="length">
 <?php foreach (Assistant::LENGTHS as $key => [$text]): ?>
-                <option value="<?= e($key) ?>"<?= $pick('length', $channel['provider'] === 'x' || $channel['provider'] === 'threads' ? 'short' : 'medium') === $key ? ' selected' : '' ?>><?= e(ucfirst($key)) ?></option>
+                <option value="<?= e($key) ?>"<?= $pick('length', $channel['provider'] === 'threads' ? 'short' : 'medium') === $key ? ' selected' : '' ?>><?= e(ucfirst($key)) ?></option>
 <?php endforeach; ?>
               </select>
             </div>

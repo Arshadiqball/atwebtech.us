@@ -14,6 +14,5 @@ return [
     ['slug' => 'youtube', 'name' => 'YouTube', 'icon' => 'youtube', 'color' => '#FF0000', 'formats' => 'Videos and Shorts', 'accounts' => 'Channel'],
     ['slug' => 'pinterest', 'name' => 'Pinterest', 'icon' => 'pinterest', 'color' => '#BD081C', 'formats' => 'Photo Pins', 'accounts' => 'Business or Profile'],
     ['slug' => 'threads', 'name' => 'Threads', 'icon' => 'threads', 'color' => '#111111', 'formats' => 'Text and photo posts', 'accounts' => 'Profile'],
-    ['slug' => 'x', 'name' => 'X', 'icon' => 'x', 'color' => '#111111', 'formats' => 'Text and photo posts', 'accounts' => 'Profile'],
     ['slug' => 'google-business-profile', 'name' => 'Google Business Profile', 'icon' => 'ui:storefront', 'color' => '#1A73E8', 'formats' => 'Updates, offers, events', 'accounts' => 'Profile'],
 ];

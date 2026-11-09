@@ -79,7 +79,7 @@ return [
         ],
         'Publishing' => [
             ['Connected channels', 'Each social profile, Facebook Page, or Pinterest account counts as one channel.', 'Up to 3', 'Unlimited, priced per channel', 'Unlimited, priced per channel'],
-            ['Networks you can publish to', 'Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, and X.', '7', '7', '7'],
+            ['Networks you can publish to', 'Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, and Threads.', '6', '6', '6'],
             ['Trending ideas', 'This week’s trending videos, stories, and searches, inside the composer.', true, true, true],
             ['Scheduled posts per channel', 'How many posts each channel can have scheduled at one time.', '10', 'Unlimited', 'Unlimited'],
             ['Visual content calendar', 'See your schedule across weeks or months.', true, true, true],
@@ -126,7 +126,7 @@ return [
         ['What are the billing options?', '<p>Paid plans can be billed monthly or yearly. Yearly billing costs the same as 10 months, so you save the equivalent of two months.</p>'],
         ['Is there a free plan?', '<p>Yes. The Free plan includes up to 3 channels, 10 scheduled posts per channel at a time, 100 ideas, and core analytics, with no time limit.</p>'],
         ['What is the scheduled post limit for each plan?', '<p>On the Free plan each channel can hold 10 scheduled posts at a time. When a post is published, that slot becomes available again. Paid plans have no limit on scheduled posts per channel.</p>'],
-        ['Which channels can I connect?', '<p>atwebtech is built for Instagram, Facebook, TikTok, LinkedIn, YouTube, Pinterest, Threads, X, and Google Business Profile. Each network is switched on once its connection is approved by the platform. The <a href="/integrations">integrations page</a> shows which ones are live today.</p>'],
+        ['Which channels can I connect?', '<p>atwebtech is built for Instagram, Facebook, TikTok, LinkedIn, YouTube, Pinterest, Threads, and Google Business Profile. Each network is switched on once its connection is approved by the platform. The <a href="/integrations">integrations page</a> shows which ones are live today.</p>'],
         ['Can I cancel or change plans?', '<p>Yes. You can stay on Free as long as you like. On a paid plan you can switch plans, add or remove channels, or cancel from Plan &amp; billing in your workspace. Changes are prorated, and if you cancel you keep your paid features until the end of the period you paid for.</p>'],
         ['Which payment methods do you accept?', '<p>All major credit and debit cards, processed by Stripe. Card details are never stored on atwebtech servers. Invoices and receipts are available from Plan &amp; billing.</p>'],
     ],

@@ -11,7 +11,7 @@ declare(strict_types=1);
  * - Reddit: top posts of the week in topic communities (public RSS).
  * - Google Trends: what people in the US are searching for right now (RSS).
  *
- * Facebook, Instagram, TikTok, X, Threads and LinkedIn don't publish trending data through an API,
+ * Facebook, Instagram, TikTok, Threads and LinkedIn don't publish trending data through an API,
  * so the composer shows these cross-web trends for them. bin/trends.php refreshes the data weekly.
  */
 final class Trends

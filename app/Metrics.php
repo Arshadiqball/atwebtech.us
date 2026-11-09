@@ -15,7 +15,6 @@ final class Metrics
         'facebook' => ['followers', 'impressions', 'reach', 'reactions', 'comments', 'shares', 'video_views', 'unique_viewers', 'watch_seconds'],
         'instagram' => ['followers', 'impressions', 'reach', 'reactions', 'comments', 'shares', 'saves', 'video_views', 'watch_seconds'],
         'threads' => ['followers', 'impressions', 'reactions', 'comments', 'shares'],
-        'x' => [], // X charges for every API read, so stats aren't collected.
         'youtube' => ['followers', 'reactions', 'comments', 'shares', 'video_views', 'watch_seconds'],
         'pinterest' => ['followers', 'impressions', 'reactions', 'comments', 'saves', 'video_views'],
         'linkedin' => [],

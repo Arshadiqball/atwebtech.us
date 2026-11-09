@@ -177,3 +177,18 @@ Stack trace:
   thrown in Command line code on line 5
 [09-Nov-2026 14:11:48 UTC] [2026-11-09T14:11:48+00:00] metrics channel 25: HTTP 401 from graph.instagram.com Invalid OAuth access token - Cannot parse access token
 [09-Nov-2026 14:11:48 UTC] [2026-11-09T14:11:48+00:00] metrics channel 26: Threads needs the insights permission.
+[09-Nov-2026 14:41:33 UTC] Migration failed: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'sent posts stay as history.
+UPDATE posts
+SET status = 'draft',
+    review_note =' at line 1
+[09-Nov-2026 14:41:33 UTC] PHP Fatal error:  Uncaught PDOException: SQLSTATE[42000]: Syntax error or access violation: 1064 You have an error in your SQL syntax; check the manual that corresponds to your MySQL server version for the right syntax to use near 'sent posts stay as history.
+UPDATE posts
+SET status = 'draft',
+    review_note =' at line 1 in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php:98
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(98): PDO->exec('sent posts stay...')
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php(53): Migrator::apply('mysql', Array)
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/bootstrap.php(55): Migrator::run()
+#3 Command line code(1): require('/Users/mac/Docu...')
+#4 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php on line 98

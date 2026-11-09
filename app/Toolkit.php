@@ -502,7 +502,7 @@ final class QueueTools
 {
     public const MAX_ROWS = 200;
     /** Networks where a post can be text only. The others need a photo or video on every post. */
-    public const TEXT_NETWORKS = ['linkedin', 'facebook', 'threads', 'x', 'tiktok'];
+    public const TEXT_NETWORKS = ['linkedin', 'facebook', 'threads', 'tiktok'];
 
     /** POST /app/channels/{id}/queue-tools */
     public static function handle(string $id): never

@@ -105,7 +105,7 @@ HTML,
 <h3>LinkedIn</h3>
 <p>A more reflective angle that suits a professional audience: what you learned developing a new glaze, or how a small studio decides what to make next. A single image and a few short paragraphs work well.</p>
 
-<h3>Threads and X</h3>
+<h3>Threads</h3>
 <p>A short, conversational question with or without an image: "Settling a studio debate. Matte or glossy glaze on a morning mug?" Replies are the point, so make it easy to respond.</p>
 
 <h3>Pinterest</h3>
@@ -220,7 +220,7 @@ HTML,
 <p><a href="/signup">Sign up</a> with your email and a password. The Free plan includes up to 3 channels, 10 scheduled posts per channel, and 100 ideas, with no credit card required. Once you are in, we recommend turning on two-factor authentication in your account settings.</p>
 
 <h2>2. Connect your channels</h2>
-<p>Open <strong>Channels</strong> in your workspace and connect Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, or X. You sign in with the platform directly, and atwebtech only gets the access it needs to publish for you; the <a href="/integrations">integrations page</a> shows the current status.</p>
+<p>Open <strong>Channels</strong> in your workspace and connect Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, or Threads. You sign in with the platform directly, and atwebtech only gets the access it needs to publish for you; the <a href="/integrations">integrations page</a> shows the current status.</p>
 
 <h2>3. Set a posting schedule</h2>
 <p>In each channel's settings, open <strong>Posting Schedule</strong> and choose its posting times, such as Tuesday and Thursday at 9:00 a.m. When you add a post to the queue, it takes the next open slot, so you keep a steady rhythm without picking a time for every post.</p>

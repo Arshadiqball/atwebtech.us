@@ -156,7 +156,7 @@ Each connected channel has `/app/channels/{id}/settings` with two tabs.
 
 ## Publishing
 
-`bin/publish.php` sends due posts to YouTube, LinkedIn Profiles, Instagram, Facebook Pages, Threads, X and Pinterest (`Channels::PUBLISHES`). TikTok can be connected, and its posts stay as plans until publishing is built (it needs the `video.publish` scope and TikTok's app audit). Run it every minute from cron:
+`bin/publish.php` sends due posts to YouTube, LinkedIn Profiles, Instagram, Facebook Pages, Threads and Pinterest (`Channels::PUBLISHES`). TikTok can be connected, and its posts stay as plans until publishing is built (it needs the `video.publish` scope and TikTok's app audit). Run it every minute from cron:
 
 ```
 * * * * * /usr/bin/php /path/to/atwebtech/bin/publish.php >> /path/to/atwebtech/storage/logs/publish.log 2>&1
@@ -182,13 +182,12 @@ Each connected channel has `/app/channels/{id}/settings` with two tabs.
   - Leave room on the disk for queued videos.
 - **Data:** migration `006` adds `media`, the publishing columns on `posts` (`channel_id`, `media_id`, `title`, `meta`, `tags`, `sent_at`, `external_id`, `external_url`, `error`, `attempts`) and `channels.queue_intro_closed_at`. It only adds tables and columns; nothing existing is changed.
 
-## Facebook, Threads, X and Pinterest publishing
+## Facebook, Threads and Pinterest publishing
 
 Code: `app/Posting.php`, called from `app/Publisher.php`.
 
 - **Facebook Pages:** text (`/{page}/feed`), one photo (`/{page}/photos`) or one video (uploaded to `/{page}/videos`), using the Page's own token and `pages_manage_posts`. **Facebook Groups are not supported**: Meta removed the Groups publishing API in April 2024. Groups are no longer offered when connecting, and any Group connected earlier is marked plan-only.
 - **Threads:** text or one photo (container, wait until `FINISHED`, then `threads_publish`), up to 500 characters.
-- **X:** text, or text and one photo. Photos need the `media.write` scope, which new connections request; accounts connected earlier must reconnect to post photos. The X API's posting limits depend on your X developer plan.
 - **Pinterest:** a photo Pin on the account's first board, needing `pins:write` (OAuth connections, not the sandbox token).
 - Photos are handed to Meta and Pinterest as signed links that expire after two hours (`/media/ig/...`), like Instagram.
 - Meta (Instagram, Facebook, Threads), Pinterest and TikTok only let the public connect after each app passes the platform's review. Until then only the app's admins and testers can connect.
@@ -204,7 +203,7 @@ The composer's Templates panel has a **Trending** view, filtered by the same Net
 
 - **Sources:** YouTube most popular videos in the US by category, Hacker News top stories of the week by topic, Reddit top posts of the week in topic communities (public RSS), and Google Trends searches in the US. Interests map to categories, searches and communities in `Trends::MAP`.
 - **YouTube** uses `YOUTUBE_API_KEY` when set, otherwise the token of a connected YouTube channel.
-- Facebook, Instagram, TikTok, X, Threads and LinkedIn don't offer trending data through their APIs, so for those networks the panel says so and shows the cross-web trends.
+- Facebook, Instagram, TikTok, Threads and LinkedIn don't offer trending data through their APIs, so for those networks the panel says so and shows the cross-web trends.
 - A source that fails (Reddit rate-limits servers at times) keeps last week's items. Data lives in `trending_items` (migration `011`).
 
 ## Link in Bio
@@ -247,7 +246,7 @@ Turn it on by setting `META_PIXEL_ID` and `META_CAPI_TOKEN` in the server `.env`
 - **Reports** (Insights → Export, Essentials/Team): CSV of published posts, and a printable report (save as PDF from the browser). Spreadsheet formulas in exported text are neutralised.
 - **Campaigns** (Insights): each post tag is a campaign, with published, scheduled, failed and draft counts.
 - **Queue actions** (Channel settings → General): pause/resume a channel's queue (the publisher skips paused channels), shuffle scheduled posts, remove failed posts, delete all drafts, empty the queue.
-- **Bulk upload** (Channel settings → General): CSV with `date,time,text[,title,tags]`, up to 200 rows, in the user's time zone; text networks only (LinkedIn, Facebook, Threads, X, TikTok). Nothing is scheduled if any row is invalid. Template: `/assets/files/bulk-upload-template.csv`.
+- **Bulk upload** (Channel settings → General): CSV with `date,time,text[,title,tags]`, up to 200 rows, in the user's time zone; text networks only (LinkedIn, Facebook, Threads, TikTok). Nothing is scheduled if any row is invalid. Template: `/assets/files/bulk-upload-template.csv`.
 - Code: `app/Toolkit.php` (`Hashtags`, `Feeds`, `Utm`, `Reports`, `QueueTools`). Data: migration `015`.
 
 ## Insights (network stats)
@@ -262,7 +261,6 @@ Turn it on by setting `META_PIXEL_ID` and `META_CAPI_TOKEN` in the server `.env`
 | YouTube | subscribers, views, likes, comments; watch time and shares with YouTube Analytics | `yt-analytics.readonly`, opt in with `STATS_PERMISSIONS=instagram,threads,youtube` |
 | Pinterest | followers, impressions, saves, reactions, comments | `pins:read`, `user_accounts:read` (already granted) |
 | LinkedIn profiles, TikTok | none: no stats API for apps | |
-| X | not collected: the X API charges for every read | |
 
 Existing channels pick up new permissions when they are reconnected.
 
@@ -276,7 +274,11 @@ Workspace → **Competitors** (`/app/competitors`, `app/Competitors.php`, migrat
 | Bluesky | Public Bluesky API, no setup |
 | Instagram | Business Discovery through a connected Facebook Page linked to an Instagram professional account (needs `instagram_basic` and `pages_read_engagement` in the Facebook Login configuration); works for other professional accounts |
 
-Facebook Pages need Meta's Page Public Content Access feature, and X charges for every API read, so neither is offered.
+Facebook Pages need Meta's Page Public Content Access feature, so they aren't offered.
+
+## X (removed)
+
+X was removed in November 2026: its API charges for every post and every read, with no free tier. Migration `018` moved waiting X posts to Drafts with a note and removed X connections. `X_CLIENT_ID` and `X_CLIENT_SECRET` are no longer used.
 
 ## Cron jobs (production)
 
