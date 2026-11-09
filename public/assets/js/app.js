@@ -188,6 +188,7 @@
           if (field) showFieldError(form, field, message);
         });
         setStatus(form, data.status === 'success' ? 'success' : 'error', data.message);
+        if (data.status === 'success' && Array.isArray(data.meta) && typeof window.atwMeta === 'function') window.atwMeta(data.meta);
         if (data.status === 'success' && data.redirect) {
           window.location.assign(data.redirect);
           return;

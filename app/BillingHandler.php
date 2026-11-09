@@ -58,7 +58,14 @@ final class BillingHandler
                 self::notice('/app/billing', sprintf('Your plan is now %s for %d %s. Any difference is prorated on your next invoice.',
                     data('pricing')['plans'][$intent['plan']]['name'], $intent['channels'], $intent['channels'] === 1 ? 'channel' : 'channels'));
             }
-            redirect(Billing::checkoutUrl($user, $intent['plan'], $intent['billing'], $intent['channels']));
+            $url = Billing::checkoutUrl($user, $intent['plan'], $intent['billing'], $intent['channels']);
+            Meta::track('InitiateCheckout', ['email' => $user['email'], 'user_id' => $user['id']], [
+                'currency' => 'USD',
+                'value' => Meta::planValue($intent['plan'], $intent['channels'], $intent['billing']),
+                'content_name' => data('pricing')['plans'][$intent['plan']]['name'] . ' (' . $intent['billing'] . ')',
+                'num_items' => $intent['channels'],
+            ]);
+            redirect($url);
         } catch (BillingException $e) {
             error_log(sprintf('[%s] billing checkout for user %d failed: %s', gmdate('c'), $user['id'], $e->getMessage()));
             self::notice($back, 'We could not reach our payment provider. Please try again in a minute.');
@@ -76,6 +83,16 @@ final class BillingHandler
             error_log(sprintf('[%s] billing success for user %d: %s', gmdate('c'), $user['id'], $e->getMessage()));
         }
         if ($sub !== null && in_array($sub['status'], Billing::LIVE_STATUSES, true)) {
+            $tracked = $_SESSION['_meta_purchases'] ?? [];
+            if (!in_array($sub['stripe_subscription_id'], $tracked, true)) {
+                Meta::track('Purchase', ['email' => $user['email'], 'user_id' => $user['id']], [
+                    'currency' => 'USD',
+                    'value' => Meta::planValue((string) $sub['plan'], (int) $sub['channels'], (string) $sub['billing']),
+                    'content_name' => (data('pricing')['plans'][$sub['plan']]['name'] ?? 'Paid plan') . ' (' . $sub['billing'] . ')',
+                    'num_items' => (int) $sub['channels'],
+                ], 'purchase-' . $sub['stripe_subscription_id']);
+                $_SESSION['_meta_purchases'] = array_slice(array_merge($tracked, [$sub['stripe_subscription_id']]), -10);
+            }
             self::notice('/app/billing', sprintf('Welcome to %s. Your paid features are on.', data('pricing')['plans'][$sub['plan']]['name'] ?? 'your new plan'));
         }
         self::notice('/app/billing', 'Thanks! Your payment is processing. Your plan will update here in a moment.');

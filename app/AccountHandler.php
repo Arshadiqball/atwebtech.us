@@ -79,6 +79,7 @@ final class AccountHandler
         }
 
         Auth::login($userId);
+        Meta::track('CompleteRegistration', ['email' => $input['email'], 'user_id' => $userId], ['content_name' => 'Free account', 'status' => 'registered', 'currency' => 'USD', 'value' => 0]);
         Mailer::notify('New account', ['Email' => $input['email'], 'Campaign' => Campaign::label()]);
         redirect('/welcome');
     }

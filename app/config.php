@@ -52,6 +52,11 @@ return [
         'user' => (string) Env::get('ADMIN_USER', 'admin'),
         'password_hash' => (string) Env::get('ADMIN_PASSWORD_HASH', '$2y$12$5GGD/Z5cJISTdInsdI4Q4eULMhAMEFeMw3FSXk7.BVYUYeGDMwF2e'),
     ],
+    'meta' => [
+        'pixel_id' => trim((string) Env::get('META_PIXEL_ID', '')),
+        'capi_token' => trim((string) Env::get('META_CAPI_TOKEN', '')),
+        'test_event_code' => trim((string) Env::get('META_TEST_EVENT_CODE', '')),
+    ],
     'stripe' => [
         'secret' => (string) Env::get('STRIPE_SECRET_KEY', ''),
         'webhook_secret' => (string) Env::get('STRIPE_WEBHOOK_SECRET', ''),

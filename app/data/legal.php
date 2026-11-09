@@ -8,7 +8,7 @@ declare(strict_types=1);
 return [
     'privacy' => [
         'title' => 'Privacy policy',
-        'updated' => '16 October 2026',
+        'updated' => '9 November 2026',
         'body' => <<<'HTML'
 <p>This policy explains what information atwebtech collects, why it is collected, how it is used, how long it is kept, and how you can delete it. It covers the website at https://atwebtech.us/, the waitlist, the contact form, a workspace account, and a YouTube channel you choose to connect.</p>
 <p><strong>Who we are:</strong> atwebtech.us is operated by atwebtech, 3672 S 16th Ave, Tucson, AZ 85713, US. You can email <a href="mailto:info@atwebtech.us">info@atwebtech.us</a> or use the <a href="/contact">contact form</a>.</p>
@@ -32,7 +32,12 @@ return [
 <h3>Technical information</h3>
 <p>To protect the forms from abuse we store a one-way keyed hash derived from your IP address (not the address itself) and your browser's user-agent string. We also record form attempts for a short period to apply rate limits.</p>
 <h3>Cookies</h3>
-<p>This site sets one essential session cookie. It protects forms against cross-site request forgery, shows the result of a form submission, and remembers the campaign link you arrived from until you close the browser. The site does not use advertising or analytics cookies.</p>
+<p>This site sets one essential session cookie. It protects forms against cross-site request forgery, shows the result of a form submission, and remembers the campaign link you arrived from until you close the browser. When Meta advertising measurement is turned on (see below), the Meta Pixel also sets advertising cookies named <code>_fbp</code> and <code>_fbc</code>. These are not set if your browser sends the Global Privacy Control signal.</p>
+<h3>Advertising measurement (Meta)</h3>
+<p>We advertise on Facebook and Instagram. To learn which ads lead people to sign up or subscribe, this site can use the Meta Pixel in your browser and Meta’s Conversions API from our server. When it is on, Meta receives: the pages you visit on this site, and when you join the waitlist, send a message, create an account, start checkout, or subscribe (with the plan’s price). It also receives your email address in hashed form (an irreversible code, never the address itself), a hashed account number, your IP address, your browser type, and Meta’s cookie or ad-click identifiers. Meta uses this to measure and improve our ads, under <a href="https://www.facebook.com/privacy/policy/" rel="noopener">Meta’s privacy policy</a>. We never send Meta the content of your messages, posts, or connected accounts.</p>
+<p><b>Opting out:</b> turn on Global Privacy Control in your browser (we honor it automatically, and nothing is sent to Meta), block third-party cookies, change your <a href="https://www.facebook.com/adpreferences/" rel="noopener">Facebook ad preferences</a>, or email us to opt out.</p>
+<h3>Payments</h3>
+<p>Paid plans are processed by Stripe. Your card details go directly to Stripe and never reach our servers. We keep your plan, the number of channels, billing period, subscription status, and Stripe customer ID so we can provide the plan you pay for.</p>
 <h3>Interactive demo</h3>
 <p>Demo interactions, such as moving idea cards or typing a reply, run entirely in your browser. They are not sent to or stored on our servers.</p>
 
@@ -44,13 +49,13 @@ return [
   <li>To upload videos you scheduled to that YouTube channel.</li>
   <li>To keep the website secure and prevent spam.</li>
 </ul>
-<p>We do not sell personal information. The website host stores this information so the site can run, and the email provider delivers messages you asked us to send. They process it only for those purposes.</p>
+<p>We do not sell personal information for money. The website host stores this information so the site can run, the email provider delivers messages you asked us to send, and Stripe processes payments. They process it only for those purposes. Sharing data with Meta for ad measurement, described above, may count as “sharing” for advertising under California law; you can opt out at any time with Global Privacy Control or by contacting us.</p>
 
 <h2>How long we keep it</h2>
 <p>Waitlist and contact records are kept until you ask us to delete them, or until we no longer need them to reply to you or to send the updates you requested. A connected YouTube channel, its name and picture, and its encrypted tokens are kept until you disconnect the channel or ask us to delete them. A video file you attached to a scheduled post is kept until the post is sent or you delete the post. Security logs are kept only for a short period.</p>
 
 <h2>Your choices and rights</h2>
-<p>You can disconnect a connected channel in your workspace at any time. Disconnecting revokes atwebtech’s access to that channel. You can ask us to access, correct, or delete the information we hold about you, including your account, waitlist entry, messages, channel name, picture, and tokens, by emailing <a href="mailto:info@atwebtech.us">info@atwebtech.us</a> or using the <a href="/contact">contact form</a>. The steps are also on the <a href="/data-deletion">data deletion</a> page.</p>
+<p>You can disconnect a connected channel in your workspace at any time. Disconnecting revokes atwebtech’s access to that channel. You can ask us to access, correct, or delete the information we hold about you, including your account, waitlist entry, messages, channel name, picture, and tokens, by emailing <a href="mailto:info@atwebtech.us">info@atwebtech.us</a> or using the <a href="/contact">contact form</a>. The steps are also on the <a href="/data-deletion">data deletion</a> page. California residents can also opt out of sharing for advertising, and we will not treat you differently for using any of these rights.</p>
 
 <h2>Changes to this policy</h2>
 <p>We will update this page if our practices change. The date at the top of this page is the date of the latest change.</p>

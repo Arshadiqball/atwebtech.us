@@ -227,6 +227,17 @@ The composer's Templates panel has a **Trending** view, filtered by the same Net
 - **Contact page:** timeline of everything the person did, notes (note, call, email, meeting), tags, status, and follow-ups with a due date. **Follow-ups** lists what's overdue, due today and upcoming; the admin bar shows a badge when something is due.
 - Messages moved to `/admin/messages`. Code: `app/Crm.php`, `views/pages/admin-crm*.php`. Data: migration `014`.
 
+## Meta ads tracking (Pixel and Conversions API)
+
+Turn it on by setting `META_PIXEL_ID` and `META_CAPI_TOKEN` in the server `.env` (Events Manager → your Pixel → Settings → Conversions API → Generate access token). With `META_PIXEL_ID` empty, nothing loads and nothing is sent. It only runs on the live site.
+
+- **Events:** `PageView` (marketing pages), `Lead` (waitlist, contact form), `CompleteRegistration` (new account), `InitiateCheckout` (going to Stripe, with the price), `Purchase` (paid plan confirmed, with the amount charged).
+- Each conversion goes to Meta twice, from the browser Pixel and from the server (Conversions API), with the same `event_id`, so Meta deduplicates it and still counts it when the Pixel is blocked.
+- The server sends hashed email, hashed account ID, IP address, user agent, and `_fbp`/`_fbc` (or one built from the `fbclid` the visitor arrived with). Message and post content are never sent.
+- Visitors whose browser sends Global Privacy Control get no Pixel and no server events. The privacy policy describes all of this.
+- To check it, set `META_TEST_EVENT_CODE` from Events Manager → Test events, use the site, and watch events arrive; then clear the code. `META_TEST_BASE` points the server calls at a local fake for automated tests and is ignored in production.
+- Code: `app/Meta.php`, `public/assets/js/meta-pixel.js`.
+
 ## AI Assistant
 
 The composer's AI Assistant writes a draft from a short brief using OpenAI's Chat Completions API. The call is made from the server, and the key never reaches the browser.

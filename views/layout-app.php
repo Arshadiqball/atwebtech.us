@@ -23,6 +23,10 @@ $theme = Auth::user()['theme'] ?? 'light';
   <link rel="stylesheet" href="<?= e(asset('css/admin.css')) ?>">
 <?php endif; ?>
   <script src="<?= e(asset('js/app.js')) ?>" defer></script>
+<?php if (Meta::enabled()): ?>
+  <script type="application/json" id="meta-events"><?= json_encode(Meta::takeBrowserEvents(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
+  <script src="<?= e(asset('js/meta-pixel.js')) ?>" data-pixel="<?= e(Meta::pixelId()) ?>" data-pageview="0" defer></script>
+<?php endif; ?>
 </head>
 <body class="acct">
   <a class="skip-link" href="#main">Skip to content</a>

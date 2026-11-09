@@ -121,6 +121,7 @@ final class FormHandler
             'Campaign' => Campaign::label(),
         ]);
 
+        Meta::track('Lead', ['email' => $input['email']], ['content_name' => 'Waitlist', 'content_category' => $input['plan'] !== '' ? $input['plan'] : 'updates']);
         flash('joined', '1');
         self::respond($formId, 'success', "You're on the list. We'll email you with atwebtech product and early-access news.", 200, [], [], '/joined');
     }
@@ -178,6 +179,7 @@ final class FormHandler
             'Message' => $input['message'],
         ]);
 
+        Meta::track('Lead', ['email' => $input['email']], ['content_name' => 'Contact form', 'content_category' => $input['topic']]);
         self::respond($formId, 'success', 'Thanks, your message has been saved. The atwebtech team will reply by email.');
     }
 
@@ -224,6 +226,8 @@ final class FormHandler
             $payload = ['status' => $status, 'message' => $message, 'errors' => (object) $errors];
             if ($redirectTo !== null && $status === 'success') {
                 $payload['redirect'] = $redirectTo;
+            } elseif ($status === 'success') {
+                $payload['meta'] = Meta::takeBrowserEvents();
             }
             json_response($payload, $code);
         }
