@@ -15,7 +15,7 @@ final class Metrics
         'facebook' => ['followers', 'impressions', 'reach', 'reactions', 'comments', 'shares', 'video_views', 'unique_viewers', 'watch_seconds'],
         'instagram' => ['followers', 'impressions', 'reach', 'reactions', 'comments', 'shares', 'saves', 'video_views', 'watch_seconds'],
         'threads' => ['followers', 'impressions', 'reactions', 'comments', 'shares'],
-        'x' => ['followers', 'impressions', 'reactions', 'comments', 'shares', 'saves'],
+        'x' => [], // X charges for every API read, so stats aren't collected.
         'youtube' => ['followers', 'reactions', 'comments', 'shares', 'video_views', 'watch_seconds'],
         'pinterest' => ['followers', 'impressions', 'reactions', 'comments', 'saves', 'video_views'],
         'linkedin' => [],
@@ -215,7 +215,6 @@ final class Metrics
             'facebook' => self::int(self::get(self::GRAPH . '/' . $id . '?' . http_build_query(['fields' => 'followers_count,fan_count', 'access_token' => $token]), null, true), ['followers_count'], ['fan_count']),
             'instagram' => self::int(self::get(self::IG . '/me?' . http_build_query(['fields' => 'followers_count']), $token), ['followers_count']),
             'threads' => self::threadsFollowers($id, $token),
-            'x' => self::int(self::get('https://api.x.com/2/users/me?user.fields=public_metrics', $token), ['data', 'public_metrics', 'followers_count']),
             'youtube' => self::youtubeSubscribers($id, $token),
             'pinterest' => self::int(self::get('https://api.pinterest.com/v5/user_account', $token), ['follower_count']),
             default => null,
@@ -257,25 +256,6 @@ final class Metrics
             return [];
         }
         $out = [];
-        if ($channel['provider'] === 'x') {
-            foreach (array_chunk($rows, 100) as $chunk) {
-                $byExt = array_column($chunk, 'id', 'external_id');
-                $data = self::get('https://api.x.com/2/tweets?' . http_build_query(['ids' => implode(',', array_keys($byExt)), 'tweet.fields' => 'public_metrics']), $token);
-                foreach ($data['data'] ?? [] as $t) {
-                    $pm = $t['public_metrics'] ?? [];
-                    if (isset($byExt[$t['id'] ?? ''])) {
-                        $out[(int) $byExt[$t['id']]] = [
-                            'impressions' => $pm['impression_count'] ?? null,
-                            'reactions' => $pm['like_count'] ?? null,
-                            'comments' => $pm['reply_count'] ?? null,
-                            'shares' => isset($pm['retweet_count']) ? (int) $pm['retweet_count'] + (int) ($pm['quote_count'] ?? 0) : null,
-                            'saves' => $pm['bookmark_count'] ?? null,
-                        ];
-                    }
-                }
-            }
-            return $out;
-        }
         if ($channel['provider'] === 'youtube') {
             $analytics = true;
             foreach (array_chunk($rows, 50) as $chunk) {
@@ -467,11 +447,9 @@ final class Metrics
     /** User-facing reason a channel's stats couldn't be read. */
     private static function explain(string $provider, Throwable $e): string
     {
-        $name = ['facebook' => 'Facebook', 'instagram' => 'Instagram', 'threads' => 'Threads', 'x' => 'X', 'youtube' => 'YouTube', 'pinterest' => 'Pinterest'][$provider] ?? 'The network';
+        $name = ['facebook' => 'Facebook', 'instagram' => 'Instagram', 'threads' => 'Threads', 'youtube' => 'YouTube', 'pinterest' => 'Pinterest'][$provider] ?? 'The network';
         return match (true) {
             $e instanceof ChannelAuthException => $e->getMessage(),
-            $provider === 'x' && $e instanceof ChannelApiException && in_array($e->status, [402, 403], true)
-                => 'X only shares post stats with apps on a paid X API plan. Posting still works.',
             $e instanceof MetricsPermission, $e instanceof ChannelApiException && in_array($e->status, [401, 403], true)
                 => 'Reconnect ' . $name . ' and allow access to insights to see its stats.',
             $e instanceof ChannelApiException && $e->status === 429 => $name . ' limited how often stats can be read. atwebtech will try again later.',

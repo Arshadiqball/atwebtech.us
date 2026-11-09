@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Competitor analysis: follow public accounts on other networks and compare their followers,
+ * Competitor analysis (YouTube, Bluesky, Instagram): follow public accounts on other networks and compare their followers,
  * posting rhythm and engagement with yours. Data comes from each network's public API and is
  * refreshed by bin/publish.php twice a day.
  */
@@ -13,14 +13,13 @@ final class Competitors
         'youtube' => ['name' => 'YouTube', 'placeholder' => '@channel or youtube.com/@channel', 'followers' => 'Subscribers'],
         'bluesky' => ['name' => 'Bluesky', 'placeholder' => 'handle.bsky.social', 'followers' => 'Followers'],
         'instagram' => ['name' => 'Instagram', 'placeholder' => '@username (professional account)', 'followers' => 'Followers'],
-        'x' => ['name' => 'X', 'placeholder' => '@username', 'followers' => 'Followers'],
     ];
     public const FREE_LIMIT = 3;
     public const PAID_LIMIT = 25;
     private const POSTS = 30;
     private const REFRESH_HOURS = 12;
     private const GRAPH = 'https://graph.facebook.com/v23.0';
-    private const AVATAR_HOSTS = ['yt3.ggpht.com', 'yt3.googleusercontent.com', 'cdn.bsky.app', 'pbs.twimg.com'];
+    private const AVATAR_HOSTS = ['yt3.ggpht.com', 'yt3.googleusercontent.com', 'cdn.bsky.app'];
 
     public static function limit(int $uid): int
     {
@@ -217,8 +216,8 @@ final class Competitors
         return match ($network) {
             'youtube' => self::youtube($input, $isId),
             'bluesky' => self::bluesky($input),
-            'x' => self::x($input, $user),
             'instagram' => self::instagram($input, $user),
+            default => throw new CompetitorError('Competitors on this network aren’t supported.'),
         };
     }
 
@@ -307,51 +306,6 @@ final class Competitors
         ];
     }
 
-    private static function x(string $input, array $user): array
-    {
-        $username = ltrim((string) preg_replace('~^(?:https?://)?(?:www\.)?(?:x|twitter)\.com/~i', '', trim($input)), '@');
-        $username = (string) strtok($username, '/?#');
-        if (!preg_match('/^[A-Za-z0-9_]{1,15}$/', $username)) {
-            throw new CompetitorError('Enter an X username like @name.');
-        }
-        $token = self::channelToken((int) $user['id'], 'x');
-        if ($token === null) {
-            throw new CompetitorError('Connect your X account first. atwebtech reads competitors on X through your connection.');
-        }
-        try {
-            $u = self::get('https://api.x.com/2/users/by/username/' . $username . '?user.fields=public_metrics,profile_image_url,name', $token);
-            $id = (string) ($u['data']['id'] ?? '');
-            if ($id === '') {
-                throw new CompetitorError('No X account found for @' . $username . '.');
-            }
-            $t = self::get('https://api.x.com/2/users/' . $id . '/tweets?' . http_build_query(['max_results' => 20, 'exclude' => 'retweets,replies', 'tweet.fields' => 'public_metrics,created_at']), $token);
-        } catch (ChannelApiException $e) {
-            if (in_array($e->status, [402, 403], true)) {
-                throw new CompetitorError('X only shares other accounts’ data with apps that have X API credits. Add credits in the X developer portal, then try again.');
-            }
-            if ($e->status === 429) {
-                throw new CompetitorError('X limited how often accounts can be looked up. Try again in 15 minutes.');
-            }
-            throw $e;
-        }
-        $posts = [];
-        foreach ($t['data'] ?? [] as $tw) {
-            $m = $tw['public_metrics'] ?? [];
-            $posts[] = self::post((string) $tw['id'], (string) ($tw['created_at'] ?? ''), (string) ($tw['text'] ?? ''), 'https://x.com/' . $username . '/status/' . $tw['id'], 'post', $m['like_count'] ?? null, $m['reply_count'] ?? null, (int) ($m['retweet_count'] ?? 0) + (int) ($m['quote_count'] ?? 0), $m['impression_count'] ?? null);
-        }
-        $pm = $u['data']['public_metrics'] ?? [];
-        return [
-            'external_id' => $id,
-            'handle' => '@' . $username,
-            'name' => (string) ($u['data']['name'] ?? $username),
-            'avatar' => $u['data']['profile_image_url'] ?? null,
-            'url' => 'https://x.com/' . $username,
-            'followers' => isset($pm['followers_count']) ? (int) $pm['followers_count'] : null,
-            'posts_total' => isset($pm['tweet_count']) ? (int) $pm['tweet_count'] : null,
-            'posts' => array_values(array_filter($posts)),
-        ];
-    }
-
     /** Instagram Business Discovery, through a connected Facebook Page that has an Instagram professional account. */
     private static function instagram(string $input, array $user): array
     {
@@ -395,21 +349,6 @@ final class Competitors
             ];
         }
         throw new CompetitorError('Instagram competitors need a connected Facebook Page that is linked to your Instagram professional account, with Instagram access allowed. Link them in Meta Business Suite, then reconnect the Page.');
-    }
-
-    private static function channelToken(int $uid, string $provider): ?string
-    {
-        $stmt = Database::connection()->prepare('SELECT id FROM channels WHERE user_id = :uid AND provider = :p ORDER BY id DESC');
-        $stmt->execute(['uid' => $uid, 'p' => $provider]);
-        foreach ($stmt->fetchAll(PDO::FETCH_COLUMN) as $id) {
-            $c = Channels::find($uid, (int) $id);
-            try {
-                return $c ? Channels::accessToken($c) : null;
-            } catch (Throwable) {
-                continue;
-            }
-        }
-        return null;
     }
 
     /** @return list<array{0:string,1:string}> page id and page token for each connected Facebook Page */

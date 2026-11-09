@@ -52,7 +52,7 @@ ob_start(); ?>
     </form>
     <p class="co-meta"><?= $count ?> of <?= $limit ?> competitors<?= !$paid ? ' on the Free plan. <a href="/app/billing">Upgrade</a> to follow up to ' . Competitors::PAID_LIMIT . '.' : '.' ?>
       <span class="tip"><button type="button" class="tip-btn" aria-describedby="co-tip-nets" aria-label="Which networks work"><?= icon('info') ?></button>
-      <span class="tip-body" role="tooltip" id="co-tip-nets">YouTube and Bluesky work for any public account. Instagram needs a connected Facebook Page linked to your Instagram professional account, and works for other professional accounts. X needs X API credits on the app.</span></span>
+      <span class="tip-body" role="tooltip" id="co-tip-nets">YouTube and Bluesky work for any public account. Instagram needs a connected Facebook Page linked to your Instagram professional account, and works for other professional accounts. X isn’t included because its API charges for every read.</span></span>
     </p>
   </section>
 

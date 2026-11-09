@@ -61,7 +61,7 @@ return [
             ['title' => 'Metrics that lead to decisions', 'text' => 'Reporting is built around questions you can act on: what worked, where, and what to try next, rather than a wall of numbers.'],
             ['title' => 'Readable at a glance', 'text' => 'Simple charts, plain labels, and short summaries make it easier to share results with a client, a manager, or yourself on a Monday morning.'],
         ],
-        'status' => 'Available now. Insights shows followers, reactions, comments, shares, impressions, reach and video stats from Instagram, Facebook Pages, Threads, X, YouTube and Pinterest, updated every few hours, with CSV and PDF exports on paid plans, plus competitor tracking for YouTube, Bluesky, Instagram and X accounts. LinkedIn personal profiles don’t share post stats with apps. The preview above uses sample data.',
+        'status' => 'Available now. Insights shows followers, reactions, comments, shares, impressions, reach and video stats from Instagram, Facebook Pages, Threads, YouTube and Pinterest, updated every few hours, with CSV and PDF exports on paid plans, plus competitor tracking for YouTube, Bluesky and Instagram accounts. LinkedIn personal profiles and X don’t share post stats with apps for free. The preview above uses sample data.',
         'related' => ['publishing', 'content-planner', 'community'],
         'meta_title' => 'Social media analytics | atwebtech',
         'meta_description' => 'Compare posts, track audience growth and engagement, and see which channels work best with clear reporting views.',

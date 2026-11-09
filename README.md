@@ -259,10 +259,10 @@ Turn it on by setting `META_PIXEL_ID` and `META_CAPI_TOKEN` in the server `.env`
 | Instagram | followers, likes, comments; views, reach, shares, saves, Reels watch time | `instagram_business_manage_insights` (requested by default) |
 | Facebook Pages | followers, reactions, comments, shares, views, reach, video stats | add `pages_read_engagement` and `read_insights` to the Facebook Login for Business configuration |
 | Threads | followers, views, likes, replies, reposts and quotes | `threads_manage_insights` (requested by default) |
-| X | followers, impressions, likes, replies, reposts, bookmarks | `tweet.read` (already granted); needs an X API plan with read access |
 | YouTube | subscribers, views, likes, comments; watch time and shares with YouTube Analytics | `yt-analytics.readonly`, opt in with `STATS_PERMISSIONS=instagram,threads,youtube` |
 | Pinterest | followers, impressions, saves, reactions, comments | `pins:read`, `user_accounts:read` (already granted) |
 | LinkedIn profiles, TikTok | none: no stats API for apps | |
+| X | not collected: the X API charges for every read | |
 
 Existing channels pick up new permissions when they are reconnected.
 
@@ -275,9 +275,8 @@ Workspace → **Competitors** (`/app/competitors`, `app/Competitors.php`, migrat
 | YouTube | YouTube Data API through `YOUTUBE_API_KEY` or any connected YouTube channel |
 | Bluesky | Public Bluesky API, no setup |
 | Instagram | Business Discovery through a connected Facebook Page linked to an Instagram professional account (needs `instagram_basic` and `pages_read_engagement` in the Facebook Login configuration); works for other professional accounts |
-| X | The user's connected X account; needs X API credits on the app |
 
-Facebook Pages need Meta's Page Public Content Access feature, so they aren't offered.
+Facebook Pages need Meta's Page Public Content Access feature, and X charges for every API read, so neither is offered.
 
 ## Cron jobs (production)
 

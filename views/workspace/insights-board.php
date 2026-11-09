@@ -159,7 +159,7 @@ $m['prev']['watch_time'] = $m['prev']['watch_seconds'];
       <li>
         <?= icon('warning-circle') ?>
         <span><b><?= e($ch['name']) ?></b> (<?= e($names[$ch['provider']] ?? $ch['provider']) ?>): <?= e($issue['message']) ?></span>
-<?php if (Channels::connectable($ch['provider']) && !str_starts_with($issue['message'], 'X only')): ?>
+<?php if (Channels::connectable($ch['provider'])): ?>
         <form action="/app/channels/connect/<?= e($ch['provider']) ?>" method="post">
           <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
           <input type="hidden" name="reconnect" value="1">
