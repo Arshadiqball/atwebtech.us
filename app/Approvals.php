@@ -10,6 +10,7 @@ declare(strict_types=1);
 final class Approvals
 {
     public const LINK_DAYS = 30;
+    public const MAX_INVITES = 20;
 
     /** Posts waiting for approval, oldest time first. */
     public static function pending(int $uid): array
@@ -69,23 +70,88 @@ final class Approvals
         if ($action === 'link') {
             $token = bin2hex(random_bytes(24));
             $pdo = Database::connection();
-            $pdo->prepare('UPDATE approval_links SET revoked_at = :now WHERE user_id = :uid AND revoked_at IS NULL')->execute(['now' => Database::now(), 'uid' => $uid]);
+            $pdo->prepare('UPDATE approval_links SET revoked_at = :now WHERE user_id = :uid AND revoked_at IS NULL AND label IS NULL')->execute(['now' => Database::now(), 'uid' => $uid]);
             $pdo->prepare('INSERT INTO approval_links (user_id, token_hash, created_at, expires_at) VALUES (:uid, :hash, :now, :exp)')
                 ->execute(['uid' => $uid, 'hash' => hash('sha256', $token), 'now' => Database::now(), 'exp' => gmdate('Y-m-d H:i:s', time() + 86400 * self::LINK_DAYS)]);
             $_SESSION['_review_link'] = $token;
             self::done($back, 'New review link created. Copy it now; for your security it is shown only once.');
         }
         if ($action === 'revoke') {
-            Database::connection()->prepare('UPDATE approval_links SET revoked_at = :now WHERE user_id = :uid AND revoked_at IS NULL')->execute(['now' => Database::now(), 'uid' => $uid]);
+            Database::connection()->prepare('UPDATE approval_links SET revoked_at = :now WHERE user_id = :uid AND revoked_at IS NULL AND label IS NULL')->execute(['now' => Database::now(), 'uid' => $uid]);
             self::done($back, 'Review link turned off. Anyone who has it can no longer open it.');
+        }
+        if ($action === 'invite') {
+            self::invite($user);
+        }
+        if ($action === 'uninvite') {
+            Database::connection()->prepare('UPDATE approval_links SET revoked_at = :now WHERE id = :id AND user_id = :uid AND label IS NOT NULL AND revoked_at IS NULL')
+                ->execute(['now' => Database::now(), 'id' => $id, 'uid' => $uid]);
+            self::done($back . '#invite', 'Teammate removed. Their review link no longer works.');
         }
         self::done($back, 'Nothing changed.');
     }
 
-    /** The active review link for an account, if any. */
+    /** Teammates invited by email, each with their own review link. */
+    public static function invites(int $uid): array
+    {
+        $stmt = Database::connection()->prepare('SELECT id, label, created_at, expires_at FROM approval_links WHERE user_id = :uid AND label IS NOT NULL AND revoked_at IS NULL AND expires_at > :now ORDER BY id DESC');
+        $stmt->execute(['uid' => $uid, 'now' => Database::now()]);
+        return array_map(static function (array $row): array {
+            [$name, $email] = array_pad(explode("\n", (string) $row['label'], 2), 2, '');
+            return $row + ['name' => $name, 'email' => $email];
+        }, $stmt->fetchAll());
+    }
+
+    /** Invite a teammate: a private review link of their own, sent by email and shown once here. */
+    private static function invite(array $user): never
+    {
+        $uid = (int) $user['id'];
+        $back = '/app/publish?tab=approvals#invite';
+        $name = trim(preg_replace('/\s+/', ' ', (string) ($_POST['name'] ?? '')) ?? '');
+        $email = strtolower(trim((string) ($_POST['email'] ?? '')));
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL) || mb_strlen($email) > 60) {
+            self::done($back, 'Enter your teammate’s email address.');
+        }
+        if (strcasecmp($email, (string) $user['email']) === 0) {
+            self::done($back, 'That’s your own email. Invite a teammate, client or manager instead.');
+        }
+        $name = mb_substr($name, 0, 18);
+        $current = self::invites($uid);
+        foreach ($current as $inv) {
+            if (strcasecmp($inv['email'], $email) === 0) {
+                Database::connection()->prepare('UPDATE approval_links SET revoked_at = :now WHERE id = :id')->execute(['now' => Database::now(), 'id' => (int) $inv['id']]);
+            }
+        }
+        if (count($current) >= self::MAX_INVITES) {
+            self::done($back, 'You can have up to ' . self::MAX_INVITES . ' teammates. Remove one to invite someone new.');
+        }
+        if (RateLimiter::tooManyAttempts('invite', (string) $uid, 15, 60)) {
+            self::done($back, 'That’s a lot of invites in a short time. Please try again in an hour.');
+        }
+        RateLimiter::hit('invite', (string) $uid);
+        $token = bin2hex(random_bytes(24));
+        Database::connection()->prepare('INSERT INTO approval_links (user_id, token_hash, label, created_at, expires_at) VALUES (:uid, :hash, :label, :now, :exp)')
+            ->execute(['uid' => $uid, 'hash' => hash('sha256', $token), 'label' => $name . "\n" . $email, 'now' => Database::now(), 'exp' => gmdate('Y-m-d H:i:s', time() + 86400 * self::LINK_DAYS)]);
+        $url = public_origin() . '/review/' . $token;
+        $owner = trim((string) ($user['display_name'] ?? '')) !== '' ? (string) $user['display_name'] : (string) $user['email'];
+        $mail = EmailTemplate::invite($url, $owner, $name, self::LINK_DAYS);
+        $sent = false;
+        try {
+            if (config('mail.enabled') && (string) config('mail.host') !== '' && (string) config('mail.user') !== '' && (string) config('mail.pass') !== '') {
+                Mailer::send($email, $mail['subject'], $mail['html'], $mail['text']);
+                $sent = true;
+            }
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] invite email failed: %s', gmdate('c'), $e->getMessage()));
+        }
+        $_SESSION['_invite_link'] = ['url' => $url, 'email' => $email];
+        self::done($back, $sent ? 'Invite sent to ' . $email . '. You can also copy their link below.' : 'Invite created. Email isn’t set up, so copy the link below and send it to ' . $email . '.');
+    }
+
+    /** The shared review link for an account, if any (teammate invites have their own links). */
     public static function activeLink(int $uid): ?array
     {
-        $stmt = Database::connection()->prepare('SELECT * FROM approval_links WHERE user_id = :uid AND revoked_at IS NULL AND expires_at > :now ORDER BY id DESC LIMIT 1');
+        $stmt = Database::connection()->prepare('SELECT * FROM approval_links WHERE user_id = :uid AND label IS NULL AND revoked_at IS NULL AND expires_at > :now ORDER BY id DESC LIMIT 1');
         $stmt->execute(['uid' => $uid, 'now' => Database::now()]);
         return $stmt->fetch() ?: null;
     }

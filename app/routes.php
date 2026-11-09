@@ -275,6 +275,13 @@ return [
             return ['insights' => $in, 'campaigns' => Reports::campaigns((int) $user['id'], $in['from']->setTimezone($utc)->format('Y-m-d H:i:s'), $in['to']->setTimezone($utc)->format('Y-m-d H:i:s'))];
         });
     }],
+    ['GET', '/app/competitors', static function (): void {
+        Workspace::render('competitors', 'workspace/competitors', 'Competitors', static function (array $user): array {
+            $range = (int) Workspace::pick('range', ['30', '7', '90']);
+            return ['range' => $range, 'rows' => Competitors::report((int) $user['id'], $range), 'limit' => Competitors::limit((int) $user['id'])];
+        });
+    }],
+    ['POST', '/app/competitors', [Competitors::class, 'handle']],
     ['POST', '/app/ideas', [WorkspaceHandler::class, 'idea']],
     ['POST', '/app/ideas/move', [WorkspaceHandler::class, 'moveIdeas']],
     ['POST', '/app/groups', [WorkspaceHandler::class, 'group']],

@@ -266,6 +266,19 @@ Turn it on by setting `META_PIXEL_ID` and `META_CAPI_TOKEN` in the server `.env`
 
 Existing channels pick up new permissions when they are reconnected.
 
+## Competitors
+
+Workspace → **Competitors** (`/app/competitors`, `app/Competitors.php`, migration `017`) follows public accounts and compares followers, growth, posts per week, average likes, comments and views, engagement rate and top posts over 7, 30 or 90 days. Free plans follow 3 accounts, paid plans 25. `bin/publish.php` refreshes each competitor every 12 hours; there is also an Update button.
+
+| Network | How it reads other accounts |
+|---|---|
+| YouTube | YouTube Data API through `YOUTUBE_API_KEY` or any connected YouTube channel |
+| Bluesky | Public Bluesky API, no setup |
+| Instagram | Business Discovery through a connected Facebook Page linked to an Instagram professional account (needs `instagram_basic` and `pages_read_engagement` in the Facebook Login configuration); works for other professional accounts |
+| X | The user's connected X account; needs X API credits on the app |
+
+Facebook Pages need Meta's Page Public Content Access feature, so they aren't offered.
+
 ## Cron jobs (production)
 
 | Schedule | Command | Purpose |

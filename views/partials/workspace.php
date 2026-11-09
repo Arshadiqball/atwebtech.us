@@ -42,8 +42,8 @@ $notice = flash('notice');
         </a>
         <hr>
         <a class="ws-menu-item" href="/app/channels#connect" data-connect-open><?= icon('plus') ?>Connect a New Channel</a>
-        <span class="ws-menu-item is-disabled" aria-disabled="true"><?= icon('arrow-square-out') ?>Create a Start Page<span class="ws-chip">Soon</span></span>
-        <span class="ws-menu-item is-disabled" aria-disabled="true"><?= icon('lightning') ?>Invite a Team Member<span class="ws-chip">Soon</span></span>
+        <a class="ws-menu-item" href="/app/link-in-bio"><?= icon('globe-simple') ?>Create a Start Page</a>
+        <a class="ws-menu-item" href="/app/publish?tab=approvals#invite"><?= icon('user-plus') ?>Invite a Team Member</a>
       </div>
     </div>
 

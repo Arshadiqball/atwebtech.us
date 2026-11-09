@@ -161,7 +161,7 @@ final class Trends
     }
 
     /** An API key, or an OAuth token from any connected YouTube channel. */
-    private static function youtubeAccess(): ?array
+    public static function youtubeAccess(): ?array
     {
         $key = (string) Env::get('YOUTUBE_API_KEY', '');
         if ($key !== '') {

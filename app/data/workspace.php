@@ -19,6 +19,7 @@ return [
         'publish' => ['label' => 'Publish', 'icon' => 'calendar-blank', 'href' => '/app/publish', 'count' => true],
         'community' => ['label' => 'Community', 'icon' => 'chats-circle', 'href' => '/app/community'],
         'insights' => ['label' => 'Insights', 'icon' => 'chart-bar', 'href' => '/app/insights'],
+        'competitors' => ['label' => 'Competitors', 'icon' => 'chart-line-up', 'href' => '/app/competitors'],
         'bio' => ['label' => 'Link in Bio', 'icon' => 'link-simple', 'href' => '/app/link-in-bio'],
         'channels' => [
             'label' => 'Channels', 'icon' => 'plus', 'href' => '/app/channels', 'nav' => false,

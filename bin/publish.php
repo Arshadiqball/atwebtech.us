@@ -28,7 +28,11 @@ fclose($lock);
 $statsLock = fopen(BASE_PATH . '/storage/logs/metrics.lock', 'c');
 if ($statsLock && flock($statsLock, LOCK_EX | LOCK_NB)) {
     try {
-        $stats = Metrics::run(40);
+        $stats = Metrics::run(30);
+        $followed = Competitors::run(15);
+        if ($followed > 0) {
+            printf("[%s] competitors: %d refreshed\n", gmdate('c'), $followed);
+        }
         if ($stats['channels'] > 0) {
             printf("[%s] stats: %d channels, %d posts, %d errors\n", gmdate('c'), $stats['channels'], $stats['posts'], $stats['errors']);
         }

@@ -28,6 +28,22 @@ final class EmailTemplate
         ];
     }
 
+    /** @return array{subject: string, html: string, text: string} */
+    public static function invite(string $inviteUrl, string $owner, string $name, int $days): array
+    {
+        $html = self::layout(
+            $owner . ' invited you to review posts on atwebtech.',
+            self::capture('invite', ['inviteUrl' => $inviteUrl, 'owner' => $owner, 'name' => $name, 'days' => $days])
+        );
+        $text = 'Hi ' . ($name !== '' ? $name : 'there') . ",\n\n"
+            . $owner . " invited you to review their social media posts on atwebtech. Open this link to approve posts or ask for changes. You don't need an account:\n"
+            . $inviteUrl . "\n\n"
+            . 'The link is private to you and works for ' . $days . " days.\n\n"
+            . "Cheers,\nThe atwebtech team\n\n"
+            . (string) config('contact.address') . "\n";
+        return ['subject' => $owner . ' invited you to review posts', 'html' => $html, 'text' => $text];
+    }
+
     private static function layout(string $preheader, string $content): string
     {
         return self::capture('layout', [

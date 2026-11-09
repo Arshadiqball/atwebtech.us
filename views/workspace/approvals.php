@@ -10,6 +10,9 @@ $json = static fn (array $data): string => e(json_encode($data, JSON_UNESCAPED_U
 $freshToken = $_SESSION['_review_link'] ?? null;
 unset($_SESSION['_review_link']);
 $freshUrl = $freshToken ? public_origin() . '/review/' . $freshToken : null;
+$freshInvite = $_SESSION['_invite_link'] ?? null;
+unset($_SESSION['_invite_link']);
+$invites = Approvals::invites($uid);
 ?>
 <section class="ap-share" aria-labelledby="ap-share-title">
   <div>
@@ -31,6 +34,43 @@ $freshUrl = $freshToken ? public_origin() . '/review/' . $freshToken : null;
     <button type="submit" class="ws-btn" name="action" value="revoke" data-confirm="Turn off the review link? Anyone who has it can no longer open it.">Turn off link</button>
 <?php endif; ?>
   </form>
+</section>
+
+<section class="ap-share ap-invite" id="invite" aria-labelledby="ap-invite-title">
+  <div>
+    <h2 id="ap-invite-title"><?= icon('users-three') ?>Invite a team member</h2>
+    <p>Add a teammate, client or manager as a reviewer. They get their own private link by email to approve posts or ask for changes, with no account needed. Remove them any time.</p>
+  </div>
+  <form action="/app/approvals" method="post" class="ap-invite-form">
+    <input type="hidden" name="_token" value="<?= e($token) ?>">
+    <input type="hidden" name="action" value="invite">
+    <label class="sr-only" for="ap-invite-name">Name</label>
+    <input class="idea-input" id="ap-invite-name" name="name" maxlength="18" placeholder="Name (optional)" autocomplete="off">
+    <label class="sr-only" for="ap-invite-email">Email</label>
+    <input class="idea-input" id="ap-invite-email" type="email" name="email" maxlength="60" placeholder="teammate@company.com" required autocomplete="off">
+    <button type="submit" class="ws-btn ws-btn--dark"><?= icon('paper-plane-tilt') ?>Send invite</button>
+  </form>
+<?php if ($freshInvite): ?>
+  <div class="ap-link">
+    <input class="idea-input" value="<?= e($freshInvite['url']) ?>" readonly aria-label="Review link for <?= e($freshInvite['email']) ?>">
+    <button type="button" class="ws-btn ws-btn--dark" data-copy-text="<?= e($freshInvite['url']) ?>"><span aria-live="polite">Copy link</span></button>
+  </div>
+<?php endif; ?>
+<?php if ($invites): ?>
+  <ul class="ap-team" role="list">
+<?php foreach ($invites as $inv): ?>
+    <li>
+      <span class="ap-team-avatar" aria-hidden="true"><?= e(mb_strtoupper(mb_substr($inv['name'] !== '' ? $inv['name'] : $inv['email'], 0, 1))) ?></span>
+      <span><b><?= e($inv['name'] !== '' ? $inv['name'] : $inv['email']) ?></b><small><?= $inv['name'] !== '' ? e($inv['email']) . ' · ' : '' ?>Reviewer until <?= e(Workspace::local((string) $inv['expires_at'], $tz)->format('j M Y')) ?></small></span>
+      <form action="/app/approvals" method="post">
+        <input type="hidden" name="_token" value="<?= e($token) ?>">
+        <input type="hidden" name="id" value="<?= (int) $inv['id'] ?>">
+        <button type="submit" class="ws-btn ws-btn--sm" name="action" value="uninvite" data-confirm="Remove <?= e($inv['email']) ?>? Their review link stops working.">Remove</button>
+      </form>
+    </li>
+<?php endforeach; ?>
+  </ul>
+<?php endif; ?>
 </section>
 
 <?php if ($posts): ?>
