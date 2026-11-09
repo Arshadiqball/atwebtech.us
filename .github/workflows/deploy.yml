@@ -1,0 +1,74 @@
+name: Deploy
+
+# Every push to main is checked, then copied to the live server with rsync.
+# The server keeps its own .env and storage/ (see .deployignore). Migrations run after each deploy.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-production
+  cancel-in-progress: false
+
+env:
+  DEPLOY_HOST: vda2000.is.cc
+  DEPLOY_USER: atwebtec
+  DEPLOY_PATH: domains/atwebtech.us/public_html
+
+jobs:
+  check:
+    name: PHP syntax check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          coverage: none
+      - name: Lint every PHP file
+        run: |
+          find . -name '*.php' -not -path './vendor/*' -not -path './.git/*' -print0 \
+            | xargs -0 -n1 -P4 php -l > /tmp/lint.txt || { grep -v '^No syntax errors' /tmp/lint.txt; exit 1; }
+          echo "$(grep -c '^No syntax errors' /tmp/lint.txt) files OK"
+
+  deploy:
+    name: Deploy to atwebtech.us
+    needs: check
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Upload files
+        run: |
+          rsync -rlptzv --delete --checksum \
+            --exclude-from=.deployignore \
+            --chmod=Du=rwx,Dgo=rx,Fu=rw,Fgo=r \
+            -e "ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes" \
+            ./ "$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH/"
+
+      - name: Prepare storage and run migrations
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" bash -s <<EOF
+          set -e
+          cd "$DEPLOY_PATH"
+          mkdir -p storage/logs storage/sessions storage/media
+          PHP=\$(command -v php8.3 || command -v php8.2 || command -v php)
+          \$PHP bin/migrate.php
+          EOF
+
+      - name: Check the site responds
+        run: |
+          code=$(curl -s -o /dev/null -w '%{http_code}' https://atwebtech.us/)
+          echo "Homepage returned $code"
+          test "$code" = "200"

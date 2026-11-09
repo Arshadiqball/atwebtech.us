@@ -1,0 +1,23 @@
+# Paths rsync never uploads to the server, and never deletes there (see .github/workflows/deploy.yml).
+# The server keeps its own .env and storage/ (sessions, logs, uploaded media, migration stamps).
+
+/.env
+/storage/
+/.git/
+/.github/
+/.claude/
+/.playwright-cli/
+/public/.playwright-cli/
+/data/
+/.deployignore
+/.DS_Store
+**/.DS_Store
+
+# Files the host or other tools create in public_html.
+/.well-known/
+/cgi-bin/
+/error_log
+**/error_log
+/.user.ini
+/php.ini
+/.htpasswd
