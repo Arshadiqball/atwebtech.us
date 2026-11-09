@@ -172,6 +172,11 @@ return [
         if ($onboarding['completed_at'] === null) {
             redirect('/welcome' . ((int) $onboarding['step'] > 0 ? '?step=' . ((int) $onboarding['step'] + 1) : ''));
         }
+        if (is_array($_SESSION['_upgrade'] ?? null)) {
+            $intent = $_SESSION['_upgrade'];
+            unset($_SESSION['_upgrade']);
+            redirect('/app/billing?' . http_build_query($intent));
+        }
         View::render('app-home', ['user' => $user, 'onboarding' => $onboarding, 'section' => 'home'], [
             'title' => 'Home | atwebtech', 'description' => 'Your atwebtech workspace.', 'layout' => 'app', 'noindex' => true,
         ]);
@@ -265,6 +270,14 @@ return [
     ['POST', '/app/posts/move', [WorkspaceHandler::class, 'movePost']],
     ['POST', '/app/templates', [WorkspaceHandler::class, 'template']],
     ['POST', '/account/timezone', [WorkspaceHandler::class, 'timezone']],
+    ['GET', '/upgrade', [BillingHandler::class, 'upgrade']],
+    ['GET', '/app/billing', static function (): void {
+        Workspace::render('billing', 'workspace/billing', 'Billing', static fn (array $user): array => BillingHandler::pageState($user));
+    }],
+    ['POST', '/app/billing/checkout', [BillingHandler::class, 'checkout']],
+    ['GET', '/app/billing/success', [BillingHandler::class, 'success']],
+    ['POST', '/app/billing/portal', [BillingHandler::class, 'portal']],
+    ['POST', '/stripe/webhook', [Billing::class, 'webhook']],
     ['GET', '/app/account', static function (): void {
         Workspace::render('account', 'workspace/account', 'Account', static function (array $user): array {
             return ['twoFactor' => TwoFactor::pageState((int) $user['id'])];

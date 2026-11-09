@@ -194,7 +194,28 @@ The composer's AI Assistant writes a draft from a short brief using OpenAI's Cha
 
 ## Pricing
 
-Plans, per-channel rates, the volume rate, the comparison table and the pricing FAQ live in `app/data/pricing.php`. Totals are calculated in `app/Pricing.php` and mirrored in `public/assets/js/app.js`, so change both if the formula changes. Without JavaScript the channel and billing controls submit as a normal `GET` form. No payment is taken: every plan button joins the waitlist with that plan selected. IP addresses are never stored; only a keyed hash is kept for rate limiting.
+Plans, per-channel rates, the volume rate, the comparison table and the pricing FAQ live in `app/data/pricing.php`. Totals are calculated in `app/Pricing.php` and mirrored in `public/assets/js/app.js`, so change both if the formula changes. Without JavaScript the channel and billing controls submit as a normal `GET` form. When Stripe is set up (below), paid plan buttons go to `/upgrade`, which sends guests to sign up first and then to checkout. Without Stripe, they offer "Get notified", which saves the email and plan to the waitlist. IP addresses are never stored; only a keyed hash is kept for rate limiting.
+
+Free plan limits come from `free_channels`, `free_scheduled` (scheduled posts per channel) and `free_ideas` in `app/data/pricing.php`, enforced in `Channels::allowance()`, `Channels::scheduledCap()` and `Channels::ideaCap()`.
+
+## Billing (Stripe)
+
+Paid plans are sold with Stripe Checkout and managed in the Stripe customer portal. Code: `app/Billing.php` (Stripe API, webhook) and `app/BillingHandler.php` (pages). Customers use **Plan & billing** (`/app/billing`) in the workspace account menu.
+
+- **How prices work:** there is nothing to create in the Stripe dashboard. Each subscription has one line item for channels 1 to 10 at the plan rate and, above 10 channels, a second one at the volume rate, both from `app/data/pricing.php`. Yearly charges 10 months. One Stripe product per plan ("atwebtech Essentials", "atwebtech Team") is created on first use and remembered in `billing_products`. Changing prices in `pricing.php` applies to new checkouts and plan changes; existing subscribers keep their price until they change plan.
+- **Plan changes:** choosing another plan, interval or channel count on `/app/billing` updates the live subscription, prorated. Card, invoices and cancellation are in the Stripe portal ("Manage billing").
+- **Access:** a subscription that is `active`, `trialing` or `past_due` unlocks the plan, with as many channels as were paid for. When it ends, the account goes back to Free. A plan set by an admin under `/admin/subscribers` still works as a complimentary plan for anyone without a Stripe subscription.
+- **Data:** migration `010` adds `users.stripe_customer_id`, `subscriptions`, `billing_products` and `stripe_events` (processed webhook IDs, so retries are ignored). Card details never reach this server.
+
+**Setup:**
+1. In the [Stripe dashboard](https://dashboard.stripe.com/), copy the secret key (*Developers → API keys*) into `STRIPE_SECRET_KEY`. Start with test mode (`sk_test_...`).
+2. Under *Developers → Webhooks*, add the endpoint `https://atwebtech.us/stripe/webhook` with these events: `checkout.session.completed`, `customer.subscription.created`, `customer.subscription.updated`, `customer.subscription.deleted`, `customer.subscription.paused`, `customer.subscription.resumed`, `invoice.paid`, `invoice.payment_failed`. Copy its signing secret into `STRIPE_WEBHOOK_SECRET`.
+3. Under *Settings → Billing → Customer portal*, turn on: update payment methods, view invoices, and cancel subscriptions (at the end of the billing period). Leave plan switching off; that happens in atwebtech.
+4. Optional: set up Stripe Tax and your US sales-tax registrations, then set `STRIPE_AUTOMATIC_TAX=true`.
+5. Test with card `4242 4242 4242 4242`. Locally, forward webhooks with the Stripe CLI: `stripe listen --forward-to localhost:8000/stripe/webhook`, and use the `whsec_...` it prints.
+6. To go live, repeat steps 1 to 3 in live mode with the live keys.
+
+`STRIPE_TEST_BASE` points API calls at a local fake server for automated tests. It is ignored when `APP_ENV=production`.
 
 ## Demo content
 

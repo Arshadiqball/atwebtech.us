@@ -18,7 +18,7 @@ final class ChannelHandler
         $reconnect = ($_POST['reconnect'] ?? '') === '1';
         $allowance = Channels::allowance($uid);
         if (!$reconnect && count(Channels::forUser($uid)) >= $allowance['limit']) {
-            self::notice('/app/channels', sprintf('The %s plan includes %d channels. Disconnect one to add another.', $allowance['name'], $allowance['limit']));
+            self::notice('/app/channels', sprintf('Your %s plan includes %d channels. Add channels in Plan & billing, or disconnect one to add another.', $allowance['name'], $allowance['limit']));
         }
         $fingerprint = Security::clientFingerprint();
         if (RateLimiter::tooManyAttempts('channel-connect', $fingerprint, 10, 10)) {
@@ -177,7 +177,7 @@ final class ChannelHandler
         $new = array_filter($picked, static fn (string $id): bool => !in_array($pending['provider'] . ':' . $id, $known, true));
         $allowance = Channels::allowance($uid);
         if (count($existing) + count($new) > $allowance['limit']) {
-            flash('form', ['form' => 'confirm', 'status' => 'error', 'message' => sprintf('The %s plan includes %d channels. You can add %d more.', $allowance['name'], $allowance['limit'], max(0, $allowance['limit'] - count($existing))), 'errors' => [], 'old' => []]);
+            flash('form', ['form' => 'confirm', 'status' => 'error', 'message' => sprintf('Your %s plan includes %d channels, so you can add %d more. Add channels in Plan & billing to connect them all.', $allowance['name'], $allowance['limit'], max(0, $allowance['limit'] - count($existing))), 'errors' => [], 'old' => []]);
             redirect('/app/channels/confirm');
         }
 
@@ -446,6 +446,11 @@ final class ChannelHandler
         }
         if (self::countPosts($uid) + count($slots) > 1000) {
             $fail('You have reached the limit of 1,000 posts. Delete a few to add more.', 4);
+        }
+        $scheduledCap = $in['save'] === 'planned' ? Channels::scheduledCap($uid) : null;
+        if ($scheduledCap !== null && Channels::scheduledCount($uid, (int) $channel['id']) + count($slots) > $scheduledCap) {
+            $left = max(0, $scheduledCap - Channels::scheduledCount($uid, (int) $channel['id']));
+            $fail(sprintf('The Free plan allows %d scheduled posts per channel, so you can add %d more here. Upgrade for unlimited scheduling, or save them as drafts.', $scheduledCap, $left), 4);
         }
         $problem = Assistant::allowanceProblem($uid, (int) ceil(count($slots) / 10));
         if ($problem !== null) {

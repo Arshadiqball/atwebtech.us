@@ -48,3 +48,13 @@ Stack trace:
 [22-Oct-2026 05:17:51 UTC] PHP Deprecated:  Method ReflectionMethod::setAccessible() is deprecated since 8.5, as it has no effect since PHP 8.1 in Command line code on line 4
 [22-Oct-2026 05:17:51 UTC] PHP Deprecated:  Function imagedestroy() is deprecated since 8.5, as it has no effect since PHP 8.0 in /Users/mac/Documents/atwebtech/atwebtechus/app/Media.php on line 262
 [22-Oct-2026 05:17:51 UTC] PHP Deprecated:  Function imagedestroy() is deprecated since 8.5, as it has no effect since PHP 8.0 in /Users/mac/Documents/atwebtech/atwebtechus/app/Media.php on line 271
+[09-Nov-2026 08:11:48 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 111
+[09-Nov-2026 08:11:48 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 112
+[09-Nov-2026 08:11:48 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 111
+[09-Nov-2026 08:11:48 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 112
+[09-Nov-2026 08:11:49 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 111
+[09-Nov-2026 08:11:49 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 112
+[09-Nov-2026 08:11:49 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 111
+[09-Nov-2026 08:11:49 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 112
+[09-Nov-2026 08:12:09 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 111
+[09-Nov-2026 08:12:09 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 112

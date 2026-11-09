@@ -14,6 +14,8 @@ $jsConfig = [
     'rates' => array_map(static fn ($p) => $p['rate'], $plans),
     'names' => array_map(static fn ($p) => $p['name'], $plans),
 ];
+$billingOpen = Billing::enabled();
+$upgradeHref = static fn (string $key): string => '/upgrade?' . http_build_query(['plan' => $key, 'channels' => $channelsCount, 'billing' => $billing]);
 $planHref = static fn (string $key): string => '/pricing?' . http_build_query(['plan' => $key, 'channels' => $channelsCount, 'billing' => $billing]) . '#join';
 $cell = static function (bool|string $value): string {
     if ($value === true) {
@@ -81,6 +83,9 @@ $planKeys = array_keys($plans);
 <?php if ($p['rate'] === 0): ?>
         <a class="btn btn--primary plan-cta" href="/signup">Start free<?= icon('arrow-right') ?></a>
         <p class="plan-sub-cta">No credit card required</p>
+<?php elseif ($billingOpen): ?>
+        <a class="btn <?= $p['badge'] ? 'btn--primary' : 'btn--dark' ?> plan-cta" href="<?= e($upgradeHref($key)) ?>" data-plan-link>Get <?= e($p['name']) ?><?= icon('arrow-right') ?></a>
+        <p class="plan-sub-cta">Secure checkout. Cancel any time.</p>
 <?php else: ?>
         <a class="btn <?= $p['badge'] ? 'btn--primary' : 'btn--dark' ?> plan-cta" href="/signup">Start free, upgrade later<?= icon('arrow-right') ?></a>
         <p class="plan-sub-cta"><a href="<?= e($planHref($key)) ?>" data-plan-cta="<?= e($key) ?>">Get notified when <?= e($p['name']) ?> opens</a></p>
@@ -103,7 +108,9 @@ $planKeys = array_keys($plans);
     <p class="sr-only" aria-live="polite" data-pricing-live></p>
 
     <div class="pr-after">
-      <p class="pr-disclaimer">Prices in US dollars. Every account starts on the Free plan. Paid plans are opening soon, and you can upgrade from your workspace when they do.</p>
+      <p class="pr-disclaimer"><?= $billingOpen
+        ? 'Prices in US dollars, before any applicable sales tax. Change channels or cancel any time from Plan &amp; billing in your workspace.'
+        : 'Prices in US dollars. Every account starts on the Free plan. Paid plans are opening soon, and you can upgrade from your workspace when they do.' ?></p>
       <a class="btn btn--dark btn--sm" href="#compare">Compare plans<?= icon('arrow-down') ?></a>
     </div>
   </div>
@@ -153,7 +160,11 @@ $planKeys = array_keys($plans);
           <th scope="col" class="cmp-plan<?= $p['badge'] ? ' cmp-col--featured' : '' ?>">
             <?php if ($p['badge']): ?><span class="plan-badge-pill"><?= e($p['badge']) ?></span><?php endif; ?>
             <span class="cmp-plan-name"><?= e($p['name']) ?></span>
+            <?php if ($billingOpen && $p['rate'] > 0): ?>
+            <a class="btn btn--outline btn--xs" href="<?= e($upgradeHref($key)) ?>" data-plan-link>Get<span class="sr-only"> <?= e($p['name']) ?></span><?= icon('arrow-right') ?></a>
+<?php else: ?>
             <a class="btn btn--outline btn--xs" href="/signup">Start free<span class="sr-only"> with <?= e($p['name']) ?> in mind</span><?= icon('arrow-right') ?></a>
+<?php endif; ?>
           </th>
 <?php endforeach; ?>
         </tr>
@@ -189,5 +200,5 @@ $planKeys = array_keys($plans);
   </div>
 </section>
 
-<?php partial('partials/cta-final', ['source' => 'pricing', 'plan' => ['selected' => $selectedPlan, 'billing' => $billing, 'channels' => $channelsCount]]); ?>
+<?php partial('partials/cta-final', ['source' => 'pricing'] + ($billingOpen ? [] : ['plan' => ['selected' => $selectedPlan, 'billing' => $billing, 'channels' => $channelsCount]])); ?>
 </div>

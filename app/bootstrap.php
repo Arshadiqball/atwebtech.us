@@ -19,6 +19,8 @@ require BASE_PATH . '/app/Admin.php';
 require BASE_PATH . '/app/View.php';
 require BASE_PATH . '/app/Charts.php';
 require BASE_PATH . '/app/Pricing.php';
+require BASE_PATH . '/app/Billing.php';
+require BASE_PATH . '/app/BillingHandler.php';
 require BASE_PATH . '/app/Auth.php';
 require BASE_PATH . '/app/QrCode.php';
 require BASE_PATH . '/app/TwoFactor.php';

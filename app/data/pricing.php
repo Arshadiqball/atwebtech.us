@@ -13,6 +13,8 @@ return [
     'yearly_months' => 10,
     'max_channels' => 100,
     'free_channels' => 3,
+    'free_ideas' => 100,
+    'free_scheduled' => 10,
 
     'plans' => [
         'free' => [
@@ -108,13 +110,16 @@ return [
     ],
 
     'faq' => [
-        ['Can I sign up today?', '<p>Yes. Create a free account and start planning and scheduling right away, with no credit card. Paid plans are opening soon. Use "Get notified" under Essentials or Team and we will email you as soon as you can upgrade.</p>'],
+        ['Can I sign up today?', Billing::enabled()
+            ? '<p>Yes. Create a free account and start planning and scheduling right away, with no credit card. When you need more, upgrade to Essentials or Team from Plan &amp; billing in your workspace. Payments are processed securely by Stripe.</p>'
+            : '<p>Yes. Create a free account and start planning and scheduling right away, with no credit card. Paid plans are opening soon. Use "Get notified" under Essentials or Team and we will email you as soon as you can upgrade.</p>'],
         ['What counts as a channel?', '<p>A channel is one social account you connect, such as a single Instagram profile, Facebook page, or LinkedIn page. A link in bio page also counts as one channel. If you manage three brands with an Instagram and a Facebook account each, that is six channels.</p>'],
         ['How does per-channel pricing work?', '<p>Paid plans are priced per channel, so you only pay for the accounts you manage. Channels 1 to 10 are billed at the plan rate ($6 a month on Essentials, $12 a month on Team). Every channel after the tenth is $4 a month on either plan, so your average cost per channel goes down as you grow.</p>'],
         ['What are the billing options?', '<p>Paid plans can be billed monthly or yearly. Yearly billing costs the same as 10 months, so you save the equivalent of two months.</p>'],
         ['Is there a free plan?', '<p>Yes. The Free plan includes up to 3 channels, 10 scheduled posts per channel at a time, 100 ideas, and core analytics, with no time limit.</p>'],
         ['What is the scheduled post limit for each plan?', '<p>On the Free plan each channel can hold 10 scheduled posts at a time. When a post is published, that slot becomes available again. Paid plans have no limit on scheduled posts per channel.</p>'],
         ['Which channels can I connect?', '<p>atwebtech is built for Instagram, Facebook, TikTok, LinkedIn, YouTube, Pinterest, Threads, X, and Google Business Profile. Each network is switched on once its connection is approved by the platform. The <a href="/integrations">integrations page</a> shows which ones are live today.</p>'],
-        ['Can I cancel or change plans?', '<p>Yes. You can stay on Free as long as you like. Paid plans will be billed monthly or yearly, and you can add or remove channels at any time.</p>'],
+        ['Can I cancel or change plans?', '<p>Yes. You can stay on Free as long as you like. On a paid plan you can switch plans, add or remove channels, or cancel from Plan &amp; billing in your workspace. Changes are prorated, and if you cancel you keep your paid features until the end of the period you paid for.</p>'],
+        ['Which payment methods do you accept?', '<p>All major credit and debit cards, processed by Stripe. Card details are never stored on atwebtech servers. Invoices and receipts are available from Plan &amp; billing.</p>'],
     ],
 ];

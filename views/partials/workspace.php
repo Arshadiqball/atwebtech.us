@@ -95,7 +95,7 @@ $notice = flash('notice');
     <div class="ws-side-foot">
 <?php if ($onboarding['checklist_closed_at'] === null): ?>
       <div class="ws-progress" data-dismissible>
-        <a class="ws-progress-link" href="/app/channels"><?= $allowance['paid'] ? count($connected) . ' channels connected' : count($connected) . '/' . $channelLimit . ' channels connected' ?></a>
+        <a class="ws-progress-link" href="/app/channels"><?= $allowance['source'] === 'admin' ? count($connected) . ' channels connected' : count($connected) . '/' . $channelLimit . ' channels connected' ?></a>
 <?php if (!$allowance['paid']): ?>
         <span class="ws-progress-bar" aria-hidden="true"><?php for ($i = 0; $i < $channelLimit; $i++): ?><i<?= $i < count($connected) ? ' class="is-on"' : '' ?>></i><?php endfor; ?></span>
 <?php endif; ?>
@@ -114,6 +114,7 @@ $notice = flash('notice');
         <div class="ws-account-menu" id="ws-account-menu" hidden>
           <p class="ws-account-email"><?= e($user['email']) ?></p>
           <a href="/app/account"<?= aria_current('/app/account') ?>><?= icon('user') ?>Account</a>
+          <a href="/app/billing"<?= aria_current('/app/billing') ?>><?= icon('tag') ?>Plan &amp; billing</a>
 <?php if (Auth::isAdmin()): ?>
           <a href="/admin"><?= icon('tray') ?>Messages</a>
           <a href="/admin/subscribers"><?= icon('envelope-simple') ?>Subscribers</a>

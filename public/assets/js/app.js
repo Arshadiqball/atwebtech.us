@@ -580,7 +580,7 @@
         summary.push(`${cfg.names[plan]} ${money(price)} per month`);
       });
       stepBtns.forEach((b) => { b.disabled = Number(b.dataset.step) < 0 ? n <= 1 : n >= cfg.max; });
-      $$('[data-plan-cta]', root).forEach((a) => {
+      $$('[data-plan-cta], [data-plan-link]', root).forEach((a) => {
         const url = new URL(a.href, location.href);
         url.searchParams.set('channels', n);
         url.searchParams.set('billing', cycle);
@@ -1958,6 +1958,32 @@
         io.observe(el);
       }
     });
+  }
+
+  /* Billing page: live total for the chosen plan, channels and interval */
+  const billForm = $('[data-billing-form]');
+  if (billForm) {
+    const cfg = JSON.parse($('[data-billing-config]', billForm).textContent);
+    const money = (n) => {
+      const r = Math.round(n * 100) / 100;
+      return '$' + r.toLocaleString('en-US', { minimumFractionDigits: r % 1 ? 2 : 0, maximumFractionDigits: 2 });
+    };
+    const update = () => {
+      const plan = ($('[data-bill-plan]:checked', billForm) || {}).value || 'essentials';
+      const yearly = (($('[data-bill-interval]:checked', billForm) || {}).value || 'yearly') === 'yearly';
+      const input = $('[data-bill-channels]', billForm);
+      const n = Math.max(Number(input.min) || 1, Math.min(cfg.max, parseInt(input.value, 10) || 1));
+      const std = Math.min(n, cfg.volumeFrom - 1);
+      const monthly = std * cfg.rates[plan] + Math.max(0, n - (cfg.volumeFrom - 1)) * cfg.volumeRate;
+      const label = n + (n === 1 ? ' channel' : ' channels');
+      $('[data-bill-total]', billForm).textContent = money(yearly ? monthly * cfg.yearlyMonths / 12 : monthly);
+      $('[data-bill-note]', billForm).textContent = yearly
+        ? `${label} · ${money(monthly * cfg.yearlyMonths)} billed yearly (save ${12 - cfg.yearlyMonths} months)`
+        : `${label} · Billed monthly`;
+    };
+    billForm.addEventListener('input', update);
+    billForm.addEventListener('change', update);
+    update();
   }
 
   /* 3D hero: the product tilts back and flattens as you scroll -------- */

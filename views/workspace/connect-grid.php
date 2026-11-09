@@ -6,7 +6,7 @@ $full = $connectedCount >= $allowance['limit'];
 $linked = $linked ?? [];
 ?>
 <?php if ($full): ?>
-<p class="cg-note"><?= icon('info') ?><span>The <?= e($allowance['name']) ?> plan includes <?= (int) $allowance['limit'] ?> channels, and you've connected all of them. Disconnect one to add another.</span></p>
+<p class="cg-note"><?= icon('info') ?><span>The <?= e($allowance['name']) ?> plan includes <?= (int) $allowance['limit'] ?> channels, and you've connected all of them. <a href="/app/billing"><?= $allowance['paid'] ? 'Add channels' : 'Upgrade' ?></a> or disconnect one to add another.</span></p>
 <?php endif; ?>
 <ul class="cg" role="list">
 <?php foreach (integrations() as $ch): $live = Channels::connectable($ch['slug']); ?>

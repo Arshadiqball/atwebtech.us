@@ -1185,10 +1185,11 @@ final class Channels
     }
 
     /**
-     * Plan for the signed-in account, taken from the waitlist row with the same email.
-     * Paid plans use the pricing channel cap. Anyone without a paid plan stays on Free.
+     * Plan for the signed-in account.
+     * A live Stripe subscription wins and allows the channels paid for. Otherwise a plan an admin
+     * set on the waitlist row with the same email (a complimentary plan) applies. Everyone else is on Free.
      *
-     * @return array{slug: string, name: string, limit: int, paid: bool}
+     * @return array{slug: string, name: string, limit: int, paid: bool, source: string}
      */
     public static function allowance(?int $userId = null): array
     {
@@ -1199,7 +1200,14 @@ final class Channels
         }
         $cfg = data('pricing');
         $slug = 'free';
-        if ($userId > 0) {
+        $limit = (int) $cfg['free_channels'];
+        $source = 'free';
+        $sub = $userId > 0 ? Billing::current($userId) : null;
+        if ($sub !== null && isset($cfg['plans'][$sub['plan']])) {
+            $slug = (string) $sub['plan'];
+            $limit = (int) $sub['channels'];
+            $source = 'stripe';
+        } elseif ($userId > 0) {
             $stmt = Database::connection()->prepare(
                 'SELECT w.plan FROM users u
                  INNER JOIN waitlist_signups w ON LOWER(w.email) = LOWER(u.email)
@@ -1209,17 +1217,39 @@ final class Channels
             );
             $stmt->execute(['id' => $userId]);
             $plan = (string) $stmt->fetchColumn();
-            if (isset($cfg['plans'][$plan])) {
+            if (isset($cfg['plans'][$plan]) && $plan !== 'free') {
                 $slug = $plan;
+                $limit = (int) $cfg['max_channels'];
+                $source = 'admin';
             }
         }
-        $paid = $slug !== 'free';
         return $cache[$userId] = [
             'slug' => $slug,
             'name' => (string) $cfg['plans'][$slug]['name'],
-            'limit' => $paid ? (int) $cfg['max_channels'] : (int) $cfg['free_channels'],
-            'paid' => $paid,
+            'limit' => $limit,
+            'paid' => $slug !== 'free',
+            'source' => $source,
         ];
+    }
+
+    /** Ideas allowed for the user's plan; null when only the storage cap applies. */
+    public static function ideaCap(int $uid): ?int
+    {
+        return self::allowance($uid)['paid'] ? null : (int) data('pricing')['free_ideas'];
+    }
+
+    /** Scheduled posts allowed per channel; null means unlimited. */
+    public static function scheduledCap(int $uid): ?int
+    {
+        return self::allowance($uid)['paid'] ? null : (int) data('pricing')['free_scheduled'];
+    }
+
+    /** Posts waiting to go out on one channel, optionally leaving one post out (when it is being edited). */
+    public static function scheduledCount(int $uid, int $channelId, int $exceptPostId = 0): int
+    {
+        $stmt = Database::connection()->prepare("SELECT COUNT(*) FROM posts WHERE user_id = :uid AND channel_id = :cid AND status IN ('planned', 'publishing') AND id <> :except");
+        $stmt->execute(['uid' => $uid, 'cid' => $channelId, 'except' => $exceptPostId]);
+        return (int) $stmt->fetchColumn();
     }
 
     /** True when the granted YouTube scopes allow videos.insert. */

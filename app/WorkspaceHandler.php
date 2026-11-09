@@ -61,6 +61,10 @@ final class WorkspaceHandler
             if (self::count('ideas', $uid) >= self::MAX_IDEAS) {
                 self::fail('idea', $back, 'You have reached the limit of ' . self::MAX_IDEAS . ' ideas. Delete a few to add more.', [], $input);
             }
+            $ideaCap = Channels::ideaCap($uid);
+            if ($ideaCap !== null && self::count('ideas', $uid) >= $ideaCap) {
+                self::fail('idea', $back, sprintf('The Free plan holds %d ideas. Upgrade for unlimited ideas, or delete a few to add more.', $ideaCap), [], $input);
+            }
             $pdo->prepare('INSERT INTO ideas (user_id, group_id, title, body, tags, position, created_at, updated_at) VALUES (:uid, :gid, :title, :body, :tags, :pos, :created, :updated)')
                 ->execute(['uid' => $uid, 'gid' => $groupId, 'title' => $input['title'], 'body' => $input['body'], 'tags' => $input['tags'], 'pos' => self::topPosition($uid, $groupId), 'created' => $now, 'updated' => $now]);
             $id = (int) $pdo->lastInsertId();
@@ -342,6 +346,14 @@ final class WorkspaceHandler
         if (!$existing && self::count('posts', $uid) + count($targets) > self::MAX_POSTS) {
             self::fail('composer', $back, 'You have reached the limit of ' . self::MAX_POSTS . ' posts. Delete a few to add more.', [], $input);
         }
+        $scheduledCap = $action === 'plan' ? Channels::scheduledCap($uid) : null;
+        if ($scheduledCap !== null) {
+            foreach ($targets as $target) {
+                if ($target['channel'] && Channels::scheduledCount($uid, (int) $target['channel']['id'], $existing ? $id : 0) >= $scheduledCap) {
+                    self::fail('composer', $back, sprintf('%s already has %d scheduled posts, the most the Free plan allows per channel. Upgrade for unlimited scheduling, or save this as a draft.', $target['channel']['name'], $scheduledCap), [], $input + ['id' => $id, 'action' => $action]);
+                }
+            }
+        }
         $publishes = false;
         foreach ($targets as $target) {
             $isYoutube = $target['provider'] === 'youtube';
@@ -396,6 +408,10 @@ final class WorkspaceHandler
             }
             if (self::count('ideas', $uid) >= self::MAX_IDEAS) {
                 self::fail('template', '/app/create?tab=templates', 'You have reached the limit of ' . self::MAX_IDEAS . ' ideas.');
+            }
+            $ideaCap = Channels::ideaCap($uid);
+            if ($ideaCap !== null && self::count('ideas', $uid) >= $ideaCap) {
+                self::fail('template', '/app/create?tab=templates', sprintf('The Free plan holds %d ideas. Upgrade for unlimited ideas.', $ideaCap));
             }
             $now = Database::now();
             $pdo->prepare('INSERT INTO ideas (user_id, group_id, title, body, tags, position, created_at, updated_at) VALUES (:uid, NULL, :title, :body, :tags, :pos, :created, :updated)')

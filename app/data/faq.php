@@ -15,7 +15,7 @@ return [
     ],
     [
         'q' => 'Is there a free plan?',
-        'a' => '<p>Yes. <a href="/signup">Create a free account</a> and connect up to 3 channels, with up to 10 scheduled posts per channel and 100 ideas. No credit card required. Paid plans with higher limits are coming soon.</p>',
+        'a' => '<p>Yes. <a href="/signup">Create a free account</a> and connect up to 3 channels, with up to 10 scheduled posts per channel and 100 ideas. No credit card required. ' . (Billing::enabled() ? 'Upgrade to Essentials or Team any time for unlimited posts and ideas and more channels.' : 'Paid plans with higher limits are coming soon.') . '</p>',
     ],
     [
         'q' => 'Can I try it before signing up?',

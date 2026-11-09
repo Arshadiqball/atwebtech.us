@@ -52,6 +52,12 @@ return [
         'user' => (string) Env::get('ADMIN_USER', 'admin'),
         'password_hash' => (string) Env::get('ADMIN_PASSWORD_HASH', '$2y$12$5GGD/Z5cJISTdInsdI4Q4eULMhAMEFeMw3FSXk7.BVYUYeGDMwF2e'),
     ],
+    'stripe' => [
+        'secret' => (string) Env::get('STRIPE_SECRET_KEY', ''),
+        'webhook_secret' => (string) Env::get('STRIPE_WEBHOOK_SECRET', ''),
+        'automatic_tax' => filter_var(Env::get('STRIPE_AUTOMATIC_TAX', false), FILTER_VALIDATE_BOOL),
+        'test_base' => (string) Env::get('STRIPE_TEST_BASE', ''),
+    ],
     'integrations' => [
         'available' => (string) Env::get('INTEGRATIONS_AVAILABLE', ''),
     ],
