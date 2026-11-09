@@ -52,7 +52,8 @@ $next = $queue['next'] ?? null;
     <nav class="wsp-tabs" aria-label="<?= e($channel['name']) ?> posts">
       <a href="<?= e($self) ?><?= $view === 'calendar' ? '?view=calendar' : '' ?>"<?= $tab === 'queue' ? ' aria-current="page"' : '' ?>>Queue <span class="wsp-count"><?= $counts['queue'] ?></span></a>
       <a href="<?= e($self) ?>?tab=drafts"<?= $tab === 'drafts' ? ' aria-current="page"' : '' ?>>Drafts <span class="wsp-count"><?= $counts['drafts'] ?></span></a>
-      <a href="<?= e($self) ?>?tab=approvals"<?= $tab === 'approvals' ? ' aria-current="page"' : '' ?>>Approvals <span class="wsp-bolt" aria-hidden="true"><?= icon('lightning') ?></span></a>
+      <a href="<?= e($self) ?>?tab=approvals"<?= $tab === 'approvals' ? ' aria-current="page"' : '' ?>>Approvals <span class="wsp-count<?= $counts['review'] > 0 ? ' wsp-count--warn' : '' ?>"><?= $counts['review'] ?></span></a>
+      <a href="<?= e($self) ?>?tab=failed"<?= $tab === 'failed' ? ' aria-current="page"' : '' ?>>Failed <span class="wsp-count<?= $counts['failed'] > 0 ? ' wsp-count--bad' : '' ?>"><?= $counts['failed'] ?></span></a>
       <a href="<?= e($self) ?>?tab=sent"<?= $tab === 'sent' ? ' aria-current="page"' : '' ?>>Sent <span class="wsp-count"><?= $counts['sent'] ?></span></a>
     </nav>
     <div class="wsp-filters">
@@ -156,12 +157,10 @@ $next = $queue['next'] ?? null;
 <?php partial('workspace/calendar', ['user' => $user, 'week' => $week, 'url' => $url, 'target' => $target, 'filter' => '']); ?>
 <?php elseif ($tab === 'drafts' || $tab === 'sent'): ?>
 <?php partial('workspace/post-list', ['user' => $user, 'posts' => $posts, 'kind' => $tab, 'compose' => json_encode(['targets' => [$target]])]); ?>
+<?php elseif ($tab === 'approvals'): ?>
+<?php partial('workspace/approvals', ['user' => $user, 'posts' => $posts, 'reviewLink' => $reviewLink ?? null]); ?>
 <?php else: ?>
-  <div class="wsp-empty">
-    <span class="wsp-empty-icon wsp-empty-icon--purple"><?= icon('lightning') ?></span>
-    <h2>Approvals <span class="ws-soon">Coming soon</span></h2>
-    <p>Approvals will let teammates review posts before they go out. Teams aren't available yet.</p>
-  </div>
+<?php partial('workspace/failed', ['user' => $user, 'posts' => $posts]); ?>
 <?php endif; ?>
 </div>
 

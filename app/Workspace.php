@@ -137,7 +137,7 @@ final class Workspace
         return array_values(array_filter(array_map('trim', explode(',', (string) $tags)), 'strlen'));
     }
 
-    private const POST_COLUMNS = 'id, channel, channel_id, body, title, meta, tags, status, planned_at, sent_at, external_url, error, attempts, idea_id, media_id, updated_at';
+    private const POST_COLUMNS = 'id, channel, channel_id, body, title, meta, tags, status, planned_at, sent_at, external_url, error, attempts, idea_id, media_id, review_note, reviewed_by, updated_at';
 
     public static function post(int $uid, int $id): ?array
     {
@@ -198,8 +198,10 @@ final class Workspace
     public static function counts(int $uid, ?int $channelId = null): array
     {
         $sql = "SELECT
-                SUM(CASE WHEN status IN ('planned', 'publishing', 'failed') THEN 1 ELSE 0 END) AS queue,
+                SUM(CASE WHEN status IN ('planned', 'publishing') THEN 1 ELSE 0 END) AS queue,
                 SUM(CASE WHEN status = 'draft' THEN 1 ELSE 0 END) AS drafts,
+                SUM(CASE WHEN status = 'review' THEN 1 ELSE 0 END) AS review,
+                SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed,
                 SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) AS sent,
                 SUM(CASE WHEN status = 'sent' AND sent_at >= :week THEN 1 ELSE 0 END) AS sent_week
              FROM posts WHERE user_id = :uid";
@@ -211,7 +213,7 @@ final class Workspace
         $stmt = Database::connection()->prepare($sql);
         $stmt->execute($params);
         $row = $stmt->fetch() ?: [];
-        return ['queue' => (int) ($row['queue'] ?? 0), 'drafts' => (int) ($row['drafts'] ?? 0), 'sent' => (int) ($row['sent'] ?? 0), 'sent_week' => (int) ($row['sent_week'] ?? 0)];
+        return ['queue' => (int) ($row['queue'] ?? 0), 'drafts' => (int) ($row['drafts'] ?? 0), 'review' => (int) ($row['review'] ?? 0), 'failed' => (int) ($row['failed'] ?? 0), 'sent' => (int) ($row['sent'] ?? 0), 'sent_week' => (int) ($row['sent_week'] ?? 0)];
     }
 
     /** YouTube settings stored with a post, with YouTube's own defaults filled in. */
@@ -399,7 +401,7 @@ final class Workspace
             Publisher::kick();
             $overdue = array_map(
                 static fn (array $post): array => $post + ['at' => self::local($post['planned_at'], $tz)],
-                array_merge(self::failed($uid, $channelId), self::planned($uid, null, $nowUtc, $channelId))
+                self::planned($uid, null, $nowUtc, $channelId)
             );
         }
         $rangeFrom = $from === null ? $nowUtc : max($nowUtc, $start->setTimezone($utc)->format('Y-m-d H:i:s'));

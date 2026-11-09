@@ -3,17 +3,30 @@
 /** @var string $slug */
 $all = data('features');
 $nav = array_column(data('site')['features'], null, 'href');
+$state = feature_state($slug);
+$signedIn = Auth::check();
 ?>
 <section class="page-hero">
   <div class="container">
     <a class="crumb" href="/features"><?= icon('arrow-left') ?>All features</a>
-    <p class="eyebrow"><?= e($feature['eyebrow']) ?></p>
+    <p class="eyebrow"><?= e($feature['eyebrow']) ?> <span class="feat-state feat-state--<?= e($state['state']) ?>"><?= e($state['label']) ?></span></p>
     <h1 class="h-page"><?= e($feature['title']) ?></h1>
     <p class="lead"><?= e($feature['intro']) ?></p>
     <div class="btn-row">
-      <a class="btn btn--green" href="/signup">Start free</a>
+<?php if ($state['state'] === 'soon'): ?>
+      <a class="btn btn--primary" href="/join"><?= icon('envelope-simple') ?>Get notified when it launches</a>
+      <a class="btn btn--outline" href="/demo">Try the demo</a>
+<?php elseif ($signedIn && $state['app']): ?>
+      <a class="btn btn--primary" href="<?= e($state['app']) ?>"><?= e($state['cta']) ?><?= icon('arrow-right') ?></a>
       <a class="btn btn--outline" href="/demo">View demo</a>
+<?php else: ?>
+      <a class="btn btn--primary" href="/signup">Start free<?= icon('arrow-right') ?></a>
+      <a class="btn btn--outline" href="/demo">View demo</a>
+<?php endif; ?>
     </div>
+<?php if ($state['state'] !== 'soon' && !$signedIn): ?>
+    <p class="feat-fine">Free plan, no credit card. You'll find it under <?= e(ucwords(str_replace('-', ' ', trim((string) $state['app'], '/app/') ?: 'your workspace'))) ?> after you sign up.</p>
+<?php endif; ?>
   </div>
   <div class="container demo-showcase">
     <div class="showcase-card">
@@ -38,7 +51,7 @@ $nav = array_column(data('site')['features'], null, 'href');
   <div class="container">
     <div class="notice" role="note">
       <?= icon('info') ?>
-      <p><b>Availability</b><?= e($feature['status']) ?></p>
+      <p><b><?= e($state['label']) ?></b><?= e($feature['status']) ?></p>
     </div>
   </div>
 </section>

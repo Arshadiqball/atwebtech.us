@@ -2003,6 +2003,32 @@
     });
   }
 
+  /* CRM: selects marked data-autosubmit save as soon as they change */
+  $$('select[data-autosubmit]').forEach((select) => {
+    select.addEventListener('change', () => select.form.requestSubmit());
+  });
+
+  /* Link in Bio: copy the page link, and keep the phone preview in step with the form */
+  $$('button[data-copy-text]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const label = btn.querySelector('[aria-live]') || btn;
+      const done = () => { const was = label.textContent; label.textContent = 'Copied'; setTimeout(() => { label.textContent = was; }, 1600); };
+      if (navigator.clipboard) navigator.clipboard.writeText(btn.dataset.copyText).then(done).catch(() => {});
+    });
+  });
+  const bioForm = $('[data-bio-form]');
+  const bioPreview = $('[data-bio-preview]');
+  if (bioForm && bioPreview) {
+    bioForm.addEventListener('input', () => {
+      const title = bioForm.elements.title.value.trim();
+      $('[data-bio-title]', bioPreview).textContent = title;
+      $('[data-bio-initial]', bioPreview).textContent = title.charAt(0).toUpperCase();
+      $('[data-bio-bio]', bioPreview).textContent = bioForm.elements.bio.value;
+      const accent = $('input[name="accent"]:checked', bioForm);
+      if (accent) bioPreview.style.setProperty('--accent', accent.value);
+    });
+  }
+
   /* Billing page: live total for the chosen plan, channels and interval */
   const billForm = $('[data-billing-form]');
   if (billForm) {

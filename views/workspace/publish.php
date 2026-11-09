@@ -8,6 +8,9 @@
 /** @var ?array $week */
 /** @var array $drafts */
 /** @var array $counts */
+/** @var array $approvals */
+/** @var ?array $reviewLink */
+/** @var array $failed */
 $token = Security::csrfToken();
 $all = array_column(integrations(), null, 'slug');
 $mine = Workspace::channels($onboarding);
@@ -35,7 +38,8 @@ ob_start(); ?>
     <nav class="wsp-tabs" aria-label="Publish">
       <a href="/app/publish<?= $view === 'calendar' ? '?view=calendar' : '' ?>"<?= $tab === 'queue' ? ' aria-current="page"' : '' ?>>Queue <span class="wsp-count"><?= $counts['queue'] ?></span></a>
       <a href="/app/publish?tab=drafts"<?= $tab === 'drafts' ? ' aria-current="page"' : '' ?>>Drafts <span class="wsp-count"><?= $counts['drafts'] ?></span></a>
-      <a href="/app/publish?tab=approvals"<?= $tab === 'approvals' ? ' aria-current="page"' : '' ?>>Approvals <span class="wsp-bolt" aria-hidden="true"><?= icon('lightning') ?></span></a>
+      <a href="/app/publish?tab=approvals"<?= $tab === 'approvals' ? ' aria-current="page"' : '' ?>>Approvals <span class="wsp-count<?= $counts['review'] > 0 ? ' wsp-count--warn' : '' ?>"><?= $counts['review'] ?></span></a>
+      <a href="/app/publish?tab=failed"<?= $tab === 'failed' ? ' aria-current="page"' : '' ?>>Failed <span class="wsp-count<?= $counts['failed'] > 0 ? ' wsp-count--bad' : '' ?>"><?= $counts['failed'] ?></span></a>
       <a href="/app/publish?tab=sent"<?= $tab === 'sent' ? ' aria-current="page"' : '' ?>>Sent <span class="wsp-count"><?= $counts['sent'] ?></span></a>
     </nav>
     <div class="wsp-filters">
@@ -65,6 +69,12 @@ ob_start(); ?>
     </div>
   </div>
 
+<?php if ($tab === 'queue' && $counts['failed'] > 0): ?>
+  <a class="wsp-alert" href="/app/publish?tab=failed"><?= icon('warning-circle') ?><span><b><?= $counts['failed'] ?> <?= $counts['failed'] === 1 ? 'post' : 'posts' ?> failed to publish.</b> Fix and retry them in the Failed tab.</span><?= icon('arrow-right') ?></a>
+<?php endif; ?>
+<?php if ($tab === 'queue' && $counts['review'] > 0): ?>
+  <a class="wsp-alert wsp-alert--info" href="/app/publish?tab=approvals"><?= icon('check-circle') ?><span><b><?= $counts['review'] ?> <?= $counts['review'] === 1 ? 'post is' : 'posts are' ?> waiting for approval.</b> They publish only after they are approved.</span><?= icon('arrow-right') ?></a>
+<?php endif; ?>
 <?php if ($tab === 'queue'): ?>
   <p class="wsp-note"><?= icon('info') ?><span><?= $publishing ? 'Posts for connected channels publish automatically at their time. Posts for networks you haven’t connected, and for TikTok, are plans only and are never sent.' : 'Connect a channel to publish automatically. Until then, everything in your queue is a plan and is never sent.' ?></span></p>
 <?php endif; ?>
@@ -80,11 +90,10 @@ ob_start(); ?>
 <?php elseif ($tab === 'drafts' || $tab === 'sent'): ?>
 <?php partial('workspace/post-list', ['user' => $user, 'posts' => array_filter($drafts, static fn (array $p): bool => $shown($p['channel'])), 'kind' => $tab]); ?>
 
+<?php elseif ($tab === 'approvals'): ?>
+<?php partial('workspace/approvals', ['user' => $user, 'posts' => array_filter($approvals, static fn (array $p): bool => $shown($p['channel'])), 'reviewLink' => $reviewLink]); ?>
+
 <?php else: ?>
-  <div class="wsp-empty">
-    <span class="wsp-empty-icon wsp-empty-icon--purple"><?= icon('lightning') ?></span>
-    <h2>Approvals <span class="ws-soon">Coming soon</span></h2>
-    <p>Approvals will let teammates review posts before they go out. Teams aren't available yet.</p>
-  </div>
+<?php partial('workspace/failed', ['user' => $user, 'posts' => array_filter($failed, static fn (array $p): bool => $shown($p['channel']))]); ?>
 <?php endif; ?>
 </div>

@@ -47,7 +47,7 @@ $count = count($messages);
     $topic = Admin::topic((string) $selected['topic']);
     $mailto = 'mailto:' . rawurlencode((string) $selected['email']) . '?subject=' . rawurlencode('Re: ' . $topic);
 ?>
-      <a class="adm-back" href="/admin"><?= icon('arrow-left') ?>All messages</a>
+      <a class="adm-back" href="/admin/messages"><?= icon('arrow-left') ?>All messages</a>
       <header class="adm-read-head">
         <p class="adm-topic"><?= e($topic) ?></p>
         <h2><?= e($selected['name']) ?></h2>

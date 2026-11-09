@@ -207,6 +207,26 @@ The composer's Templates panel has a **Trending** view, filtered by the same Net
 - Facebook, Instagram, TikTok, X, Threads and LinkedIn don't offer trending data through their APIs, so for those networks the panel says so and shows the cross-web trends.
 - A source that fails (Reddit rate-limits servers at times) keeps last week's items. Data lives in `trending_items` (migration `011`).
 
+## Link in Bio
+
+`/app/link-in-bio` (workspace sidebar). One page per account at `/l/{handle}`, with up to 20 links, a brand color, a publish switch, page views and clicks per link. Links go through `/l/{handle}/{id}` so clicks are counted; only `http`/`https` addresses are accepted. Code: `app/Bio.php`, `views/workspace/bio.php`, `views/bio/page.php`. Data: migration `012`.
+
+## Approvals and failed posts
+
+- **Send for approval** in the composer saves posts with status `review`. They are never published until approved. Publish → **Approvals** (and each channel's Approvals tab) lists them with Approve, Approve all, Request changes (moves the post to Drafts with the note) and Edit.
+- **Review link:** Approvals → Create review link makes a private `/review/{token}` page where a client can approve or request changes without an account. The token is shown once, stored only as a hash, expires after 30 days, and can be turned off.
+- **Failed** tab: posts that failed to publish leave the Queue and its count, with the reason, Retry, Retry all, Edit and Delete.
+- Code: `app/Approvals.php`, `views/workspace/approvals.php`, `views/workspace/failed.php`, `views/review/page.php`. Data: migration `013`.
+
+## Admin CRM
+
+`/admin` (accounts in `ADMIN_EMAILS`, or the admin login) opens the CRM:
+
+- **Dashboard:** new leads, sign-ups, activated (connected a channel), active users (last 7 days), paying customers and MRR, with the change against the previous period; a Lead → Signed up → Activated → Customer funnel; daily chart; and a **sources** table. Meta ads are recognised from Facebook click IDs (`fbclid`) and paid UTM tags, so tag ads like `?utm_source=facebook&utm_medium=paid&utm_campaign=launch`.
+- **Contacts:** every email from the waitlist, the contact form and accounts, merged into one contact. The stage (Lead, Signed up, Activated, Active, Customer, Churned) is worked out automatically; the sales status (New, Contacted, Qualified, Won, Lost) is set by you. Filter, search, and export CSV (for example as a Meta custom audience).
+- **Contact page:** timeline of everything the person did, notes (note, call, email, meeting), tags, status, and follow-ups with a due date. **Follow-ups** lists what's overdue, due today and upcoming; the admin bar shows a badge when something is due.
+- Messages moved to `/admin/messages`. Code: `app/Crm.php`, `views/pages/admin-crm*.php`. Data: migration `014`.
+
 ## AI Assistant
 
 The composer's AI Assistant writes a draft from a short brief using OpenAI's Chat Completions API. The call is made from the server, and the key never reaches the browser.

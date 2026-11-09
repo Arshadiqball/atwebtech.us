@@ -30,11 +30,10 @@ $linked = $linked ?? [];
   </li>
 <?php endforeach; ?>
   <li>
-    <div class="cg-card is-disabled" aria-disabled="true">
-      <span class="ws-chip cg-chip">Soon</span>
+    <a class="cg-card" href="/app/link-in-bio">
       <span class="cg-icon" style="--c: #3E8E5C"><?= icon('link-simple', 'brand-glyph') ?></span>
-      <b>Start Page</b><small>Simple link-in-bio page</small>
-    </div>
+      <b>Link in Bio</b><small>Your own link page</small>
+    </a>
   </li>
   <li>
     <a class="cg-card cg-card--request" href="/contact">

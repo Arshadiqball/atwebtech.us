@@ -23,7 +23,7 @@ $menus = [
                 <a class="mega-link" href="<?= e($item['href']) ?>"<?= aria_current($item['href']) ?>>
                   <span class="mega-icon"><?= icon($item['icon']) ?></span>
                   <span class="mega-text">
-                    <span class="mega-title"><?= e($item['label']) ?></span>
+                    <span class="mega-title"><?= e($item['label']) ?><?php if ($key === 'features' && feature_state(basename($item['href']))['state'] === 'soon'): ?> <span class="feat-state feat-state--soon">Soon</span><?php endif; ?></span>
                     <span class="mega-desc"><?= e($item['desc']) ?></span>
                   </span>
                 </a>

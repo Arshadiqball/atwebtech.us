@@ -1,0 +1,24 @@
+CREATE TABLE IF NOT EXISTS bio_pages (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL UNIQUE REFERENCES users (id) ON DELETE CASCADE,
+    handle TEXT NOT NULL UNIQUE,
+    title TEXT NOT NULL,
+    bio TEXT NULL,
+    accent TEXT NOT NULL DEFAULT '#16A34A',
+    published INTEGER NOT NULL DEFAULT 0,
+    views INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS bio_links (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    page_id INTEGER NOT NULL REFERENCES bio_pages (id) ON DELETE CASCADE,
+    label TEXT NOT NULL,
+    url TEXT NOT NULL,
+    position INTEGER NOT NULL DEFAULT 0,
+    clicks INTEGER NOT NULL DEFAULT 0,
+    created_at TEXT NOT NULL,
+    updated_at TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_bio_links_page ON bio_links (page_id, position);

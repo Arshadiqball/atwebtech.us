@@ -58,3 +58,55 @@ Stack trace:
 [09-Nov-2026 08:11:49 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 112
 [09-Nov-2026 08:12:09 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 111
 [09-Nov-2026 08:12:09 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/billing.php on line 112
+[09-Nov-2026 09:10:16 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/bio.php on line 12
+[09-Nov-2026 09:10:16 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/app/helpers.php on line 29
+[09-Nov-2026 09:22:54 UTC] PHP Fatal error:  Uncaught ArgumentCountError: max() does not accept unknown named parameters in /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php:20
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php(20): max(1, 2026-10-11: 1, 2026-10-12: 0, 2026-10-13: 0, 2026-10-14: 0, 2026-10-15: 0, 2026-10-16: 0, 2026-10-17: 0, 2026-10-18: 0, 2026-10-19: 0, 2026-10-20: 0, 2026-10-21: 0, 2026-10-22: 0, 2026-10-23: 0, 2026-10-24: 0, 2026-10-25: 0, 2026-10-26: 0, 2026-10-27: 0, 2026-10-28: 0, 2026-10-29: 0, 2026-10-30: 0, 2026-10-31: 0, 2026-11-01: 0, 2026-11-02: 0, 2026-11-03: 0, 2026-11-04: 0, 2026-11-05: 0, 2026-11-06: 0, 2026-11-07: 0, 2026-11-08: 0, 2026-11-09: 1)
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(56): require('/Users/mac/Docu...')
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(57): View::{closure:View::capture():54}('/Users/mac/Docu...', Array)
+#3 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(27): View::capture('/Users/mac/Docu...', Array)
+#4 /Users/mac/Documents/atwebtech/atwebtechus/app/routes.php(407): View::render('admin-crm', Array, Array)
+#5 /Users/mac/Documents/atwebtech/atwebtechus/public/index.php(37): {closure:/Users/mac/Documents/atwebtech/atwebtechus/app/routes.php:404}()
+#6 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php on line 20
+[09-Nov-2026 09:22:54 UTC] PHP Fatal error:  Uncaught ArgumentCountError: max() does not accept unknown named parameters in /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php:20
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php(20): max(1, 2026-11-03: 0, 2026-11-04: 0, 2026-11-05: 0, 2026-11-06: 0, 2026-11-07: 0, 2026-11-08: 0, 2026-11-09: 1)
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(56): require('/Users/mac/Docu...')
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(57): View::{closure:View::capture():54}('/Users/mac/Docu...', Array)
+#3 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(27): View::capture('/Users/mac/Docu...', Array)
+#4 /Users/mac/Documents/atwebtech/atwebtechus/app/routes.php(407): View::render('admin-crm', Array, Array)
+#5 /Users/mac/Documents/atwebtech/atwebtechus/public/index.php(37): {closure:/Users/mac/Documents/atwebtech/atwebtechus/app/routes.php:404}()
+#6 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php on line 20
+[09-Nov-2026 09:22:54 UTC] PHP Fatal error:  Uncaught ArgumentCountError: max() does not accept unknown named parameters in /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php:20
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php(20): max(1, 2026-08-12: 0, 2026-08-13: 0, 2026-08-14: 0, 2026-08-15: 0, 2026-08-16: 0, 2026-08-17: 0, 2026-08-18: 0, 2026-08-19: 0, 2026-08-20: 0, 2026-08-21: 0, 2026-08-22: 0, 2026-08-23: 0, 2026-08-24: 0, 2026-08-25: 0, 2026-08-26: 0, 2026-08-27: 0, 2026-08-28: 0, 2026-08-29: 0, 2026-08-30: 0, 2026-08-31: 0, 2026-09-01: 0, 2026-09-02: 0, 2026-09-03: 0, 2026-09-04: 0, 2026-09-05: 0, 2026-09-06: 0, 2026-09-07: 0, 2026-09-08: 0, 2026-09-09: 0, 2026-09-10: 0, 2026-09-11: 0, 2026-09-12: 0, 2026-09-13: 0, 2026-09-14: 0, 2026-09-15: 0, 2026-09-16: 0, 2026-09-17: 0, 2026-09-18: 0, 2026-09-19: 0, 2026-09-20: 0, 2026-09-21: 0, 2026-09-22: 0, 2026-09-23: 0, 2026-09-24: 0, 2026-09-25: 0, 2026-09-26: 0, 2026-09-27: 0, 2026-09-28: 0, 2026-09-29: 0, 2026-09-30: 0, 2026-10-01: 0, 2026-10-02: 0, 2026-10-03: 0, 2026-10-04: 0, 2026-10-05: 0, 2026-10-06: 0, 2026-10-07: 0, 2026-10-08: 0, 2026-10-09: 0, 2026-10-10: 1, 2026-10-11: 1, 2026-10-12: 0, 2026-10-13: 0, 2026-10-14: 0, 2026-10-15: 0, 2026-10-16: 0, 2026-10-17: 0, 2026-10-18: 0, 2026-10-19: 0, 2026-10-20: 0, 2026-10-21: 0, 2026-10-22: 0, 2026-10-23: 0, 2026-10-24: 0, 2026-10-25: 0, 2026-10-26: 0, 2026-10-27: 0, 2026-10-28: 0, 2026-10-29: 0, 2026-10-30: 0, 2026-10-31: 0, 2026-11-01: 0, 2026-11-02: 0, 2026-11-03: 0, 2026-11-04: 0, 2026-11-05: 0, 2026-11-06: 0, 2026-11-07: 0, 2026-11-08: 0, 2026-11-09: 1)
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(56): require('/Users/mac/Docu...')
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(57): View::{closure:View::capture():54}('/Users/mac/Docu...', Array)
+#3 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(27): View::capture('/Users/mac/Docu...', Array)
+#4 /Users/mac/Documents/atwebtech/atwebtechus/app/routes.php(407): View::render('admin-crm', Array, Array)
+#5 /Users/mac/Documents/atwebtech/atwebtechus/public/index.php(37): {closure:/Users/mac/Documents/atwebtech/atwebtechus/app/routes.php:404}()
+#6 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php on line 20
+[09-Nov-2026 09:22:55 UTC] PHP Fatal error:  Uncaught ArgumentCountError: max() does not accept unknown named parameters in /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php:20
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php(20): max(1, 2026-10-11: 1, 2026-10-12: 0, 2026-10-13: 0, 2026-10-14: 0, 2026-10-15: 0, 2026-10-16: 0, 2026-10-17: 0, 2026-10-18: 0, 2026-10-19: 0, 2026-10-20: 0, 2026-10-21: 0, 2026-10-22: 0, 2026-10-23: 0, 2026-10-24: 0, 2026-10-25: 0, 2026-10-26: 0, 2026-10-27: 0, 2026-10-28: 0, 2026-10-29: 0, 2026-10-30: 0, 2026-10-31: 0, 2026-11-01: 0, 2026-11-02: 0, 2026-11-03: 0, 2026-11-04: 0, 2026-11-05: 0, 2026-11-06: 0, 2026-11-07: 0, 2026-11-08: 0, 2026-11-09: 1)
+#1 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(56): require('/Users/mac/Docu...')
+#2 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(57): View::{closure:View::capture():54}('/Users/mac/Docu...', Array)
+#3 /Users/mac/Documents/atwebtech/atwebtechus/app/View.php(27): View::capture('/Users/mac/Docu...', Array)
+#4 /Users/mac/Documents/atwebtech/atwebtechus/app/routes.php(407): View::render('admin-crm', Array, Array)
+#5 /Users/mac/Documents/atwebtech/atwebtechus/public/index.php(37): {closure:/Users/mac/Documents/atwebtech/atwebtechus/app/routes.php:404}()
+#6 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/views/pages/admin-crm.php on line 20
+[09-Nov-2026 09:23:21 UTC] PHP Deprecated:  fputcsv(): the $escape parameter must be provided as its default value will change in /Users/mac/Documents/atwebtech/atwebtechus/app/Crm.php on line 451
+[09-Nov-2026 09:23:21 UTC] PHP Deprecated:  fputcsv(): the $escape parameter must be provided as its default value will change in /Users/mac/Documents/atwebtech/atwebtechus/app/Crm.php on line 453
+[09-Nov-2026 09:23:53 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/views/workspace/bio.php on line 12
+[09-Nov-2026 09:23:53 UTC] PHP Warning:  Array to string conversion in /Users/mac/Documents/atwebtech/atwebtechus/app/helpers.php on line 29
+[09-Nov-2026 09:23:54 UTC] PHP Fatal error:  Uncaught ChannelApiException: Request failed: Failed to connect to localhost:8003 after 0 ms: Could not connect to server in /Users/mac/Documents/atwebtech/atwebtechus/app/Posting.php:238
+Stack trace:
+#0 /Users/mac/Documents/atwebtech/atwebtechus/app/Posting.php(49): Posting::send('POST', 'http://localhos...', Array)
+#1 /private/tmp/claude-501/-Users-mac--claude-spares-spare-9Q6luU/206db1c5-eea9-400a-ae4a-7c4a43199c39/scratchpad/posting_test.php(19): Posting::facebook('PAGETOKEN', '1234', 'Hello Page', NULL, NULL)
+#2 {main}
+  thrown in /Users/mac/Documents/atwebtech/atwebtechus/app/Posting.php on line 238

@@ -19,6 +19,7 @@ return [
         'publish' => ['label' => 'Publish', 'icon' => 'calendar-blank', 'href' => '/app/publish', 'count' => true],
         'community' => ['label' => 'Community', 'icon' => 'chats-circle', 'href' => '/app/community'],
         'insights' => ['label' => 'Insights', 'icon' => 'chart-bar', 'href' => '/app/insights'],
+        'bio' => ['label' => 'Link in Bio', 'icon' => 'link-simple', 'href' => '/app/link-in-bio'],
         'channels' => [
             'label' => 'Channels', 'icon' => 'plus', 'href' => '/app/channels', 'nav' => false,
             'title' => 'Connect a channel',

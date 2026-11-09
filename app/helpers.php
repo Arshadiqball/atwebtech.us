@@ -148,6 +148,7 @@ function post_badge(array $post, array $accounts): string
     $label = match (true) {
         $post['status'] === 'publishing' => ['is-busy', 'Publishing…'],
         $post['status'] === 'failed' => ['is-bad', 'Failed'],
+        $post['status'] === 'review' => ['is-busy', 'Awaiting approval'],
         $post['status'] === 'planned' && (int) $post['attempts'] > 0 => ['is-bad', 'Retrying'],
         $post['status'] === 'planned' && !empty($accounts[(int) $post['channel_id']]['can_publish']) => ['is-ok', 'Scheduled'],
         $post['status'] === 'planned' => ['', 'Plan only'],
@@ -182,6 +183,28 @@ function integrations(bool $withUpcoming = false): array
         }
     }
     return $list;
+}
+
+/**
+ * Where each feature stands today: live (use it now), partial (part of it is live) or soon.
+ * 'app' is the workspace page that opens it, 'cta' the button label for signed-in people.
+ *
+ * @return array{state: string, label: string, app: ?string, cta: ?string}
+ */
+function feature_state(string $slug): array
+{
+    $map = [
+        'publishing' => ['live', '/app/publish', 'Open Publishing'],
+        'content-planner' => ['live', '/app/create', 'Open the Content Planner'],
+        'ai-assistant' => ['live', '/app/publish/new', 'Write a post with AI'],
+        'link-in-bio' => ['live', '/app/link-in-bio', 'Build your Link in Bio'],
+        'analytics' => ['partial', '/app/insights', 'Open Insights'],
+        'community' => ['soon', null, null],
+        'collaboration' => ['partial', '/app/publish?tab=approvals', 'Open Approvals'],
+    ];
+    [$state, $app, $cta] = $map[$slug] ?? ['soon', null, null];
+    $label = ['live' => 'Available now', 'partial' => 'Partly available', 'soon' => 'Coming soon'][$state];
+    return ['state' => $state, 'label' => $label, 'app' => $app, 'cta' => $cta];
 }
 
 /** Badge text for an integration status. */

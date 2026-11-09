@@ -209,7 +209,7 @@ return [
     }],
     ['GET', '/app/publish', static function (): void {
         Workspace::render('publish', 'workspace/publish', 'Publish', static function (array $user, array $onboarding): array {
-            $tab = Workspace::pick('tab', ['queue', 'drafts', 'approvals', 'sent']);
+            $tab = Workspace::pick('tab', ['queue', 'drafts', 'approvals', 'failed', 'sent']);
             $view = Workspace::pick('view', ['list', 'calendar']);
             $uid = (int) $user['id'];
             return [
@@ -219,6 +219,9 @@ return [
                 'queue' => $tab === 'queue' && $view === 'list' ? Workspace::queue($user, $onboarding, max(2, min(14, (int) ($_GET['days'] ?? 2)))) : null,
                 'week' => $tab === 'queue' && $view === 'calendar' ? Workspace::week($user, max(-52, min(52, (int) ($_GET['week'] ?? 0)))) : null,
                 'drafts' => $tab === 'drafts' ? Workspace::drafts($uid) : ($tab === 'sent' ? Workspace::sent($uid) : []),
+                'approvals' => $tab === 'approvals' ? Approvals::pending($uid) : [],
+                'reviewLink' => $tab === 'approvals' ? Approvals::activeLink($uid) : null,
+                'failed' => $tab === 'failed' ? Workspace::failed($uid) : [],
                 'counts' => Workspace::counts($uid),
             ];
         });
@@ -270,6 +273,19 @@ return [
     ['POST', '/app/posts/move', [WorkspaceHandler::class, 'movePost']],
     ['POST', '/app/templates', [WorkspaceHandler::class, 'template']],
     ['POST', '/account/timezone', [WorkspaceHandler::class, 'timezone']],
+    ['GET', '/app/link-in-bio', static function (): void {
+        Workspace::render('bio', 'workspace/bio', 'Link in Bio', static function (array $user): array {
+            $page = Bio::page((int) $user['id']);
+            return ['bioPage' => $page, 'bioLinks' => $page ? Bio::links((int) $page['id']) : [], 'suggested' => $page ? $page['handle'] : Bio::suggestHandle($user)];
+        });
+    }],
+    ['POST', '/app/link-in-bio', [Bio::class, 'save']],
+    ['POST', '/app/link-in-bio/links', [Bio::class, 'link']],
+    ['GET', '/l/{handle}', [Bio::class, 'show']],
+    ['GET', '/l/{handle}/{id}', [Bio::class, 'go']],
+    ['POST', '/app/approvals', [Approvals::class, 'handle']],
+    ['GET', '/review/{token}', [Approvals::class, 'show']],
+    ['POST', '/review/{token}', [Approvals::class, 'decide']],
     ['GET', '/upgrade', [BillingHandler::class, 'upgrade']],
     ['GET', '/app/billing', static function (): void {
         Workspace::render('billing', 'workspace/billing', 'Billing', static fn (array $user): array => BillingHandler::pageState($user));
@@ -319,7 +335,7 @@ return [
                 redirect('/app/channels/' . (int) $channel['id'] . '/settings');
             }
             $cid = (int) $channel['id'];
-            $tab = Workspace::pick('tab', ['queue', 'drafts', 'approvals', 'sent']);
+            $tab = Workspace::pick('tab', ['queue', 'drafts', 'approvals', 'failed', 'sent']);
             $view = Workspace::pick('view', ['list', 'calendar']);
             $days = max(28, min(ChannelHandler::QUEUE_DAYS, (int) ($_GET['days'] ?? 28)));
             return [
@@ -330,7 +346,14 @@ return [
                 'days' => $days,
                 'queue' => $tab === 'queue' && $view === 'list' ? Workspace::queue($user, $onboarding, $days, $cid) : null,
                 'week' => $tab === 'queue' && $view === 'calendar' ? Workspace::week($user, max(-52, min(52, (int) ($_GET['week'] ?? 0))), $cid) : null,
-                'posts' => match ($tab) { 'drafts' => Workspace::drafts($uid, $cid), 'sent' => Workspace::sent($uid, $cid), default => [] },
+                'posts' => match ($tab) {
+                    'drafts' => Workspace::drafts($uid, $cid),
+                    'sent' => Workspace::sent($uid, $cid),
+                    'failed' => Workspace::failed($uid, $cid),
+                    'approvals' => array_values(array_filter(Approvals::pending($uid), static fn (array $p): bool => (int) $p['channel_id'] === $cid)),
+                    default => [],
+                },
+                'reviewLink' => $tab === 'approvals' ? Approvals::activeLink($uid) : null,
                 'counts' => Workspace::counts($uid, $cid),
             ];
         });
@@ -379,6 +402,39 @@ return [
     }],
     ['POST', '/admin/login', [Admin::class, 'login']],
     ['GET', '/admin', static function (): void {
+        $user = Auth::requireAdmin();
+        $days = in_array((int) ($_GET['days'] ?? 30), [7, 30, 90], true) ? (int) ($_GET['days'] ?? 30) : 30;
+        View::render('admin-crm', ['user' => $user, 'days' => $days, 'dash' => Crm::dashboard($days)], [
+            'title' => 'CRM | atwebtech', 'description' => 'Leads, activity, and conversions.', 'layout' => 'app', 'noindex' => true, 'admin' => true,
+        ]);
+    }],
+    ['GET', '/admin/crm/contacts', static function (): void {
+        $user = Auth::requireAdmin();
+        if (($_GET['export'] ?? '') === 'csv') {
+            Crm::export($_GET);
+        }
+        View::render('admin-crm-contacts', ['user' => $user, 'rows' => Crm::filter($_GET), 'q' => $_GET], [
+            'title' => 'Contacts | CRM | atwebtech', 'description' => 'All contacts.', 'layout' => 'app', 'noindex' => true, 'admin' => true,
+        ]);
+    }],
+    ['GET', '/admin/crm/contacts/{id}', static function (string $id): void {
+        $user = Auth::requireAdmin();
+        $contact = ctype_digit($id) ? Crm::contact((int) $id) : null;
+        if ($contact === null) {
+            not_found();
+        }
+        View::render('admin-crm-contact', ['user' => $user, 'c' => $contact, 'timeline' => Crm::timeline($contact), 'followups' => Crm::followups('open', 50, (int) $contact['id'])], [
+            'title' => $contact['email'] . ' | CRM | atwebtech', 'description' => 'Contact.', 'layout' => 'app', 'noindex' => true, 'admin' => true,
+        ]);
+    }],
+    ['GET', '/admin/crm/followups', static function (): void {
+        $user = Auth::requireAdmin();
+        View::render('admin-crm-followups', ['user' => $user, 'due' => Crm::followups('due'), 'upcoming' => Crm::followups('upcoming'), 'done' => Crm::followups('done', 20)], [
+            'title' => 'Follow-ups | CRM | atwebtech', 'description' => 'Follow-ups.', 'layout' => 'app', 'noindex' => true, 'admin' => true,
+        ]);
+    }],
+    ['POST', '/admin/crm/action', [Crm::class, 'action']],
+    ['GET', '/admin/messages', static function (): void {
         $user = Auth::requireAdmin();
         View::render('admin', [
             'user' => $user,

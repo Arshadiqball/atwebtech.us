@@ -372,6 +372,7 @@ $media = $p['media'];
     </span>
     <span class="cp-foot-end">
       <button type="submit" class="ws-btn" name="action" value="draft">Save Draft</button>
+      <button type="submit" class="ws-btn" name="action" value="review" title="Hold this post until it is approved"><?= icon('check-circle') ?>Send for approval</button>
       <span class="cp-when">
         <?= icon('calendar-blank') ?>
         <label><span class="sr-only">Date (<?= e(Workspace::timezoneLabel($tz)) ?> time)</span><input type="date" name="date" min="<?= e($now->format('Y-m-d')) ?>" max="<?= e($now->modify('+1 year')->format('Y-m-d')) ?>" value="<?= e($p['date']) ?>" data-field="date"></label>

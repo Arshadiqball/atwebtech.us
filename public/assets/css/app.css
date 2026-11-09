@@ -1699,3 +1699,11 @@ select.input { appearance: none; padding-right: 40px; background-image: linear-g
 .int-card--planned .ch { filter: saturate(.85); }
 .ch .brand-glyph { fill: currentColor; }
 #snapchat .ch { color: #111; }
+
+/* Feature availability badges */
+.feat-state { display: inline-block; margin-left: 6px; padding: 2px 9px; border-radius: 999px; font: 600 11.5px/1.5 var(--font-body); letter-spacing: .02em; text-transform: none; vertical-align: 2px; }
+.feat-state--live { background: var(--green-soft); color: #1F5233; }
+.feat-state--partial { background: #FFF1D6; color: #7A4B00; }
+.feat-state--soon { background: var(--sand); color: var(--ink-2); }
+.mega-title .feat-state { font-size: 10.5px; padding: 1px 7px; margin-left: 4px; }
+.feat-fine { margin-top: 12px; font-size: 14.5px; color: var(--muted); }

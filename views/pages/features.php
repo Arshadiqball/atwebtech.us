@@ -20,7 +20,7 @@ $nav = data('site')['features'];
 <?php foreach ($nav as $item): $slug = basename($item['href']); $f = $features[$slug]; ?>
       <a class="link-card" href="<?= e($item['href']) ?>">
         <span class="link-card-icon panel--<?= e($f['panel']) ?>"><?= icon($item['icon']) ?></span>
-        <h2 class="h-small"><?= e($item['label']) ?></h2>
+        <h2 class="h-small"><?= e($item['label']) ?> <span class="feat-state feat-state--<?= e(feature_state($slug)['state']) ?>"><?= e(feature_state($slug)['label']) ?></span></h2>
         <p><?= e($f['intro']) ?></p>
         <span class="link-arrow">Learn more<?= icon('arrow-right') ?></span>
       </a>

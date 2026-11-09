@@ -189,6 +189,15 @@ final class WorkspaceHandler
             }
             self::done($back, 'Post deleted.', ['id' => $id]);
         }
+        if ($action === 'retry_all') {
+            $stmt = $pdo->prepare("UPDATE posts SET status = 'planned', planned_at = :now, error = NULL, attempts = 0, updated_at = :now2 WHERE user_id = :uid AND status = 'failed'");
+            $stmt->execute(['now' => Database::now(), 'now2' => Database::now(), 'uid' => $uid]);
+            self::done($back, $stmt->rowCount() . ' failed ' . ($stmt->rowCount() === 1 ? 'post is' : 'posts are') . ' being retried now. Check back in a few minutes.');
+        }
+        $review = $action === 'review';
+        if ($review) {
+            $action = 'plan';
+        }
         if ($action === 'retry') {
             if (!$existing || $existing['status'] !== 'failed') {
                 self::fail('composer', $back, 'Only posts that failed to publish can be retried.');
@@ -353,12 +362,12 @@ final class WorkspaceHandler
         }
 
         $ideaId = $input['idea'] > 0 && Workspace::idea($uid, $input['idea']) ? $input['idea'] : null;
-        $status = $action === 'plan' ? 'planned' : 'draft';
+        $status = $review ? 'review' : ($action === 'plan' ? 'planned' : 'draft');
         $now = Database::now();
         if (!$existing && self::count('posts', $uid) + count($targets) > self::MAX_POSTS) {
             self::fail('composer', $back, 'You have reached the limit of ' . self::MAX_POSTS . ' posts. Delete a few to add more.', [], $input);
         }
-        $scheduledCap = $action === 'plan' ? Channels::scheduledCap($uid) : null;
+        $scheduledCap = $action === 'plan' && !$review ? Channels::scheduledCap($uid) : null;
         if ($scheduledCap !== null) {
             foreach ($targets as $target) {
                 if ($target['channel'] && Channels::scheduledCount($uid, (int) $target['channel']['id'], $existing ? $id : 0) >= $scheduledCap) {
@@ -384,8 +393,8 @@ final class WorkspaceHandler
             ];
             $publishes = $publishes || ($status === 'planned' && $target['channel'] && $target['channel']['can_publish']);
             if ($existing) {
-                $pdo->prepare('UPDATE posts SET channel = :channel, channel_id = :cid, body = :body, title = :title, meta = :meta, tags = :tags, media_id = :media, first_comment = :first, first_comment_error = NULL, status = :status, planned_at = :planned, error = NULL, attempts = 0, updated_at = :now WHERE id = :id AND user_id = :uid')
-                    ->execute($row + ['id' => $id, 'uid' => $uid]);
+                $pdo->prepare('UPDATE posts SET channel = :channel, channel_id = :cid, body = :body, title = :title, meta = :meta, tags = :tags, media_id = :media, first_comment = :first, first_comment_error = NULL, status = :status, planned_at = :planned, error = NULL, attempts = 0, review_note = CASE WHEN :status2 = \'review\' THEN NULL ELSE review_note END, updated_at = :now WHERE id = :id AND user_id = :uid')
+                    ->execute($row + ['status2' => $status, 'id' => $id, 'uid' => $uid]);
                 continue;
             }
             $pdo->prepare('INSERT INTO posts (user_id, channel, channel_id, body, title, meta, tags, media_id, first_comment, status, planned_at, idea_id, created_at, updated_at) VALUES (:uid, :channel, :cid, :body, :title, :meta, :tags, :media, :first, :status, :planned, :idea, :created, :now)')
@@ -394,10 +403,11 @@ final class WorkspaceHandler
         $many = count($targets) > 1 ? count($targets) . ' posts' : 'Post';
         $message = match (true) {
             $status === 'draft' => count($targets) > 1 ? count($targets) . ' drafts saved.' : 'Saved to drafts.',
+            $status === 'review' => $many . ' sent for approval. Nothing is published until it is approved.',
             $publishes => $many . ' scheduled. atwebtech publishes at the time you picked.',
             default => $many . ' added to your queue as a plan. Channels that aren’t connected aren’t published automatically.',
         };
-        $location = $status === 'planned' ? '/app/publish' : '/app/publish?tab=drafts';
+        $location = match ($status) { 'planned' => '/app/publish', 'review' => '/app/publish?tab=approvals', default => '/app/publish?tab=drafts' };
         self::done(str_starts_with($back, '/app/publish') ? $location : $back, $message, ['status' => $status]);
     }
 

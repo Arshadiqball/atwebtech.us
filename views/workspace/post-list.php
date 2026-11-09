@@ -27,12 +27,15 @@ $compose ??= '{}';
         <p class="composer-error" role="status"><?= e($post['first_comment_error']) ?></p>
 <?php endif; ?>
 <?php else: ?>
+<?php if (!empty($post['review_note'])): ?>
+        <p class="ap-note"><?= icon('chat-circle-text') ?><span><b>Changes requested<?= !empty($post['reviewed_by']) ? ' by ' . e($post['reviewed_by']) : '' ?>:</b> <?= e($post['review_note']) ?></span></p>
+<?php endif; ?>
         <small>Edited <?= e(Workspace::local($post['updated_at'], $tz)->format('j M, g:i A')) ?><?= $post['media_id'] ? ' · file attached' : '' ?></small>
 <?php endif; ?>
       </div>
 <?php if ($kind === 'sent'): ?>
 <?php if ($post['external_url']): ?>
-      <a class="ws-btn ws-btn--sm" href="<?= e($post['external_url']) ?>" target="_blank" rel="noopener noreferrer"><?= icon('arrow-square-out') ?>View on <?= e($post['channel'] === 'linkedin' ? 'LinkedIn' : 'YouTube') ?></a>
+      <a class="ws-btn ws-btn--sm" href="<?= e($post['external_url']) ?>" target="_blank" rel="noopener noreferrer"><?= icon('arrow-square-out') ?>View on <?= e(array_column(integrations(), 'name', 'slug')[$post['channel']] ?? 'the network') ?></a>
 <?php endif; ?>
 <?php else: ?>
       <a class="ws-btn ws-btn--sm" href="/app/publish/new?id=<?= (int) $post['id'] ?>" data-compose="<?= $json(Workspace::composeData($post, $tz, $uid)) ?>"><?= icon('pencil-simple') ?>Edit</a>

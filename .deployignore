@@ -2,6 +2,7 @@
 # The server keeps its own .env and storage/ (sessions, logs, uploaded media, migration stamps).
 
 /.env
+/.env.backup-*
 /storage/
 /.git/
 /.github/
