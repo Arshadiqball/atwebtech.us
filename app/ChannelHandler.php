@@ -317,20 +317,16 @@ final class ChannelHandler
         if (!ctype_digit($id)) {
             not_found();
         }
-        $view = $section === 'community' ? 'workspace/channel-community' : 'workspace/channel-insights';
-        Workspace::render('channels', $view, $section === 'community' ? 'Community' : 'Insights', static function (array $user) use ($id, $section): array {
+        if ($section === 'community') {
+            redirect('/app/community?channel=' . (int) $id);
+        }
+        $view = 'workspace/channel-insights';
+        Workspace::render('channels', $view, 'Insights', static function (array $user) use ($id): array {
             $channel = Channels::find((int) $user['id'], (int) $id);
             if ($channel === null) {
                 not_found();
             }
-            $data = ['channel' => $channel];
-            if ($section === 'community') {
-                $data['tab'] = Workspace::pick('tab', ['comments', 'mentions']);
-                $data['view'] = Workspace::pick('view', ['post', 'list']);
-            } else {
-                $data['insights'] = Workspace::insights($user, Workspace::pick('range', ['30d', '7d', 'mtd', 'last-month', 'custom']), (int) $channel['id']);
-            }
-            return $data;
+            return ['channel' => $channel, 'insights' => Workspace::insights($user, Workspace::pick('range', ['30d', '7d', 'mtd', 'last-month', 'custom']), (int) $channel['id'])];
         });
     }
 

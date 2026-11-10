@@ -87,8 +87,25 @@ ob_start(); ?>
 <?php elseif ($tab === 'queue'): ?>
 <?php partial('workspace/calendar', ['user' => $user, 'week' => $week, 'url' => $url, 'target' => $channel !== '' ? 'n:' . $channel : '', 'filter' => $channel]); ?>
 
-<?php elseif ($tab === 'drafts' || $tab === 'sent'): ?>
-<?php partial('workspace/post-list', ['user' => $user, 'posts' => array_filter($drafts, static fn (array $p): bool => $shown($p['channel'])), 'kind' => $tab]); ?>
+<?php elseif ($tab === 'drafts' || $tab === 'sent'): $listed = array_filter($drafts, static fn (array $p): bool => $shown($p['channel'])); ?>
+<?php if ($tab === 'drafts' && $listed): ?>
+  <div class="ap-head">
+    <div>
+      <h2><?= count($listed) ?> <?= count($listed) === 1 ? 'draft' : 'drafts' ?></h2>
+      <p class="ap-sub">Open a draft to finish and schedule it, or clear out the ones you no longer need.</p>
+    </div>
+    <form action="/app/posts" method="post">
+      <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+      <input type="hidden" name="return" value="<?= e($_SERVER['REQUEST_URI'] ?? '/app/publish?tab=drafts') ?>">
+      <input type="hidden" name="status" value="draft">
+<?php foreach ($listed as $p): ?>
+      <input type="hidden" name="ids[]" value="<?= (int) $p['id'] ?>">
+<?php endforeach; ?>
+      <button type="submit" class="ws-btn ws-btn--danger" name="action" value="delete_all" data-confirm="Delete all <?= count($listed) ?> drafts shown here? This can’t be undone."><?= icon('trash') ?>Delete all</button>
+    </form>
+  </div>
+<?php endif; ?>
+<?php partial('workspace/post-list', ['user' => $user, 'posts' => $listed, 'kind' => $tab]); ?>
 
 <?php elseif ($tab === 'approvals'): ?>
 <?php partial('workspace/approvals', ['user' => $user, 'posts' => array_filter($approvals, static fn (array $p): bool => $shown($p['channel'])), 'reviewLink' => $reviewLink]); ?>

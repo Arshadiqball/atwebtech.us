@@ -262,11 +262,23 @@ return [
         });
     }],
     ['GET', '/app/community', static function (): void {
-        Workspace::render('community', 'workspace/community', 'Community', static fn (): array => [
-            'tab' => Workspace::pick('tab', ['comments', 'mentions']),
-            'view' => Workspace::pick('view', ['post', 'list']),
-        ]);
+        Workspace::render('community', 'workspace/community', 'Community', static function (array $user): array {
+            $state = Workspace::pick('state', ['open', 'replied', 'done', 'all']);
+            $view = Workspace::pick('view', ['post', 'list']);
+            $channel = isset($_GET['channel']) && ctype_digit((string) $_GET['channel']) ? (int) $_GET['channel'] : null;
+            $item = isset($_GET['item']) && is_string($_GET['item']) && preg_match('/^[A-Za-z0-9_.:-]{1,191}$/', $_GET['item']) ? $_GET['item'] : null;
+            $page = isset($_GET['page']) && ctype_digit((string) $_GET['page']) ? max(1, (int) $_GET['page']) : 1;
+            $draft = $_SESSION['_cm_draft'] ?? null;
+            unset($_SESSION['_cm_draft']);
+            return [
+                'state' => $state, 'view' => $view, 'channelId' => $channel, 'item' => $item, 'page' => $page,
+                'inbox' => Community::inbox((int) $user['id'], $channel, $state, $view === 'post' ? $item : null, $page),
+                'problems' => Community::problems((int) $user['id']),
+                'draft' => is_array($draft) ? $draft : null,
+            ];
+        });
     }],
+    ['POST', '/app/community', [Community::class, 'handle']],
     ['GET', '/app/insights', static function (): void {
         Workspace::render('insights', 'workspace/insights', 'Insights', static function (array $user): array {
             $range = Workspace::pick('range', ['30d', '7d', 'mtd', 'last-month', 'custom']);

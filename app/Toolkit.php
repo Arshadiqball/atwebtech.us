@@ -304,7 +304,7 @@ final class Feeds
     }
 
     /** GET with SSRF protection: public hosts only, http(s), size and time limits, up to 3 checked redirects. */
-    private static function fetch(string $url): string
+    public static function fetch(string $url): string
     {
         for ($hop = 0; $hop < 4; $hop++) {
             $host = (string) parse_url($url, PHP_URL_HOST);

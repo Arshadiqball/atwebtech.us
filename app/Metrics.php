@@ -157,6 +157,70 @@ final class Metrics
         ];
     }
 
+    /** Posts with stats needed before best times are shown, and per time slot. */
+    public const BEST_MIN_POSTS = 6;
+    private const BEST_MIN_SLOT = 2;
+
+    /**
+     * When your posts get the most engagement, from your own stats over the last 90 days.
+     * Each post scores its reactions, comments, shares and saves against its channel's average, so channels of
+     * different sizes can be compared. Heatmap: day (1 = Monday) x 4-hour block, in the user's time zone.
+     * @return array{posts:int, ready:bool, heat:array, max:float, top:array}
+     */
+    public static function bestTimes(int $uid, ?int $channelId, DateTimeZone $tz): array
+    {
+        $sql = "SELECT p.channel_id, p.sent_at, COALESCE(m.reactions, 0) + COALESCE(m.comments, 0) + COALESCE(m.shares, 0) + COALESCE(m.saves, 0) AS acts
+            FROM post_metrics m JOIN posts p ON p.id = m.post_id
+            WHERE p.user_id = :uid AND p.status = 'sent' AND p.sent_at >= :since AND m.error IS NULL
+            AND (m.reactions IS NOT NULL OR m.comments IS NOT NULL OR m.shares IS NOT NULL OR m.saves IS NOT NULL)";
+        $params = ['uid' => $uid, 'since' => gmdate('Y-m-d H:i:s', time() - self::LOOKBACK_DAYS * 86400)];
+        if ($channelId !== null) {
+            $sql .= ' AND p.channel_id = :cid';
+            $params['cid'] = $channelId;
+        }
+        $stmt = Database::connection()->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll();
+        $avg = [];
+        foreach ($rows as $r) {
+            $avg[$r['channel_id']][] = (int) $r['acts'];
+        }
+        $avg = array_map(static fn (array $v): float => max(1.0, array_sum($v) / count($v)), $avg);
+
+        $blocks = [];
+        $hours = [];
+        foreach ($rows as $r) {
+            $at = (new DateTimeImmutable($r['sent_at'], new DateTimeZone('UTC')))->setTimezone($tz);
+            $day = (int) $at->format('N');
+            $hour = (int) $at->format('G');
+            $lift = (int) $r['acts'] / $avg[$r['channel_id']];
+            $blocks[$day][intdiv($hour, 4)][] = $lift;
+            $hours[$day . ' ' . $hour][] = $lift;
+        }
+        $heat = [];
+        $max = 0.0;
+        foreach ($blocks as $day => $byBlock) {
+            foreach ($byBlock as $block => $lifts) {
+                $score = array_sum($lifts) / count($lifts);
+                $heat[$day][$block] = ['score' => $score, 'n' => count($lifts)];
+                if (count($lifts) >= self::BEST_MIN_SLOT) {
+                    $max = max($max, $score);
+                }
+            }
+        }
+        $top = [];
+        foreach ($hours as $key => $lifts) {
+            if (count($lifts) < self::BEST_MIN_SLOT) {
+                continue;
+            }
+            [$day, $hour] = array_map('intval', explode(' ', $key));
+            $top[] = ['day' => $day, 'hour' => $hour, 'lift' => array_sum($lifts) / count($lifts), 'n' => count($lifts)];
+        }
+        usort($top, static fn (array $a, array $b): int => [$b['lift'], $b['n']] <=> [$a['lift'], $a['n']]);
+        $top = array_values(array_filter($top, static fn (array $t): bool => $t['lift'] >= 1.0));
+        return ['posts' => count($rows), 'ready' => count($rows) >= self::BEST_MIN_POSTS && $top !== [], 'heat' => $heat, 'max' => $max, 'top' => array_slice($top, 0, 5)];
+    }
+
     /** Stats for these posts, keyed by post id. */
     public static function forPosts(array $postIds): array
     {

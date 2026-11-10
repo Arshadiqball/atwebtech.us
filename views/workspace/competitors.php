@@ -20,6 +20,10 @@ $num = static function ($v, int $dec = 0): string {
 $signed = static fn ($v): string => $v === null ? '—' : (($v > 0 ? '+' : ($v < 0 ? '−' : '')) . $num(abs($v)));
 $ranges = ['7' => '7 Days', '30' => '30 Days', '90' => '90 Days'];
 $networks = Competitors::NETWORKS;
+$found = $_SESSION['_co_found'] ?? null;
+$connect = $_SESSION['_co_connect'] ?? null;
+unset($_SESSION['_co_found'], $_SESSION['_co_connect']);
+$allNames = array_map(static fn (array $n): string => $n['name'], $networks) + Competitors::UNAVAILABLE;
 
 ob_start(); ?>
       <nav class="ws-seg ws-seg--range" aria-label="Date range">
@@ -33,26 +37,64 @@ ob_start(); ?>
 
   <section class="co-add" aria-labelledby="co-add-title">
     <div>
-      <h2 id="co-add-title">Follow a competitor</h2>
-      <p>Compare followers, posting rhythm and engagement with accounts in your niche. Stats update twice a day from each network’s public data.</p>
+      <h2 id="co-add-title">Analyze a competitor</h2>
+      <p>Paste their website and we’ll find their social profiles, or paste a profile or page link. Compare followers, posting rhythm and engagement. Stats update twice a day.</p>
     </div>
     <form action="/app/competitors" method="post" class="co-form">
       <input type="hidden" name="_token" value="<?= e($token) ?>">
       <input type="hidden" name="action" value="add">
       <input type="hidden" name="range" value="<?= (int) $range ?>">
+      <label class="sr-only" for="co-handle">Profile or page link</label>
+      <input class="idea-input" id="co-handle" name="handle" maxlength="200" placeholder="Website or profile link, e.g. nike.com or instagram.com/nike" required autocomplete="off">
       <label class="sr-only" for="co-network">Network</label>
       <select class="idea-input" id="co-network" name="network">
+        <option value="auto">Detect automatically</option>
+        <optgroup label="Available">
 <?php foreach ($networks as $slug => $n): ?>
-        <option value="<?= e($slug) ?>"><?= e($n['name']) ?></option>
+          <option value="<?= e($slug) ?>"><?= e($n['name']) ?></option>
 <?php endforeach; ?>
+        </optgroup>
+        <optgroup label="Not available: no official access">
+<?php foreach (Competitors::UNAVAILABLE as $slug => $name): ?>
+          <option value="<?= e($slug) ?>" disabled><?= e($name) ?></option>
+<?php endforeach; ?>
+        </optgroup>
       </select>
-      <label class="sr-only" for="co-handle">Handle or profile link</label>
-      <input class="idea-input" id="co-handle" name="handle" maxlength="200" placeholder="@handle or profile link" required autocomplete="off">
       <button type="submit" class="ws-btn ws-btn--dark"<?= $count >= $limit ? ' disabled' : '' ?>><?= icon('plus') ?>Add competitor</button>
     </form>
+<?php if ($connect && Channels::connectable($connect)): ?>
+    <form class="co-connect" action="/app/channels/connect/<?= e($connect) ?>" method="post">
+      <input type="hidden" name="_token" value="<?= e($token) ?>">
+      <?= icon('link-simple') ?><span>Connecting your <?= e($connect === 'facebook' ? 'Facebook Page' : ($allNames[$connect] ?? $connect)) ?> lets atwebtech look this up for you.</span>
+      <button type="submit" class="ws-btn ws-btn--dark ws-btn--sm">Connect <?= e($connect === 'facebook' ? 'Facebook Page' : ($allNames[$connect] ?? $connect)) ?></button>
+    </form>
+<?php endif; ?>
+<?php if ($found): ?>
+    <form class="co-found" action="/app/competitors" method="post" aria-labelledby="co-found-title">
+      <input type="hidden" name="_token" value="<?= e($token) ?>">
+      <input type="hidden" name="action" value="add_found">
+      <input type="hidden" name="range" value="<?= (int) $range ?>">
+      <h3 id="co-found-title">Profiles found on <?= e($found['site']) ?></h3>
+      <ul role="list">
+<?php foreach ($found['profiles'] as $i => $p): ?>
+        <li<?= $p['available'] ? '' : ' class="is-off"' ?>>
+          <label>
+            <input type="checkbox" name="profiles[]" value="<?= e($p['url']) ?>"<?= $p['available'] ? ' checked' : ' disabled' ?>>
+            <?= brand_icon($p['network'], 'co-net') ?><b><?= e($allNames[$p['network']] ?? $p['network']) ?></b>
+            <span><?= e(preg_replace('~^https?://(www\.)?~', '', $p['url'])) ?></span>
+          </label>
+<?php if (!$p['available']): ?>
+          <small>No official access to stats</small>
+<?php endif; ?>
+        </li>
+<?php endforeach; ?>
+      </ul>
+      <button type="submit" class="ws-btn ws-btn--dark"><?= icon('plus') ?>Follow selected</button>
+    </form>
+<?php endif; ?>
     <p class="co-meta"><?= $count ?> of <?= $limit ?> competitors<?= !$paid ? ' on the Free plan. <a href="/app/billing">Upgrade</a> to follow up to ' . Competitors::PAID_LIMIT . '.' : '.' ?>
       <span class="tip"><button type="button" class="tip-btn" aria-describedby="co-tip-nets" aria-label="Which networks work"><?= icon('info') ?></button>
-      <span class="tip-body" role="tooltip" id="co-tip-nets">YouTube and Bluesky work for any public account. Instagram needs a connected Facebook Page linked to your Instagram professional account, and works for other professional accounts. X isn’t included because its API charges for every read.</span></span>
+      <span class="tip-body" role="tooltip" id="co-tip-nets">YouTube, Bluesky and Mastodon work for any public account. Instagram needs a connected Facebook Page linked to your Instagram professional account. Facebook Pages and Threads work once Meta approves atwebtech’s access to public content. TikTok, LinkedIn, Pinterest and X don’t let apps read other accounts.</span></span>
     </p>
   </section>
 

@@ -119,9 +119,9 @@ $nameList = count($newNames) > 1 ? implode(', ', array_slice($newNames, 0, -1)) 
     <article class="core-card reveal" data-tilt aria-labelledby="f-community">
       <div class="core-panel panel--yellow"><?php partial('demos/inbox'); ?></div>
       <div class="core-body">
-        <p class="eyebrow">Community <span class="soon">Coming soon</span></p>
+        <p class="eyebrow">Community</p>
         <h3 class="h-card" id="f-community">Every conversation in one inbox.</h3>
-        <p>A shared inbox to find unanswered questions and reply in your brand's voice, across every channel.</p>
+        <p>Find unanswered comments, reply from one place, and let AI suggest a reply in your brand's voice.</p>
         <a class="link-arrow" href="/features/community">Explore the inbox<?= icon('arrow-right') ?></a>
       </div>
     </article>

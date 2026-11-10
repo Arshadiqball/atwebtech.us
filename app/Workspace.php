@@ -328,6 +328,7 @@ final class Workspace
             'series' => array_values($series),
             'metrics' => Metrics::summary((int) $user['id'], $channelId, $fromUtc, $toUtc, $prevFromUtc, $prevToUtc),
             'post_metrics' => Metrics::forPosts(array_column($posts, 'id')),
+            'best' => Metrics::bestTimes((int) $user['id'], $channelId, $tz),
         ];
     }
 

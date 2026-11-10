@@ -9,10 +9,21 @@ declare(strict_types=1);
  */
 final class Competitors
 {
+    /** Networks with an official way to read other accounts. */
     public const NETWORKS = [
-        'youtube' => ['name' => 'YouTube', 'placeholder' => '@channel or youtube.com/@channel', 'followers' => 'Subscribers'],
-        'bluesky' => ['name' => 'Bluesky', 'placeholder' => 'handle.bsky.social', 'followers' => 'Followers'],
-        'instagram' => ['name' => 'Instagram', 'placeholder' => '@username (professional account)', 'followers' => 'Followers'],
+        'youtube' => ['name' => 'YouTube', 'followers' => 'Subscribers'],
+        'instagram' => ['name' => 'Instagram', 'followers' => 'Followers'],
+        'facebook' => ['name' => 'Facebook Page', 'followers' => 'Followers'],
+        'threads' => ['name' => 'Threads', 'followers' => 'Followers'],
+        'bluesky' => ['name' => 'Bluesky', 'followers' => 'Followers'],
+        'mastodon' => ['name' => 'Mastodon', 'followers' => 'Followers'],
+    ];
+    /** Networks that give apps no official access to other accounts' stats. */
+    public const UNAVAILABLE = [
+        'tiktok' => 'TikTok',
+        'linkedin' => 'LinkedIn',
+        'pinterest' => 'Pinterest',
+        'x' => 'X',
     ];
     public const FREE_LIMIT = 3;
     public const PAID_LIMIT = 25;
@@ -101,17 +112,42 @@ final class Competitors
             $error = self::refresh($c, $user);
             self::done($back, $error ?? $c['name'] . ' is up to date.');
         }
+        if ($action === 'add_found') {
+            self::addFound($user, $back);
+        }
         if ($action !== 'add') {
             self::done($back, 'Nothing changed.');
         }
-        $network = (string) ($_POST['network'] ?? '');
+        $network = (string) ($_POST['network'] ?? 'auto');
         $input = trim((string) ($_POST['handle'] ?? ''));
+        if ($input === '' || mb_strlen($input) > 200) {
+            self::done($back, 'Paste the account’s profile or page link, or enter its handle.');
+        }
+        $detected = self::detect($input);
+        if (($network === 'auto' || $network === '') && $detected === null && preg_match('~^(https?://)?[a-z0-9.-]+\.[a-z]{2,}(/.*)?$~i', $input)) {
+            self::scanWebsite($input, $back);
+        }
+        if ($network === 'auto' || $network === '') {
+            $network = $detected ?? '';
+            if ($network === '') {
+                self::done($back, 'We couldn’t tell which network that is. Paste the full profile link, or choose the network.');
+            }
+        } elseif ($detected !== null && $detected !== $network) {
+            $network = $detected; // The link wins over the dropdown.
+        }
+        if (isset(self::UNAVAILABLE[$network])) {
+            self::done($back, self::UNAVAILABLE[$network] . ' doesn’t let apps read other accounts’ stats, so it can’t be followed yet.');
+        }
         if (!isset(self::NETWORKS[$network])) {
             self::done($back, 'Choose a network.');
         }
-        if ($input === '' || mb_strlen($input) > 200) {
-            self::done($back, 'Enter the account’s handle or profile link.');
-        }
+        self::follow($user, $network, $input, $back);
+    }
+
+    /** Follow one account and redirect back with the result. */
+    private static function follow(array $user, string $network, string $input, string $back, bool $quiet = false): ?string
+    {
+        $uid = (int) $user['id'];
         if (count(self::forUser($uid)) >= self::limit($uid)) {
             self::done($back, Channels::allowance($uid)['paid']
                 ? 'You’re following ' . self::PAID_LIMIT . ' competitors, the most for your plan. Remove one to add another.'
@@ -124,22 +160,124 @@ final class Competitors
         try {
             $profile = self::lookup($network, $input, $user);
         } catch (CompetitorError $e) {
+            if ($quiet) {
+                return $e->getMessage();
+            }
+            if ($e->connect !== null) {
+                $_SESSION['_co_connect'] = $e->connect;
+            }
             self::done($back, $e->getMessage());
         } catch (Throwable $e) {
             error_log(sprintf('[%s] competitor lookup %s: %s', gmdate('c'), $network, $e->getMessage()));
-            self::done($back, self::NETWORKS[$network]['name'] . ' didn’t answer. Check the handle and try again in a minute.');
+            $msg = self::NETWORKS[$network]['name'] . ' didn’t answer. Check the link and try again in a minute.';
+            if ($quiet) {
+                return $msg;
+            }
+            self::done($back, $msg);
         }
         $pdo = Database::connection();
         $exists = $pdo->prepare('SELECT id FROM competitors WHERE user_id = :uid AND network = :n AND external_id = :e');
         $exists->execute(['uid' => $uid, 'n' => $network, 'e' => $profile['external_id']]);
         if ($exists->fetchColumn()) {
+            if ($quiet) {
+                return 'already following';
+            }
             self::done($back, 'You already follow ' . $profile['name'] . '.');
         }
         $pdo->prepare('INSERT INTO competitors (user_id, network, handle, external_id, name, avatar_url, url, created_at) VALUES (:uid, :n, :h, :e, :name, :a, :url, :now)')
             ->execute(['uid' => $uid, 'n' => $network, 'h' => mb_substr($profile['handle'], 0, 120), 'e' => $profile['external_id'], 'name' => mb_substr($profile['name'], 0, 190), 'a' => self::safeAvatar($profile['avatar']), 'url' => $profile['url'], 'now' => Database::now()]);
         $c = self::find($uid, (int) $pdo->lastInsertId());
         $error = self::save($c, $profile);
+        if ($quiet) {
+            return null;
+        }
         self::done($back, $error ?? 'Now following ' . $profile['name'] . '. Their recent posts are below.');
+    }
+
+    /**
+     * A website link: read its home page for links to its social profiles and offer them
+     * (shown once on the page, where the user picks which to follow).
+     */
+    private static function scanWebsite(string $input, string $back): never
+    {
+        $url = preg_match('~^https?://~i', $input) ? $input : 'https://' . $input;
+        $uid = (int) (Auth::user()['id'] ?? 0);
+        if (RateLimiter::tooManyAttempts('competitor', (string) $uid, 30, 60)) {
+            self::done($back, 'That’s a lot of lookups in a short time. Please try again in an hour.');
+        }
+        RateLimiter::hit('competitor', (string) $uid);
+        try {
+            $html = Feeds::fetch($url);
+        } catch (Throwable $e) {
+            self::done($back, 'We couldn’t open ' . (parse_url($url, PHP_URL_HOST) ?: $input) . '. Check the address, or paste a social profile link instead.');
+        }
+        $found = self::socialLinks($html);
+        $site = (string) parse_url($url, PHP_URL_HOST);
+        if (!$found) {
+            self::done($back, 'We didn’t find social profile links on ' . $site . '. Paste their Instagram, YouTube or other profile link instead.');
+        }
+        $_SESSION['_co_found'] = ['site' => $site, 'profiles' => $found];
+        self::done($back, 'Found ' . count($found) . ' social ' . (count($found) === 1 ? 'profile' : 'profiles') . ' on ' . $site . '. Choose which to follow.');
+    }
+
+    /** POST action=add_found: follow the profiles picked from a website scan. */
+    private static function addFound(array $user, string $back): never
+    {
+        $picked = array_slice(array_values(array_filter((array) ($_POST['profiles'] ?? []), 'is_string')), 0, 10);
+        $ok = 0;
+        $problems = [];
+        foreach ($picked as $link) {
+            $network = self::detect($link);
+            if ($network === null || !isset(self::NETWORKS[$network])) {
+                continue;
+            }
+            if (count(self::forUser((int) $user['id'])) >= self::limit((int) $user['id'])) {
+                $problems[] = 'your plan’s limit was reached';
+                break;
+            }
+            $error = self::follow($user, $network, $link, $back, true);
+            if ($error === null) {
+                $ok++;
+            } elseif ($error !== 'already following') {
+                $problems[] = self::NETWORKS[$network]['name'] . ': ' . rtrim($error, '.');
+            }
+        }
+        self::done($back, ($ok === 0 ? 'No new competitors added.' : 'Now following ' . $ok . ($ok === 1 ? ' profile.' : ' profiles.')) . ($problems ? ' Skipped: ' . implode('; ', array_unique($problems)) . '.' : ''));
+    }
+
+    /**
+     * Profile links in a page: <a href>, JSON-LD sameAs and meta tags, one per network,
+     * skipping share buttons, single posts and videos.
+     * @return list<array{network:string, url:string, available:bool}>
+     */
+    public static function socialLinks(string $html): array
+    {
+        preg_match_all('~(?:href|content)\s*=\s*["\']([^"\'\s>]{8,300})["\']~i', $html, $m);
+        preg_match_all('~"(https?:\\?/\\?/[^"\s]{8,300})"~', $html, $j);
+        $candidates = array_merge($m[1], array_map(static fn (string $u): string => str_replace('\\/', '/', $u), $j[1]));
+        $skip = '~/(sharer|share|intent|shareArticle|dialog|plugins|pin/create|p/|reel/|reels/|watch|shorts/|embed|hashtag|explore|status/|posts/|photo|video/|events/|groups/|login|signup|privacy|legal|help|about/|policies)~i';
+        $out = [];
+        foreach ($candidates as $raw) {
+            $u = html_entity_decode(trim($raw), ENT_QUOTES);
+            if (str_starts_with($u, '//')) {
+                $u = 'https:' . $u;
+            }
+            if (!preg_match('~^https?://~i', $u)) {
+                continue;
+            }
+            $network = self::detect($u);
+            if ($network === null || isset($out[$network]) || $network === 'mastodon') {
+                continue;
+            }
+            $path = (string) parse_url($u, PHP_URL_PATH);
+            if (trim($path, '/') === '' || preg_match($skip, $path . '/')) {
+                continue;
+            }
+            $out[$network] = ['network' => $network, 'url' => strtok($u, '?#') ?: $u, 'available' => isset(self::NETWORKS[$network])];
+        }
+        $order = array_flip(array_merge(array_keys(self::NETWORKS), array_keys(self::UNAVAILABLE)));
+        uasort($out, static fn (array $a, array $b): int => ($order[$a['network']] ?? 99) <=> ($order[$b['network']] ?? 99));
+        return array_values($out);
     }
 
     /** Refresh competitors not checked for 12 hours. Called from bin/publish.php. */
@@ -217,8 +355,206 @@ final class Competitors
             'youtube' => self::youtube($input, $isId),
             'bluesky' => self::bluesky($input),
             'instagram' => self::instagram($input, $user),
+            'facebook' => self::facebook($input, $user),
+            'threads' => self::threads($input, $user),
+            'mastodon' => self::mastodon($input),
             default => throw new CompetitorError('Competitors on this network aren’t supported.'),
         };
+    }
+
+    /** The network a pasted link or handle belongs to, or null when it can't be told. */
+    public static function detect(string $input): ?string
+    {
+        $input = trim($input);
+        if (preg_match('/^@?[a-z0-9_.]+@[a-z0-9.-]+\.[a-z]{2,}$/i', $input)) {
+            return 'mastodon'; // user@instance
+        }
+        if (preg_match('~^(UC[A-Za-z0-9_-]{22})$~', $input)) {
+            return 'youtube';
+        }
+        $url = preg_match('~^https?://~i', $input) ? $input : (str_contains($input, '/') && str_contains($input, '.') ? 'https://' . $input : '');
+        $host = strtolower((string) parse_url($url, PHP_URL_HOST));
+        $host = preg_replace('/^(www\.|m\.|mobile\.)/', '', $host) ?? $host;
+        if ($host === '') {
+            return str_ends_with(strtolower($input), '.bsky.social') ? 'bluesky' : null;
+        }
+        $map = [
+            'youtube.com' => 'youtube', 'youtu.be' => 'youtube',
+            'instagram.com' => 'instagram',
+            'facebook.com' => 'facebook', 'fb.com' => 'facebook',
+            'threads.net' => 'threads', 'threads.com' => 'threads',
+            'bsky.app' => 'bluesky',
+            'tiktok.com' => 'tiktok', 'linkedin.com' => 'linkedin',
+            'x.com' => 'x', 'twitter.com' => 'x',
+        ];
+        if (isset($map[$host])) {
+            return $map[$host];
+        }
+        if (preg_match('/(^|\.)pinterest\.[a-z.]+$/', $host) || $host === 'pin.it') {
+            return 'pinterest';
+        }
+        if (preg_match('~^/@[A-Za-z0-9_.]+/?$~', (string) parse_url($url, PHP_URL_PATH))) {
+            return 'mastodon'; // https://instance/@user
+        }
+        return null;
+    }
+
+    /** Mastodon (any server): public account lookup and recent posts, no sign-in needed. */
+    private static function mastodon(string $input): array
+    {
+        $input = trim($input);
+        if (preg_match('~^https?://([a-z0-9.-]+\.[a-z]{2,})/@([A-Za-z0-9_.]+)/?$~i', $input, $m)) {
+            [$server, $user] = [strtolower($m[1]), $m[2]];
+        } elseif (preg_match('/^@?([A-Za-z0-9_.]+)@([a-z0-9.-]+\.[a-z]{2,})$/i', $input, $m)) {
+            [$server, $user] = [strtolower($m[2]), $m[1]];
+        } else {
+            throw new CompetitorError('Enter a Mastodon account like @name@mastodon.social, or its profile link.');
+        }
+        $base = 'https://' . $server . '/api/v1/';
+        try {
+            $a = self::get($base . 'accounts/lookup?' . http_build_query(['acct' => $user]));
+        } catch (ChannelApiException $e) {
+            if ($e->status === 404) {
+                throw new CompetitorError('No Mastodon account @' . $user . ' on ' . $server . '.');
+            }
+            throw $e;
+        }
+        $id = (string) ($a['id'] ?? '');
+        if ($id === '' || !preg_match('/^[0-9]+$/', $id)) {
+            throw new CompetitorError('No Mastodon account @' . $user . ' on ' . $server . '.');
+        }
+        $posts = [];
+        foreach (self::get($base . 'accounts/' . $id . '/statuses?' . http_build_query(['limit' => self::POSTS, 'exclude_replies' => 'true', 'exclude_reblogs' => 'true'])) as $st) {
+            $text = html_entity_decode(strip_tags(str_replace(['<br>', '<br />', '</p>'], "\n", (string) ($st['content'] ?? ''))), ENT_QUOTES, 'UTF-8');
+            $posts[] = self::post((string) ($st['id'] ?? ''), (string) ($st['created_at'] ?? ''), $text, (string) ($st['url'] ?? ''), !empty($st['media_attachments']) && ($st['media_attachments'][0]['type'] ?? '') === 'video' ? 'video' : 'post',
+                $st['favourites_count'] ?? null, $st['replies_count'] ?? null, $st['reblogs_count'] ?? null, null);
+        }
+        return [
+            'external_id' => $server . ':' . $id,
+            'handle' => '@' . $user . '@' . $server,
+            'name' => (string) (trim((string) ($a['display_name'] ?? '')) !== '' ? $a['display_name'] : $user),
+            'avatar' => null,
+            'url' => (string) ($a['url'] ?? 'https://' . $server . '/@' . $user),
+            'followers' => isset($a['followers_count']) ? (int) $a['followers_count'] : null,
+            'posts_total' => isset($a['statuses_count']) ? (int) $a['statuses_count'] : null,
+            'posts' => array_values(array_filter($posts)),
+        ];
+    }
+
+    /**
+     * Facebook Page by link, username or ID, read with a connected Page's token.
+     * Reading Pages you don't manage needs Meta's Page Public Content Access feature on the app.
+     */
+    private static function facebook(string $input, array $user): array
+    {
+        $path = trim((string) parse_url(preg_match('~^https?://~i', $input) ? $input : 'https://facebook.com/' . ltrim($input, '@/'), PHP_URL_PATH), '/');
+        parse_str((string) parse_url($input, PHP_URL_QUERY), $q);
+        $page = isset($q['id']) && preg_match('/^[0-9]+$/', (string) $q['id']) ? (string) $q['id'] : (string) strtok($path, '/');
+        if ($page === 'pages') { // facebook.com/pages/Name/123
+            $page = (string) preg_replace('~^.*/([0-9]{6,})$~', '$1', $path);
+        } elseif (preg_match('/-([0-9]{8,})$/', $page, $m)) { // facebook.com/Name-123456789
+            $page = $m[1];
+        }
+        if (preg_match('/^profile\.php$/', $page) || !preg_match('/^[A-Za-z0-9.\-]{2,100}$/', $page)) {
+            throw new CompetitorError('Enter a Facebook Page link like facebook.com/pagename.');
+        }
+        $tokens = self::pageTokens((int) $user['id']);
+        $app = config('oauth.facebook');
+        if (($app['client_id'] ?? '') !== '' && ($app['client_secret'] ?? '') !== '') {
+            $tokens[] = ['app', $app['client_id'] . '|' . $app['client_secret']]; // App token: works for public Pages once Page Public Content Access is approved.
+        }
+        if (!$tokens) {
+            throw new CompetitorError('Connect a Facebook Page so atwebtech can read other public Pages.', 'facebook');
+        }
+        $fields = 'id,name,username,link,picture{url},followers_count,fan_count,posts.limit(' . self::POSTS . '){id,created_time,message,permalink_url,shares,reactions.summary(total_count).limit(0),comments.summary(total_count).limit(0)}';
+        $d = null;
+        $last = null;
+        foreach ($tokens as [, $token]) {
+            try {
+                $d = self::get(self::GRAPH . '/' . rawurlencode($page) . '?' . http_build_query(['fields' => $fields, 'access_token' => $token]));
+                break;
+            } catch (ChannelApiException $e) {
+                $last = $e;
+            }
+        }
+        if ($d === null && $last !== null) {
+            $e = $last;
+            $msg = $last->getMessage();
+            if (str_contains($msg, 'Page Public Content Access') || str_contains($msg, 'pages_read_engagement') || str_contains($msg, 'missing permission')) {
+                throw new CompetitorError('Facebook Pages can’t be followed yet: atwebtech is waiting for Meta to approve reading public Pages. Try Instagram, YouTube or another network for now.');
+            }
+            if ($e->status === 404 || (str_contains($msg, 'does not exist') && !str_contains($msg, 'missing permission'))) {
+                throw new CompetitorError('No public Facebook Page found for “' . $input . '”.');
+            }
+            throw $e;
+        }
+        $posts = [];
+        foreach ($d['posts']['data'] ?? [] as $p) {
+            $posts[] = self::post((string) $p['id'], (string) ($p['created_time'] ?? ''), (string) ($p['message'] ?? ''), (string) ($p['permalink_url'] ?? ''), 'post',
+                $p['reactions']['summary']['total_count'] ?? null, $p['comments']['summary']['total_count'] ?? null, $p['shares']['count'] ?? 0, null);
+        }
+        $followers = $d['followers_count'] ?? ($d['fan_count'] ?? null);
+        return [
+            'external_id' => (string) $d['id'],
+            'handle' => (string) ($d['username'] ?? $d['id']),
+            'name' => (string) ($d['name'] ?? $page),
+            'avatar' => $d['picture']['data']['url'] ?? null,
+            'url' => (string) ($d['link'] ?? 'https://www.facebook.com/' . $d['id']),
+            'followers' => $followers !== null ? (int) $followers : null,
+            'posts_total' => null,
+            'posts' => array_values(array_filter($posts)),
+        ];
+    }
+
+    /**
+     * Threads Profile Discovery, read with the user's connected Threads profile.
+     * Needs the threads_profile_discovery permission approved for the app.
+     */
+    private static function threads(string $input, array $user): array
+    {
+        $username = (string) preg_replace('~^(?:https?://)?(?:www\.)?threads\.(?:net|com)/@?~i', '', trim($input));
+        $username = strtolower(ltrim((string) strtok($username, '/?#'), '@'));
+        if (!preg_match('/^[a-z0-9._]{1,30}$/', $username)) {
+            throw new CompetitorError('Enter a Threads username like @name, or a threads.com profile link.');
+        }
+        $token = self::tokens((int) $user['id'], 'threads')[0][1] ?? null;
+        if ($token === null) {
+            throw new CompetitorError('Connect your Threads profile so atwebtech can look up other Threads profiles.', 'threads');
+        }
+        $base = 'https://graph.threads.net/v1.0/';
+        try {
+            try {
+                $p = self::get($base . 'profile_lookup?' . http_build_query(['username' => $username, 'fields' => 'id,username,name,threads_profile_picture_url,follower_count', 'access_token' => $token]));
+            } catch (ChannelApiException $e) {
+                if ($e->status !== 400 || !str_contains($e->getMessage(), 'field')) {
+                    throw $e;
+                }
+                $p = self::get($base . 'profile_lookup?' . http_build_query(['username' => $username, 'fields' => 'id,username,name,threads_profile_picture_url', 'access_token' => $token]));
+            }
+            $feed = self::get($base . 'profile_posts?' . http_build_query(['username' => $username, 'fields' => 'id,text,timestamp,permalink,media_type', 'limit' => 25, 'access_token' => $token]));
+        } catch (ChannelApiException $e) {
+            if (in_array($e->status, [400, 403], true) && (str_contains($e->getMessage(), 'ermission') || str_contains($e->getMessage(), 'not authorized'))) {
+                throw new CompetitorError('Threads profiles can’t be followed yet: atwebtech is waiting for Meta to approve Threads profile lookups. Try Instagram, YouTube or another network for now.');
+            }
+            if ($e->status === 400 || $e->status === 404) {
+                throw new CompetitorError('No public Threads profile found for @' . $username . '.');
+            }
+            throw $e;
+        }
+        $posts = [];
+        foreach ($feed['data'] ?? [] as $t) {
+            $posts[] = self::post((string) $t['id'], (string) ($t['timestamp'] ?? ''), (string) ($t['text'] ?? ''), (string) ($t['permalink'] ?? 'https://www.threads.com/@' . $username), strtolower((string) ($t['media_type'] ?? 'post')), null, null, null, null);
+        }
+        return [
+            'external_id' => (string) ($p['id'] ?? $username),
+            'handle' => '@' . ($p['username'] ?? $username),
+            'name' => (string) (($p['name'] ?? '') !== '' ? $p['name'] : $username),
+            'avatar' => $p['threads_profile_picture_url'] ?? null,
+            'url' => 'https://www.threads.com/@' . ($p['username'] ?? $username),
+            'followers' => isset($p['follower_count']) ? (int) $p['follower_count'] : null,
+            'posts_total' => null,
+            'posts' => array_values(array_filter($posts)),
+        ];
     }
 
     private static function youtube(string $input, bool $isId): array
@@ -230,7 +566,9 @@ final class Competitors
         $params = ['part' => 'snippet,statistics,contentDetails'];
         if ($isId || preg_match('~(?:youtube\.com/channel/)?(UC[A-Za-z0-9_-]{22})~', $input, $m)) {
             $params['id'] = $isId ? $input : $m[1];
-        } elseif (preg_match('~(?:youtube\.com/)?@([A-Za-z0-9._-]{3,100})~', $input, $m) || preg_match('~^([A-Za-z0-9._-]{3,100})$~', $input, $m)) {
+        } elseif (preg_match('~youtube\.com/user/([A-Za-z0-9._-]{2,100})~i', $input, $m)) {
+            $params['forUsername'] = $m[1]; // Legacy /user/ links.
+        } elseif (preg_match('~(?:youtube\.com/)?@([A-Za-z0-9._-]{3,100})~', $input, $m) || preg_match('~youtube\.com/(?:c/)?([A-Za-z0-9._-]{3,100})/?(?:[?#].*)?$~i', $input, $m) || preg_match('~^([A-Za-z0-9._-]{3,100})$~', $input, $m)) {
             $params['forHandle'] = '@' . $m[1];
         } else {
             throw new CompetitorError('Enter a YouTube handle like @channel, or a channel link.');
@@ -348,21 +686,44 @@ final class Competitors
                 'posts' => array_values(array_filter($posts)),
             ];
         }
-        throw new CompetitorError('Instagram competitors need a connected Facebook Page that is linked to your Instagram professional account, with Instagram access allowed. Link them in Meta Business Suite, then reconnect the Page.');
+        throw new CompetitorError('Instagram lookups need a Facebook Page linked to an Instagram professional account. Link your Page and Instagram in Meta Business Suite, then connect the Page here.', 'facebook');
     }
 
     /** @return list<array{0:string,1:string}> page id and page token for each connected Facebook Page */
     private static function pageTokens(int $uid): array
     {
         $out = [];
-        foreach (Channels::forUser($uid) as $c) {
-            if ($c['provider'] !== 'facebook') {
-                continue;
-            }
-            $full = Channels::find($uid, (int) $c['id']);
-            try {
-                $out[] = [(string) $full['external_id'], Channels::accessToken($full)];
-            } catch (Throwable) {
+        foreach (self::tokens($uid, 'facebook') as [$channel, $token]) {
+            $out[] = [(string) $channel['external_id'], $token];
+        }
+        return $out;
+    }
+
+    /**
+     * Usable tokens for a network: the user's own connections first, then the site admins'
+     * (ADMIN_EMAILS), so public lookups work for people who haven't connected that network.
+     * @return list<array{0:array,1:string}>
+     */
+    private static function tokens(int $uid, string $provider): array
+    {
+        $owners = [$uid];
+        $emails = array_filter(array_map(static fn (string $e): string => strtolower(trim($e)), explode(',', (string) config('admin.emails'))));
+        if ($emails) {
+            $stmt = Database::connection()->prepare('SELECT id FROM users WHERE LOWER(email) IN (' . implode(',', array_fill(0, count($emails), '?')) . ')');
+            $stmt->execute(array_values($emails));
+            $owners = array_values(array_unique(array_merge($owners, array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN)))));
+        }
+        $out = [];
+        foreach ($owners as $owner) {
+            foreach (Channels::forUser($owner) as $c) {
+                if ($c['provider'] !== $provider) {
+                    continue;
+                }
+                $full = Channels::find($owner, (int) $c['id']);
+                try {
+                    $out[] = [$full, Channels::accessToken($full)];
+                } catch (Throwable) {
+                }
             }
         }
         return $out;
@@ -424,4 +785,9 @@ final class Competitors
 
 final class CompetitorError extends RuntimeException
 {
+    /** @param string|null $connect a network the user can connect to fix this */
+    public function __construct(string $message, public readonly ?string $connect = null)
+    {
+        parent::__construct($message);
+    }
 }

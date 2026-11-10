@@ -172,6 +172,51 @@ $m['prev']['watch_time'] = $m['prev']['watch_seconds'];
 <?php endif; ?>
   </section>
 
+<?php $best = $insights['best']; $dayNames = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
+$hourLabel = static fn (int $h): string => (new DateTimeImmutable('2000-01-01 ' . sprintf('%02d:00', $h)))->format('g A'); ?>
+  <section class="in-panel" aria-labelledby="in-best">
+    <h2 id="in-best">Best Times to Post <small>Last 90 days · <?= e(Workspace::timezoneLabel(Workspace::timezone($user))) ?></small></h2>
+<?php if (!$best['ready']): ?>
+    <div class="in-empty">
+      <?= icon('clock') ?>
+      <p>atwebtech needs stats from at least <?= Metrics::BEST_MIN_POSTS ?> posts<?= $best['posts'] > 0 ? ' (it has ' . (int) $best['posts'] . ' so far)' : '' ?>, with a few sent at the same hour, to find your best times. Keep posting at different times; stats update every few hours.</p>
+    </div>
+<?php else: ?>
+    <ol class="bt-top" role="list">
+<?php foreach ($best['top'] as $t): ?>
+      <li><b><?= e($dayNames[$t['day']] . ' ' . $hourLabel($t['hour'])) ?></b><span><?= e(number_format($t['lift'], 1)) ?>× your usual engagement · <?= (int) $t['n'] ?> posts</span></li>
+<?php endforeach; ?>
+    </ol>
+    <div class="bt-heat" role="table" aria-label="Average engagement by day and time">
+      <div role="row" class="bt-row bt-row--head"><span role="columnheader"></span>
+<?php foreach (['12–4 AM', '4–8 AM', '8 AM–12', '12–4 PM', '4–8 PM', '8 PM–12'] as $b): ?>
+        <span role="columnheader"><?= e($b) ?></span>
+<?php endforeach; ?>
+      </div>
+<?php foreach ($dayNames as $d => $dn): ?>
+      <div role="row" class="bt-row"><span role="rowheader"><?= e($dn) ?></span>
+<?php for ($b = 0; $b < 6; $b++): $cell = $best['heat'][$d][$b] ?? null; $v = $cell && $best['max'] > 0 ? min(1, $cell['score'] / $best['max']) : 0; ?>
+        <span role="cell" class="bt-cell<?= $cell ? '' : ' is-empty' ?>" style="--v: <?= e(number_format($v, 2, '.', '')) ?>" title="<?= e($cell ? sprintf('%s %s: %s× usual engagement, %d %s', $dn, ['12–4 AM', '4–8 AM', '8 AM–12 PM', '12–4 PM', '4–8 PM', '8 PM–12 AM'][$b], number_format($cell['score'], 1), $cell['n'], $cell['n'] === 1 ? 'post' : 'posts') : 'No posts sent at this time') ?>"><span class="sr-only"><?= e($cell ? number_format($cell['score'], 1) . '×' : 'none') ?></span></span>
+<?php endfor; ?>
+      </div>
+<?php endforeach; ?>
+    </div>
+    <p class="wsp-muted">Darker means more reactions, comments, shares and saves than your usual post on that channel.</p>
+<?php if (isset($channel)): ?>
+    <form class="bt-apply" action="/app/channels/<?= (int) $channel['id'] ?>/schedule" method="post">
+      <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+<?php foreach ($best['top'] as $t): ?>
+      <input type="hidden" name="times[<?= (int) $t['day'] ?>][]" value="<?= e(sprintf('%02d:00', $t['hour'])) ?>">
+<?php endforeach; ?>
+      <button type="submit" class="ws-btn ws-btn--sm"><?= icon('clock') ?>Use these times for the posting schedule</button>
+      <small>Replaces this channel’s current posting times.</small>
+    </form>
+<?php else: ?>
+    <p class="wsp-muted">To use these times for a channel’s posting schedule, open that channel’s Insights.</p>
+<?php endif; ?>
+<?php endif; ?>
+  </section>
+
   <section class="in-panel" aria-labelledby="in-perf">
     <h2 id="in-perf">Performance per Post <small><?= e($label) ?></small></h2>
 <?php if ($insights['posts']): ?>

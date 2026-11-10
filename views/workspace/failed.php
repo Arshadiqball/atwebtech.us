@@ -13,11 +13,22 @@ $json = static fn (array $data): string => e(json_encode($data, JSON_UNESCAPED_U
       <h2><?= count($posts) ?> failed to publish</h2>
       <p class="ap-sub">Fix what each message asks for, then retry. Posts that need a different file or a reconnected channel will fail again until that's done.</p>
     </div>
-    <form action="/app/posts" method="post">
-      <input type="hidden" name="_token" value="<?= e($token) ?>">
-      <input type="hidden" name="return" value="/app/publish?tab=failed">
-      <button type="submit" class="ws-btn ws-btn--dark" name="action" value="retry_all" data-confirm="Retry all <?= count($posts) ?> failed posts now?"><?= icon('arrows-clockwise') ?>Retry all</button>
-    </form>
+    <div class="ap-head-acts">
+      <form action="/app/posts" method="post">
+        <input type="hidden" name="_token" value="<?= e($token) ?>">
+        <input type="hidden" name="return" value="<?= e($_SERVER['REQUEST_URI'] ?? '/app/publish?tab=failed') ?>">
+        <input type="hidden" name="status" value="failed">
+<?php foreach ($posts as $p): ?>
+        <input type="hidden" name="ids[]" value="<?= (int) $p['id'] ?>">
+<?php endforeach; ?>
+        <button type="submit" class="ws-btn ws-btn--danger" name="action" value="delete_all" data-confirm="Delete all <?= count($posts) ?> failed posts? This can’t be undone."><?= icon('trash') ?>Delete all</button>
+      </form>
+      <form action="/app/posts" method="post">
+        <input type="hidden" name="_token" value="<?= e($token) ?>">
+        <input type="hidden" name="return" value="/app/publish?tab=failed">
+        <button type="submit" class="ws-btn ws-btn--dark" name="action" value="retry_all" data-confirm="Retry all <?= count($posts) ?> failed posts now?"><?= icon('arrows-clockwise') ?>Retry all</button>
+      </form>
+    </div>
   </div>
   <ul class="dr-list ap-list" role="list">
 <?php foreach ($posts as $post): $at = $post['planned_at'] ? Workspace::local((string) $post['planned_at'], $tz) : null; ?>

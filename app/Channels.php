@@ -20,6 +20,12 @@ final class Channels
         'threads' => 'threads_manage_insights',
         'youtube' => 'https://www.googleapis.com/auth/yt-analytics.readonly',
     ];
+    /** Comment permissions for the Community inbox, requested when COMMUNITY_PERMISSIONS lists the network. */
+    public const INBOX_SCOPES = [
+        'instagram' => 'instagram_business_manage_comments',
+        'threads' => 'threads_read_replies,threads_manage_replies',
+        'youtube' => 'https://www.googleapis.com/auth/youtube.force-ssl',
+    ];
     public const GOALS = [
         1 => ['Keep it steady', '1 time/week', 'purple'],
         3 => ['Build a presence', '3 times/week', 'orange'],
@@ -47,14 +53,14 @@ final class Channels
 
     public static function forUser(int $uid): array
     {
-        $stmt = Database::connection()->prepare('SELECT id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, created_at FROM channels WHERE user_id = :uid ORDER BY id');
+        $stmt = Database::connection()->prepare('SELECT id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, inbox_checked_at, inbox_error, created_at FROM channels WHERE user_id = :uid ORDER BY id');
         $stmt->execute(['uid' => $uid]);
         return array_map([self::class, 'hydrate'], $stmt->fetchAll());
     }
 
     public static function find(int $uid, int $id): ?array
     {
-        $stmt = Database::connection()->prepare('SELECT id, user_id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, access_token, refresh_token, token_expires_at, created_at FROM channels WHERE id = :id AND user_id = :uid');
+        $stmt = Database::connection()->prepare('SELECT id, user_id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, inbox_checked_at, inbox_error, access_token, refresh_token, token_expires_at, created_at FROM channels WHERE id = :id AND user_id = :uid');
         $stmt->execute(['id' => $id, 'uid' => $uid]);
         $row = $stmt->fetch();
         return $row ? self::hydrate($row) : null;
@@ -302,7 +308,7 @@ final class Channels
                 'client_id' => config('oauth.threads.client_id'),
                 'redirect_uri' => $redirectUri,
                 'response_type' => 'code',
-                'scope' => self::withStats('threads', self::THREADS_SCOPES, ','),
+                'scope' => self::withInbox('threads', self::withStats('threads', self::THREADS_SCOPES, ','), ','),
                 'state' => $state,
             ], '', '&', PHP_QUERY_RFC3986);
         }
@@ -311,7 +317,7 @@ final class Channels
                 'client_id' => config('oauth.instagram.client_id'),
                 'redirect_uri' => $redirectUri,
                 'response_type' => 'code',
-                'scope' => self::withStats('instagram', self::INSTAGRAM_SCOPES, ','),
+                'scope' => self::withInbox('instagram', self::withStats('instagram', self::INSTAGRAM_SCOPES, ','), ','),
                 'state' => $state,
             ], '', '&', PHP_QUERY_RFC3986);
         }
@@ -350,7 +356,7 @@ final class Channels
             'client_id' => config('oauth.google.client_id'),
             'redirect_uri' => $redirectUri,
             'response_type' => 'code',
-            'scope' => self::withStats('youtube', self::YOUTUBE_SCOPE . ' ' . self::UPLOAD_SCOPE, ' '),
+            'scope' => self::withInbox('youtube', self::withStats('youtube', self::YOUTUBE_SCOPE . ' ' . self::UPLOAD_SCOPE, ' '), ' '),
             'access_type' => 'offline',
             'include_granted_scopes' => $fresh ? 'false' : 'true',
             'prompt' => ($switchAccount || $fresh) ? 'select_account consent' : 'consent',
@@ -364,13 +370,31 @@ final class Channels
      * Adds the network's stats permission when STATS_PERMISSIONS (comma list, "all" or "none") includes it.
      * Instagram and Threads are on by default; YouTube Analytics is opt-in because Google reviews new scopes.
      */
+    /**
+     * Adds comment permissions for the Community inbox when COMMUNITY_PERMISSIONS (comma list, "all" or "none") lists
+     * the network. Off by default: Meta and Google review these before customers outside the app's roles can grant them.
+     */
+    public static function withInbox(string $provider, string $scopes, string $glue): string
+    {
+        $on = array_map('trim', explode(',', strtolower((string) Env::get('COMMUNITY_PERMISSIONS', ''))));
+        if (!isset(self::INBOX_SCOPES[$provider]) || (!in_array('all', $on, true) && !in_array($provider, $on, true))) {
+            return $scopes;
+        }
+        return $scopes . $glue . str_replace(',', $glue, self::INBOX_SCOPES[$provider]);
+    }
+
     public static function withStats(string $provider, string $scopes, string $glue): string
     {
         $on = array_map('trim', explode(',', strtolower((string) Env::get('STATS_PERMISSIONS', 'instagram,threads'))));
         if (!isset(self::STATS_SCOPES[$provider]) || (!in_array('all', $on, true) && !in_array($provider, $on, true))) {
             return $scopes;
         }
-        return $scopes . $glue . self::STATS_SCOPES[$provider];
+        $scopes .= $glue . self::STATS_SCOPES[$provider];
+        // Competitor lookups on Threads, once Meta has approved threads_profile_discovery for the app.
+        if ($provider === 'threads' && (in_array('all', $on, true) || in_array('threads-discovery', $on, true))) {
+            $scopes .= $glue . 'threads_profile_discovery';
+        }
+        return $scopes;
     }
 
     /** Swap an authorization code for tokens. */
@@ -759,7 +783,7 @@ final class Channels
             'access_token' => $kept,
             'refresh_token' => null,
             'expires_at' => gmdate('Y-m-d H:i:s', time() + max(3600, (int) ($long['expires_in'] ?? 5184000))),
-            'scope' => self::THREADS_SCOPES,
+            'scope' => self::withInbox('threads', self::withStats('threads', self::THREADS_SCOPES, ','), ','), // Threads doesn't echo the granted scopes.
         ];
     }
 

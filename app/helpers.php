@@ -199,7 +199,7 @@ function feature_state(string $slug): array
         'ai-assistant' => ['live', '/app/publish/new', 'Write a post with AI'],
         'link-in-bio' => ['live', '/app/link-in-bio', 'Build your Link in Bio'],
         'analytics' => ['live', '/app/insights', 'Open Insights'],
-        'community' => ['soon', null, null],
+        'community' => ['live', '/app/community', 'Open the Community inbox'],
         'collaboration' => ['partial', '/app/publish?tab=approvals', 'Open Approvals'],
     ];
     [$state, $app, $cta] = $map[$slug] ?? ['soon', null, null];

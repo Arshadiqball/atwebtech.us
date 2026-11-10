@@ -150,8 +150,8 @@ Each connected channel has `/app/channels/{id}/settings` with two tabs.
 
 ## Community and Insights
 
-- **Community** (`/app/community` and `/app/channels/{id}/community`) matches the comments / mentions layout. atwebtech does not read comments or mentions. The page says so and stays empty.
-- **Insights** (`/app/insights` and `/app/channels/{id}/insights`) shows posts atwebtech actually sent in the selected date range, plus a simple posts-per-day chart. Followers, reactions, impressions and the other network metrics are labelled Coming soon and show an em dash — never a made-up number.
+- **Community** (`/app/community`; `/app/channels/{id}/community` redirects there filtered to that channel) is a comment inbox. See *Community inbox* below.
+- **Insights** (`/app/insights` and `/app/channels/{id}/insights`) shows posts atwebtech sent in the selected date range, network stats (see *Insights* below) and Best Times to Post.
 - **First comment:** the composer can save a first comment on a LinkedIn post. After the post publishes, `bin/publish.php` tries to post that comment. If LinkedIn refuses, the post is still `sent` and Sent shows why the comment failed.
 
 ## Publishing
@@ -264,17 +264,37 @@ Turn it on by setting `META_PIXEL_ID` and `META_CAPI_TOKEN` in the server `.env`
 
 Existing channels pick up new permissions when they are reconnected.
 
+**Best Times to Post** (Insights and channel Insights): `Metrics::bestTimes()` scores each post sent in the last 90 days by reactions + comments + shares + saves, divided by its channel's average, then averages by weekday and hour in the user's time zone. It shows the top hours (at least 2 posts each, above the usual) and a day × 4-hour heatmap once 6 posts have stats. On a channel's Insights, "Use these times for the posting schedule" posts the top hours to `/app/channels/{id}/schedule`, replacing that channel's posting times.
+
+## Community inbox
+
+`app/Community.php` reads comments into `comments` (migration `019`) from `bin/publish.php`, up to 8 channels a minute, each channel every 30 minutes; the Refresh button reads now (at most every 3 minutes per channel). New comments start as Unanswered; the account's own comments start as Done. People can reply (the comment becomes Answered), get an AI-suggested reply to edit (uses the AI Assistant allowance), mark done, or reopen. The sidebar shows the Unanswered count.
+
+| Network | Reads | Reply needs |
+|---|---|---|
+| YouTube | all comment threads on the channel (falls back to videos atwebtech posted) with the existing `youtube.readonly` scope | `youtube.force-ssl`: `COMMUNITY_PERMISSIONS=youtube` once Google approves it |
+| Facebook Pages | top-level comments on the Page's 15 latest posts and posts atwebtech sent | `pages_read_engagement` (+ `pages_read_user_content` for names) and `pages_manage_engagement` in the Facebook Login for Business configuration |
+| Instagram | comments on the 15 latest posts | `instagram_business_manage_comments`: `COMMUNITY_PERMISSIONS=instagram` after Meta approval |
+| Threads | replies to the 15 latest threads | `threads_read_replies`, `threads_manage_replies`: `COMMUNITY_PERMISSIONS=threads` after Meta approval |
+| LinkedIn, Pinterest, TikTok | not available to apps | |
+
+Without permission a channel shows "Reconnect … and allow access to comments" with a Reconnect button, and comments that can't be answered from atwebtech link to the network. Mentions are not read.
+
 ## Competitors
 
 Workspace → **Competitors** (`/app/competitors`, `app/Competitors.php`, migration `017`) follows public accounts and compares followers, growth, posts per week, average likes, comments and views, engagement rate and top posts over 7, 30 or 90 days. Free plans follow 3 accounts, paid plans 25. `bin/publish.php` refreshes each competitor every 12 hours; there is also an Update button.
+
+Paste any profile or page link; the network is detected from it (or chosen in the dropdown).
 
 | Network | How it reads other accounts |
 |---|---|
 | YouTube | YouTube Data API through `YOUTUBE_API_KEY` or any connected YouTube channel |
 | Bluesky | Public Bluesky API, no setup |
+| Mastodon | Public API of the account's server, no setup |
 | Instagram | Business Discovery through a connected Facebook Page linked to an Instagram professional account (needs `instagram_basic` and `pages_read_engagement` in the Facebook Login configuration); works for other professional accounts |
-
-Facebook Pages need Meta's Page Public Content Access feature, so they aren't offered.
+| Facebook Pages | A connected Page's token; needs Meta to approve **Page Public Content Access** for the app |
+| Threads | Profile Discovery API through the user's Threads connection; needs Meta to approve `threads_profile_discovery`, then `STATS_PERMISSIONS=instagram,threads,threads-discovery` and a reconnect |
+| TikTok, LinkedIn, Pinterest, X | Listed but disabled: no official API for other accounts' stats (X also charges per read) |
 
 ## X (removed)
 
@@ -284,7 +304,7 @@ X was removed in November 2026: its API charges for every post and every read, w
 
 | Schedule | Command | Purpose |
 |---|---|---|
-| `* * * * *` | `php bin/publish.php` | Publish due posts, then refresh network stats for Insights |
+| `* * * * *` | `php bin/publish.php` | Publish due posts, then refresh network stats, competitors and the Community inbox |
 | `15 * * * *` | `php bin/feeds.php` | Check followed feeds |
 | `0 14 * * 1` | `php bin/trends.php` | Refresh the Trending list (run by GitHub Actions, `trends.yml`, no server cron needed) |
 

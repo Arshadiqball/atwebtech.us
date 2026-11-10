@@ -192,3 +192,5 @@ Stack trace:
 #3 Command line code(1): require('/Users/mac/Docu...')
 #4 {main}
   thrown in /Users/mac/Documents/atwebtech/atwebtechus/app/Migrator.php on line 98
+[10-Nov-2026 04:34:47 UTC] [2026-11-10T04:34:47+00:00] inbox reply 1: Google access expired. Reconnect the channel to keep publishing.
+[10-Nov-2026 04:35:24 UTC] [2026-11-10T04:35:24+00:00] inbox channel 29: Google access expired. Reconnect the channel to keep publishing.

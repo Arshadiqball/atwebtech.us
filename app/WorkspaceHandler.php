@@ -189,6 +189,22 @@ final class WorkspaceHandler
             }
             self::done($back, 'Post deleted.', ['id' => $id]);
         }
+        if ($action === 'delete_all') {
+            // Deletes exactly the drafts or failed posts that were on screen (the channel filter may hide some).
+            $status = (string) ($_POST['status'] ?? '');
+            if (!in_array($status, ['draft', 'failed'], true)) {
+                self::fail('composer', $back, 'Nothing was deleted.');
+            }
+            $ids = array_slice(array_values(array_unique(array_filter(array_map('intval', (array) ($_POST['ids'] ?? []))))), 0, 1000);
+            $deleted = 0;
+            foreach (array_chunk($ids, 200) as $chunk) {
+                $stmt = $pdo->prepare('DELETE FROM posts WHERE user_id = ? AND status = ? AND id IN (' . implode(',', array_fill(0, count($chunk), '?')) . ')');
+                $stmt->execute(array_merge([$uid, $status], $chunk));
+                $deleted += $stmt->rowCount();
+            }
+            $what = $status === 'draft' ? 'draft' : 'failed post';
+            self::done($back, $deleted === 0 ? 'Nothing was deleted.' : $deleted . ' ' . $what . ($deleted === 1 ? '' : 's') . ' deleted.');
+        }
         if ($action === 'retry_all') {
             $stmt = $pdo->prepare("UPDATE posts SET status = 'planned', planned_at = :now, error = NULL, attempts = 0, updated_at = :now2 WHERE user_id = :uid AND status = 'failed'");
             $stmt->execute(['now' => Database::now(), 'now2' => Database::now(), 'uid' => $uid]);

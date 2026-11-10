@@ -15,6 +15,7 @@ $allowance = Channels::allowance((int) $user['id']);
 $channelLimit = $allowance['limit'];
 $initial = mb_strtoupper(mb_substr($user['display_name'], 0, 1));
 $queueCount = Workspace::counts((int) $user['id'])['queue'];
+$inboxCount = Community::unanswered((int) $user['id']);
 $notice = flash('notice');
 ?>
 <div class="ws" data-workspace data-token="<?= e(Security::csrfToken()) ?>"<?= empty($user['timezone']) ? ' data-tz-unset' : '' ?>>
@@ -55,6 +56,8 @@ $notice = flash('notice');
             <?= icon($s['icon']) ?><span class="ws-label"><?= e($s['label']) ?></span>
 <?php if (isset($s['count'])): ?>
             <span class="ws-count" aria-label="<?= $queueCount ?> in queue"><?= $queueCount ?></span>
+<?php elseif ($key === 'community' && $inboxCount > 0): ?>
+            <span class="ws-count" aria-label="<?= $inboxCount ?> unanswered"><?= $inboxCount > 99 ? '99+' : $inboxCount ?></span>
 <?php endif; ?>
           </a>
         </li>

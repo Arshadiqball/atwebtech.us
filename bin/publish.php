@@ -30,6 +30,10 @@ if ($statsLock && flock($statsLock, LOCK_EX | LOCK_NB)) {
     try {
         $stats = Metrics::run(30);
         $followed = Competitors::run(15);
+        $inbox = Community::run(15);
+        if ($inbox > 0) {
+            printf("[%s] inbox: %d channels read\n", gmdate('c'), $inbox);
+        }
         if ($followed > 0) {
             printf("[%s] competitors: %d refreshed\n", gmdate('c'), $followed);
         }
