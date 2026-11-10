@@ -10,7 +10,7 @@ declare(strict_types=1);
  */
 final class Community
 {
-    public const NETWORKS = ['youtube' => 'YouTube', 'facebook' => 'Facebook', 'instagram' => 'Instagram', 'threads' => 'Threads'];
+    public const NETWORKS = ['youtube' => 'YouTube', 'facebook' => 'Facebook', 'instagram' => 'Instagram', 'threads' => 'Threads', 'bluesky' => 'Bluesky', 'mastodon' => 'Mastodon'];
     public const STATES = ['open' => 'Unanswered', 'replied' => 'Answered', 'done' => 'Done'];
     public const REPLY_MAX = 2000;
     /** How often the cron reads each channel, and the shortest gap for "Refresh now". */
@@ -56,6 +56,7 @@ final class Community
                 'facebook' => self::facebook($channel, $token),
                 'instagram' => self::instagram($channel, $token),
                 'threads' => self::threads($channel, $token),
+                'bluesky', 'mastodon' => OpenSocial::comments($channel, $token),
                 default => [],
             };
             self::save($channel, $items);
@@ -77,6 +78,7 @@ final class Community
             'instagram' => str_contains($scopes, 'instagram_business_manage_comments'),
             'threads' => str_contains($scopes, 'threads_manage_replies'),
             'facebook' => ($channel['kind'] ?? '') === 'Page', // Set by the Facebook Login configuration; a missing permission shows on send.
+            'bluesky', 'mastodon' => true,
             default => false,
         };
     }
@@ -89,7 +91,7 @@ final class Community
     {
         $pdo = Database::connection();
         $channels = array_values(array_filter(Channels::forUser($uid), static fn (array $c): bool => isset(self::NETWORKS[$c['provider']])));
-        $where = 'c.user_id = :uid';
+        $where = 'c.user_id = :uid' . Team::channelSql($uid, 'c.channel_id', false);
         $params = ['uid' => $uid];
         if ($channelId !== null) {
             $where .= ' AND c.channel_id = :cid';
@@ -126,10 +128,21 @@ final class Community
         return ['comments' => array_slice($rows, 0, self::PAGE), 'items' => $items, 'counts' => $counts, 'channels' => $channels, 'more' => $more];
     }
 
+    /** Saved replies allowed on the Free plan. Paid plans have no practical limit. */
+    public const SAVED_FREE = 1;
+    private const SAVED_MAX = 300;
+
+    public static function savedReplies(int $uid): array
+    {
+        $stmt = Database::connection()->prepare('SELECT id, title, body FROM saved_replies WHERE user_id = :uid ORDER BY title, id');
+        $stmt->execute(['uid' => $uid]);
+        return $stmt->fetchAll();
+    }
+
     /** Count for the sidebar badge. */
     public static function unanswered(int $uid): int
     {
-        $stmt = Database::connection()->prepare("SELECT COUNT(*) FROM comments WHERE user_id = :uid AND state = 'open'");
+        $stmt = Database::connection()->prepare("SELECT COUNT(*) FROM comments WHERE user_id = :uid AND state = 'open'" . Team::channelSql($uid, 'channel_id', false));
         $stmt->execute(['uid' => $uid]);
         return (int) $stmt->fetchColumn();
     }
@@ -160,6 +173,25 @@ final class Community
                 $ran++;
             }
             self::done($back, $ran === 0 ? 'Comments were read a moment ago. Try again in a few minutes.' : ($problems ? $problems[0] : 'Comments are up to date.'));
+        }
+
+        if ($action === 'save_reply') {
+            $title = mb_substr(trim((string) ($_POST['title'] ?? '')), 0, 80);
+            $body = trim(str_replace("\r\n", "\n", (string) ($_POST['body'] ?? '')));
+            if ($title === '' || $body === '' || mb_strlen($body) > self::REPLY_MAX) {
+                self::done($back, sprintf('Give the saved reply a name and some text (up to %d characters).', self::REPLY_MAX));
+            }
+            $have = count(self::savedReplies($uid));
+            $paid = Channels::allowance($uid)['paid'];
+            if ($have >= ($paid ? self::SAVED_MAX : self::SAVED_FREE)) {
+                self::done($back, $paid ? 'That’s the most saved replies a workspace can have. Delete one first.' : 'The Free plan includes 1 saved reply. Upgrade for unlimited saved replies, or delete the one you have.');
+            }
+            Database::connection()->prepare('INSERT INTO saved_replies (user_id, title, body, created_at) VALUES (:uid, :t, :b, :now)')->execute(['uid' => $uid, 't' => $title, 'b' => $body, 'now' => Database::now()]);
+            self::done($back, 'Saved. Pick it from “Saved replies” under any comment.');
+        }
+        if ($action === 'delete_reply') {
+            Database::connection()->prepare('DELETE FROM saved_replies WHERE id = :id AND user_id = :uid')->execute(['id' => (int) ($_POST['reply_id'] ?? 0), 'uid' => $uid]);
+            self::done($back, 'Saved reply deleted.');
         }
 
         $comment = self::find($uid, (int) ($_POST['id'] ?? 0));
@@ -243,8 +275,18 @@ final class Community
         self::done($back, 'Suggested reply added. Edit it, then send.');
     }
 
+    /** Send a reply to a comment (used by auto-reply rules). */
+    public static function deliver(array $channel, array $comment, string $text): void
+    {
+        self::sendReply($channel, $comment, $text);
+    }
+
     private static function sendReply(array $channel, array $comment, string $text): void
     {
+        if (in_array($channel['provider'], OpenSocial::PROVIDERS, true)) {
+            OpenSocial::reply($channel, $comment, $text);
+            return;
+        }
         $token = Channels::accessToken($channel);
         $id = (string) $comment['external_id'];
         switch ($channel['provider']) {
@@ -485,6 +527,14 @@ final class Community
                 'body' => mb_substr($c['body'], 0, 5000), 'at' => gmdate('Y-m-d H:i:s', $at ?: time()),
                 'state' => $c['is_own'] ? 'done' : 'open', 'now' => $now,
             ] + $counts);
+            $newId = (int) $pdo->lastInsertId();
+            if (!$c['is_own']) {
+                Automations::autoReply($channel, $newId, $c, $at ?: time());
+                Webhooks::queue((int) $channel['user_id'], 'comment.received', [
+                    'channel_id' => (int) $channel['id'], 'network' => $channel['provider'], 'author' => $c['author_name'],
+                    'text' => mb_substr($c['body'], 0, 2000), 'url' => self::safeUrl($c['item_url']), 'published_at' => gmdate('c', $at ?: time()),
+                ]);
+            }
         }
     }
 
@@ -496,7 +546,7 @@ final class Community
 
     private static function find(int $uid, int $id): ?array
     {
-        $stmt = Database::connection()->prepare('SELECT c.*, ch.provider FROM comments c JOIN channels ch ON ch.id = c.channel_id WHERE c.id = :id AND c.user_id = :uid');
+        $stmt = Database::connection()->prepare('SELECT c.*, ch.provider FROM comments c JOIN channels ch ON ch.id = c.channel_id WHERE c.id = :id AND c.user_id = :uid' . Team::channelSql($uid, 'c.channel_id', false));
         $stmt->execute(['id' => $id, 'uid' => $uid]);
         return $stmt->fetch() ?: null;
     }

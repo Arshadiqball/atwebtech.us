@@ -17,6 +17,8 @@ final class Metrics
         'threads' => ['followers', 'impressions', 'reactions', 'comments', 'shares'],
         'youtube' => ['followers', 'reactions', 'comments', 'shares', 'video_views', 'watch_seconds'],
         'pinterest' => ['followers', 'impressions', 'reactions', 'comments', 'saves', 'video_views'],
+        'bluesky' => ['followers', 'reactions', 'comments', 'shares'],
+        'mastodon' => ['followers', 'reactions', 'comments', 'shares'],
         'linkedin' => [],
     ];
 
@@ -96,7 +98,7 @@ final class Metrics
         $channels = array_filter(Channels::forUser($uid), static fn (array $c): bool => $channelId === null || (int) $c['id'] === $channelId);
         $sum = static function (string $from, string $to) use ($pdo, $uid, $channelId): array {
             $cols = implode(', ', array_map(static fn (string $f): string => "SUM(m.$f) AS $f, COUNT(m.$f) AS n_$f", self::FIELDS));
-            $sql = "SELECT $cols FROM post_metrics m JOIN posts p ON p.id = m.post_id WHERE p.user_id = :uid AND p.status = 'sent' AND p.sent_at BETWEEN :from AND :to";
+            $sql = "SELECT $cols FROM post_metrics m JOIN posts p ON p.id = m.post_id WHERE p.user_id = :uid AND p.status = 'sent' AND p.sent_at BETWEEN :from AND :to" . Team::channelSql($uid, 'p.channel_id');
             $params = ['uid' => $uid, 'from' => $from, 'to' => $to];
             if ($channelId !== null) {
                 $sql .= ' AND p.channel_id = :cid';
@@ -157,6 +159,53 @@ final class Metrics
         ];
     }
 
+    /**
+     * Hashtags used in posts with stats over the last 90 days, ranked by engagement against each channel's average.
+     * @return list<array{tag:string, posts:int, lift:float, reactions:int, comments:int}>
+     */
+    public static function hashtags(int $uid, ?int $channelId): array
+    {
+        $sql = "SELECT p.channel_id, p.body, COALESCE(m.reactions, 0) AS r, COALESCE(m.comments, 0) AS c, COALESCE(m.shares, 0) + COALESCE(m.saves, 0) AS s
+            FROM post_metrics m JOIN posts p ON p.id = m.post_id
+            WHERE p.user_id = :uid AND p.status = 'sent' AND p.sent_at >= :since AND m.error IS NULL" . Team::channelSql($uid, 'p.channel_id');
+        $params = ['uid' => $uid, 'since' => gmdate('Y-m-d H:i:s', time() - self::LOOKBACK_DAYS * 86400)];
+        if ($channelId !== null) {
+            $sql .= ' AND p.channel_id = :cid';
+            $params['cid'] = $channelId;
+        }
+        $stmt = Database::connection()->prepare($sql);
+        $stmt->execute($params);
+        $rows = $stmt->fetchAll();
+        $avg = [];
+        foreach ($rows as $r) {
+            $avg[$r['channel_id']][] = (int) $r['r'] + (int) $r['c'] + (int) $r['s'];
+        }
+        $avg = array_map(static fn (array $v): float => max(1.0, array_sum($v) / count($v)), $avg);
+        $tags = [];
+        foreach ($rows as $r) {
+            if (!preg_match_all('/(?<![\p{L}\p{N}_&])#([\p{L}\p{N}_]{2,50})/u', (string) $r['body'], $m)) {
+                continue;
+            }
+            $acts = (int) $r['r'] + (int) $r['c'] + (int) $r['s'];
+            foreach (array_unique(array_map('mb_strtolower', $m[1])) as $tag) {
+                $t = &$tags[$tag];
+                $t ??= ['tag' => '#' . $tag, 'posts' => 0, 'lift' => 0.0, 'reactions' => 0, 'comments' => 0];
+                $t['posts']++;
+                $t['lift'] += $acts / $avg[$r['channel_id']];
+                $t['reactions'] += (int) $r['r'];
+                $t['comments'] += (int) $r['c'];
+                unset($t);
+            }
+        }
+        $tags = array_values(array_filter($tags, static fn (array $t): bool => $t['posts'] >= 2));
+        foreach ($tags as &$t) {
+            $t['lift'] = $t['lift'] / $t['posts'];
+        }
+        unset($t);
+        usort($tags, static fn (array $a, array $b): int => [$b['lift'], $b['posts']] <=> [$a['lift'], $a['posts']]);
+        return array_slice($tags, 0, 10);
+    }
+
     /** Posts with stats needed before best times are shown, and per time slot. */
     public const BEST_MIN_POSTS = 6;
     private const BEST_MIN_SLOT = 2;
@@ -172,7 +221,7 @@ final class Metrics
         $sql = "SELECT p.channel_id, p.sent_at, COALESCE(m.reactions, 0) + COALESCE(m.comments, 0) + COALESCE(m.shares, 0) + COALESCE(m.saves, 0) AS acts
             FROM post_metrics m JOIN posts p ON p.id = m.post_id
             WHERE p.user_id = :uid AND p.status = 'sent' AND p.sent_at >= :since AND m.error IS NULL
-            AND (m.reactions IS NOT NULL OR m.comments IS NOT NULL OR m.shares IS NOT NULL OR m.saves IS NOT NULL)";
+            AND (m.reactions IS NOT NULL OR m.comments IS NOT NULL OR m.shares IS NOT NULL OR m.saves IS NOT NULL)" . Team::channelSql($uid, 'p.channel_id');
         $params = ['uid' => $uid, 'since' => gmdate('Y-m-d H:i:s', time() - self::LOOKBACK_DAYS * 86400)];
         if ($channelId !== null) {
             $sql .= ' AND p.channel_id = :cid';
@@ -280,6 +329,7 @@ final class Metrics
             'threads' => self::threadsFollowers($id, $token),
             'youtube' => self::youtubeSubscribers($id, $token),
             'pinterest' => self::int(self::get('https://api.pinterest.com/v5/user_account', $token), ['follower_count']),
+            'bluesky', 'mastodon' => OpenSocial::followers($channel, $token),
             default => null,
         };
     }
@@ -319,6 +369,9 @@ final class Metrics
             return [];
         }
         $out = [];
+        if (in_array($channel['provider'], OpenSocial::PROVIDERS, true)) {
+            return OpenSocial::postStats($channel, $token, $rows);
+        }
         if ($channel['provider'] === 'youtube') {
             $analytics = true;
             foreach (array_chunk($rows, 50) as $chunk) {

@@ -17,7 +17,7 @@ final class ChannelHandler
         }
         $reconnect = ($_POST['reconnect'] ?? '') === '1';
         $allowance = Channels::allowance($uid);
-        if (!$reconnect && count(Channels::forUser($uid)) >= $allowance['limit']) {
+        if (!$reconnect && Channels::familyCount($uid) >= $allowance['limit']) {
             self::notice('/app/channels', sprintf('Your %s plan includes %d channels. Add channels in Plan & billing, or disconnect one to add another.', $allowance['name'], $allowance['limit']));
         }
         $fingerprint = Security::clientFingerprint();
@@ -25,6 +25,9 @@ final class ChannelHandler
             self::notice('/app/channels', 'Too many connection attempts. Please wait a few minutes and try again.');
         }
         RateLimiter::hit('channel-connect', $fingerprint);
+        if (in_array($provider, OpenSocial::PROVIDERS, true)) {
+            OpenSocial::start($provider, $reconnect);
+        }
 
         if ($provider === 'pinterest' && !Channels::pinterestOAuthReady()) {
             self::connectPinterestSandbox();
@@ -39,6 +42,9 @@ final class ChannelHandler
 
     public static function callback(string $provider): never
     {
+        if ($provider === 'mastodon') {
+            OpenSocial::mastodonCallback();
+        }
         $user = Auth::require();
         $flow = $_SESSION['_oauth'] ?? null;
         unset($_SESSION['_oauth']);
@@ -170,8 +176,8 @@ final class ChannelHandler
         $known = array_map(static fn (array $c): string => $c['provider'] . ':' . $c['external_id'], $existing);
         $new = array_filter($picked, static fn (string $id): bool => !in_array($pending['provider'] . ':' . $id, $known, true));
         $allowance = Channels::allowance($uid);
-        if (count($existing) + count($new) > $allowance['limit']) {
-            flash('form', ['form' => 'confirm', 'status' => 'error', 'message' => sprintf('Your %s plan includes %d channels, so you can add %d more. Add channels in Plan & billing to connect them all.', $allowance['name'], $allowance['limit'], max(0, $allowance['limit'] - count($existing))), 'errors' => [], 'old' => []]);
+        if (Channels::familyCount($uid) + count($new) > $allowance['limit']) {
+            flash('form', ['form' => 'confirm', 'status' => 'error', 'message' => sprintf('Your %s plan includes %d channels, so you can add %d more. Add channels in Plan & billing to connect them all.', $allowance['name'], $allowance['limit'], max(0, $allowance['limit'] - Channels::familyCount($uid))), 'errors' => [], 'old' => []]);
             redirect('/app/channels/confirm');
         }
 

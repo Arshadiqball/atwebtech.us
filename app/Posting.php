@@ -16,7 +16,8 @@ final class Posting
     private const PINTEREST = 'https://api.pinterest.com';
 
     /** @param array|null $media a ready media row, with $file its path on disk */
-    public static function facebook(string $pageToken, string $pageId, string $text, ?array $media, ?string $file): array
+    /** @param array[] $extras more ready image rows: the post goes out as a multi-photo post */
+    public static function facebook(string $pageToken, string $pageId, string $text, ?array $media, ?string $file, array $extras = []): array
     {
         if (!preg_match('/^[0-9]+$/', $pageId)) {
             throw new PublishError('This Facebook Page can’t be published to. Reconnect it and try again.');
@@ -37,7 +38,21 @@ final class Posting
             self::requireId($id, 'Facebook didn’t accept the video.');
             return ['id' => $id, 'url' => 'https://www.facebook.com/' . $pageId . '/videos/' . $id];
         }
-        if ($media !== null) {
+        if ($media !== null && $extras) {
+            $fields = ['access_token' => $pageToken, 'message' => $text];
+            foreach (array_values(array_merge([$media], array_slice($extras, 0, 9))) as $i => $photo) {
+                $up = self::send('POST', self::base(self::GRAPH) . '/' . $pageId . '/photos', [
+                    'access_token' => $pageToken,
+                    'url' => Media::shareUrl((int) $photo['id']),
+                    'published' => 'false',
+                ]);
+                $fbid = (string) ($up['id'] ?? '');
+                self::requireId($fbid, 'Facebook didn’t accept one of the photos.');
+                $fields['attached_media[' . $i . ']'] = json_encode(['media_fbid' => $fbid]);
+            }
+            $sent = self::send('POST', self::base(self::GRAPH) . '/' . $pageId . '/feed', $fields);
+            $id = (string) ($sent['id'] ?? '');
+        } elseif ($media !== null) {
             $sent = self::send('POST', self::base(self::GRAPH) . '/' . $pageId . '/photos', [
                 'access_token' => $pageToken,
                 'url' => Media::shareUrl((int) $media['id']),
@@ -61,7 +76,8 @@ final class Posting
         return ['id' => $id, 'url' => $url];
     }
 
-    public static function threads(string $token, string $userId, string $text, ?array $media, ?string $file): array
+    /** @param array[] $extras more ready image rows: the post goes out as a carousel (up to 20 photos) */
+    public static function threads(string $token, string $userId, string $text, ?array $media, ?string $file, array $extras = []): array
     {
         if (!preg_match('/^[0-9]+$/', $userId)) {
             throw new PublishError('This Threads profile can’t be published to. Reconnect it and try again.');
@@ -76,9 +92,22 @@ final class Posting
             throw new PublishError('Threads posts need some text or a photo.');
         }
         $fields = ['access_token' => $token, 'text' => mb_substr($text, 0, 500)];
-        $fields += $media !== null
-            ? ['media_type' => 'IMAGE', 'image_url' => Media::shareUrl((int) $media['id'])]
-            : ['media_type' => 'TEXT'];
+        if ($media !== null && $extras) {
+            $children = [];
+            foreach (array_merge([$media], array_slice($extras, 0, 19)) as $photo) {
+                $child = self::send('POST', self::base(self::THREADS) . '/' . $userId . '/threads', [
+                    'access_token' => $token, 'media_type' => 'IMAGE', 'is_carousel_item' => 'true', 'image_url' => Media::shareUrl((int) $photo['id']),
+                ]);
+                $childId = (string) ($child['id'] ?? '');
+                self::requireId($childId, 'Threads didn’t accept one of the carousel photos.');
+                $children[] = $childId;
+            }
+            $fields += ['media_type' => 'CAROUSEL', 'children' => implode(',', $children)];
+        } else {
+            $fields += $media !== null
+                ? ['media_type' => 'IMAGE', 'image_url' => Media::shareUrl((int) $media['id'])]
+                : ['media_type' => 'TEXT'];
+        }
         $created = self::send('POST', self::base(self::THREADS) . '/' . $userId . '/threads', $fields);
         $creation = (string) ($created['id'] ?? '');
         self::requireId($creation, 'Threads didn’t accept the post.');
@@ -111,7 +140,8 @@ final class Posting
         return ['id' => $id, 'url' => $url];
     }
 
-    public static function pinterest(string $token, string $title, string $text, ?array $media, ?string $file): array
+    /** @param array[] $extras more ready image rows: 2 to 5 photos become a carousel Pin */
+    public static function pinterest(string $token, string $title, string $text, ?array $media, ?string $file, array $extras = []): array
     {
         if ($media === null || $media['kind'] !== 'image' || $file === null) {
             throw new PublishError('Pinterest needs a photo. Attach one and schedule the Pin again.');
@@ -132,7 +162,9 @@ final class Posting
             'board_id' => $board,
             'title' => mb_substr(trim($title), 0, 100),
             'description' => mb_substr($text, 0, 500),
-            'media_source' => ['source_type' => 'image_url', 'url' => Media::shareUrl((int) $media['id'])],
+            'media_source' => $extras
+                ? ['source_type' => 'multiple_image_urls', 'items' => array_map(static fn (array $m): array => ['url' => Media::shareUrl((int) $m['id'])], array_merge([$media], array_slice($extras, 0, 4)))]
+                : ['source_type' => 'image_url', 'url' => Media::shareUrl((int) $media['id'])],
         ], $token, json: true);
         $id = (string) ($sent['id'] ?? '');
         self::requireId($id, 'Pinterest didn’t accept the Pin.');

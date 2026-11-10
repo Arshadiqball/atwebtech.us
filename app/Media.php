@@ -318,6 +318,25 @@ final class Media
         return ['id' => (int) $pdo->lastInsertId(), 'file' => self::root() . '/' . $relative];
     }
 
+    /** Ids of a post's extra carousel photos, stored as ",12,34,". */
+    public static function extraIds(?string $stored): array
+    {
+        return array_values(array_unique(array_filter(array_map('intval', explode(',', (string) $stored)))));
+    }
+
+    public static function storeExtra(array $ids): ?string
+    {
+        $ids = array_values(array_unique(array_filter(array_map('intval', $ids))));
+        return $ids ? ',' . implode(',', $ids) . ',' : null;
+    }
+
+    /** SQL true when post alias $p uses media alias $m, as the main file or a carousel photo. */
+    public static function usedBySql(string $p = 'p', string $m = 'm'): string
+    {
+        $like = Database::driver() === 'sqlite' ? "'%,' || $m.id || ',%'" : "CONCAT('%,', $m.id, ',%')";
+        return "($p.media_id = $m.id OR $p.extra_media LIKE $like)";
+    }
+
     public static function describe(?array $media): ?array
     {
         if ($media === null) {
@@ -330,7 +349,7 @@ final class Media
     public static function cleanup(): int
     {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare('SELECT m.* FROM media m WHERE (m.status = :uploading AND m.updated_at < :day) OR (m.status = :ready AND m.updated_at < :week AND NOT EXISTS (SELECT 1 FROM posts p WHERE p.media_id = m.id))');
+        $stmt = $pdo->prepare('SELECT m.* FROM media m WHERE (m.status = :uploading AND m.updated_at < :day) OR (m.status = :ready AND m.in_library = 0 AND m.updated_at < :week AND NOT EXISTS (SELECT 1 FROM posts p WHERE ' . self::usedBySql() . '))');
         $stmt->execute(['uploading' => 'uploading', 'day' => gmdate('Y-m-d H:i:s', time() - 86400), 'ready' => 'ready', 'week' => gmdate('Y-m-d H:i:s', time() - 7 * 86400)]);
         $rows = $stmt->fetchAll();
         foreach ($rows as $media) {
@@ -339,7 +358,7 @@ final class Media
         return count($rows);
     }
 
-    private static function discard(array $media): void
+    public static function discard(array $media): void
     {
         @unlink(self::root() . '/' . $media['path']);
         Database::connection()->prepare('DELETE FROM media WHERE id = :id')->execute(['id' => (int) $media['id']]);

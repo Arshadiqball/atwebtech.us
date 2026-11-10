@@ -38,7 +38,12 @@ $regenErrors = $regen['errors'] ?? [];
         <h2>Name</h2>
         <p>Shown on your workspace.</p>
       </div>
-      <p class="set-value"><?= e($user['display_name']) ?></p>
+      <form class="set-inline" action="/app/account/profile" method="post">
+        <input type="hidden" name="_token" value="<?= e($token) ?>">
+        <label class="sr-only" for="acc-name">Name</label>
+        <input class="idea-input" id="acc-name" name="display_name" maxlength="60" required value="<?= e($user['display_name']) ?>">
+        <button type="submit" class="ws-btn">Save</button>
+      </form>
     </div>
     <div class="set-row">
       <div>
@@ -49,16 +54,33 @@ $regenErrors = $regen['errors'] ?? [];
     </div>
   </section>
 
-  <section class="set-block" id="utm" aria-labelledby="utm-title">
-    <form class="set-row set-row--stack" action="/app/account/utm" method="post">
+  <section class="set-block" id="password" aria-labelledby="pw-title">
+    <form class="set-row set-row--stack" action="/app/account/password" method="post" autocomplete="off">
       <input type="hidden" name="_token" value="<?= e($token) ?>">
       <div>
-        <h2 id="utm-title">Link tracking (UTM) <?php if (!Channels::allowance((int) $user['id'])['paid']): ?><span class="ws-soon">Essentials and Team</span><?php endif; ?></h2>
-        <p>When a post publishes, atwebtech adds <code>utm_source</code> (the network), <code>utm_medium=social</code>, <code>utm_campaign</code>, and <code>utm_content</code> to its links, so Google Analytics shows which posts bring visitors. Links that already have UTM tags are left alone.</p>
-        <label class="bio-toggle" style="margin-top:12px"><input type="checkbox" name="utm_enabled" value="1"<?= $utm['enabled'] ? ' checked' : '' ?>><span><b>Add UTM tags to links</b><small>Applies to posts published from now on.</small></span></label>
-        <label class="bio-field" style="margin-top:12px;max-width:360px"><span>Campaign name</span><input class="idea-input" name="utm_campaign" maxlength="80" value="<?= e($utm['campaign']) ?>" placeholder="atwebtech"></label>
+        <h2 id="pw-title">Password</h2>
+        <p>Changing it signs you out on every other device. At least 8 characters, with an uppercase letter and a number or symbol.</p>
+        <div class="rb-grid">
+          <label class="bio-field"><span>Current password</span><input class="idea-input" type="password" name="current" required autocomplete="current-password"></label>
+          <label class="bio-field"><span>New password</span><input class="idea-input" type="password" name="password" required maxlength="72" autocomplete="new-password"></label>
+        </div>
       </div>
-      <button type="submit" class="ws-btn ws-btn--dark">Save link tracking</button>
+      <button type="submit" class="ws-btn ws-btn--dark">Change password</button>
+    </form>
+  </section>
+
+<?php $notifyOff = explode(',', (string) ($notifyOff ?? '')); ?>
+  <section class="set-block" id="notifications" aria-labelledby="nt-title">
+    <form class="set-row set-row--stack" action="/app/account/notifications" method="post">
+      <input type="hidden" name="_token" value="<?= e($token) ?>">
+      <div>
+        <h2 id="nt-title">Notifications</h2>
+        <p>Everything shows under <a href="/app/notifications">Notifications</a> in the app. Choose which ones also reach you by email at <?= e($user['email']) ?>.</p>
+<?php foreach (Notify::KINDS as $kind => $label): ?>
+        <label class="bio-toggle" style="margin-top:10px"><input type="checkbox" name="email[]" value="<?= e($kind) ?>"<?= in_array($kind, $notifyOff, true) ? '' : ' checked' ?>><span><b><?= e($label) ?></b></span></label>
+<?php endforeach; ?>
+      </div>
+      <button type="submit" class="ws-btn ws-btn--dark">Save email preferences</button>
     </form>
   </section>
 

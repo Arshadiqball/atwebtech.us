@@ -231,7 +231,7 @@ foreach ($why as [$ic, $title, $text]): ?>
       <div class="plan-teaser reveal">
         <h3 class="h-small">Team</h3>
         <p class="pt-price"><b>$<?= e($yearlyRate('team')) ?></b><span>per channel / month, billed yearly</span></p>
-        <p>Everything in Essentials, plus unlimited teammates, access levels, and approvals.</p>
+        <p>Everything in Essentials, plus up to 50 teammates with roles, channel access levels, and approvals.</p>
         <a class="btn btn--outline btn--block" href="/pricing?plan=team">See Team</a>
       </div>
     </div>

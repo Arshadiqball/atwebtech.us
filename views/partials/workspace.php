@@ -8,14 +8,18 @@ $channels = array_column(integrations(), null, 'slug');
 $connected = Channels::forUser((int) $user['id']);
 $connectedProviders = array_column($connected, 'provider');
 $focus = array_values(array_filter(explode(',', (string) ($onboarding['focus_channels'] ?? '')), static fn ($s) => isset($channels[$s])));
-$suggested = array_slice(array_values(array_diff($focus ?: ['linkedin', 'facebook', 'tiktok'], $connectedProviders)), 0, 3);
+$suggestedChannels = array_slice(array_values(array_diff($focus ?: ['linkedin', 'facebook', 'tiktok'], $connectedProviders)), 0, 3);
 $currentChannel = isset($channel['id']) && $section === 'channels' ? (int) $channel['id'] : 0;
 $currentSub = $sub ?? 'publish';
 $allowance = Channels::allowance((int) $user['id']);
 $channelLimit = $allowance['limit'];
-$initial = mb_strtoupper(mb_substr($user['display_name'], 0, 1));
+$person = Auth::person() ?? $user;
+$initial = mb_strtoupper(mb_substr($person['display_name'], 0, 1));
+$inTeam = isset($user['team_role']);
+$workspaces = Team::workspacesFor($person);
 $queueCount = Workspace::counts((int) $user['id'])['queue'];
 $inboxCount = Community::unanswered((int) $user['id']);
+$unreadCount = Notify::unread((int) (Auth::person()['id'] ?? 0));
 $notice = flash('notice');
 ?>
 <div class="ws" data-workspace data-token="<?= e(Security::csrfToken()) ?>"<?= empty($user['timezone']) ? ' data-tz-unset' : '' ?>>
@@ -44,7 +48,7 @@ $notice = flash('notice');
         <hr>
         <a class="ws-menu-item" href="/app/channels#connect" data-connect-open><?= icon('plus') ?>Connect a New Channel</a>
         <a class="ws-menu-item" href="/app/link-in-bio"><?= icon('globe-simple') ?>Create a Start Page</a>
-        <a class="ws-menu-item" href="/app/publish?tab=approvals#invite"><?= icon('user-plus') ?>Invite a Team Member</a>
+        <a class="ws-menu-item" href="/app/team"><?= icon('user-plus') ?>Invite a Team Member</a>
       </div>
     </div>
 
@@ -56,6 +60,8 @@ $notice = flash('notice');
             <?= icon($s['icon']) ?><span class="ws-label"><?= e($s['label']) ?></span>
 <?php if (isset($s['count'])): ?>
             <span class="ws-count" aria-label="<?= $queueCount ?> in queue"><?= $queueCount ?></span>
+<?php elseif ($key === 'notifications' && $unreadCount > 0): ?>
+            <span class="ws-count ws-count--alert" aria-label="<?= $unreadCount ?> unread"><?= $unreadCount > 99 ? '99+' : $unreadCount ?></span>
 <?php elseif ($key === 'community' && $inboxCount > 0): ?>
             <span class="ws-count" aria-label="<?= $inboxCount ?> unanswered"><?= $inboxCount > 99 ? '99+' : $inboxCount ?></span>
 <?php endif; ?>
@@ -88,7 +94,7 @@ $notice = flash('notice');
     <div class="ws-connect">
       <p class="ws-connect-title ws-label"><?= $connected ? 'Connect more channels' : 'Connect channels' ?></p>
       <ul class="ws-connect-list" role="list">
-<?php foreach ($suggested as $slug): $ch = $channels[$slug]; ?>
+<?php foreach ($suggestedChannels as $slug): $ch = $channels[$slug]; ?>
         <li><a class="ws-ch" href="/app/channels#connect-<?= e($slug) ?>" style="--c: <?= e($ch['color']) ?>" title="Connect <?= e($ch['name']) ?>" data-connect-open><?= brand_mark($ch['icon'], 'Connect ' . $ch['name']) ?></a></li>
 <?php endforeach; ?>
         <li><a class="ws-ch ws-ch--more" href="/app/channels#connect" title="Connect a new channel" data-connect-open><?= icon('plus', 'icon', 'Connect a new channel') ?></a></li>
@@ -117,11 +123,24 @@ $notice = flash('notice');
       <div class="ws-account">
         <button type="button" class="ws-org" aria-expanded="false" aria-controls="ws-account-menu" data-account-toggle>
           <span class="ws-avatar" aria-hidden="true"><?= e($initial) ?></span>
-          <span class="ws-org-text ws-label"><b>My workspace</b><small><?= e($allowance['name']) ?> plan</small></span>
+          <span class="ws-org-text ws-label"><b><?= e($inTeam ? (Channels::parentOf((int) $user['id']) !== null ? $user['display_name'] : $user['display_name'] . '’s workspace') : 'My workspace') ?></b><small><?= e($inTeam ? Team::roleName($user['team_role']) . ' · ' . $allowance['name'] . ' plan' : $allowance['name'] . ' plan') ?></small></span>
         </button>
         <button type="button" class="ws-icon-btn ws-collapse" aria-pressed="false" data-ws-collapse><?= icon('sidebar-simple') ?><span class="sr-only">Collapse sidebar</span></button>
         <div class="ws-account-menu" id="ws-account-menu" hidden>
-          <p class="ws-account-email"><?= e($user['email']) ?></p>
+          <p class="ws-account-email"><?= e($person['email']) ?></p>
+<?php if (count($workspaces) > 1): ?>
+          <form action="/app/workspace" method="post" class="ws-switch">
+            <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+            <p class="ws-switch-label">Workspaces</p>
+<?php foreach ($workspaces as $w): $here = $w['id'] === (int) $user['id']; ?>
+            <button type="submit" name="ws" value="<?= (int) $w['id'] ?>"<?= $here ? ' aria-current="true"' : '' ?>><?= icon($here ? 'check' : 'arrows-left-right') ?><span><?= e($w['name']) ?><?= !empty($w['client']) ? ' <small>Client</small>' : ($w['role'] !== 'owner' ? ' <small>' . e(Team::roleName($w['role'])) . '</small>' : '') ?></span></button>
+<?php endforeach; ?>
+          </form>
+<?php endif; ?>
+          <a href="/app/settings"<?= aria_current('/app/settings') ?>><?= icon('gear') ?>Workspace settings</a>
+          <a href="/app/team"<?= aria_current('/app/team') ?>><?= icon('user-plus') ?>Team</a>
+          <a href="/app/workspaces"<?= aria_current('/app/workspaces') ?>><?= icon('arrows-left-right') ?>Client workspaces</a>
+          <a href="/app/developers"<?= aria_current('/app/developers') ?>><?= icon('link-simple') ?>API &amp; webhooks</a>
           <a href="/app/account"<?= aria_current('/app/account') ?>><?= icon('user') ?>Account</a>
           <a href="/app/billing"<?= aria_current('/app/billing') ?>><?= icon('tag') ?>Plan &amp; billing</a>
 <?php if (Auth::isAdmin()): ?>

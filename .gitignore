@@ -5,3 +5,4 @@ data/mail.json
 data/sessions.json
 storage/migrations.stamp
 storage/migrations.lock
+storage/branding/

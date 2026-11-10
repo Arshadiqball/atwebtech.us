@@ -1,4 +1,4 @@
-<?php $current = Auth::user()['theme'] ?? 'light'; ?>
+<?php $current = Auth::person()['theme'] ?? 'light'; ?>
 <form class="theme-toggle" action="/account/theme" method="post" data-theme-toggle>
   <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
   <input type="hidden" name="return" value="<?= e($_SERVER['REQUEST_URI'] ?? '/app') ?>">

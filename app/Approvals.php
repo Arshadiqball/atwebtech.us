@@ -15,7 +15,7 @@ final class Approvals
     /** Posts waiting for approval, oldest time first. */
     public static function pending(int $uid): array
     {
-        $stmt = Database::connection()->prepare("SELECT * FROM posts WHERE user_id = :uid AND status = 'review' ORDER BY planned_at, id");
+        $stmt = Database::connection()->prepare("SELECT * FROM posts WHERE user_id = :uid AND status = 'review'" . Team::channelSql($uid) . ' ORDER BY planned_at, id');
         $stmt->execute(['uid' => $uid]);
         return $stmt->fetchAll();
     }
@@ -29,18 +29,21 @@ final class Approvals
         }
         $soon = gmdate('Y-m-d H:i:s', time() + 120);
         $at = $post['planned_at'] && $post['planned_at'] > $soon ? $post['planned_at'] : $soon;
-        Database::connection()->prepare("UPDATE posts SET status = 'planned', planned_at = :at, reviewed_at = :now, reviewed_by = :by, review_note = NULL, updated_at = :now2 WHERE id = :id AND user_id = :uid")
+        Database::connection()->prepare("UPDATE posts SET status = 'planned', planned_at = :at, reviewed_at = :now, reviewed_by = :by, review_note = NULL, updated_at = :now2 WHERE id = :id AND user_id = :uid" . Team::channelSql($uid))
             ->execute(['at' => $at, 'now' => Database::now(), 'by' => mb_substr($by, 0, 120), 'now2' => Database::now(), 'id' => $postId, 'uid' => $uid]);
+        Notify::approvalDecided($uid, $post, true, $by);
         return true;
     }
 
     /** Request changes: back to Drafts with the reviewer's note. */
     public static function requestChanges(int $uid, int $postId, string $note, string $by): bool
     {
-        if (self::reviewPost($uid, $postId) === null) {
+        $post = self::reviewPost($uid, $postId);
+        if ($post === null) {
             return false;
         }
-        Database::connection()->prepare("UPDATE posts SET status = 'draft', review_note = :note, reviewed_at = :now, reviewed_by = :by, updated_at = :now2 WHERE id = :id AND user_id = :uid")
+        Notify::approvalDecided($uid, $post, false, $by, trim($note));
+        Database::connection()->prepare("UPDATE posts SET status = 'draft', review_note = :note, reviewed_at = :now, reviewed_by = :by, updated_at = :now2 WHERE id = :id AND user_id = :uid" . Team::channelSql($uid))
             ->execute(['note' => mb_substr(trim($note) !== '' ? trim($note) : 'Changes requested.', 0, 1000), 'now' => Database::now(), 'by' => mb_substr($by, 0, 120), 'now2' => Database::now(), 'id' => $postId, 'uid' => $uid]);
         return true;
     }
@@ -53,7 +56,7 @@ final class Approvals
         $action = (string) ($_POST['action'] ?? '');
         $id = (int) ($_POST['id'] ?? 0);
         $back = '/app/publish?tab=approvals';
-        $by = 'You';
+        $by = isset($user['team_role']) ? (string) $user['person_name'] : 'You';
         if ($action === 'approve') {
             self::done($back, self::approve($uid, $id, $by) ? 'Approved and scheduled.' : 'That post is no longer waiting for approval.');
         }

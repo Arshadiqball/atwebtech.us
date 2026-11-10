@@ -81,7 +81,8 @@ final class AccountHandler
         Auth::login($userId);
         Meta::track('CompleteRegistration', ['email' => $input['email'], 'user_id' => $userId], ['content_name' => 'Free account', 'status' => 'registered', 'currency' => 'USD', 'value' => 0]);
         Mailer::notify('New account', ['Email' => $input['email'], 'Campaign' => Campaign::label()]);
-        redirect('/welcome');
+        $next = Auth::safeNext($_POST['next'] ?? null);
+        redirect($next !== null && str_starts_with($next, '/join/') ? $next : '/welcome');
     }
 
     public static function login(): never

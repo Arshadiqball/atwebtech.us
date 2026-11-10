@@ -8,30 +8,75 @@ final class Auth
     public const PASSWORD_MAX_BYTES = 72;
 
     private static ?array $user = null;
+    private static ?array $person = null;
     private static bool $loaded = false;
+    /** True on personal pages (account, billing, log out): user() is the signed-in person even inside a team workspace. */
+    private static bool $personal = false;
 
+    /**
+     * The workspace the request acts on. For a teammate who switched into someone's workspace this is the
+     * owner's row plus team_role, team_channels and person_* keys; otherwise the signed-in person.
+     */
     public static function user(): ?array
     {
         if (self::$loaded) {
             return self::$user;
         }
         self::$loaded = true;
+        self::$person = null;
         $id = $_SESSION['_uid'] ?? null;
         if (!is_int($id)) {
-            return null;
+            return self::$user = null;
         }
         try {
-            $stmt = Database::connection()->prepare('SELECT id, email, display_name, theme, timezone, workspace_seeded_at, created_at FROM users WHERE id = :id');
+            $stmt = Database::connection()->prepare('SELECT id, email, display_name, theme, timezone, workspace_seeded_at, created_at, password_changed_at FROM users WHERE id = :id');
             $stmt->execute(['id' => $id]);
-            self::$user = $stmt->fetch() ?: null;
+            self::$person = $stmt->fetch() ?: null;
         } catch (Throwable $e) {
             error_log(sprintf('[%s] auth lookup failed: %s', gmdate('c'), $e->getMessage()));
-            self::$user = null;
+            self::$person = null;
         }
-        if (self::$user === null) {
-            unset($_SESSION['_uid']);
+        if (self::$person === null) {
+            unset($_SESSION['_uid'], $_SESSION['_ws']);
+            return self::$user = null;
+        }
+        // A password change elsewhere signs this session out.
+        if ((self::$person['password_changed_at'] ?? null) !== ($_SESSION['_pwat'] ?? null)) {
+            $_SESSION = [];
+            self::$person = null;
+            return self::$user = null;
+        }
+        unset(self::$person['password_changed_at']);
+        self::$user = self::$person;
+        $ws = $_SESSION['_ws'] ?? null;
+        if (!self::$personal && is_int($ws) && $ws !== (int) self::$person['id']) {
+            $team = Team::membership($ws, self::$person);
+            if ($team !== null) {
+                self::$user = $team;
+            } else {
+                unset($_SESSION['_ws']);
+            }
         }
         return self::$user;
+    }
+
+    /** The signed-in person, whichever workspace they are in. */
+    public static function person(): ?array
+    {
+        self::user();
+        return self::$person;
+    }
+
+    /** Use the person's own account for the rest of this request. */
+    public static function personal(): void
+    {
+        self::$personal = true;
+        self::$loaded = false;
+    }
+
+    public static function reload(): void
+    {
+        self::$loaded = false;
     }
 
     public static function check(): bool
@@ -43,7 +88,11 @@ final class Auth
     {
         session_regenerate_id(true);
         $_SESSION['_uid'] = $userId;
-        unset($_SESSION['_csrf']);
+        unset($_SESSION['_csrf'], $_SESSION['_ws']);
+        $stamp = Database::connection()->prepare('SELECT password_changed_at FROM users WHERE id = :id');
+        $stamp->execute(['id' => $userId]);
+        $_SESSION['_pwat'] = $stamp->fetchColumn() ?: null;
+        Team::defaultWorkspace($userId);
         self::$loaded = false;
     }
 
@@ -52,6 +101,7 @@ final class Auth
         $_SESSION = [];
         session_regenerate_id(true);
         self::$user = null;
+        self::$person = null;
         self::$loaded = true;
     }
 
@@ -103,7 +153,7 @@ final class Auth
 
     public static function isAdmin(): bool
     {
-        $user = self::user();
+        $user = self::person();
         if ($user === null) {
             return false;
         }
@@ -142,7 +192,7 @@ final class Auth
     public static function safeNext(?string $next): ?string
     {
         $next = safe_return_path($next, '');
-        return preg_match('#^/(app|welcome|admin)(/|$|\?)#', $next) ? $next : null;
+        return preg_match('#^/(app|welcome|admin|join)(/|$|\?)#', $next) ? $next : null;
     }
 
     public static function onboarding(int $userId): array

@@ -300,11 +300,105 @@ Paste any profile or page link; the network is detected from it (or chosen in th
 
 X was removed in November 2026: its API charges for every post and every read, with no free tier. Migration `018` moved waiting X posts to Drafts with a note and removed X connections. `X_CLIENT_ID` and `X_CLIENT_SECRET` are no longer used.
 
+## Evergreen recycling
+
+Mark a sent post **Recycle** (Publish → Sent). `app/Evergreen.php` runs inside `bin/publish.php`: once an hour per channel it fills free posting slots in the next 3 days with copies of that channel's evergreen posts, oldest first, when the channel's gap has passed (Channel settings → Evergreen Recycling: off, 2 weeks, monthly (default), 2 or 3 months). A slot is free when nothing is planned within 45 minutes of it. Copies are normal planned posts (`recycled_from` points to the original) and count toward Free plan scheduling caps. Migration `020`.
+
+## Branded reports
+
+Account → Branded reports (Essentials and Team): brand name, color and logo (PNG/JPG/WebP under 512 KB, stored in `storage/branding/`) on the printable Insights report, which now includes follower, view, reaction, comment and engagement totals, top posts and best times. Each account gets a private client link `/r/{token}` (period switcher, Save as PDF; "New link" revokes the old one) and can email the report every Monday (last 7 days) or on the 1st (last month) to up to 5 addresses, after 08:00 in the user's time zone, from `bin/publish.php`. White label leaves atwebtech off the report and the email. Links stop working if the account drops to Free. Migration `021`.
+
+## Media Library
+
+`/app/library` lists every ready upload with size, date and how many posts use it, filtered by images, videos or unused. Upload many files at once (same chunked upload as the composer); they're marked "kept" (`media.in_library`) so `Media::cleanup()` never removes them. **Create post** opens the composer with the file attached (`/app/publish/new?media={id}`). Delete is refused for files used by drafts, scheduled or evergreen posts. Storage limit: 2 GB per account. Migration `022`.
+
+## Team accounts
+
+Team plan only (`app/Team.php`, migration `023`). The owner (or an admin) invites people from `/app/team` with an email, a role and channel access. The invite link (`/join/{token}`, single use, 7 days, only a hash is stored) is emailed when mail is set up and shown once on the page. The invitee signs up or logs in **with the invited email** and accepts; they skip onboarding and land in the owner's workspace.
+
+How it works: `Auth::user()` returns the owner's row (plus `team_role`, `team_channels`, `person_*`) when the session has `_ws` set to a workspace the person belongs to, so every existing query stays scoped to the owner. `Auth::person()` is always the signed-in person. Account, two-factor, theme, billing, log out and welcome pages always use the person's own account. People with their own workspace switch between workspaces from the account menu; after sign-in, someone with no channels of their own opens the workspace they joined.
+
+| Role | Can | Can't |
+|---|---|---|
+| Admin | everything in the workspace, invite editors and contributors | billing; only the owner adds or changes admins |
+| Editor | create, schedule and publish posts, approve, reply to comments, competitors, feeds, hashtags, library, evergreen | connect or change channels, channel settings, time zone, UTM, branded reports, link in bio, team |
+| Contributor | write drafts and send them for approval (scheduling turns into "send for approval"), ideas, templates, uploads | schedule, retry, bulk delete, approve, reply, everything above |
+
+`Team::guard()` runs before every route (`public/index.php`) and enforces the table by path. Channel access (all channels, or a list) filters `Channels::forUser/find`, post lists and counts, Insights, best times, approvals and the Community inbox via `Team::channelSql()`; posts with no channel stay visible. New posts record `created_by`, and approvals record the teammate's name. If the owner leaves the Team plan, teammates lose access until they upgrade again. Up to 50 members and pending invites per workspace. Clients who only approve posts don't need an account: they use review links from Publish → Approvals.
+
+## Carousels
+
+A post can have up to 10 photos (composer → **Add photos** under the first photo). The first stays in `posts.media_id`; the rest are stored in order in `posts.extra_media` as `,12,34,` (migration `024`, helpers `Media::extraIds/storeExtra/usedBySql`). Instagram, Threads and Facebook publish a native carousel / multi-photo post, LinkedIn a multi-image post, Pinterest a carousel Pin (2–5 photos), Bluesky and Mastodon up to 4 photos. YouTube and TikTok take one file. Carousels are photos only.
+
+## Bluesky and Mastodon
+
+`app/OpenSocial.php`, migration `025`. Both publish, report followers and post stats, and feed replies and mentions into Community (with replies sent from atwebtech).
+
+- **Bluesky** connects with the handle and an **app password** at `/app/channels/add/bluesky`. atwebtech exchanges it for a session (`createSession`) and stores only the sealed access and refresh tokens, never the password. Up to 300 characters and 4 photos; photos over ~1 MB are resized to JPEG; links and hashtags become clickable facets.
+- **Mastodon** uses OAuth on the person's server (`/app/channels/add/mastodon`). atwebtech registers itself once per server (`mastodon_apps`, secret sealed). Up to 500 characters and 4 photos or a video. Because CSP `form-action` can't list every server, the hand-off to the server's login uses a small page with a meta refresh.
+- Server addresses typed by users are only called over HTTPS after checking they resolve to a public IP, and the connection is pinned to that IP (no internal-network requests).
+
+## Client workspaces
+
+Team plan, `/app/workspaces` (account menu → Client workspaces), migration `026`. Each client workspace is a `users` row with `parent_id` = the owner and no login (unroutable email, unusable password hash); the owner is a `team_members` row with role `owner`, so switching, roles, channel access and invites from Team all work per client. `Channels::allowance()` uses the parent's plan, and `Channels::familyCount()` counts channels across the owner and all client workspaces against the plan's channel limit. Up to 25 per account. Deleting one (type its name) removes its channels, posts and stats.
+
+## API, webhooks, installable app, browser extension
+
+- **REST API** (`app/Api.php`, migration `027`, docs at `/developers`): paid plans; keys created under account menu → API & webhooks (admins); only a SHA-256 hash is stored. `GET /api/v1/me|channels|posts|posts/{id}`, `POST /api/v1/posts`, `DELETE /api/v1/posts/{id}`; 120 requests a minute per key. `.htaccess` passes the `Authorization` header to PHP.
+- **Webhooks**: `post.published`, `post.failed`, `comment.received`, queued in `webhook_events` and delivered by `bin/publish.php` with an HMAC-SHA256 signature (`X-Atwebtech-Signature`), 5 retries, endpoint paused after 20 failures in a row; public HTTPS hosts only, pinned to the checked IP. Works with Zapier / Make / n8n webhook triggers.
+- **Installable app (PWA)**: `public/manifest.webmanifest`, `public/sw.js` (offline page only; workspace pages are never cached), shortcuts, and a share target so "Share → atwebtech" on a phone opens the composer.
+- **Browser extension**: `extension/` (Manifest V3, not deployed). Toolbar button and right-click menu open the composer with the page or selected text. Load unpacked to try; publishing to the Chrome Web Store is a manual step (see `extension/README.md`).
+
+**Hashtag Performance** (Insights): `Metrics::hashtags()` ranks hashtags used in 2+ posts in the last 90 days by engagement against each channel's average.
+
+## Password reset, Account and Workspace settings
+
+- **Forgot password** (`app/Passwords.php`, migration `028`): `/forgot` emails a link (`/reset/{token}`, single use, 60 minutes, only a hash stored). The answer is the same whether or not the address has an account; requests are rate-limited per IP and per address. It needs outgoing email (`MAIL_ENABLED`); without it the page says to contact the team.
+- Changing a password (by reset or in Account) sets `users.password_changed_at`. `Auth::user()` compares it with the session's copy, so **every other session is signed out**.
+- **Account** (`/app/account`) is personal: name, password, email notification choices, two-factor.
+- **Workspace settings** (`/app/settings`, admins): link tracking (UTM) and branded reports. They apply to the workspace you're in, so each client workspace has its own report branding.
+
+## Notifications
+
+`app/Notify.php`. People get an in-app notification (`/app/notifications`, unread count in the sidebar) and an email unless they turned that kind off in Account:
+
+| Kind | When | Who |
+|---|---|---|
+| `post_failed` | a post fails for good | owner, admins and editors with access to the channel, and the post's author |
+| `channel_reconnect` | a post fails because the channel needs reconnecting (once per channel per 24 hours) | same |
+| `approval_needed` | someone sends a post for approval | owner, admins, editors (not the sender) |
+| `approval_decided` | a post is approved or sent back, in the app or from a review link | the post's author |
+
+Opening a notification switches to its workspace first. Sending never throws, so publishing can't fail because of it.
+
+## Saved replies and Duplicate
+
+- **Saved replies** (Community → Saved replies): name + text, picked from a menu under any comment to fill the reply box. Free plan: 1, paid: unlimited (as on the pricing page).
+- **Duplicate** (Drafts and Sent): copies a post, including its photos, to a new draft and opens it so the channel, text or time can be changed.
+
+## Automations
+
+`app/Automations.php`, migration `029`, page `/app/automations` (admins set up; paid plans). Each automation chooses what happens to its posts: saved to Drafts, sent for approval, or scheduled into the channel's next free posting slot (`Automations::nextSlots`, 45-minute clearance; channels without a schedule use 10:00 daily).
+
+| Automation | What it does | Runs |
+|---|---|---|
+| **Blog to social** (`feed`) | New articles in a followed feed become a post with the link for each chosen channel. Caption by the AI Assistant, or the article title. Starts from the next new article (`last_item_id`); up to 3 articles per run. | every 30 minutes |
+| **Weekly AI plan** (`plan`) | `Assistant::posts()` writes N posts per channel for the next 7 days' free slots from the business description, and notifies editors when they're in Drafts or Approvals. Uses the daily AI allowance; if it runs out, the rest are written the next day. | every 6.5 days |
+| **Auto-replies** (`reply`) | A new comment (under 24 hours old, from someone else) containing a keyword as a whole word gets the set reply. One reply per comment, 25 a day per workspace; marked "Auto-reply sent" in Community. | when comments are read |
+
+Text networks only for feed and plan (LinkedIn, Facebook, Threads, Bluesky, Mastodon); the others need a photo or video. Automations run in `bin/publish.php` under their own lock (`automations.lock`) and pause when a workspace drops to Free.
+
+Also for every plan:
+
+- **Recurring posts**: the composer's Repeat menu (day, week, 2 weeks, month) stores `posts.repeat_rule`. When the post publishes, `Automations::repeatNext()` schedules the next one at the same local time and moves the rule to it.
+- **Empty-queue alert** (`queue_low`): once a week per channel that posted in the last 14 days and has nothing scheduled.
+- **Monday summary** (`weekly_digest`): after 08:00 on Mondays in the person's time zone: published last week, scheduled this week, failed, waiting for approval and unanswered comments, with a line per client workspace. Both are notifications people can turn off under Account.
+
 ## Cron jobs (production)
 
 | Schedule | Command | Purpose |
 |---|---|---|
-| `* * * * *` | `php bin/publish.php` | Publish due posts, then refresh network stats, competitors and the Community inbox |
+| `* * * * *` | `php bin/publish.php` | Recycle evergreen posts, publish due posts, then refresh network stats, competitors and the Community inbox, email due branded reports, deliver webhooks, and run automations |
 | `15 * * * *` | `php bin/feeds.php` | Check followed feeds |
 | `0 14 * * 1` | `php bin/trends.php` | Refresh the Trending list (run by GitHub Actions, `trends.yml`, no server cron needed) |
 

@@ -163,6 +163,19 @@ $media = $p['media'];
               <span class="cp-progress" data-cp-progress hidden><span></span></span></span>
             <button type="button" class="ws-icon-btn" data-cp-media-remove title="Remove file"><?= icon('trash') ?><span class="sr-only">Remove file</span></button>
           </div>
+<?php $extraMedia = $p['extra_media'] ?? []; ?>
+          <div class="cp-extra" data-cp-extra<?= $media && $media['kind'] === 'image' ? '' : ' hidden' ?>>
+            <ul class="cp-extra-list" role="list" data-cp-extra-list>
+<?php foreach ($extraMedia as $x): ?>
+              <li data-id="<?= (int) $x['id'] ?>"><img src="<?= e($x['url']) ?>" alt=""><button type="button" class="cp-extra-x" data-cp-extra-remove title="Remove photo"><span aria-hidden="true">×</span><span class="sr-only">Remove photo</span></button></li>
+<?php endforeach; ?>
+            </ul>
+            <label class="cp-extra-add" data-cp-extra-add>
+              <input type="file" class="sr-only" multiple accept="image/jpeg,image/png,image/webp" data-cp-extra-file>
+              <?= icon('plus') ?><span>Add photos <small>carousel, up to 10</small></span>
+            </label>
+          </div>
+          <input type="hidden" name="extra_media" value="<?= e(implode(',', array_column($extraMedia, 'id'))) ?>" data-field="extra_media">
           <label class="cp-drop" data-cp-drop<?= $media ? ' hidden' : '' ?>>
             <input type="file" class="sr-only" accept="<?= e(implode(',', array_keys(Media::TYPES))) ?>" data-cp-file>
             <?= icon('image') ?><span>Drag &amp; drop or <u>select a file</u></span>
@@ -386,6 +399,11 @@ $media = $p['media'];
         <?= icon('calendar-blank') ?>
         <label><span class="sr-only">Date (<?= e(Workspace::timezoneLabel($tz)) ?> time)</span><input type="date" name="date" min="<?= e($now->format('Y-m-d')) ?>" max="<?= e($now->modify('+1 year')->format('Y-m-d')) ?>" value="<?= e($p['date']) ?>" data-field="date"></label>
         <label><span class="sr-only">Time</span><input type="time" name="time" step="60" value="<?= e($p['time']) ?>" data-field="time"></label>
+        <label><span class="sr-only">Repeat</span><select class="cp-repeat" name="repeat" data-field="repeat" title="Repeat this post">
+<?php foreach (Automations::REPEATS as $rk => $rlabel): ?>
+          <option value="<?= e($rk) ?>"<?= (string) ($p['repeat'] ?? '') === $rk ? ' selected' : '' ?>><?= e($rlabel) ?></option>
+<?php endforeach; ?>
+        </select></label>
       </span>
       <button type="submit" class="ws-btn ws-btn--green" name="action" value="plan" data-cp-schedule>Schedule Post</button>
     </span>

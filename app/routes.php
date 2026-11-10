@@ -113,10 +113,11 @@ return [
     ['POST', '/chat/reset', [Chatbot::class, 'reset']],
 
     ['GET', '/signup', static function (): void {
+        $next = Auth::safeNext($_GET['next'] ?? null);
         if (Auth::check()) {
-            redirect('/app');
+            redirect($next ?? '/app');
         }
-        View::render('auth', ['mode' => 'signup'], ['title' => 'Create your account | atwebtech', 'description' => 'Create an atwebtech account.', 'layout' => 'app', 'noindex' => true]);
+        View::render('auth', ['mode' => 'signup', 'next' => $next], ['title' => 'Create your account | atwebtech', 'description' => 'Create an atwebtech account.', 'layout' => 'app', 'noindex' => true]);
     }],
     ['POST', '/signup', [AccountHandler::class, 'signup']],
     ['GET', '/login', static function (): void {
@@ -128,6 +129,12 @@ return [
         View::render('auth', ['mode' => 'login', 'next' => $next], ['title' => 'Log in | atwebtech', 'description' => 'Log in to your atwebtech account.', 'layout' => 'app', 'noindex' => true]);
     }],
     ['POST', '/login', [AccountHandler::class, 'login']],
+    ['GET', '/forgot', static function (): void {
+        View::render('password', ['mode' => 'forgot', 'token' => ''], ['title' => 'Reset your password | atwebtech', 'description' => 'Get a link to choose a new atwebtech password.', 'layout' => 'app', 'noindex' => true]);
+    }],
+    ['POST', '/forgot', [Passwords::class, 'request']],
+    ['GET', '/reset/{token}', [Passwords::class, 'form']],
+    ['POST', '/reset/{token}', [Passwords::class, 'reset']],
     ['GET', '/login/two-factor', static function (): void {
         if (Auth::check()) {
             redirect('/app');
@@ -242,8 +249,12 @@ return [
                     not_found();
                 }
                 $prefill = Workspace::composeData($post, Workspace::timezone($user), $uid) + ['idea' => (int) $post['idea_id']];
-            } elseif (isset($_GET['text']) && is_string($_GET['text'])) {
-                $prefill['body'] = mb_substr(trim($_GET['text']), 0, 5000);
+            } elseif (isset($_GET['media']) && ctype_digit((string) $_GET['media']) && ($picked = Media::ready($uid, (int) $_GET['media']))) {
+                $prefill['media'] = Media::describe($picked);
+            } elseif ((isset($_GET['text']) && is_string($_GET['text'])) || (isset($_GET['url']) && is_string($_GET['url']))) {
+                // Also the target of "Share to atwebtech" from the installed app and the browser extension.
+                $shared = array_filter([trim((string) ($_GET['title'] ?? '')), trim((string) ($_GET['text'] ?? '')), trim((string) ($_GET['url'] ?? ''))], static fn (string $v): bool => $v !== '');
+                $prefill['body'] = mb_substr(implode("\n\n", array_unique($shared)), 0, 5000);
             } elseif (isset($_GET['idea']) && ($idea = Workspace::idea($uid, (int) $_GET['idea']))) {
                 $prefill['body'] = trim($idea['title'] . "\n\n" . $idea['body']);
                 $prefill['idea'] = (int) $idea['id'];
@@ -271,6 +282,7 @@ return [
             $draft = $_SESSION['_cm_draft'] ?? null;
             unset($_SESSION['_cm_draft']);
             return [
+                'saved' => Community::savedReplies((int) $user['id']),
                 'state' => $state, 'view' => $view, 'channelId' => $channel, 'item' => $item, 'page' => $page,
                 'inbox' => Community::inbox((int) $user['id'], $channel, $state, $view === 'post' ? $item : null, $page),
                 'problems' => Community::problems((int) $user['id']),
@@ -279,6 +291,32 @@ return [
         });
     }],
     ['POST', '/app/community', [Community::class, 'handle']],
+    ['POST', '/app/evergreen', [Evergreen::class, 'handle']],
+    ['GET', '/app/channels/add/{provider}', [OpenSocial::class, 'form']],
+    ['GET', '/app/developers', static function (): void {
+        Workspace::render('team', 'workspace/developers', 'API & webhooks', static fn (array $user): array => Api::page((int) $user['id']));
+    }],
+    ['POST', '/app/developers', [Api::class, 'handle']],
+    ['GET', '/developers', page('developers', 'API documentation | atwebtech', 'Schedule and read posts with the atwebtech REST API, and get webhooks when posts publish or comments arrive.')],
+    ['GET', '/api/v1/{resource}', [Api::class, 'dispatch']],
+    ['POST', '/api/v1/{resource}', [Api::class, 'dispatch']],
+    ['GET', '/api/v1/{resource}/{id}', [Api::class, 'dispatch']],
+    ['DELETE', '/api/v1/{resource}/{id}', [Api::class, 'dispatch']],
+    ['GET', '/app/library', static function (): void {
+        Workspace::render('library', 'workspace/library', 'Media Library', static fn (array $user): array => Library::page((int) $user['id']));
+    }],
+    ['POST', '/app/library', [Library::class, 'handle']],
+    ['GET', '/app/team', static function (): void {
+        Workspace::render('team', 'workspace/team', 'Team', static fn (array $user): array => Team::page($user));
+    }],
+    ['POST', '/app/team', [Team::class, 'handle']],
+    ['POST', '/app/workspace', [Team::class, 'switch']],
+    ['GET', '/app/workspaces', static function (): void {
+        Workspace::render('team', 'workspace/workspaces', 'Workspaces', static fn (array $user): array => ['clients' => Team::clientWorkspaces((int) $user['id']), 'plan' => Team::planAllows((int) $user['id']), 'isClient' => Channels::parentOf((int) $user['id']) !== null]);
+    }],
+    ['POST', '/app/workspaces', [Team::class, 'workspaces']],
+    ['GET', '/join/{token}', [Team::class, 'join']],
+    ['POST', '/join/{token}', [Team::class, 'accept']],
     ['GET', '/app/insights', static function (): void {
         Workspace::render('insights', 'workspace/insights', 'Insights', static function (array $user): array {
             $range = Workspace::pick('range', ['30d', '7d', 'mtd', 'last-month', 'custom']);
@@ -315,7 +353,25 @@ return [
     ['POST', '/app/hashtags', [Hashtags::class, 'handle']],
     ['GET', '/app/insights/export', [Reports::class, 'export']],
     ['POST', '/app/feeds', [Feeds::class, 'handle']],
+    ['POST', '/app/account/password', [Passwords::class, 'change']],
+    ['POST', '/app/account/profile', [Passwords::class, 'profile']],
+    ['POST', '/app/account/notifications', [Notify::class, 'preferences']],
+    ['GET', '/app/notifications', static function (): void {
+        Workspace::render('notifications', 'workspace/notifications', 'Notifications', static fn (): array => Notify::page((array) Auth::person()));
+    }],
+    ['POST', '/app/notifications', [Notify::class, 'handle']],
+    ['GET', '/app/notifications/open/{id}', [Notify::class, 'open']],
+    ['GET', '/app/automations', static function (): void {
+        Workspace::render('automations', 'workspace/automations', 'Automations', static fn (array $user): array => Automations::page($user));
+    }],
+    ['POST', '/app/automations', [Automations::class, 'handle']],
+    ['GET', '/app/settings', static function (): void {
+        Workspace::render('team', 'workspace/settings', 'Workspace settings', static fn (array $user): array => ['utm' => Utm::settings((int) $user['id'])]);
+    }],
     ['POST', '/app/account/utm', [Utm::class, 'save']],
+    ['POST', '/app/account/reports', [ClientReports::class, 'save']],
+    ['GET', '/r/{token}', [ClientReports::class, 'shared']],
+    ['GET', '/r/{token}/logo', [ClientReports::class, 'logo']],
     ['GET', '/review/{token}', [Approvals::class, 'show']],
     ['POST', '/review/{token}', [Approvals::class, 'decide']],
     ['GET', '/upgrade', [BillingHandler::class, 'upgrade']],
@@ -328,7 +384,9 @@ return [
     ['POST', '/stripe/webhook', [Billing::class, 'webhook']],
     ['GET', '/app/account', static function (): void {
         Workspace::render('account', 'workspace/account', 'Account', static function (array $user): array {
-            return ['twoFactor' => TwoFactor::pageState((int) $user['id']), 'utm' => Utm::settings((int) $user['id'])];
+            $off = Database::connection()->prepare('SELECT notify_off FROM users WHERE id = :id');
+            $off->execute(['id' => (int) $user['id']]);
+            return ['twoFactor' => TwoFactor::pageState((int) $user['id']), 'notifyOff' => (string) $off->fetchColumn()];
         });
     }],
     ['POST', '/app/account/two-factor/start', [AccountHandler::class, 'twoFactorStart']],

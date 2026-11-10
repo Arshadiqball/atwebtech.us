@@ -176,13 +176,40 @@ final class WorkspaceHandler
         }
         $action = (string) ($_POST['action'] ?? 'draft');
         $pdo = Database::connection();
-        if ($existing && $existing['status'] === 'sent' && $action !== 'delete') {
+        if ($existing && $existing['status'] === 'sent' && !in_array($action, ['delete', 'duplicate'], true)) {
             self::fail('composer', $back, 'This post was already published.');
         }
         if ($existing && $existing['status'] === 'publishing') {
             self::fail('composer', $back, 'This post is being published right now.');
         }
 
+        // Contributors write drafts and send them for approval; scheduling and bulk actions need an editor.
+        if (Team::role() === 'contributor') {
+            if (in_array($action, ['retry', 'retry_all', 'delete_all'], true)
+                || ($action === 'delete' && $existing && !in_array($existing['status'], ['draft', 'review'], true))) {
+                self::fail('composer', $back, 'Contributors can write drafts and send them for approval. Ask an editor to schedule, retry or delete scheduled posts.');
+            }
+            if ($action === 'plan') {
+                $action = 'review';
+            }
+        }
+        if ($action === 'duplicate') {
+            if (!$existing) {
+                self::fail('composer', $back, 'That post no longer exists.');
+            }
+            $src = $pdo->prepare('SELECT * FROM posts WHERE id = :id AND user_id = :uid');
+            $src->execute(['id' => $id, 'uid' => $uid]);
+            $src = $src->fetch();
+            $stamp = Database::now();
+            $pdo->prepare('INSERT INTO posts (user_id, channel, channel_id, body, title, meta, tags, media_id, extra_media, first_comment, status, idea_id, created_by, created_at, updated_at) VALUES (:uid, :channel, :cid, :body, :title, :meta, :tags, :media, :extra, :first, :status, NULL, :by, :now, :now2)')
+                ->execute([
+                    'uid' => $uid, 'channel' => $src['channel'], 'cid' => $src['channel_id'], 'body' => $src['body'], 'title' => $src['title'], 'meta' => $src['meta'],
+                    'tags' => $src['tags'], 'media' => $src['media_id'], 'extra' => $src['extra_media'], 'first' => $src['first_comment'], 'status' => 'draft',
+                    'by' => (int) (Auth::person()['id'] ?? $uid), 'now' => $stamp, 'now2' => $stamp,
+                ]);
+            flash('notice', 'Copied to a new draft. Change the channel, text or time, then schedule it.');
+            redirect('/app/publish/new?id=' . (int) $pdo->lastInsertId());
+        }
         if ($action === 'delete') {
             if ($existing) {
                 $pdo->prepare('DELETE FROM posts WHERE id = :id AND user_id = :uid')->execute(['id' => $id, 'uid' => $uid]);
@@ -198,7 +225,7 @@ final class WorkspaceHandler
             $ids = array_slice(array_values(array_unique(array_filter(array_map('intval', (array) ($_POST['ids'] ?? []))))), 0, 1000);
             $deleted = 0;
             foreach (array_chunk($ids, 200) as $chunk) {
-                $stmt = $pdo->prepare('DELETE FROM posts WHERE user_id = ? AND status = ? AND id IN (' . implode(',', array_fill(0, count($chunk), '?')) . ')');
+                $stmt = $pdo->prepare('DELETE FROM posts WHERE user_id = ? AND status = ? AND id IN (' . implode(',', array_fill(0, count($chunk), '?')) . ')' . Team::channelSql($uid));
                 $stmt->execute(array_merge([$uid, $status], $chunk));
                 $deleted += $stmt->rowCount();
             }
@@ -206,7 +233,7 @@ final class WorkspaceHandler
             self::done($back, $deleted === 0 ? 'Nothing was deleted.' : $deleted . ' ' . $what . ($deleted === 1 ? '' : 's') . ' deleted.');
         }
         if ($action === 'retry_all') {
-            $stmt = $pdo->prepare("UPDATE posts SET status = 'planned', planned_at = :now, error = NULL, attempts = 0, updated_at = :now2 WHERE user_id = :uid AND status = 'failed'");
+            $stmt = $pdo->prepare("UPDATE posts SET status = 'planned', planned_at = :now, error = NULL, attempts = 0, updated_at = :now2 WHERE user_id = :uid AND status = 'failed'" . Team::channelSql($uid));
             $stmt->execute(['now' => Database::now(), 'now2' => Database::now(), 'uid' => $uid]);
             self::done($back, $stmt->rowCount() . ' failed ' . ($stmt->rowCount() === 1 ? 'post is' : 'posts are') . ' being retried now. Check back in a few minutes.');
         }
@@ -270,6 +297,30 @@ final class WorkspaceHandler
         }
         if ($input['media'] > 0 && $media === null) {
             $errors['media'] = 'That file is no longer available. Please attach it again.';
+        }
+        // Carousel: up to 9 more photos after the first one.
+        $extras = [];
+        foreach (array_slice(Media::extraIds((string) ($_POST['extra_media'] ?? '')), 0, 9) as $extraId) {
+            $extra = Media::ready($uid, $extraId);
+            if ($extra === null || $extra['kind'] !== 'image') {
+                $errors['media'] = 'One of the carousel photos is no longer available. Remove it and add it again.';
+                break;
+            }
+            if ($media === null || $extraId !== (int) $media['id']) {
+                $extras[] = $extraId;
+            }
+        }
+        if ($extras && ($media === null || $media['kind'] !== 'image')) {
+            $errors['media'] = 'Carousels can only contain photos. The first file must be a photo too.';
+        }
+        if ($extras) {
+            foreach ($targets as $target) {
+                if (in_array($target['provider'], ['youtube', 'tiktok'], true)) {
+                    $errors['media'] = 'YouTube and TikTok posts take one file. Post the carousel to other channels.';
+                } elseif ($target['provider'] === 'pinterest' && count($extras) > 4) {
+                    $errors['media'] = 'Pinterest carousels can have up to 5 photos.';
+                }
+            }
         }
         $limit = (int) $settings['post_max'];
         $youtube = false;
@@ -402,6 +453,8 @@ final class WorkspaceHandler
                 'meta' => $isYoutube ? json_encode($meta) : null,
                 'tags' => $input['tags'] !== '' ? $input['tags'] : null,
                 'media' => $media ? (int) $media['id'] : null,
+                'extra' => Media::storeExtra($extras),
+                'repeat' => isset(Automations::REPEATS[(string) ($_POST['repeat'] ?? '')]) && ($_POST['repeat'] ?? '') !== '' ? (string) $_POST['repeat'] : null,
                 'first' => $target['provider'] === 'linkedin' && $input['first_comment'] !== '' ? $input['first_comment'] : null,
                 'status' => $status,
                 'planned' => $plannedUtc,
@@ -409,12 +462,15 @@ final class WorkspaceHandler
             ];
             $publishes = $publishes || ($status === 'planned' && $target['channel'] && $target['channel']['can_publish']);
             if ($existing) {
-                $pdo->prepare('UPDATE posts SET channel = :channel, channel_id = :cid, body = :body, title = :title, meta = :meta, tags = :tags, media_id = :media, first_comment = :first, first_comment_error = NULL, status = :status, planned_at = :planned, error = NULL, attempts = 0, review_note = CASE WHEN :status2 = \'review\' THEN NULL ELSE review_note END, updated_at = :now WHERE id = :id AND user_id = :uid')
+                $pdo->prepare('UPDATE posts SET channel = :channel, channel_id = :cid, body = :body, title = :title, meta = :meta, tags = :tags, media_id = :media, extra_media = :extra, repeat_rule = :repeat, first_comment = :first, first_comment_error = NULL, status = :status, planned_at = :planned, error = NULL, attempts = 0, review_note = CASE WHEN :status2 = \'review\' THEN NULL ELSE review_note END, updated_at = :now WHERE id = :id AND user_id = :uid')
                     ->execute($row + ['status2' => $status, 'id' => $id, 'uid' => $uid]);
                 continue;
             }
-            $pdo->prepare('INSERT INTO posts (user_id, channel, channel_id, body, title, meta, tags, media_id, first_comment, status, planned_at, idea_id, created_at, updated_at) VALUES (:uid, :channel, :cid, :body, :title, :meta, :tags, :media, :first, :status, :planned, :idea, :created, :now)')
-                ->execute($row + ['uid' => $uid, 'idea' => $ideaId, 'created' => $now]);
+            $pdo->prepare('INSERT INTO posts (user_id, channel, channel_id, body, title, meta, tags, media_id, extra_media, repeat_rule, first_comment, status, planned_at, idea_id, created_by, created_at, updated_at) VALUES (:uid, :channel, :cid, :body, :title, :meta, :tags, :media, :extra, :repeat, :first, :status, :planned, :idea, :by, :created, :now)')
+                ->execute($row + ['uid' => $uid, 'idea' => $ideaId, 'by' => (int) (Auth::person()['id'] ?? $uid), 'created' => $now]);
+        }
+        if ($status === 'review' && (!$existing || $existing['status'] !== 'review')) {
+            Notify::approvalNeeded($uid, count($targets), array_values(array_filter(array_map(static fn (array $t): int => (int) ($t['channel']['id'] ?? 0), $targets))));
         }
         $many = count($targets) > 1 ? count($targets) . ' posts' : 'Post';
         $message = match (true) {

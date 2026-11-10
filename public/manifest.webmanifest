@@ -1,0 +1,23 @@
+{
+  "name": "atwebtech",
+  "short_name": "atwebtech",
+  "description": "Plan, schedule and publish social media posts, answer comments and see what works.",
+  "start_url": "/app?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#F3F3F0",
+  "theme_color": "#0B1514",
+  "icons": [
+    { "src": "/assets/img/logo-mark-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/img/logo-mark-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ],
+  "shortcuts": [
+    { "name": "New post", "url": "/app/publish/new", "icons": [{ "src": "/assets/img/logo-mark-192.png", "sizes": "192x192" }] },
+    { "name": "Community inbox", "url": "/app/community", "icons": [{ "src": "/assets/img/logo-mark-192.png", "sizes": "192x192" }] }
+  ],
+  "share_target": {
+    "action": "/app/publish/new",
+    "method": "GET",
+    "params": { "title": "title", "text": "text", "url": "url" }
+  }
+}

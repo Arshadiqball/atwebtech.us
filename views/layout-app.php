@@ -1,7 +1,7 @@
 <?php
 /** @var string $content */
 /** @var array $meta */
-$theme = Auth::user()['theme'] ?? 'light';
+$theme = Auth::person()['theme'] ?? 'light';
 ?>
 <!doctype html>
 <html lang="en" data-theme="<?= e($theme) ?>">
@@ -15,6 +15,8 @@ $theme = Auth::user()['theme'] ?? 'light';
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+  <link rel="manifest" href="/manifest.webmanifest">
+  <meta name="theme-color" content="#0B1514">
   <link rel="preload" href="/assets/fonts/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">

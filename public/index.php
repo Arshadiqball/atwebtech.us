@@ -34,6 +34,7 @@ foreach ($routes as [$routeMethod, $pattern, $handler]) {
         continue;
     }
     $params = array_filter($matches, 'is_string', ARRAY_FILTER_USE_KEY);
+    Team::guard($method, $path);
     $handler(...$params);
     exit;
 }

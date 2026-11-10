@@ -1,0 +1,11 @@
+{
+  "manifest_version": 3,
+  "name": "atwebtech: share to social",
+  "short_name": "atwebtech",
+  "version": "1.0.0",
+  "description": "Share the page you're on, or the text you selected, to atwebtech and schedule it for your social channels.",
+  "action": { "default_title": "Share to atwebtech", "default_icon": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" } },
+  "icons": { "16": "icon-16.png", "48": "icon-48.png", "128": "icon-128.png" },
+  "background": { "service_worker": "background.js" },
+  "permissions": ["activeTab", "contextMenus"]
+}

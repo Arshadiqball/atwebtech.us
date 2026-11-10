@@ -23,7 +23,7 @@ return [
     ],
     [
         'q' => 'Which integrations are available?',
-        'a' => '<p>You can publish to Instagram (Business and Creator accounts), Facebook Pages, LinkedIn profiles, YouTube, Pinterest, and Threads today. TikTok accounts can be connected now, with publishing coming soon, and more networks such as Google Business Profile, Bluesky, and LinkedIn Pages are on the roadmap. Facebook Groups can’t be posted to by any app since Meta closed that option in 2024. The <a href="/integrations">integrations page</a> shows the current status of each one.</p>',
+        'a' => '<p>You can publish to Instagram (Business and Creator accounts), Facebook Pages, LinkedIn profiles, YouTube, Pinterest, Threads, Bluesky, and Mastodon today. TikTok accounts can be connected now, with publishing coming soon, and more networks such as Google Business Profile, Bluesky, and LinkedIn Pages are on the roadmap. Facebook Groups can’t be posted to by any app since Meta closed that option in 2024. The <a href="/integrations">integrations page</a> shows the current status of each one.</p>',
     ],
     [
         'q' => 'How do I hear about new features?',

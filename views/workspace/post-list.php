@@ -19,7 +19,7 @@ $compose ??= '{}';
 <?php if ($post['title']): ?><b><?= e($post['title']) ?></b><?php endif; ?>
 <?php if ($post['body'] !== ''): ?><p><?= nl2br(e($excerpt($post['body'], 280))) ?></p><?php endif; ?>
 <?php if ($kind === 'sent'): ?>
-        <small>Published <?= e(Workspace::local((string) $post['sent_at'], $tz)->format('j M Y, g:i A')) ?></small>
+        <small>Published <?= e(Workspace::local((string) $post['sent_at'], $tz)->format('j M Y, g:i A')) ?><?= !empty($post['recycled_from']) ? ' · recycled' : '' ?><?= !empty($post['recycled_at']) ? ' · last recycled ' . e(Workspace::local((string) $post['recycled_at'], $tz)->format('j M')) : '' ?></small>
 <?php if (!empty($post['first_comment'])): ?>
         <small>First comment: <?= e(mb_strlen((string) $post['first_comment']) > 80 ? rtrim(mb_substr((string) $post['first_comment'], 0, 80)) . '…' : $post['first_comment']) ?></small>
 <?php endif; ?>
@@ -30,10 +30,21 @@ $compose ??= '{}';
 <?php if (!empty($post['review_note'])): ?>
         <p class="ap-note"><?= icon('chat-circle-text') ?><span><b><?= empty($post['reviewed_at']) ? 'Note' : 'Changes requested' . (!empty($post['reviewed_by']) ? ' by ' . e($post['reviewed_by']) : '') ?>:</b> <?= e($post['review_note']) ?></span></p>
 <?php endif; ?>
-        <small>Edited <?= e(Workspace::local($post['updated_at'], $tz)->format('j M, g:i A')) ?><?= $post['media_id'] ? ' · file attached' : '' ?></small>
+        <small>Edited <?= e(Workspace::local($post['updated_at'], $tz)->format('j M, g:i A')) ?><?= $post['media_id'] ? (($n = count(Media::extraIds($post['extra_media'] ?? null))) > 0 ? ' · carousel of ' . ($n + 1) . ' photos' : ' · file attached') : '' ?></small>
 <?php endif; ?>
       </div>
+      <form action="/app/posts" method="post" class="dr-evergreen">
+        <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+        <input type="hidden" name="id" value="<?= (int) $post['id'] ?>">
+        <button type="submit" name="action" value="duplicate" class="ws-btn ws-btn--sm" title="Copy this post to a new draft"><?= icon('copy') ?>Duplicate</button>
+      </form>
 <?php if ($kind === 'sent'): ?>
+      <form action="/app/evergreen" method="post" class="dr-evergreen">
+        <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+        <input type="hidden" name="id" value="<?= (int) $post['id'] ?>">
+        <input type="hidden" name="back" value="<?= e(strtok((string) ($_SERVER['REQUEST_URI'] ?? ''), '#')) ?>">
+        <button type="submit" name="on" value="<?= empty($post['evergreen']) ? '1' : '' ?>" class="ws-btn ws-btn--sm<?= !empty($post['evergreen']) ? ' is-on' : '' ?>" aria-pressed="<?= !empty($post['evergreen']) ? 'true' : 'false' ?>" title="<?= !empty($post['evergreen']) ? 'Evergreen: re-posted into empty slots. Click to stop.' : 'Re-post this into empty slots later' ?>"><?= icon('arrows-clockwise') ?><?= !empty($post['evergreen']) ? 'Evergreen' : 'Recycle' ?></button>
+      </form>
 <?php if ($post['external_url']): ?>
       <a class="ws-btn ws-btn--sm" href="<?= e($post['external_url']) ?>" target="_blank" rel="noopener noreferrer"><?= icon('arrow-square-out') ?>View on <?= e(array_column(integrations(), 'name', 'slug')[$post['channel']] ?? 'the network') ?></a>
 <?php endif; ?>

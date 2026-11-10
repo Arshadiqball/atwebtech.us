@@ -14,9 +14,9 @@ $id = $mode;
       <h1 class="auth-title"><?= $signup ? 'Create an atwebtech account' : 'Log in to atwebtech' ?></h1>
       <p class="auth-switch">
 <?php if ($signup): ?>
-        Already have an account? <a href="/login">Log in instead</a>
+        Already have an account? <a href="/login<?= $next ? '?next=' . e(rawurlencode($next)) : '' ?>">Log in instead</a>
 <?php else: ?>
-        New to atwebtech? <a href="/signup">Create an account</a>
+        New to atwebtech? <a href="/signup<?= $next ? '?next=' . e(rawurlencode($next)) : '' ?>">Create an account</a>
 <?php endif; ?>
       </p>
 
@@ -25,10 +25,16 @@ $id = $mode;
 <?php if ($signup): ?>
         <input type="hidden" name="_ts" value="<?= e(Security::freshFormTimestamp(isset($old['_ts']) ? (string) $old['_ts'] : null)) ?>">
         <?php partial('partials/honeypot', ['id' => $id]); ?>
+<?php if ($next): ?>
+        <input type="hidden" name="next" value="<?= e($next) ?>">
+<?php endif; ?>
 <?php elseif ($next): ?>
         <input type="hidden" name="next" value="<?= e($next) ?>">
 <?php endif; ?>
 
+<?php if ($state && $state['status'] === 'success'): ?>
+        <div class="form-status is-success" role="status"><?= icon('check-circle') ?><span><?= e($state['message']) ?></span></div>
+<?php endif; ?>
 <?php if ($state && $state['status'] === 'error' && !$errors): ?>
         <div class="form-status is-error" role="alert"><?= icon('warning-circle') ?><span><?= e($state['message']) ?></span></div>
 <?php endif; ?>
@@ -71,7 +77,7 @@ $id = $mode;
 <?php if ($signup): ?>
         <p class="auth-fine">By signing up, you agree to the <a href="/terms">terms of use</a> and <a href="/privacy">privacy policy</a>.</p>
 <?php else: ?>
-        <p class="auth-fine">Forgot your password? <a href="/contact">Contact the atwebtech team</a> and we'll help you get back in.</p>
+        <p class="auth-fine"><a href="/forgot">Forgot your password?</a></p>
 <?php endif; ?>
       </form>
     </div>
@@ -84,7 +90,7 @@ $id = $mode;
   <aside class="auth-aside" aria-label="About atwebtech">
     <span class="auth-badge">Free plan</span>
     <h2 class="auth-aside-title">Plan your content in one workspace</h2>
-    <p class="auth-aside-sub">Plan ideas, set posting schedules, and publish to Instagram, Facebook, LinkedIn, YouTube, Pinterest, and Threads. Free for up to 3 channels, no credit card required.</p>
+    <p class="auth-aside-sub">Plan ideas, set posting schedules, and publish to Instagram, Facebook, LinkedIn, YouTube, Pinterest, Threads, Bluesky, and Mastodon. Free for up to 3 channels, no credit card required.</p>
     <div class="auth-preview" aria-hidden="true">
       <div class="ap-side">
         <span class="ap-logo"><?php partial('partials/logo-mark'); ?></span>

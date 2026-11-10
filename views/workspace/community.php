@@ -8,6 +8,7 @@
 /** @var array $inbox */
 /** @var array $problems */
 /** @var ?array $draft */
+/** @var array $saved */
 $token = Security::csrfToken();
 $tz = Workspace::timezone($user);
 $channels = array_column($inbox['channels'], null, 'id');
@@ -107,6 +108,37 @@ ob_start(); ?>
   </ul>
 <?php endif; ?>
 
+<?php if ($inbox['channels']): $paidSaved = Channels::allowance((int) $user['id'])['paid']; ?>
+  <details class="cm-saved"<?= isset($_GET['saved']) ? ' open' : '' ?>>
+    <summary><?= icon('chat-circle-text') ?>Saved replies <span class="cm-n"><?= count($saved) ?></span></summary>
+    <div class="cm-saved-body">
+<?php foreach ($saved as $sr): ?>
+      <form class="cm-saved-row" action="/app/community" method="post">
+        <input type="hidden" name="_token" value="<?= e($token) ?>">
+        <input type="hidden" name="reply_id" value="<?= (int) $sr['id'] ?>">
+        <?= $keep() ?>
+        <div><b><?= e($sr['title']) ?></b><p><?= e($short($sr['body'], 160)) ?></p></div>
+        <button type="submit" name="action" value="delete_reply" class="ws-btn ws-btn--sm ws-btn--ghost">Delete</button>
+      </form>
+<?php endforeach; ?>
+<?php if ($paidSaved || count($saved) < Community::SAVED_FREE): ?>
+      <form class="cm-saved-new" action="/app/community" method="post">
+        <input type="hidden" name="_token" value="<?= e($token) ?>">
+        <input type="hidden" name="action" value="save_reply">
+        <?= $keep() ?>
+        <label class="sr-only" for="cm-saved-title">Name</label>
+        <input class="idea-input" id="cm-saved-title" name="title" maxlength="80" required placeholder="Name, like “Opening hours”">
+        <label class="sr-only" for="cm-saved-body">Reply text</label>
+        <textarea class="idea-input" id="cm-saved-body" name="body" rows="2" maxlength="<?= Community::REPLY_MAX ?>" required placeholder="The answer you send often"></textarea>
+        <button type="submit" class="ws-btn ws-btn--dark ws-btn--sm">Save reply</button>
+      </form>
+<?php else: ?>
+      <p class="wsp-muted">The Free plan includes <?= Community::SAVED_FREE ?> saved reply. <a href="/app/billing">Upgrade</a> for unlimited.</p>
+<?php endif; ?>
+    </div>
+  </details>
+<?php endif; ?>
+
 <?php if (!$inbox['channels']): ?>
   <section class="cm-listen" aria-labelledby="cm-title">
     <span class="cm-wave" aria-hidden="true"><i></i><i></i><i></i></span>
@@ -188,7 +220,7 @@ ob_start(); ?>
 <?php endif; ?>
 <?php if ($cm['reply_body']): ?>
         <div class="cm-mine">
-          <small>You replied <?= e($when((string) $cm['replied_at'])) ?></small>
+          <small><?= !empty($cm['auto_reply']) ? 'Auto-reply sent' : 'You replied' ?> <?= e($when((string) $cm['replied_at'])) ?></small>
           <p><?= nl2br(e((string) $cm['reply_body'])) ?></p>
         </div>
 <?php endif; ?>
@@ -202,6 +234,14 @@ ob_start(); ?>
           <textarea id="cm-r-<?= (int) $cm['id'] ?>" name="reply" rows="2" maxlength="<?= Community::REPLY_MAX ?>" placeholder="Write a reply…"><?= e($text) ?></textarea>
           <div class="cm-acts">
             <button type="submit" name="action" value="reply" class="ws-btn ws-btn--dark ws-btn--sm">Send reply</button>
+<?php if ($saved): ?>
+            <select class="cm-saved-pick" aria-label="Insert a saved reply" data-cm-saved>
+              <option value="">Saved replies…</option>
+<?php foreach ($saved as $sr): ?>
+              <option value="<?= (int) $sr['id'] ?>" data-body="<?= e($sr['body']) ?>"><?= e($sr['title']) ?></option>
+<?php endforeach; ?>
+            </select>
+<?php endif; ?>
 <?php if (Assistant::enabled()): ?>
             <button type="submit" name="action" value="suggest" class="ws-btn ws-btn--sm" formnovalidate><?= icon('sparkle') ?>Suggest a reply</button>
 <?php endif; ?>

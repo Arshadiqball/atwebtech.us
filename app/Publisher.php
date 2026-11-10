@@ -5,7 +5,7 @@ declare(strict_types=1);
 /** Sends due posts to their connected channel. Driven by bin/publish.php from cron. */
 final class Publisher
 {
-    private const NAMES = ['facebook' => 'Facebook', 'threads' => 'Threads', 'pinterest' => 'Pinterest'];
+    private const NAMES = ['facebook' => 'Facebook', 'threads' => 'Threads', 'pinterest' => 'Pinterest', 'bluesky' => 'Bluesky', 'mastodon' => 'Mastodon'];
 
     public const MAX_ATTEMPTS = 3;
     private const STALE_MINUTES = 90;
@@ -68,9 +68,37 @@ final class Publisher
             if ($claim->rowCount() !== 1) {
                 continue;
             }
-            $result[self::publish((int) $id)]++;
+            $outcome = self::publish((int) $id);
+            $result[$outcome]++;
+            if ($outcome !== 'retry') {
+                self::announce((int) $id, $outcome);
+            }
+            if ($outcome === 'sent') {
+                Automations::repeatNext((int) $id);
+            }
         }
         return $result;
+    }
+
+    /** Queue the post.published / post.failed webhook. */
+    private static function announce(int $id, string $outcome): void
+    {
+        try {
+            $stmt = Database::connection()->prepare('SELECT id, user_id, channel, channel_id, body, status, sent_at, external_url, error, created_by FROM posts WHERE id = :id');
+            $stmt->execute(['id' => $id]);
+            $p = $stmt->fetch();
+            if ($p && $outcome === 'failed') {
+                Notify::postFailed($p);
+            }
+            if ($p) {
+                Webhooks::queue((int) $p['user_id'], $outcome === 'sent' ? 'post.published' : 'post.failed', [
+                    'post_id' => (int) $p['id'], 'channel_id' => (int) $p['channel_id'], 'network' => $p['channel'], 'text' => (string) $p['body'],
+                    'url' => $p['external_url'], 'error' => $outcome === 'sent' ? null : $p['error'],
+                ]);
+            }
+        } catch (Throwable $e) {
+            error_log(sprintf('[%s] webhook queue post %d: %s', gmdate('c'), $id, $e->getMessage()));
+        }
     }
 
     /** @return 'sent'|'failed'|'retry' */
@@ -111,6 +139,17 @@ final class Publisher
             }
             $media = $post['media_id'] ? Media::ready((int) $post['user_id'], (int) $post['media_id']) : null;
             $file = $media ? Media::file($media) : null;
+            $extras = [];
+            foreach (Media::extraIds($post['extra_media'] ?? null) as $extraId) {
+                $extra = Media::ready((int) $post['user_id'], $extraId);
+                if ($extra === null || $extra['kind'] !== 'image' || Media::file($extra) === null) {
+                    throw new PublishError('One of the carousel photos is missing. Open the post, attach the photos again, then retry.');
+                }
+                $extras[] = $extra;
+            }
+            if ($extras && ($media === null || $media['kind'] !== 'image')) {
+                throw new PublishError('Carousels can only contain photos. Remove the video or the extra photos, then retry.');
+            }
             if ($channel['provider'] === 'linkedin') {
                 if (trim((string) $post['body']) === '') {
                     throw new PublishError('LinkedIn posts need some text.');
@@ -122,7 +161,7 @@ final class Publisher
                     throw new PublishError('The image file is missing. Attach it again, then retry.');
                 }
                 $token = Channels::accessToken($channel);
-                $urn = Channels::linkedinShare($token, (string) $channel['external_id'], (string) $post['body'], $file, $media['mime'] ?? null);
+                $urn = Channels::linkedinShare($token, (string) $channel['external_id'], (string) $post['body'], $file, $media['mime'] ?? null, array_map(static fn (array $m): array => [(string) Media::file($m), (string) $m['mime']], $extras));
                 $commentError = null;
                 $comment = trim((string) ($post['first_comment'] ?? ''));
                 if ($comment !== '') {
@@ -147,8 +186,15 @@ final class Publisher
                     Channels::accessToken($channel),
                     (string) $channel['external_id'],
                     Media::shareUrl((int) $media['id']),
-                    mb_substr(trim((string) $post['body']), 0, 2200)
+                    mb_substr(trim((string) $post['body']), 0, 2200),
+                    array_map(static fn (array $m): string => Media::shareUrl((int) $m['id']), $extras)
                 );
+                $pdo->prepare('UPDATE posts SET status = :sent, sent_at = :at, external_id = :ext, external_url = :url, error = NULL, updated_at = :now WHERE id = :id')
+                    ->execute(['sent' => 'sent', 'at' => Database::now(), 'ext' => $sent['id'], 'url' => $sent['url'] !== '' ? $sent['url'] : null, 'now' => Database::now(), 'id' => $id]);
+                return 'sent';
+            }
+            if (in_array($channel['provider'], OpenSocial::PROVIDERS, true)) {
+                $sent = OpenSocial::publish($channel, (string) $post['body'], $media, $file, $extras);
                 $pdo->prepare('UPDATE posts SET status = :sent, sent_at = :at, external_id = :ext, external_url = :url, error = NULL, updated_at = :now WHERE id = :id')
                     ->execute(['sent' => 'sent', 'at' => Database::now(), 'ext' => $sent['id'], 'url' => $sent['url'] !== '' ? $sent['url'] : null, 'now' => Database::now(), 'id' => $id]);
                 return 'sent';
@@ -157,16 +203,16 @@ final class Publisher
                 $text = trim((string) $post['body']);
                 $token = Channels::accessToken($channel);
                 $sent = match ($channel['provider']) {
-                    'facebook' => Posting::facebook($token, (string) $channel['external_id'], $text, $media, $file),
-                    'threads' => Posting::threads($token, (string) $channel['external_id'], $text, $media, $file),
-                    'pinterest' => Posting::pinterest($token, (string) ($post['title'] ?? ''), $text, $media, $file),
+                    'facebook' => Posting::facebook($token, (string) $channel['external_id'], $text, $media, $file, $extras),
+                    'threads' => Posting::threads($token, (string) $channel['external_id'], $text, $media, $file, $extras),
+                    'pinterest' => Posting::pinterest($token, (string) ($post['title'] ?? ''), $text, $media, $file, $extras),
                 };
                 $pdo->prepare('UPDATE posts SET status = :sent, sent_at = :at, external_id = :ext, external_url = :url, error = NULL, updated_at = :now WHERE id = :id')
                     ->execute(['sent' => 'sent', 'at' => Database::now(), 'ext' => $sent['id'], 'url' => $sent['url'] !== '' ? $sent['url'] : null, 'now' => Database::now(), 'id' => $id]);
                 return 'sent';
             }
-            if ($media === null || $media['kind'] !== 'video' || $file === null) {
-                throw new PublishError('YouTube needs a video. Attach one and schedule the post again.');
+            if ($media === null || $media['kind'] !== 'video' || $file === null || $extras) {
+                throw new PublishError('YouTube needs one video. Attach one and schedule the post again.');
             }
             $meta = Workspace::youtubeMeta($post);
             $videoId = Channels::uploadVideo(Channels::accessToken($channel), $file, (string) $media['mime'], [
@@ -202,7 +248,7 @@ final class Publisher
                 default => match ($provider) {
                     'linkedin' => 'LinkedIn didn’t accept the post. Please retry.',
                     'instagram' => 'Instagram didn’t accept the photo. Please retry.',
-                    'facebook', 'threads', 'pinterest' => self::NAMES[$provider] . ' didn’t accept the post. Please retry.',
+                    'facebook', 'threads', 'pinterest', 'bluesky', 'mastodon' => self::NAMES[$provider] . ' didn’t accept the post. Please retry.',
                     default => 'YouTube didn’t accept the upload. Please retry.',
                 },
             };

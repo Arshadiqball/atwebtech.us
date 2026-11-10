@@ -1048,9 +1048,38 @@
       sync();
     };
 
+    // Carousel photos after the first one (ids kept in the hidden extra_media field, in order).
+    let extras = $$('[data-cp-extra-list] li', form).map((li) => ({ id: Number(li.dataset.id), url: $('img', li).getAttribute('src') }));
+    const renderExtras = () => {
+      const list = $('[data-cp-extra-list]', form);
+      if (!list) return;
+      list.innerHTML = '';
+      extras.forEach((x, i) => {
+        const li = document.createElement('li');
+        li.dataset.id = String(x.id);
+        const img = document.createElement('img');
+        img.src = x.url;
+        img.alt = '';
+        const del = document.createElement('button');
+        del.type = 'button';
+        del.className = 'cp-extra-x';
+        del.title = 'Remove photo';
+        del.innerHTML = '<span aria-hidden="true">×</span><span class="sr-only">Remove photo</span>';
+        del.addEventListener('click', () => { extras.splice(i, 1); renderExtras(); });
+        li.append(img, del);
+        list.append(li);
+      });
+      f.extra_media.value = extras.map((x) => x.id).join(',');
+      $('[data-cp-extra]', form).hidden = !(media && media.kind === 'image');
+      $('[data-cp-extra-add]', form).hidden = extras.length >= 9;
+    };
+    $$('[data-cp-extra-remove]', form).forEach((b, i) => b.addEventListener('click', () => { extras.splice(i, 1); renderExtras(); }));
+
     const showMedia = (m) => {
       media = m;
       f.media_id.value = m ? m.id : 0;
+      if (!m || m.kind !== 'image') extras = [];
+      renderExtras();
       $('[data-cp-media]', form).hidden = !m && !uploading;
       $('[data-cp-drop]', form).hidden = Boolean(m) || uploading;
       const thumb = $('[data-cp-thumb]', form);
@@ -1118,6 +1147,51 @@
         mediaError(err.message);
       }
     };
+
+    const sendFile = async (file, progress) => {
+      const json = async (res) => { const data = await res.json().catch(() => ({})); if (!res.ok || data.status !== 'ok') throw new Error(data.message || 'Upload failed. Please try again.'); return data; };
+      const start = new FormData();
+      start.set('_token', wsToken());
+      start.set('name', file.name);
+      start.set('size', String(file.size));
+      start.set('type', file.type);
+      const opened = await json(await fetch('/app/media', { method: 'POST', body: start, headers: { Accept: 'application/json' }, credentials: 'same-origin' }));
+      let offset = 0;
+      while (offset < file.size) {
+        const sent = await json(await fetch(`/app/media/${opened.id}/chunk`, {
+          method: 'POST', body: file.slice(offset, offset + opened.chunk), credentials: 'same-origin',
+          headers: { Accept: 'application/json', 'Content-Type': 'application/octet-stream', 'X-CSRF-Token': wsToken(), 'X-Upload-Offset': String(offset) },
+        }));
+        offset = sent.offset;
+        progress(offset / file.size);
+      }
+      const done = new FormData();
+      done.set('_token', wsToken());
+      return (await json(await fetch(`/app/media/${opened.id}/complete`, { method: 'POST', body: done, headers: { Accept: 'application/json' }, credentials: 'same-origin' }))).media;
+    };
+    const addExtras = async (files) => {
+      const add = $('[data-cp-extra-add] span', form);
+      const label = add.innerHTML;
+      for (const file of files) {
+        if (extras.length >= 9) { mediaError('A carousel can have up to 10 photos.'); break; }
+        if (MEDIA_TYPES[file.type] !== 'image') { mediaError('Carousels can only contain photos (JPG, PNG or WebP).'); continue; }
+        if (file.size > MEDIA_MAX.image) { mediaError('Images can be up to 10 MB.'); continue; }
+        uploading = true;
+        sync();
+        try {
+          const m = await sendFile(file, (pct) => { add.textContent = `Uploading ${Math.round(pct * 100)}%`; });
+          extras.push({ id: m.id, url: m.url });
+        } catch (err) {
+          mediaError(err.message);
+        }
+        uploading = false;
+      }
+      add.innerHTML = label;
+      renderExtras();
+      sync();
+    };
+    const extraFile = $('[data-cp-extra-file]', form);
+    if (extraFile) extraFile.addEventListener('change', () => { mediaError(''); addExtras([...extraFile.files]); extraFile.value = ''; });
 
     const fileInput = $('[data-cp-file]', form);
     const drop = $('[data-cp-drop]', form);
@@ -1310,6 +1384,7 @@
 
     const initialMedia = Number(f.media_id.value) > 0 ? { id: Number(f.media_id.value), kind: $('[data-cp-thumb] video', form) ? 'video' : 'image', name: $('[data-cp-file-name]', form).textContent, size: 0, url: `/app/media/${f.media_id.value}` } : null;
     media = initialMedia;
+    renderExtras();
     if (window.matchMedia('(min-width: 1100px)').matches) setPanel('preview');
     sync();
     if (form.dataset.cpStartImage && !media) attachImage(form.dataset.cpStartImage, form.dataset.cpStartType || 'image/webp');
@@ -1333,9 +1408,12 @@
         ['notify', 'embeddable', 'kids', 'synthetic'].forEach((k) => { if (k in meta) f[`yt_${k}`].checked = Boolean(meta[k]); });
         if (data.date) f.date.value = data.date;
         if (data.time) f.time.value = data.time;
+        if (f.repeat) f.repeat.value = data.repeat || '';
         mediaError('');
         $('[data-cp-progress]', form).hidden = true;
         showMedia(data.media || null);
+        extras = Array.isArray(data.extra_media) ? data.extra_media.map((x) => ({ id: x.id, url: x.url })) : [];
+        renderExtras();
         if (!data.media && data.video) attachImage(data.video, 'video/mp4');
         else if (!data.media && data.image) attachImage(data.image);
         $('[data-compose-title]', form).textContent = data.id ? 'Edit Post' : 'Create Post';
@@ -2086,3 +2164,18 @@
     });
   }
 })();
+
+// Installable app: register the service worker (offline page only; workspace pages are never cached).
+if ('serviceWorker' in navigator && window.isSecureContext) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
+}
+
+// Community: picking a saved reply fills the reply box.
+document.addEventListener('change', (e) => {
+  const pick = e.target.closest && e.target.closest('[data-cm-saved]');
+  if (!pick) return;
+  const option = pick.selectedOptions[0];
+  const area = pick.closest('form').querySelector('textarea');
+  if (option && option.dataset.body && area) { area.value = option.dataset.body; area.focus(); }
+  pick.selectedIndex = 0;
+});

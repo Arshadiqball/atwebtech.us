@@ -16,6 +16,10 @@ if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
     exit(0);
 }
 
+$recycled = Evergreen::run();
+if ($recycled > 0) {
+    printf("[%s] evergreen: %d posts recycled into empty slots\n", gmdate('c'), $recycled);
+}
 $result = Publisher::run();
 $cleaned = Media::cleanup();
 if (array_sum($result) + $cleaned > 0) {
@@ -31,6 +35,14 @@ if ($statsLock && flock($statsLock, LOCK_EX | LOCK_NB)) {
         $stats = Metrics::run(30);
         $followed = Competitors::run(15);
         $inbox = Community::run(15);
+        $reports = ClientReports::run();
+        $hooks = Webhooks::run();
+        if ($hooks > 0) {
+            printf("[%s] webhooks: %d deliveries\n", gmdate('c'), $hooks);
+        }
+        if ($reports > 0) {
+            printf("[%s] reports: %d emailed\n", gmdate('c'), $reports);
+        }
         if ($inbox > 0) {
             printf("[%s] inbox: %d channels read\n", gmdate('c'), $inbox);
         }
@@ -44,4 +56,19 @@ if ($statsLock && flock($statsLock, LOCK_EX | LOCK_NB)) {
         error_log(sprintf('[%s] metrics run failed: %s', gmdate('c'), $e->getMessage()));
     }
     flock($statsLock, LOCK_UN);
+}
+
+// Automations run under their own lock: writing posts with AI can take a while.
+$autoLock = fopen(BASE_PATH . '/storage/logs/automations.lock', 'c');
+if ($autoLock && flock($autoLock, LOCK_EX | LOCK_NB)) {
+    try {
+        $autoMade = Automations::run(25);
+        if ($autoMade > 0) {
+            printf("[%s] automations: %d posts made\n", gmdate('c'), $autoMade);
+        }
+        Automations::housekeeping();
+    } catch (Throwable $e) {
+        error_log(sprintf('[%s] automations run failed: %s', gmdate('c'), $e->getMessage()));
+    }
+    flock($autoLock, LOCK_UN);
 }

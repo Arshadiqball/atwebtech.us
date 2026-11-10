@@ -217,6 +217,20 @@ $hourLabel = static fn (int $h): string => (new DateTimeImmutable('2000-01-01 ' 
 <?php endif; ?>
   </section>
 
+<?php if (!empty($insights['hashtags'])): ?>
+  <section class="in-panel" aria-labelledby="in-tags">
+    <h2 id="in-tags">Hashtag Performance <small>Last 90 days · used in 2 or more posts</small></h2>
+    <table class="in-tags">
+      <thead><tr><th>Hashtag</th><th>Posts</th><th>Engagement vs usual</th><th>Reactions</th><th>Comments</th></tr></thead>
+      <tbody>
+<?php foreach ($insights['hashtags'] as $t): ?>
+        <tr><td><b><?= e($t['tag']) ?></b></td><td><?= (int) $t['posts'] ?></td><td class="<?= $t['lift'] >= 1 ? 'is-up' : 'is-down' ?>"><?= e(number_format($t['lift'], 1)) ?>×</td><td><?= number_format($t['reactions']) ?></td><td><?= number_format($t['comments']) ?></td></tr>
+<?php endforeach; ?>
+      </tbody>
+    </table>
+  </section>
+<?php endif; ?>
+
   <section class="in-panel" aria-labelledby="in-perf">
     <h2 id="in-perf">Performance per Post <small><?= e($label) ?></small></h2>
 <?php if ($insights['posts']): ?>

@@ -7,7 +7,7 @@ return [
     // Caption limits used by the post composer, in characters.
     'limits' => [
         'instagram' => 2200, 'facebook' => 5000, 'tiktok' => 2200, 'linkedin' => 3000, 'youtube' => 5000,
-        'pinterest' => 500, 'threads' => 500, 'google-business-profile' => 1500,
+        'pinterest' => 500, 'threads' => 500, 'bluesky' => 300, 'mastodon' => 500, 'google-business-profile' => 1500,
     ],
     'post_max' => 5000,
     // Suggested posting times for the queue (24h, in the user's time zone).
@@ -20,11 +20,15 @@ return [
         'community' => ['label' => 'Community', 'icon' => 'chats-circle', 'href' => '/app/community'],
         'insights' => ['label' => 'Insights', 'icon' => 'chart-bar', 'href' => '/app/insights'],
         'competitors' => ['label' => 'Competitors', 'icon' => 'chart-line-up', 'href' => '/app/competitors'],
+        'team' => ['label' => 'Team', 'icon' => 'user-plus', 'href' => '/app/team', 'nav' => false],
+        'automations' => ['label' => 'Automations', 'icon' => 'lightning', 'href' => '/app/automations'],
+        'notifications' => ['label' => 'Notifications', 'icon' => 'bell', 'href' => '/app/notifications'],
+        'library' => ['label' => 'Media Library', 'icon' => 'image', 'href' => '/app/library'],
         'bio' => ['label' => 'Link in Bio', 'icon' => 'link-simple', 'href' => '/app/link-in-bio'],
         'channels' => [
             'label' => 'Channels', 'icon' => 'plus', 'href' => '/app/channels', 'nav' => false,
             'title' => 'Connect a channel',
-            'text' => 'Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, and Threads can be connected and published to. TikTok connects now, with publishing coming soon.',
+            'text' => 'Instagram, Facebook Pages, LinkedIn, YouTube, Pinterest, Threads, Bluesky, and Mastodon can be connected and published to. TikTok connects now, with publishing coming soon.',
             'demo' => null, 'feature' => '/integrations',
         ],
     ],

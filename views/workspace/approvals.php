@@ -38,8 +38,8 @@ $invites = Approvals::invites($uid);
 
 <section class="ap-share ap-invite" id="invite" aria-labelledby="ap-invite-title">
   <div>
-    <h2 id="ap-invite-title"><?= icon('users-three') ?>Invite a team member</h2>
-    <p>Add a teammate, client or manager as a reviewer. They get their own private link by email to approve posts or ask for changes, with no account needed. Remove them any time.</p>
+    <h2 id="ap-invite-title"><?= icon('users-three') ?>Invite a reviewer</h2>
+    <p>Add a client or manager as a reviewer. They get their own private link by email to approve posts or ask for changes, with no account needed. Remove them any time. To give teammates their own login and role, use <a href="/app/team">Team</a>.</p>
   </div>
   <form action="/app/approvals" method="post" class="ap-invite-form">
     <input type="hidden" name="_token" value="<?= e($token) ?>">

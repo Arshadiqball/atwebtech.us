@@ -146,7 +146,7 @@ $linkedin = $channel['provider'] === 'linkedin';
     <div class="set-row">
       <div>
         <h2>Campaign tracking (UTM)</h2>
-        <p>Add Google Analytics UTM tags to the links in your posts automatically. It's one setting for all channels, under <a href="/app/account#utm">Account → Link tracking</a>.</p>
+        <p>Add Google Analytics UTM tags to the links in your posts automatically. It's one setting for all channels, under <a href="/app/settings#utm">Workspace settings → Link tracking</a>.</p>
       </div>
     </div>
   </section>
@@ -204,6 +204,22 @@ $linkedin = $channel['provider'] === 'linkedin';
         <p><?= !empty($channel['paused_at']) ? 'Nothing on this channel publishes while paused. Resume to send posts that are due.' : 'Stop every post on this channel from publishing until you resume. Nothing is deleted.' ?></p>
       </div>
       <button type="submit" name="paused" value="<?= empty($channel['paused_at']) ? '1' : '' ?>" class="ws-btn set-control"><?= empty($channel['paused_at']) ? 'Pause queue' : 'Resume queue' ?></button>
+    </form>
+    <form class="set-row" action="/app/channels/<?= (int) $channel['id'] ?>/queue-tools" method="post" id="recycle">
+      <input type="hidden" name="_token" value="<?= e(Security::csrfToken()) ?>">
+      <input type="hidden" name="action" value="recycle">
+      <div>
+        <h2>Evergreen Recycling</h2>
+        <p>Re-post your evergreen posts into empty posting slots, so the queue never runs dry. Mark a post as evergreen from Sent. Each post waits at least this long before it goes out again.</p>
+      </div>
+      <div class="set-control set-inline">
+        <select class="idea-input" name="recycle_days" aria-label="How often to recycle">
+<?php foreach (Evergreen::GAPS as $d => $label): ?>
+          <option value="<?= $d ?>"<?= (int) ($channel['recycle_days'] ?? 30) === $d ? ' selected' : '' ?>><?= e($label) ?></option>
+<?php endforeach; ?>
+        </select>
+        <button type="submit" class="ws-btn">Save</button>
+      </div>
     </form>
     <div class="set-row">
       <div><h2>Shuffle Queue</h2><p>Mix up the order of scheduled posts. The time slots stay the same.</p></div>

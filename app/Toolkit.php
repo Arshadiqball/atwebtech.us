@@ -169,6 +169,34 @@ final class Feeds
         Toolkit::done($back, sprintf('Following %s. %d recent articles are ready to share.', $parsed['title'] ?: 'the feed', min(count($parsed['items']), self::KEEP_ITEMS)));
     }
 
+    /** Follow a feed by website or feed address and return its id (an existing one when already followed). */
+    public static function follow(int $uid, string $url): int
+    {
+        if ($url !== '' && !preg_match('#^https?://#i', $url)) {
+            $url = 'https://' . $url;
+        }
+        if (!filter_var($url, FILTER_VALIDATE_URL) || strlen($url) > 500) {
+            throw new FeedProblem('Enter a full web address for your blog, such as https://blog.example.com.');
+        }
+        [$feedUrl, $xml] = self::discover($url);
+        $parsed = self::parse($xml);
+        $pdo = Database::connection();
+        $have = $pdo->prepare('SELECT id FROM feeds WHERE user_id = :uid AND url = :url');
+        $have->execute(['uid' => $uid, 'url' => $feedUrl]);
+        if (($id = $have->fetchColumn()) !== false) {
+            return (int) $id;
+        }
+        if (count(self::list($uid)) >= self::limit($uid)) {
+            throw new FeedProblem('You follow the most feeds your plan allows. Remove one under Create → Feeds first.');
+        }
+        $now = Database::now();
+        $pdo->prepare('INSERT INTO feeds (user_id, url, title, site_url, last_checked_at, created_at, updated_at) VALUES (:uid, :url, :title, :site, :now, :c, :u)')
+            ->execute(['uid' => $uid, 'url' => $feedUrl, 'title' => mb_substr($parsed['title'] ?: (string) parse_url($feedUrl, PHP_URL_HOST), 0, 200), 'site' => $parsed['site'], 'now' => $now, 'c' => $now, 'u' => $now]);
+        $feedId = (int) $pdo->lastInsertId();
+        self::store($feedId, $uid, $parsed['items']);
+        return $feedId;
+    }
+
     /** Fetch one feed and add new articles. Returns false on failure (the error is stored on the feed). */
     public static function refresh(array $feed): bool
     {
@@ -390,12 +418,12 @@ final class Utm
         $uid = (int) $user['id'];
         $enabled = !empty($_POST['utm_enabled']);
         if ($enabled && !Channels::allowance($uid)['paid']) {
-            Toolkit::done('/app/account#utm', 'Link tracking is part of Essentials and Team. Upgrade under Plan & billing to turn it on.');
+            Toolkit::done('/app/settings#utm', 'Link tracking is part of Essentials and Team. Upgrade under Plan & billing to turn it on.');
         }
         $campaign = mb_substr(trim((string) preg_replace('/[^\p{L}\p{N}_\- ]/u', '', (string) ($_POST['utm_campaign'] ?? ''))), 0, 80);
         Database::connection()->prepare('UPDATE users SET utm_tracking_enabled = :e, utm_tracking_campaign = :c WHERE id = :id')
             ->execute(['e' => $enabled ? 1 : 0, 'c' => $campaign !== '' ? $campaign : null, 'id' => $uid]);
-        Toolkit::done('/app/account#utm', $enabled ? 'Link tracking is on. New posts get UTM tags on their links when they publish.' : 'Link tracking is off.');
+        Toolkit::done('/app/settings#utm', $enabled ? 'Link tracking is on. New posts get UTM tags on their links when they publish.' : 'Link tracking is off.');
     }
 }
 
@@ -487,13 +515,7 @@ final class Reports
             fclose($out);
             exit;
         }
-        header('Content-Type: text/html; charset=utf-8');
-        header('Cache-Control: no-store, private');
-        View::partial('reports/print', [
-            'user' => $user, 'in' => $in, 'tz' => $tz, 'names' => $names, 'accounts' => $accounts, 'file' => $file,
-            'campaigns' => self::campaigns($uid, $in['from']->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s'), $in['to']->setTimezone(new DateTimeZone('UTC'))->format('Y-m-d H:i:s')),
-        ]);
-        exit;
+        ClientReports::render($user, $range, false, $channelId > 0 ? $channelId : null);
     }
 }
 
@@ -502,7 +524,7 @@ final class QueueTools
 {
     public const MAX_ROWS = 200;
     /** Networks where a post can be text only. The others need a photo or video on every post. */
-    public const TEXT_NETWORKS = ['linkedin', 'facebook', 'threads', 'tiktok'];
+    public const TEXT_NETWORKS = ['linkedin', 'facebook', 'threads', 'tiktok', 'bluesky', 'mastodon'];
 
     /** POST /app/channels/{id}/queue-tools */
     public static function handle(string $id): never
@@ -554,6 +576,13 @@ final class QueueTools
                 Toolkit::done($back, $n . ' scheduled ' . ($n === 1 ? 'post' : 'posts') . ' removed from the queue.');
             case 'bulk':
                 self::bulk($user, $channel, $back);
+            case 'recycle':
+                $days = (int) ($_POST['recycle_days'] ?? 30);
+                if (!isset(Evergreen::GAPS[$days])) {
+                    Toolkit::done($back, 'Choose how often to recycle.');
+                }
+                $pdo->prepare('UPDATE channels SET recycle_days = :d, recycle_checked_at = NULL WHERE id = :id AND user_id = :uid')->execute(['d' => $days, 'id' => $cid, 'uid' => $uid]);
+                Toolkit::done($back, $days === 0 ? 'Evergreen recycling is off for this channel.' : 'Evergreen posts will be recycled ' . strtolower(Evergreen::GAPS[$days]) . ', into empty posting slots.');
         }
         Toolkit::done($back, 'Nothing changed.');
     }

@@ -34,7 +34,7 @@ final class Channels
     public const MAX_GOAL = 14;
     private const AVATAR_HOSTS = ['yt3.ggpht.com', 'yt3.googleusercontent.com', 'media.licdn.com', 'media-exp1.licdn.com', 'media-exp2.licdn.com'];
     /** Networks atwebtech can publish to. Others can be connected, and their posts wait as plans. */
-    public const PUBLISHES = ['youtube', 'linkedin', 'instagram', 'facebook', 'threads', 'pinterest'];
+    public const PUBLISHES = ['youtube', 'linkedin', 'instagram', 'facebook', 'threads', 'pinterest', 'bluesky', 'mastodon'];
     private const DAYS = [1 => 'Mon', 2 => 'Tue', 3 => 'Wed', 4 => 'Thu', 5 => 'Fri', 6 => 'Sat', 7 => 'Sun'];
 
     public static function connectable(string $provider): bool
@@ -47,22 +47,29 @@ final class Channels
             'facebook' => config('oauth.facebook.client_id') !== '' && config('oauth.facebook.client_secret') !== '' && config('oauth.facebook.config_id') !== '',
             'instagram' => config('oauth.instagram.client_id') !== '' && config('oauth.instagram.client_secret') !== '',
             'threads' => config('oauth.threads.client_id') !== '' && config('oauth.threads.client_secret') !== '',
+            'bluesky', 'mastodon' => true,
             default => false,
         };
     }
 
     public static function forUser(int $uid): array
     {
-        $stmt = Database::connection()->prepare('SELECT id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, inbox_checked_at, inbox_error, created_at FROM channels WHERE user_id = :uid ORDER BY id');
+        $stmt = Database::connection()->prepare('SELECT id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, inbox_checked_at, inbox_error, recycle_days, created_at FROM channels WHERE user_id = :uid ORDER BY id');
         $stmt->execute(['uid' => $uid]);
-        return array_map([self::class, 'hydrate'], $stmt->fetchAll());
+        $rows = array_map([self::class, 'hydrate'], $stmt->fetchAll());
+        $allowed = Team::allowed($uid);
+        return $allowed === null ? $rows : array_values(array_filter($rows, static fn (array $c): bool => in_array((int) $c['id'], $allowed, true)));
     }
 
     public static function find(int $uid, int $id): ?array
     {
-        $stmt = Database::connection()->prepare('SELECT id, user_id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, inbox_checked_at, inbox_error, access_token, refresh_token, token_expires_at, created_at FROM channels WHERE id = :id AND user_id = :uid');
+        $stmt = Database::connection()->prepare('SELECT id, user_id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, inbox_checked_at, inbox_error, recycle_days, access_token, refresh_token, token_expires_at, created_at FROM channels WHERE id = :id AND user_id = :uid');
         $stmt->execute(['id' => $id, 'uid' => $uid]);
         $row = $stmt->fetch();
+        $allowed = $row ? Team::allowed($uid) : null;
+        if ($allowed !== null && !in_array((int) $row['id'], $allowed, true)) {
+            return null;
+        }
         return $row ? self::hydrate($row) : null;
     }
 
@@ -77,6 +84,8 @@ final class Channels
             'facebook' => ($row['kind'] ?? '') === 'Page' && str_contains($scopes, 'pages_manage_posts'),
             'threads' => str_contains($scopes, 'threads_content_publish'),
             'pinterest' => str_contains($scopes, 'pins:write'),
+            'bluesky' => str_contains($scopes, 'pds:'),
+            'mastodon' => str_contains($scopes, 'write:statuses'),
             default => false,
         };
         return $row;
@@ -85,6 +94,9 @@ final class Channels
     /** A usable access token, refreshed with the sealed refresh token when it is about to expire. */
     public static function accessToken(array $channel): string
     {
+        if (in_array($channel['provider'], OpenSocial::PROVIDERS, true)) {
+            return OpenSocial::accessToken($channel);
+        }
         $access = Security::unseal($channel['access_token'] ?? null);
         if ($access !== null && strtotime((string) $channel['token_expires_at'] . ' UTC') > time() + 120) {
             return $access;
@@ -637,7 +649,8 @@ final class Channels
      * Publish a text or image post to a personal LinkedIn Profile.
      * Returns the post URN (used as the public feed URL).
      */
-    public static function linkedinShare(string $token, string $personId, string $text, ?string $imagePath, ?string $imageMime): string
+    /** @param array<int, array{0:string, 1:string}> $more extra images as [path, mime]: LinkedIn shows them as a multi-image post */
+    public static function linkedinShare(string $token, string $personId, string $text, ?string $imagePath, ?string $imageMime, array $more = []): string
     {
         $author = 'urn:li:person:' . $personId;
         $content = [
@@ -654,6 +667,9 @@ final class Channels
                 'media' => $asset,
                 'title' => ['text' => mb_substr($text, 0, 80)],
             ]];
+            foreach (array_slice($more, 0, 19) as [$path, $mime]) {
+                $content['com.linkedin.ugc.ShareContent']['media'][] = ['status' => 'READY', 'media' => self::linkedinImage($token, $author, $path, $mime)];
+            }
         }
         $data = self::requestJson('POST', self::endpoint('linkedin', 'ugc'), [
             'author' => $author,
@@ -894,15 +910,33 @@ final class Channels
      *
      * @return array{id:string, url:string}
      */
-    public static function instagramPublish(string $token, string $igId, string $imageUrl, string $caption): array
+    /** @param string[] $moreUrls extra photos: with any, the post goes out as a carousel (up to 10 photos) */
+    public static function instagramPublish(string $token, string $igId, string $imageUrl, string $caption, array $moreUrls = []): array
     {
         if (!preg_match('/^[0-9]+$/', $igId)) {
             throw new PublishError('This Instagram account can’t be published to. Reconnect it and try again.');
         }
-        $created = self::request('POST', 'https://graph.instagram.com/v23.0/' . $igId . '/media', [
-            'image_url' => $imageUrl,
-            'caption' => $caption,
-        ], $token);
+        if ($moreUrls) {
+            $children = [];
+            foreach (array_slice(array_merge([$imageUrl], $moreUrls), 0, 10) as $url) {
+                $child = self::request('POST', 'https://graph.instagram.com/v23.0/' . $igId . '/media', ['image_url' => $url, 'is_carousel_item' => 'true'], $token);
+                $childId = (string) ($child['id'] ?? '');
+                if (!preg_match('/^[0-9]+$/', $childId)) {
+                    throw new PublishError('Instagram didn’t accept one of the carousel photos.');
+                }
+                $children[] = $childId;
+            }
+            $created = self::request('POST', 'https://graph.instagram.com/v23.0/' . $igId . '/media', [
+                'media_type' => 'CAROUSEL',
+                'children' => implode(',', $children),
+                'caption' => $caption,
+            ], $token);
+        } else {
+            $created = self::request('POST', 'https://graph.instagram.com/v23.0/' . $igId . '/media', [
+                'image_url' => $imageUrl,
+                'caption' => $caption,
+            ], $token);
+        }
         $creation = (string) ($created['id'] ?? '');
         if ($creation === '' || !preg_match('/^[0-9]+$/', $creation)) {
             throw new PublishError('Instagram didn’t accept the photo.');
@@ -1136,6 +1170,11 @@ final class Channels
         if (isset($cache[$userId])) {
             return $cache[$userId];
         }
+        // A client workspace uses its owner's plan.
+        $parent = $userId > 0 ? self::parentOf($userId) : null;
+        if ($parent !== null) {
+            return $cache[$userId] = self::allowance($parent);
+        }
         $cfg = data('pricing');
         $slug = 'free';
         $limit = (int) $cfg['free_channels'];
@@ -1168,6 +1207,28 @@ final class Channels
             'paid' => $slug !== 'free',
             'source' => $source,
         ];
+    }
+
+    /** Owner account of a client workspace, or null for a normal account. */
+    public static function parentOf(int $userId): ?int
+    {
+        static $cache = [];
+        if (!array_key_exists($userId, $cache)) {
+            $stmt = Database::connection()->prepare('SELECT parent_id FROM users WHERE id = :id');
+            $stmt->execute(['id' => $userId]);
+            $parent = $stmt->fetchColumn();
+            $cache[$userId] = $parent ? (int) $parent : null;
+        }
+        return $cache[$userId];
+    }
+
+    /** Channels billed to this account: its own plus every client workspace's (or the owner's family for a client workspace). */
+    public static function familyCount(int $userId): int
+    {
+        $root = self::parentOf($userId) ?? $userId;
+        $stmt = Database::connection()->prepare('SELECT COUNT(*) FROM channels c JOIN users u ON u.id = c.user_id WHERE u.id = :root OR u.parent_id = :root2');
+        $stmt->execute(['root' => $root, 'root2' => $root]);
+        return (int) $stmt->fetchColumn();
     }
 
     /** Ideas allowed for the user's plan; null when only the storage cap applies. */

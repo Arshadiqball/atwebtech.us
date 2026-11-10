@@ -137,11 +137,11 @@ final class Workspace
         return array_values(array_filter(array_map('trim', explode(',', (string) $tags)), 'strlen'));
     }
 
-    private const POST_COLUMNS = 'id, channel, channel_id, body, title, meta, tags, status, planned_at, sent_at, external_url, error, attempts, idea_id, media_id, review_note, reviewed_by, updated_at';
+    private const POST_COLUMNS = 'id, channel, channel_id, body, title, meta, tags, status, planned_at, sent_at, external_url, error, attempts, idea_id, media_id, review_note, reviewed_by, updated_at, evergreen, recycled_at, recycled_from, extra_media, created_by, repeat_rule, automation_id';
 
     public static function post(int $uid, int $id): ?array
     {
-        $stmt = Database::connection()->prepare('SELECT ' . self::POST_COLUMNS . ' FROM posts WHERE id = :id AND user_id = :uid');
+        $stmt = Database::connection()->prepare('SELECT ' . self::POST_COLUMNS . ' FROM posts WHERE id = :id AND user_id = :uid' . Team::channelSql($uid));
         $stmt->execute(['id' => $id, 'uid' => $uid]);
         return $stmt->fetch() ?: null;
     }
@@ -155,7 +155,7 @@ final class Workspace
             $in[] = ':s' . $i;
             $params['s' . $i] = $status;
         }
-        $sql = 'SELECT ' . self::POST_COLUMNS . ' FROM posts WHERE user_id = :uid AND status IN (' . implode(', ', $in) . ')';
+        $sql = 'SELECT ' . self::POST_COLUMNS . ' FROM posts WHERE user_id = :uid AND status IN (' . implode(', ', $in) . ')' . Team::channelSql($uid);
         if ($channelId !== null) {
             $sql .= ' AND channel_id = :cid';
             $params['cid'] = $channelId;
@@ -204,7 +204,7 @@ final class Workspace
                 SUM(CASE WHEN status = 'failed' THEN 1 ELSE 0 END) AS failed,
                 SUM(CASE WHEN status = 'sent' THEN 1 ELSE 0 END) AS sent,
                 SUM(CASE WHEN status = 'sent' AND sent_at >= :week THEN 1 ELSE 0 END) AS sent_week
-             FROM posts WHERE user_id = :uid";
+             FROM posts WHERE user_id = :uid" . Team::channelSql($uid);
         $params = ['uid' => $uid, 'week' => gmdate('Y-m-d H:i:s', strtotime('monday this week 00:00 UTC'))];
         if ($channelId !== null) {
             $sql .= ' AND channel_id = :cid';
@@ -245,7 +245,9 @@ final class Workspace
             'tags' => (string) ($post['tags'] ?? ''),
             'meta' => self::youtubeMeta($post),
             'media' => $media,
+            'extra_media' => array_values(array_filter(array_map(static fn (int $mid): ?array => Media::describe(Media::ready($uid, $mid)), Media::extraIds($post['extra_media'] ?? null)))),
             'first_comment' => (string) ($post['first_comment'] ?? ''),
+            'repeat' => (string) ($post['repeat_rule'] ?? ''),
             'date' => $at ? $at->format('Y-m-d') : '',
             'time' => $at ? $at->format('H:i') : '',
         ];
@@ -280,7 +282,7 @@ final class Workspace
         $prevFromUtc = $prevFrom->setTimezone($utc)->format('Y-m-d H:i:s');
         $prevToUtc = $prevTo->setTimezone($utc)->format('Y-m-d H:i:s');
 
-        $sql = 'SELECT * FROM posts WHERE user_id = :uid AND status = :sent AND sent_at BETWEEN :from AND :to';
+        $sql = 'SELECT * FROM posts WHERE user_id = :uid AND status = :sent AND sent_at BETWEEN :from AND :to' . Team::channelSql((int) $user['id']);
         $params = ['uid' => (int) $user['id'], 'sent' => 'sent', 'from' => $fromUtc, 'to' => $toUtc];
         if ($channelId !== null) {
             $sql .= ' AND channel_id = :cid';
@@ -290,7 +292,7 @@ final class Workspace
         $stmt->execute($params);
         $posts = $stmt->fetchAll();
 
-        $prevSql = 'SELECT COUNT(*) FROM posts WHERE user_id = :uid AND status = :sent AND sent_at BETWEEN :from AND :to';
+        $prevSql = 'SELECT COUNT(*) FROM posts WHERE user_id = :uid AND status = :sent AND sent_at BETWEEN :from AND :to' . Team::channelSql((int) $user['id']);
         $prevParams = ['uid' => (int) $user['id'], 'sent' => 'sent', 'from' => $prevFromUtc, 'to' => $prevToUtc];
         if ($channelId !== null) {
             $prevSql .= ' AND channel_id = :cid';
@@ -329,6 +331,7 @@ final class Workspace
             'metrics' => Metrics::summary((int) $user['id'], $channelId, $fromUtc, $toUtc, $prevFromUtc, $prevToUtc),
             'post_metrics' => Metrics::forPosts(array_column($posts, 'id')),
             'best' => Metrics::bestTimes((int) $user['id'], $channelId, $tz),
+            'hashtags' => Metrics::hashtags((int) $user['id'], $channelId),
         ];
     }
 

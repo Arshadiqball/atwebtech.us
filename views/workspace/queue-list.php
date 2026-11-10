@@ -44,7 +44,7 @@ $due = array_filter($overdue, static fn (array $p): bool => $p['status'] === 'pl
               <small>This was a plan only, so nothing was sent. Pick a new time or delete it.</small>
 <?php endif; ?>
             </span>
-            <?= post_badge($post, $accounts) ?>
+            <?= post_badge($post, $accounts) ?><?php if (!empty($post['repeat_rule'])): ?><span class="q-repeat" title="<?= e(Automations::REPEATS[$post['repeat_rule']] ?? 'Repeats') ?>"><?= icon('arrows-clockwise') ?></span><?php endif; ?>
             <span class="q-acts">
 <?php if ($post['status'] === 'failed'): ?>
               <form action="/app/posts" method="post">
@@ -76,7 +76,7 @@ $due = array_filter($overdue, static fn (array $p): bool => $p['status'] === 'pl
             <span class="q-post-text"><?= e($excerpt($text($post), 140)) ?>
               <small>Sending now.</small>
             </span>
-            <?= post_badge($post, $accounts) ?>
+            <?= post_badge($post, $accounts) ?><?php if (!empty($post['repeat_rule'])): ?><span class="q-repeat" title="<?= e(Automations::REPEATS[$post['repeat_rule']] ?? 'Repeats') ?>"><?= icon('arrows-clockwise') ?></span><?php endif; ?>
             <span class="q-acts">
               <a class="ws-btn ws-btn--sm" href="/app/publish/new?id=<?= (int) $post['id'] ?>" data-compose="<?= $compose($postJson($post)) ?>"><?= icon('pencil-simple') ?>Edit</a>
             </span>
@@ -103,7 +103,7 @@ $due = array_filter($overdue, static fn (array $p): bool => $p['status'] === 'pl
           </a>
 <?php else: $post = $item['post']; $busy = $post['status'] === 'publishing'; ?>
           <<?= $busy ? 'div' : 'a' ?> class="q-post"<?= $busy ? '' : ' href="/app/publish/new?id=' . (int) $post['id'] . '" data-compose="' . $compose($postJson($post)) . '" draggable="true" data-move="' . (int) $post['id'] . '" data-at="' . e($item['at']->format('Y-m-d H:i')) . '" title="Drag to another time"' ?>>
-            <?= post_mark($post, $accounts) ?><span class="q-post-text"><?= e($excerpt($text($post), 140)) ?></span><?= post_badge($post, $accounts) ?><?php if (!$busy): ?><span class="q-edit"><?= icon('pencil-simple') ?>Edit</span><?php endif; ?>
+            <?= post_mark($post, $accounts) ?><span class="q-post-text"><?= e($excerpt($text($post), 140)) ?></span><?= post_badge($post, $accounts) ?><?php if (!empty($post['repeat_rule'])): ?><span class="q-repeat" title="<?= e(Automations::REPEATS[$post['repeat_rule']] ?? 'Repeats') ?>"><?= icon('arrows-clockwise') ?></span><?php endif; ?><?php if (!$busy): ?><span class="q-edit"><?= icon('pencil-simple') ?>Edit</span><?php endif; ?>
           </<?= $busy ? 'div' : 'a' ?>>
 <?php endif; ?>
         </li>
