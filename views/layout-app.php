@@ -16,11 +16,12 @@ $theme = Auth::person()['theme'] ?? 'light';
   <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
   <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#0B1514">
+  <meta name="theme-color" content="<?= $theme === 'dark' ? '#0C100F' : '#F1F0EB' ?>">
   <link rel="preload" href="/assets/fonts/figtree-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="/assets/fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
   <link rel="stylesheet" href="<?= e(asset('css/account.css')) ?>">
+  <link rel="stylesheet" href="<?= e(asset('css/theme.css')) ?>">
 <?php if (!empty($meta['admin'])): ?>
   <link rel="stylesheet" href="<?= e(asset('css/admin.css')) ?>">
 <?php endif; ?>

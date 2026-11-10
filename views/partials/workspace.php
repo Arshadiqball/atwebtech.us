@@ -55,6 +55,9 @@ $notice = flash('notice');
     <nav aria-label="Workspace sections">
       <ul class="ws-nav" role="list">
 <?php foreach ($sections as $key => $s): if (($s['nav'] ?? true) === false) continue; ?>
+<?php if (!empty($s['group'])): ?>
+        <li class="ws-nav-group" aria-hidden="true"><?= e($s['group']) ?></li>
+<?php endif; ?>
         <li>
           <a href="<?= e($s['href']) ?>"<?= $key === $section ? ' aria-current="page"' : '' ?> title="<?= e($s['label']) ?>">
             <?= icon($s['icon']) ?><span class="ws-label"><?= e($s['label']) ?></span>

@@ -394,6 +394,15 @@ Also for every plan:
 - **Empty-queue alert** (`queue_low`): once a week per channel that posted in the last 14 days and has nothing scheduled.
 - **Monday summary** (`weekly_digest`): after 08:00 on Mondays in the person's time zone: published last week, scheduled this week, failed, waiting for approval and unanswered comments, with a line per client workspace. Both are notifications people can turn off under Account.
 
+## Workspace theme
+
+`public/assets/css/theme.css` is loaded after `account.css` on every app page (`views/layout-app.php`) and holds the 2026 look. It redefines the design tokens for light and dark and restyles the shared pieces, so a new page gets the look by using the existing classes.
+
+- **Layers:** sidebar `--a-bg` < canvas `--a-canvas` (`.ws-main`) < cards `--a-panel`. Status colors are tokens too: `--bad-*`, `--warn-*`, `--ok-*`, `--violet-*`, `--a-info-*`. Don't hard-code a light color in a component: that is what made cards white in dark mode.
+- **Buttons (CTA rules):** one primary per view, `ws-btn--dark` (green). Secondary is plain `ws-btn`. `ws-btn--tint` is for the main action of a row that repeats down a list (Retry, Approve, Send reply). `ws-btn--danger` is red text that fills on hover. `ws-btn--ghost` is for tertiary actions.
+- **Sidebar:** navigation is grouped by the `group` key in `app/data/workspace.php` (Content, Engage, Grow).
+- **Home:** starts with what needs the person (failed posts, channels to reconnect, approvals, unanswered comments, empty queue, drafts), then quick actions, then real counts.
+
 ## Cron jobs (production)
 
 | Schedule | Command | Purpose |

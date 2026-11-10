@@ -6,13 +6,24 @@ $hour = (int) gmdate('G');
 $showSurvey = $onboarding['referral'] === null && $onboarding['survey_closed_at'] === null;
 $survey = View::formState('survey');
 $referral = data('onboarding')['referral'];
-$stats = [
-    ['Week Streak', 'Weeks in a row with at least one published post.'],
-    ['Posting Goals', 'Weekly posting goals you have met.'],
-    ['Comment Score', 'How many comments you have replied to.'],
-];
 $connected = Channels::forUser((int) $user['id']);
 $counts = Workspace::counts((int) $user['id']);
+$waiting = Community::unanswered((int) $user['id']);
+$reconnect = count(array_filter($connected, static fn (array $c): bool => stripos((string) ($c['stats_error'] ?? '') . ' ' . (string) ($c['inbox_error'] ?? ''), 'reconnect') !== false));
+$stats = [
+    ['Scheduled', 'Posts waiting in your queue.', $counts['queue']],
+    ['Published this week', 'Posts atwebtech sent since Monday.', $counts['sent_week']],
+    ['Channels', 'Connected social accounts.', count($connected)],
+];
+// What needs the person, most urgent first: [style, icon, title, detail, link].
+$todo = array_values(array_filter([
+    $counts['failed'] > 0 ? ['bad', 'warning-circle', $counts['failed'] . ' ' . ($counts['failed'] === 1 ? 'post' : 'posts') . ' failed to publish', 'See why and retry', '/app/publish?tab=failed'] : null,
+    $reconnect > 0 ? ['bad', 'link-simple', $reconnect . ' ' . ($reconnect === 1 ? 'channel needs' : 'channels need') . ' reconnecting', 'Posts and stats wait until then', '/app/channels'] : null,
+    $counts['review'] > 0 ? ['warn', 'check-circle', $counts['review'] . ' ' . ($counts['review'] === 1 ? 'post is' : 'posts are') . ' waiting for approval', 'Approve or ask for changes', '/app/publish?tab=approvals'] : null,
+    $waiting > 0 ? ['info', 'chats-circle', $waiting . ' unanswered ' . ($waiting === 1 ? 'comment' : 'comments'), 'Reply from the inbox', '/app/community'] : null,
+    $connected && $counts['queue'] === 0 ? ['warn', 'calendar-blank', 'Nothing is scheduled', 'Write a post or let an automation fill the queue', '/app/publish/new'] : null,
+    $counts['drafts'] > 0 ? ['ok', 'pencil-simple', $counts['drafts'] . ' ' . ($counts['drafts'] === 1 ? 'draft' : 'drafts') . ' to finish', 'Pick up where you left off', '/app/publish?tab=drafts'] : null,
+]));
 $steps = [
     $connected
         ? ['1. Connect a channel', ($plan = Channels::allowance())['paid'] ? sprintf('%d channels connected. Add another or set its posting goal.', count($connected)) : sprintf('%d of %d channels connected. Add another or set its posting goal.', count($connected), $plan['limit']), '/app/channels', 'plus', 'Manage Channels', true]
@@ -30,11 +41,34 @@ $steps = [
     </div>
   </header>
 
+<?php if ($todo): ?>
+  <section aria-labelledby="hm-todo-title">
+    <h2 class="sr-only" id="hm-todo-title">Needs your attention</h2>
+    <div class="hm-todo">
+<?php foreach ($todo as [$style, $glyph, $title, $detail, $href]): ?>
+      <a class="hm-task hm-task--<?= e($style) ?>" href="<?= e($href) ?>">
+        <?= icon($glyph) ?>
+        <div><b><?= e($title) ?></b><small><?= e($detail) ?></small></div>
+        <?= icon('arrow-right', 'icon hm-go') ?>
+      </a>
+<?php endforeach; ?>
+    </div>
+  </section>
+<?php elseif ($connected): ?>
+  <p class="hm-clear"><?= icon('check-circle') ?>You’re all caught up. Nothing needs you right now.</p>
+<?php endif; ?>
+  <div class="hm-quick">
+    <a class="ws-btn ws-btn--dark" href="/app/publish/new"><?= icon('plus') ?>New post</a>
+    <a class="ws-btn" href="/app/automations"><?= icon('lightning') ?>Automate my week</a>
+    <a class="ws-btn" href="/app/insights"><?= icon('chart-bar') ?>See what’s working</a>
+    <a class="ws-btn" href="/app/channels"><?= icon('plus') ?>Connect a channel</a>
+  </div>
+
   <section class="ws-stats-card" aria-label="Your activity">
     <ul class="ws-stats" role="list">
-<?php foreach ($stats as $i => [$label, $desc]): ?>
+<?php foreach ($stats as $i => [$label, $desc, $value]): ?>
       <li class="ws-stat">
-        <span class="ws-stat-num">0</span>
+        <span class="ws-stat-num"><?= (int) $value ?></span>
         <span class="ws-stat-label"><?= e($label) ?></span>
         <span class="tip">
           <button type="button" class="tip-btn" aria-describedby="stat-tip-<?= $i ?>" aria-label="About <?= e($label) ?>"><?= icon('info') ?></button>
@@ -43,7 +77,6 @@ $steps = [
       </li>
 <?php endforeach; ?>
     </ul>
-    <p class="ws-stats-note"><?= icon('info') ?><span>Streaks, goals and comment scores start counting once publishing and the comment inbox are live. <a href="/app/channels">Manage channels</a>.</span></p>
   </section>
 
   <section class="ws-block" aria-labelledby="first-steps">
