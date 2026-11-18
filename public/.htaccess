@@ -9,6 +9,11 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Static mini-sites (e.g. /wordglow): serve the folder's index.html.
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteCond %{REQUEST_FILENAME}/index.html -f
+    RewriteRule ^(.+?)/?$ $1/index.html [L]
+
     # Serve existing static files directly; send every other request to the front controller.
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
