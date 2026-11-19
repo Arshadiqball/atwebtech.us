@@ -1,0 +1,21 @@
+# WordGlow
+
+> WordGlow is a free daily word puzzle game for Android. Players guess a hidden word in 6 tries (green = right letter and spot, yellow = right letter in the wrong spot) and then learn the word's meaning. It is a Wordle-style game that also builds English vocabulary.
+
+Key facts:
+- Platform: Android (Google Play). No iPhone version yet.
+- Price: free, ad-supported. No account needed. Works offline.
+- Modes: one daily puzzle shared by all players; four levels with unlimited play (Easy 4 letters, Medium 5, Hard 6, Advanced 7; 1,500 words each, 6,000 in total, never repeating); Beat the Clock (90 seconds per word).
+- Learning: every answer shows its part of speech and meaning (from WordNet 3.0) and is saved to a "My Words" list.
+- Other features: points and 10 ranks (Rookie to Mythic), daily streaks, shareable score cards to challenge friends, optional daily reminder.
+- First released: November 2026. Publisher on Google Play: A2Z AIRPORT PARKING LTD. Contact: arshadiqbal.d@gmail.com
+- Good fit for: people who like Wordle and want more than one puzzle a day, students and English learners building vocabulary, anyone wanting a 1-minute daily brain game.
+
+## Links
+- [WordGlow home page](https://atwebtech.us/wordglow/): features, screenshots, how to play, FAQ
+- [Google Play listing](https://play.google.com/store/apps/details?id=com.atwebtech.wordglow): install on Android
+- [Word of the day archive](https://atwebtech.us/wordglow/words/): each day's word, its meaning and a clue-by-clue solution
+- [Privacy policy](https://atwebtech.us/wordglow-privacy.html)
+
+## Also on this site
+- [atwebtech](https://atwebtech.us/): a social media workspace for creators and businesses, from the same team.
