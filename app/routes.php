@@ -646,11 +646,20 @@ return [
         foreach (array_keys(data('articles')) as $slug) {
             $paths[] = '/resources/' . $slug;
         }
+        // WordGlow guides and word lists: public/wordglow/pages.json maps path => last-modified date.
+        $dated = [];
+        $manifest = json_decode((string) @file_get_contents(BASE_PATH . '/public/wordglow/pages.json'), true);
+        foreach (is_array($manifest) ? $manifest : [] as $p => $meta) {
+            $dated[$p] = is_array($meta) ? ($meta['lastmod'] ?? null) : null;
+        }
         header('Content-Type: application/xml; charset=utf-8');
         echo '<?xml version="1.0" encoding="UTF-8"?>', "\n";
         echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">', "\n";
         foreach ($paths as $p) {
             echo '  <url><loc>', e(absolute_url($p)), '</loc></url>', "\n";
+        }
+        foreach ($dated as $p => $lastmod) {
+            echo '  <url><loc>', e(absolute_url($p)), '</loc>', $lastmod ? '<lastmod>' . e($lastmod) . '</lastmod>' : '', '</url>', "\n";
         }
         echo '</urlset>', "\n";
     }],

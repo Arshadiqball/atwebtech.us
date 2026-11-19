@@ -49,6 +49,7 @@ return [
             ['Adapting ideas by channel', '/resources/adapting-ideas-for-each-channel'],
             ['Choosing social metrics', '/resources/choosing-social-metrics'],
             ['FAQ', '/faq'],
+            ['WordGlow word game', '/wordglow/'],
         ],
         'Company' => [
             ['About', '/about'],

@@ -1,0 +1,402 @@
+{
+"/wordglow/guides/": {
+"hash": "fe7b4c6d6281",
+"lastmod": "2026-11-19"
+},
+"/wordglow/guides/best-starting-words/": {
+"hash": "830f58487368",
+"lastmod": "2026-11-19"
+},
+"/wordglow/guides/how-to-play/": {
+"hash": "f1b7460a604d",
+"lastmod": "2026-11-19"
+},
+"/wordglow/guides/wordle-alternatives/": {
+"hash": "f1cc5c1fff0b",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/": {
+"hash": "870a88a47055",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-a/": {
+"hash": "d8897737883e",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-b/": {
+"hash": "191d87dd2337",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-c/": {
+"hash": "6616226c6d46",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-d/": {
+"hash": "ac841be42bfc",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-e/": {
+"hash": "3c3365ad6e28",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-f/": {
+"hash": "72c9d4d4ccc5",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-g/": {
+"hash": "f4b3265ed3ca",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-h/": {
+"hash": "3268a38a33d1",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-i/": {
+"hash": "4e2786d06c71",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-j/": {
+"hash": "122d7a78ce7b",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-k/": {
+"hash": "afd125c26aec",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-l/": {
+"hash": "6cf72db891d7",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-m/": {
+"hash": "2645d9ac7dcd",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-n/": {
+"hash": "b33dcceccc53",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-o/": {
+"hash": "ee4edb8d983c",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-p/": {
+"hash": "998ce2b3bee7",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-r/": {
+"hash": "fff6bf52a2ac",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-s/": {
+"hash": "6a770eddfefb",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-t/": {
+"hash": "3a46c4cd9c6c",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-v/": {
+"hash": "ed77cf631e71",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-w/": {
+"hash": "16245b23526f",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-y/": {
+"hash": "10b5fa34a53f",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words-starting-with-z/": {
+"hash": "1917ab50e518",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/4-letter-words/": {
+"hash": "caeeec05a599",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-a/": {
+"hash": "e370f8ef8217",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-b/": {
+"hash": "b910c116404c",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-c/": {
+"hash": "1706cc04d7ef",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-d/": {
+"hash": "8691794a1bee",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-e/": {
+"hash": "2cd98c791cd4",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-f/": {
+"hash": "b0f4a80a96e1",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-g/": {
+"hash": "b3b53c4ec5cf",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-h/": {
+"hash": "6e682af8bacf",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-i/": {
+"hash": "4ea05893a670",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-j/": {
+"hash": "b5e864f3b437",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-k/": {
+"hash": "435d914450f1",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-l/": {
+"hash": "a0adb2bfeda4",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-m/": {
+"hash": "238c3f89f773",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-n/": {
+"hash": "5ef851fe7845",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-o/": {
+"hash": "eb19d7568b5a",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-p/": {
+"hash": "8ff32e49a84b",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-q/": {
+"hash": "ec2b7229dd7c",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-r/": {
+"hash": "f59aeaccf870",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-s/": {
+"hash": "66555a565760",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-t/": {
+"hash": "f620efe25259",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-u/": {
+"hash": "b5fea253042c",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-v/": {
+"hash": "3ea65c8a6c49",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words-starting-with-w/": {
+"hash": "2f105b91c0da",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/5-letter-words/": {
+"hash": "fb2a3650617e",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-a/": {
+"hash": "c7df8136ce8f",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-b/": {
+"hash": "ccc1cf718cf0",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-c/": {
+"hash": "bb8ae1b6bfcb",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-d/": {
+"hash": "cdb3455a0282",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-e/": {
+"hash": "65a20f3f4dda",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-f/": {
+"hash": "297b3631a92f",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-g/": {
+"hash": "b83c27cee8ba",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-h/": {
+"hash": "2fba6c263807",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-i/": {
+"hash": "3c5a9e9aeafa",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-j/": {
+"hash": "8914e2deb123",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-k/": {
+"hash": "292baeac532b",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-l/": {
+"hash": "da247b440579",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-m/": {
+"hash": "f15bf19566e0",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-n/": {
+"hash": "636933ac9675",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-o/": {
+"hash": "9c148f90cba2",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-p/": {
+"hash": "6f9c92936a6d",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-r/": {
+"hash": "e685910106f6",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-s/": {
+"hash": "fe58fe36740c",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-t/": {
+"hash": "e7edf3d3920b",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-u/": {
+"hash": "37cbd36bd379",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-v/": {
+"hash": "9720345af80e",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words-starting-with-w/": {
+"hash": "c10b12a1269c",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/6-letter-words/": {
+"hash": "31cc339b4f21",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-a/": {
+"hash": "9c0acd2c83f4",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-b/": {
+"hash": "af29b1c2c989",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-c/": {
+"hash": "2d0bfb7858c1",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-d/": {
+"hash": "22fbd0e2caf4",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-e/": {
+"hash": "d065c60a13df",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-f/": {
+"hash": "6b0a0871e761",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-g/": {
+"hash": "98e7e16ef67e",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-h/": {
+"hash": "bd1ae70bf235",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-i/": {
+"hash": "5d9b357f7a27",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-j/": {
+"hash": "f922df1349ad",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-k/": {
+"hash": "5ba2df6b7e22",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-l/": {
+"hash": "f99d5f902b99",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-m/": {
+"hash": "43d28df75a8e",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-n/": {
+"hash": "a2def2cf197e",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-o/": {
+"hash": "b3fa9e008298",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-p/": {
+"hash": "f23e8d01ff01",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-q/": {
+"hash": "59021ecafdbc",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-r/": {
+"hash": "90ba3d6b9882",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-s/": {
+"hash": "165af505dbc4",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-t/": {
+"hash": "959d2ca4ae97",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-u/": {
+"hash": "2064c46170a5",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-v/": {
+"hash": "1106c9182d58",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words-starting-with-w/": {
+"hash": "bf68d6020121",
+"lastmod": "2026-11-19"
+},
+"/wordglow/word-lists/7-letter-words/": {
+"hash": "297c154af03d",
+"lastmod": "2026-11-19"
+}
+}
