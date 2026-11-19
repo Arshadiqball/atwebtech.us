@@ -20,7 +20,7 @@ final class Team
     private const RANK = ['contributor' => 1, 'editor' => 2, 'admin' => 3, 'owner' => 4];
 
     /** Paths that always act on the signed-in person's own account, never on a workspace they joined. */
-    private const PERSONAL = '#^/(app/account(/(two-factor(/.*)?|password|profile|notifications))?|account/theme|logout|welcome|app/billing(/.*)?|app/workspaces)$#';
+    private const PERSONAL = '#^/(app/account(/(two-factor(/.*)?|password|profile|notifications))?|account/theme|logout|welcome|app/billing(/.*)?|app/workspaces|api/mobile/(account|notifications(/.*)?|logout|device))$#';
     public const MAX_WORKSPACES = 25;
 
     /** [methods, path regex, lowest role allowed]. Anything not listed is open to every role. */

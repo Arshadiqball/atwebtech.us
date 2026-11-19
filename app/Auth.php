@@ -12,6 +12,28 @@ final class Auth
     private static bool $loaded = false;
     /** True on personal pages (account, billing, log out): user() is the signed-in person even inside a team workspace. */
     private static bool $personal = false;
+    /** Row id of the mobile app token this request signed in with, or null for a browser session. */
+    private static ?int $tokenId = null;
+
+    /** The app token from the Authorization header, if the request carries one. */
+    public static function bearer(): ?string
+    {
+        $header = (string) ($_SERVER['HTTP_AUTHORIZATION'] ?? $_SERVER['REDIRECT_HTTP_AUTHORIZATION'] ?? '');
+        return preg_match('/^Bearer\s+(amt_[a-f0-9]{48})$/', $header, $m) ? $m[1] : null;
+    }
+
+    /** True when this request is signed in with a valid mobile app token. */
+    public static function viaToken(): bool
+    {
+        self::user();
+        return self::$tokenId !== null;
+    }
+
+    public static function tokenId(): ?int
+    {
+        self::user();
+        return self::$tokenId;
+    }
 
     /**
      * The workspace the request acts on. For a teammate who switched into someone's workspace this is the
@@ -24,7 +46,26 @@ final class Auth
         }
         self::$loaded = true;
         self::$person = null;
+        self::$tokenId = null;
         $id = $_SESSION['_uid'] ?? null;
+        $bearer = self::bearer();
+        if ($bearer !== null) {
+            // The mobile app: the token decides who this is; any browser session is ignored.
+            $id = null;
+            try {
+                $stmt = Database::connection()->prepare('SELECT id, user_id, last_used_at FROM mobile_tokens WHERE token_hash = :h');
+                $stmt->execute(['h' => hash('sha256', $bearer)]);
+                if ($row = $stmt->fetch()) {
+                    $id = (int) $row['user_id'];
+                    self::$tokenId = (int) $row['id'];
+                    if ($row['last_used_at'] === null || strtotime($row['last_used_at'] . ' UTC') < time() - 300) {
+                        Database::connection()->prepare('UPDATE mobile_tokens SET last_used_at = :now WHERE id = :id')->execute(['now' => Database::now(), 'id' => (int) $row['id']]);
+                    }
+                }
+            } catch (Throwable $e) {
+                error_log(sprintf('[%s] token lookup failed: %s', gmdate('c'), $e->getMessage()));
+            }
+        }
         if (!is_int($id)) {
             return self::$user = null;
         }
@@ -38,10 +79,11 @@ final class Auth
         }
         if (self::$person === null) {
             unset($_SESSION['_uid'], $_SESSION['_ws']);
+            self::$tokenId = null;
             return self::$user = null;
         }
-        // A password change elsewhere signs this session out.
-        if ((self::$person['password_changed_at'] ?? null) !== ($_SESSION['_pwat'] ?? null)) {
+        // A password change elsewhere signs this session out. (App tokens are deleted on a password change instead.)
+        if (self::$tokenId === null && (self::$person['password_changed_at'] ?? null) !== ($_SESSION['_pwat'] ?? null)) {
             $_SESSION = [];
             self::$person = null;
             return self::$user = null;
@@ -49,6 +91,10 @@ final class Auth
         unset(self::$person['password_changed_at']);
         self::$user = self::$person;
         $ws = $_SESSION['_ws'] ?? null;
+        if (self::$tokenId !== null) {
+            $header = (string) ($_SERVER['HTTP_X_WORKSPACE'] ?? '');
+            $ws = ctype_digit($header) ? (int) $header : null;
+        }
         if (!self::$personal && is_int($ws) && $ws !== (int) self::$person['id']) {
             $team = Team::membership($ws, self::$person);
             if ($team !== null) {
@@ -110,6 +156,9 @@ final class Auth
     {
         $user = self::user();
         if ($user === null) {
+            if (self::bearer() !== null) {
+                json_response(['status' => 'error', 'code' => 'unauthorized', 'message' => 'Log in again to continue.'], 401);
+            }
             redirect('/login?next=' . rawurlencode(current_path()));
         }
         return $user;

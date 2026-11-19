@@ -7,3 +7,4 @@ storage/migrations.stamp
 storage/migrations.lock
 storage/branding/
 storage/wordglow/
+storage/firebase-service-account.json

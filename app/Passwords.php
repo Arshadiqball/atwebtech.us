@@ -19,17 +19,31 @@ final class Passwords
         if (!Security::verifyCsrf($_POST['_token'] ?? null)) {
             self::fail('forgot', $back, 'Your session expired. Refresh the page and try again.', ['email' => $email]);
         }
+        [$ok, $message] = self::start($email);
+        if (!$ok) {
+            self::fail('forgot', $back, $message, ['email' => $email]);
+        }
+        flash('form', ['form' => 'forgot', 'status' => 'success', 'message' => $message, 'errors' => [], 'old' => []]);
+        redirect($back);
+    }
+
+    /**
+     * Email a reset link if the address has an account. Used by the website and the mobile app.
+     * @return array{0: bool, 1: string} whether the request was accepted, and what to tell the person
+     */
+    public static function start(string $email): array
+    {
         if ($email === '' || mb_strlen($email) > 254 || filter_var($email, FILTER_VALIDATE_EMAIL) === false) {
-            self::fail('forgot', $back, 'Enter the email address you signed up with.', ['email' => $email]);
+            return [false, 'Enter the email address you signed up with.'];
         }
         if (!config('mail.enabled')) {
             error_log(sprintf('[%s] password reset asked but mail is not enabled', gmdate('c')));
-            self::fail('forgot', $back, 'Password reset emails aren’t available right now. Contact the atwebtech team and we’ll help you get back in.', ['email' => $email]);
+            return [false, 'Password reset emails aren’t available right now. Contact the atwebtech team and we’ll help you get back in.'];
         }
         $ip = Security::clientFingerprint();
         $emailKey = Security::keyedHash('reset:' . $email);
         if (RateLimiter::tooManyAttempts('pw-reset', $ip, 5, 60) || RateLimiter::tooManyAttempts('pw-reset-email', $emailKey, 3, 60)) {
-            self::fail('forgot', $back, 'Too many reset requests. Please wait an hour and try again.', ['email' => $email]);
+            return [false, 'Too many reset requests. Please wait an hour and try again.'];
         }
         RateLimiter::hit('pw-reset', $ip);
         RateLimiter::hit('pw-reset-email', $emailKey);
@@ -48,8 +62,7 @@ final class Passwords
             Mailer::send($email, $mail['subject'], $mail['html'], $mail['text']);
         }
         // The same answer whether or not the address has an account.
-        flash('form', ['form' => 'forgot', 'status' => 'success', 'message' => 'If an account uses that address, a reset link is on its way. It works for ' . self::LINK_MINUTES . ' minutes. Check your spam folder too.', 'errors' => [], 'old' => []]);
-        redirect($back);
+        return [true, 'If an account uses that address, a reset link is on its way. It works for ' . self::LINK_MINUTES . ' minutes. Check your spam folder too.'];
     }
 
     /** GET /reset/{token} */
@@ -82,6 +95,7 @@ final class Passwords
         $pdo->prepare('UPDATE users SET password_hash = :hash, password_changed_at = :at, updated_at = :now WHERE id = :id')
             ->execute(['hash' => Auth::hash($password), 'at' => $now, 'now' => $now, 'id' => (int) $row['user_id']]);
         $pdo->prepare('DELETE FROM password_resets WHERE user_id = :uid')->execute(['uid' => (int) $row['user_id']]);
+        $pdo->prepare('DELETE FROM mobile_tokens WHERE user_id = :uid')->execute(['uid' => (int) $row['user_id']]); // signs the app out on every device
         Auth::logout();
         flash('form', ['form' => 'login', 'status' => 'success', 'message' => 'Your password was changed. Log in with the new one.', 'errors' => [], 'old' => []]);
         redirect('/login');
@@ -111,6 +125,7 @@ final class Passwords
         $pdo->prepare('UPDATE users SET password_hash = :hash, password_changed_at = :at, updated_at = :now WHERE id = :id')
             ->execute(['hash' => Auth::hash($password), 'at' => $now, 'now' => $now, 'id' => $uid]);
         $pdo->prepare('DELETE FROM password_resets WHERE user_id = :uid')->execute(['uid' => $uid]);
+        $pdo->prepare('DELETE FROM mobile_tokens WHERE user_id = :uid AND id <> :keep')->execute(['uid' => $uid, 'keep' => (int) (Auth::tokenId() ?? 0)]);
         $_SESSION['_pwat'] = $now; // Keep this session; every other one is signed out.
         self::notice($back, 'Password changed. Other devices were signed out.');
     }

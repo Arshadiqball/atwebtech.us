@@ -403,6 +403,16 @@ Also for every plan:
 - **Sidebar:** navigation is grouped by the `group` key in `app/data/workspace.php` (Content, Engage, Grow).
 - **Home:** starts with what needs the person (failed posts, channels to reconnect, approvals, unanswered comments, empty queue, drafts), then quick actions, then real counts.
 
+## Mobile app
+
+`mobile-app-flutter/` is the iOS and Android app (Flutter); see its README. It is not deployed with the website (`.deployignore`). Server side (migration `030`):
+
+- **Device tokens.** `POST /api/mobile/login|signup|two-factor` return a token (`amt_…`, only its hash is stored in `mobile_tokens`, 20 devices per person). `Auth::user()` accepts it from the `Authorization: Bearer` header; the workspace comes from `X-Workspace`. For those requests no PHP session is started (`$_SESSION` is a per-request array), `Security::verifyCsrf()` passes (a website can't forge the header), and `redirect()` answers with JSON (`Mobile::answerRedirect`: the flashed notice, or a 422 with the form errors). So the app posts to the same handlers as the website and gets the same rules.
+- **Reads** for the app's screens are under `/api/mobile/*` in `app/Mobile.php` (bootstrap, posts, inbox, notifications, insights, automations, library, account).
+- **Handoff.** `POST /api/mobile/handoff {next}` returns a single-use, 90-second link (`/m/open/{code}`) that signs the browser in and opens that page, for the screens the app shows from the site and for Stripe checkout.
+- **Push.** `app/Push.php` sends every `Notify::send()` notification to the person's phones through Firebase Cloud Messaging when `storage/firebase-service-account.json` exists (or `FIREBASE_SERVICE_ACCOUNT` points to it). Dead device addresses are dropped.
+- A password change or reset deletes the person's app tokens (other devices are signed out).
+
 ## Cron jobs (production)
 
 | Schedule | Command | Purpose |

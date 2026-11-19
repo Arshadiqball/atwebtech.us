@@ -47,6 +47,8 @@ require BASE_PATH . '/app/Api.php';
 require BASE_PATH . '/app/Passwords.php';
 require BASE_PATH . '/app/Notify.php';
 require BASE_PATH . '/app/Automations.php';
+require BASE_PATH . '/app/Push.php';
+require BASE_PATH . '/app/Mobile.php';
 require BASE_PATH . '/app/ChannelHandler.php';
 require BASE_PATH . '/app/Media.php';
 require BASE_PATH . '/app/Assistant.php';

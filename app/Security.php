@@ -16,6 +16,12 @@ final class Security
         if (session_status() === PHP_SESSION_ACTIVE) {
             return;
         }
+        if (Auth::bearer() !== null) {
+            // The mobile app signs each request with its token. A session file per request would only pile up,
+            // so $_SESSION is a plain array that lives for this request (flash messages still work).
+            $_SESSION = [];
+            return;
+        }
         session_name('awt_session');
         session_set_cookie_params([
             'lifetime' => 0,
@@ -55,6 +61,9 @@ final class Security
 
     public static function verifyCsrf(?string $token): bool
     {
+        if (Auth::viaToken()) {
+            return true; // Signed in by the app's bearer token: a website can't forge that header, so there is nothing to check.
+        }
         return is_string($token) && !empty($_SESSION['_csrf']) && hash_equals($_SESSION['_csrf'], $token);
     }
 

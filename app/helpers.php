@@ -215,6 +215,9 @@ function integration_label(string $status): string
 
 function redirect(string $location, int $status = 303): never
 {
+    if (Auth::bearer() !== null) {
+        Mobile::answerRedirect($location);
+    }
     header('Location: ' . $location, true, $status);
     exit;
 }

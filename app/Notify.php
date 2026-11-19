@@ -101,6 +101,7 @@ final class Notify
                 }
                 $insert->execute(['uid' => $pid, 'ws' => $ws, 'k' => $kind, 't' => mb_substr($title, 0, 200), 'b' => mb_substr($body, 0, 500), 'url' => mb_substr($url, 0, 300), 'now' => Database::now()]);
                 $id = (int) $pdo->lastInsertId();
+                Push::toUser($pid, $title, $body, ['notification_id' => (string) $id, 'kind' => $kind, 'url' => $url, 'workspace_id' => (string) $ws]);
                 if (in_array($kind, explode(',', (string) $person['notify_off']), true)) {
                     continue;
                 }
