@@ -142,6 +142,63 @@ final class Passwords
         self::notice('/app/account', 'Name saved.');
     }
 
+    /**
+     * POST /app/account/delete: the person deletes their own account, for good. Needs their password and the
+     * word DELETE. Removes their workspace, their client workspaces and everything in them (channels, posts,
+     * media files, comments, stats, team), ends a paid plan first, and signs every device out.
+     */
+    public static function delete(): never
+    {
+        $person = Auth::member();
+        $uid = (int) $person['id'];
+        $back = '/app/account#delete';
+        if (RateLimiter::tooManyAttempts('pw-change', 'user:' . $uid, 8, 15)) {
+            self::notice($back, 'Too many attempts. Please wait 15 minutes and try again.');
+        }
+        $pdo = Database::connection();
+        $stmt = $pdo->prepare('SELECT email, password_hash FROM users WHERE id = :id AND parent_id IS NULL');
+        $stmt->execute(['id' => $uid]);
+        $row = $stmt->fetch();
+        if (!$row || !password_verify((string) ($_POST['current'] ?? ''), (string) $row['password_hash'])) {
+            RateLimiter::hit('pw-change', 'user:' . $uid);
+            self::notice($back, 'Your password isn’t right. Nothing was deleted.');
+        }
+        if (strtoupper(trim((string) ($_POST['confirm'] ?? ''))) !== 'DELETE') {
+            self::notice($back, 'Type DELETE to confirm. Nothing was deleted.');
+        }
+        if (($sub = Billing::current($uid)) !== null) {
+            try {
+                Billing::cancelNow($sub);
+            } catch (Throwable $e) {
+                error_log(sprintf('[%s] account delete: could not cancel plan for user %d: %s', gmdate('c'), $uid, $e->getMessage()));
+                self::notice($back, 'We couldn’t cancel your paid plan just now, so nothing was deleted. Cancel it under Plan & billing, or try again in a minute.');
+            }
+        }
+        // The account's own workspace and any client workspaces it owns.
+        $kids = $pdo->prepare('SELECT id FROM users WHERE parent_id = :id');
+        $kids->execute(['id' => $uid]);
+        $ids = array_merge([$uid], array_map('intval', $kids->fetchAll(PDO::FETCH_COLUMN)));
+        $in = implode(',', $ids);
+        foreach ($pdo->query("SELECT * FROM media WHERE user_id IN ($in)")->fetchAll() as $media) {
+            Media::discard($media); // the files on disk too
+        }
+        foreach ($pdo->query("SELECT logo_file FROM report_settings WHERE user_id IN ($in) AND logo_file IS NOT NULL AND logo_file <> ''")->fetchAll(PDO::FETCH_COLUMN) as $logo) {
+            @unlink(BASE_PATH . '/storage/branding/' . basename((string) $logo)); // report logos
+        }
+        // Everything else belongs to these rows and goes with them.
+        $pdo->exec("DELETE FROM users WHERE parent_id = $uid");
+        $pdo->prepare('DELETE FROM users WHERE id = :id')->execute(['id' => $uid]);
+        $pdo->prepare('DELETE FROM waitlist_signups WHERE email = :e')->execute(['e' => (string) $row['email']]);
+        $pdo->prepare('DELETE FROM team_invites WHERE email = :e')->execute(['e' => (string) $row['email']]);
+        error_log(sprintf('[%s] account %d deleted by its owner', gmdate('c'), $uid));
+        if (Auth::bearer() !== null) {
+            json_response(['status' => 'ok', 'deleted' => true, 'message' => 'Your account and everything in it were deleted.']);
+        }
+        Auth::logout();
+        flash('form', ['form' => 'login', 'status' => 'success', 'message' => 'Your account and everything in it were deleted.', 'errors' => [], 'old' => []]);
+        redirect('/login');
+    }
+
     private static function find(string $token): ?array
     {
         if (!preg_match('/^[a-f0-9]{48}$/', $token)) {

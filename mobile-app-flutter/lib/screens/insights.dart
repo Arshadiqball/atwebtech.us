@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../fx.dart';
+import '../motion.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -39,12 +41,12 @@ class _InsightsScreenState extends State<InsightsScreen> {
         final maxN = series.fold<int>(1, (m, s) => (s['n'] as int) > m ? s['n'] as int : m);
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 32),
-          children: [
+          children: staggered([
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(children: [
                 for (final e in _ranges.entries)
-                  Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(label: Text(e.value), selected: _range == e.key, onSelected: (_) { setState(() => _range = e.key); _loader.currentState?.reload(); })),
+                  Padding(padding: const EdgeInsets.only(right: 8), child: ChoiceChip(label: Text(e.value), selected: _range == e.key, onSelected: (_) { Fx.tap(); setState(() => _range = e.key); _loader.currentState?.reload(); })),
               ]),
             ),
             const SizedBox(height: 6),
@@ -61,7 +63,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
                       Text(card['label'].toString(), style: TextStyle(color: c.muted, fontSize: 12.5)),
                       const SizedBox(height: 2),
                       Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                        Text(card['value'].toString(), style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800, color: c.ink)),
+                        CountUp(card['value'].toString(), key: ValueKey('${card['label']}-$_range'), style: TextStyle(fontSize: 23, fontWeight: FontWeight.w800, color: c.ink)),
                         const SizedBox(width: 6),
                         if ((card['delta'] ?? '').toString().isNotEmpty)
                           Padding(padding: const EdgeInsets.only(bottom: 4), child: Text(card['delta'].toString(), style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: card['delta'].toString().startsWith('-') ? c.bad : c.greenInk))),
@@ -75,11 +77,14 @@ class _InsightsScreenState extends State<InsightsScreen> {
               child: SizedBox(
                 height: 110,
                 child: Row(crossAxisAlignment: CrossAxisAlignment.end, children: [
-                  for (final s in series)
+                  for (final (i, s) in series.indexed)
                     Expanded(
                       child: Tooltip(
                         message: '${s['day']}: ${s['n']}',
-                        child: Container(margin: const EdgeInsets.symmetric(horizontal: 1), height: 4 + 100 * (s['n'] as int) / maxN, decoration: BoxDecoration(color: (s['n'] as int) > 0 ? c.greenInk : c.line, borderRadius: const BorderRadius.vertical(top: Radius.circular(3)))),
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 1),
+                          child: GrowBar(key: ValueKey('${s['day']}-$_range'), index: i, height: 4 + 100 * (s['n'] as int) / maxN, color: (s['n'] as int) > 0 ? c.greenInk : c.line),
+                        ),
                       ),
                     ),
                 ]),
@@ -141,7 +146,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
             ],
             const SizedBox(height: 8),
             OutlinedButton.icon(onPressed: () => act(context, () async { await app.api.openWeb('/app/insights'); return {}; }), icon: const Icon(Icons.open_in_new, size: 17), label: const Text('Full insights and reports')),
-          ],
+          ]),
         );
       },
     );

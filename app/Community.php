@@ -616,13 +616,19 @@ final class Community
         if ($bearer !== null) {
             $headers[] = 'Authorization: Bearer ' . $bearer;
         }
+        // Tests point every network host at a local fake server (same switch as Posting). Ignored in production.
+        $test = config('app.is_production') ? '' : rtrim((string) Env::get('NETWORK_TEST_BASE', ''), '/');
+        if ($test !== '') {
+            $query = (string) parse_url($url, PHP_URL_QUERY);
+            $url = $test . '/' . parse_url($url, PHP_URL_HOST) . (string) parse_url($url, PHP_URL_PATH) . ($query !== '' ? '?' . $query : '');
+        }
         $ch = curl_init($url);
         $opts = [
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_TIMEOUT => 15,
             CURLOPT_CONNECTTIMEOUT => 8,
             CURLOPT_FOLLOWLOCATION => false,
-            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS,
+            CURLOPT_PROTOCOLS => CURLPROTO_HTTPS | ($test !== '' ? CURLPROTO_HTTP : 0),
         ];
         if ($method === 'POST') {
             $opts[CURLOPT_POST] = true;

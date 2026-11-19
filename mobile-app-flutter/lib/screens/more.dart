@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../api.dart';
+import '../fx.dart';
+import '../motion.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -16,7 +18,7 @@ Future<void> openWebPage(BuildContext context, String path, {bool external = fal
   try {
     await app.api.openWeb(path, external: external);
   } on ApiException catch (e) {
-    if (context.mounted) showSnack(context, e.message);
+    if (context.mounted) showSnack(context, e.message, error: true);
   }
 }
 
@@ -28,12 +30,15 @@ class MoreScreen extends StatelessWidget {
     final app = context.watch<AppState>();
     final c = context.c;
     void push(Widget screen) => Navigator.of(context).push(MaterialPageRoute(builder: (_) => screen));
-    Widget tile(IconData icon, String title, String? subtitle, VoidCallback onTap, {bool web = false}) => ListTile(
-          leading: Icon(icon),
+    Widget tile(IconData icon, String title, String? subtitle, VoidCallback action, {bool web = false}) => ListTile(
+          leading: Container(width: 34, height: 34, decoration: BoxDecoration(color: c.soft, borderRadius: BorderRadius.circular(10)), child: Icon(icon, size: 19, color: c.ink2)),
           title: Text(title, style: const TextStyle(fontWeight: FontWeight.w600)),
           subtitle: subtitle == null ? null : Text(subtitle, style: TextStyle(color: c.muted, fontSize: 12.5)),
           trailing: Icon(web ? Icons.open_in_new : Icons.chevron_right, size: web ? 18 : 24, color: c.muted),
-          onTap: onTap,
+          onTap: () {
+            Fx.tap();
+            action();
+          },
         );
     Widget group(List<Widget> children) => AppCard(
           padding: EdgeInsets.zero,
@@ -44,7 +49,7 @@ class MoreScreen extends StatelessWidget {
       onRefresh: app.refresh,
       child: ListView(
         padding: const EdgeInsets.fromLTRB(16, 14, 16, 32),
-        children: [
+        children: staggered([
           AppCard(
             child: Row(children: [
               CircleAvatar(radius: 22, backgroundColor: c.greenSoft, child: Text(((app.me['name'] ?? '?').toString().isEmpty ? '?' : app.me['name'].toString()[0]).toUpperCase(), style: TextStyle(color: c.greenInk, fontWeight: FontWeight.w800, fontSize: 18))),
@@ -67,6 +72,7 @@ class MoreScreen extends StatelessWidget {
                   title: Text(w['name'].toString(), style: const TextStyle(fontWeight: FontWeight.w600)),
                   subtitle: w['role'] == 'owner' ? (w['client'] == true ? const Text('Client workspace') : null) : Text(w['role'].toString()[0].toUpperCase() + w['role'].toString().substring(1)),
                   onTap: () async {
+                    Fx.tap();
                     await app.switchWorkspace((w['id'] as num).toInt());
                     if (context.mounted) showSnack(context, 'Switched to ${w['name']}.');
                   },
@@ -97,14 +103,29 @@ class MoreScreen extends StatelessWidget {
             tile(Icons.person_outline, 'Account', 'Name, password, email alerts', () => push(const AccountScreen())),
             tile(Icons.workspace_premium_outlined, 'Plan & billing', '${app.workspace['plan'] ?? 'Free'} plan', () => push(const PlanScreen())),
             ListTile(
-              leading: const Icon(Icons.dark_mode_outlined),
+              leading: Container(width: 34, height: 34, decoration: BoxDecoration(color: c.soft, borderRadius: BorderRadius.circular(10)), child: Icon(Icons.volume_up_outlined, size: 19, color: c.ink2)),
+              title: const Text('Sound effects', style: TextStyle(fontWeight: FontWeight.w600)),
+              subtitle: Text('Quiet when your phone is on silent', style: TextStyle(color: c.muted, fontSize: 12.5)),
+              trailing: Switch(
+                value: app.sound,
+                onChanged: (on) async {
+                  await app.setSound(on);
+                  if (on) Fx.toggle();
+                },
+              ),
+            ),
+            ListTile(
+              leading: Container(width: 34, height: 34, decoration: BoxDecoration(color: c.soft, borderRadius: BorderRadius.circular(10)), child: Icon(Icons.dark_mode_outlined, size: 19, color: c.ink2)),
               title: const Text('Theme', style: TextStyle(fontWeight: FontWeight.w600)),
               trailing: SegmentedButton<ThemeMode>(
                 showSelectedIcon: false,
                 style: const ButtonStyle(visualDensity: VisualDensity.compact),
                 segments: const [ButtonSegment(value: ThemeMode.light, label: Text('Light')), ButtonSegment(value: ThemeMode.system, label: Text('Auto')), ButtonSegment(value: ThemeMode.dark, label: Text('Dark'))],
                 selected: {app.themeMode},
-                onSelectionChanged: (s) => app.setTheme(s.first),
+                onSelectionChanged: (s) {
+                  Fx.toggle();
+                  app.setTheme(s.first);
+                },
               ),
             ),
             tile(Icons.help_outline, 'Help', null, () => app.api.openLink('https://atwebtech.us/faq'), web: true),
@@ -117,7 +138,7 @@ class MoreScreen extends StatelessWidget {
             icon: const Icon(Icons.logout, size: 18),
             label: const Text('Log out'),
           ),
-        ],
+        ]),
       ),
     );
   }
@@ -145,8 +166,11 @@ class ChannelsScreen extends StatelessWidget {
                 children: [
                   Callout('After connecting or reconnecting in the browser, pull down here to refresh.', tone: Tone.info, icon: Icons.info_outline),
                   const SizedBox(height: 12),
-                  for (final ch in app.channels)
-                    Padding(
+                  for (final (i, ch) in app.channels.indexed)
+                    Appear(
+                      key: ValueKey('ch-${ch['id']}'),
+                      index: i,
+                      child: Padding(
                       padding: const EdgeInsets.only(bottom: 10),
                       child: AppCard(
                         child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -176,7 +200,7 @@ class ChannelsScreen extends StatelessWidget {
                           ],
                         ]),
                       ),
-                    ),
+                    )),
                 ],
               ),
       ),
@@ -211,7 +235,7 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
           final canEdit = d['can_edit'] == true;
           return ListView(
             padding: const EdgeInsets.all(16),
-            children: [
+            children: staggered([
               AppCard(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Let atwebtech do the weekly work', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink)),
@@ -235,7 +259,7 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
                         Icon(switch (a['kind']) { 'feed' => Icons.rss_feed, 'plan' => Icons.auto_awesome, _ => Icons.quickreply_outlined }, color: c.greenInk),
                         const SizedBox(width: 10),
                         Expanded(child: Text(a['name'].toString(), style: TextStyle(fontWeight: FontWeight.w700, color: c.ink))),
-                        if (canEdit) Switch(value: a['enabled'] == true, onChanged: (_) => run({'action': 'toggle', 'id': a['id']})) else Pill(a['enabled'] == true ? 'On' : 'Paused', tone: a['enabled'] == true ? Tone.ok : Tone.neutral),
+                        if (canEdit) Switch(value: a['enabled'] == true, onChanged: (_) { Fx.toggle(); run({'action': 'toggle', 'id': a['id']}); }) else Pill(a['enabled'] == true ? 'On' : 'Paused', tone: a['enabled'] == true ? Tone.ok : Tone.neutral),
                       ]),
                       Text(a['summary'].toString(), style: TextStyle(color: c.ink2, fontSize: 13.5)),
                       const SizedBox(height: 4),
@@ -252,7 +276,7 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
                     ]),
                   ),
                 ),
-            ],
+            ]),
           );
         },
       ),
@@ -286,9 +310,9 @@ class _LibraryScreenState extends State<LibraryScreen> {
       await app.api.postForm('/app/library', {'action': 'keep', 'ids': ids});
       if (mounted) showSnack(context, ids.length == 1 ? 'Added to your library.' : '${ids.length} files added to your library.');
     } on ApiException catch (e) {
-      if (mounted) showSnack(context, e.message);
+      if (mounted) showSnack(context, e.message, error: true);
     } catch (_) {
-      if (mounted) showSnack(context, 'Couldn’t open your photos. Allow access in Settings and try again.');
+      if (mounted) showSnack(context, 'Couldn’t open your photos. Allow access in Settings and try again.', error: true);
     } finally {
       if (mounted) setState(() => _progress = null);
       await _loader.currentState?.reload();
@@ -349,9 +373,13 @@ class _LibraryScreenState extends State<LibraryScreen> {
               sliver: SliverGrid.count(
                 crossAxisCount: 3, crossAxisSpacing: 8, mainAxisSpacing: 8,
                 children: [
-                  for (final m in items)
-                    InkWell(
-                      onTap: () => _menu(m),
+                  for (final (i, m) in items.indexed)
+                    Appear(
+                      key: ValueKey('m-${m['id']}'),
+                      index: i,
+                      scale: true,
+                      child: InkWell(
+                      onTap: () { Fx.tap(); _menu(m); },
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(10),
                         child: Stack(fit: StackFit.expand, children: [
@@ -361,7 +389,7 @@ class _LibraryScreenState extends State<LibraryScreen> {
                           if (m['kept'] == true) const Positioned(top: 6, right: 6, child: Icon(Icons.bookmark, color: Colors.white, size: 18, shadows: [Shadow(blurRadius: 4)])),
                         ]),
                       ),
-                    ),
+                    )),
                 ],
               ),
             ),
@@ -394,6 +422,43 @@ class _AccountScreenState extends State<AccountScreen> {
     super.dispose();
   }
 
+  /// Asks for the password and the word DELETE, then deletes the account on the server and signs out.
+  Future<void> _deleteAccount() async {
+    final app = context.read<AppState>();
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+    final password = TextEditingController();
+    final word = TextEditingController();
+    final go = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Delete your account?'),
+        content: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+          const Text('Everything in it is deleted for good and you are signed out on every device.'),
+          const SizedBox(height: 14),
+          TextField(controller: password, obscureText: true, decoration: const InputDecoration(labelText: 'Your password')),
+          const SizedBox(height: 10),
+          TextField(controller: word, autocorrect: false, textCapitalization: TextCapitalization.characters, decoration: const InputDecoration(labelText: 'Type DELETE to confirm')),
+        ]),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), style: TextButton.styleFrom(foregroundColor: ctx.c.bad), child: const Text('Delete account')),
+        ],
+      ),
+    );
+    if (go != true || !mounted) return;
+    try {
+      final message = await app.deleteAccount(password.text, word.text);
+      // The app is back on the sign-in screen now: close this page and say what happened there.
+      navigator.popUntil((route) => route.isFirst);
+      // Once the sign-in screen has finished fading in (two screens can't share one message).
+      await Future<void>.delayed(const Duration(milliseconds: 700));
+      messenger.showSnackBar(SnackBar(content: Text(message)));
+    } on ApiException catch (e) {
+      if (mounted) showSnack(context, e.detail, error: true);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final app = context.read<AppState>();
@@ -412,7 +477,7 @@ class _AccountScreenState extends State<AccountScreen> {
           final kinds = (d['notifications'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
           return ListView(
             padding: const EdgeInsets.all(16),
-            children: [
+            children: staggered([
               const SectionTitle('Name'),
               Row(children: [
                 Expanded(child: TextField(controller: _name, maxLength: 60, decoration: const InputDecoration(counterText: ''))),
@@ -445,6 +510,7 @@ class _AccountScreenState extends State<AccountScreen> {
                       title: Text(k['label'].toString(), style: const TextStyle(fontSize: 14.5)),
                       value: _email!.contains(k['kind']),
                       onChanged: (on) async {
+                        Fx.toggle();
                         setState(() => on ? _email!.add(k['kind'].toString()) : _email!.remove(k['kind']));
                         await act(context, () => app.api.postForm('/app/account/notifications', {'email': _email!.toList()}), done: '');
                       },
@@ -463,7 +529,12 @@ class _AccountScreenState extends State<AccountScreen> {
                   onTap: () => openWebPage(context, '/app/account'),
                 ),
               ),
-            ],
+              const SectionTitle('Delete account'),
+              Text('Deletes your account, your workspace and any client workspaces, with every channel, post, photo, video and comment in them. A paid plan is cancelled first. It can’t be undone.', style: TextStyle(color: c.muted, fontSize: 13, height: 1.4)),
+              const SizedBox(height: 10),
+              Align(alignment: Alignment.centerLeft, child: SmallButton(label: 'Delete my account', icon: Icons.delete_forever_outlined, danger: true, onPressed: _deleteAccount)),
+              const SizedBox(height: 24),
+            ]),
           );
         },
       ),
@@ -492,7 +563,7 @@ class PlanScreen extends StatelessWidget {
           ].join(' · ');
           return ListView(
             padding: const EdgeInsets.all(16),
-            children: [
+            children: staggered([
               AppCard(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Current plan', style: TextStyle(color: c.muted, fontSize: 12.5)),
@@ -530,7 +601,7 @@ class PlanScreen extends StatelessWidget {
                 Text('Payments are handled on the atwebtech website by Stripe. It opens in your browser, already signed in. Pull down here afterwards to see your new plan.', style: TextStyle(color: c.muted, fontSize: 12.5, height: 1.4)),
               ] else
                 const Callout('Paid plans aren’t open for purchase yet.', tone: Tone.info, icon: Icons.info_outline),
-            ],
+            ]),
           );
         },
       ),

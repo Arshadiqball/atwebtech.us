@@ -63,13 +63,16 @@ HTML,
     ],
     'deletion' => [
         'title' => 'Data deletion',
-        'updated' => '17 October 2026',
+        'updated' => '19 November 2026',
         'body' => <<<'HTML'
 <p>You can ask atwebtech to delete the personal information we hold about you. This page explains how. It applies to your workspace account, the waitlist, contact messages, and information received when you connect a channel, including data from Google, YouTube, Facebook, Instagram, and Threads.</p>
 <p>atwebtech.us is operated by atwebtech, 3672 S 16th Ave, Tucson, AZ 85713, US.</p>
 
+<h2>Delete it yourself</h2>
+<p>Signed in, open Account and choose Delete account, on the website or in the atwebtech app (More, then Account). After you enter your password and confirm, your account, your workspace and everything in it are deleted at once, and a paid plan is cancelled first.</p>
+
 <h2>How to ask</h2>
-<p>Email <a href="mailto:info@atwebtech.us">info@atwebtech.us</a> or use the <a href="/contact">contact form</a>. Use the subject “Delete my data” and include the email address on your atwebtech account. If you connected a channel, include the account or Page name so we can find the right record.</p>
+<p>You can also ask us to do it. Email <a href="mailto:info@atwebtech.us">info@atwebtech.us</a> or use the <a href="/contact">contact form</a>. Use the subject “Delete my data” and include the email address on your atwebtech account. If you connected a channel, include the account or Page name so we can find the right record.</p>
 
 <h2>What we delete</h2>
 <ul>

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../api.dart';
+import '../fx.dart';
+import '../motion.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -37,6 +39,7 @@ class _AuthScreenState extends State<AuthScreen> {
     final app = context.read<AppState>();
     final email = _email.text.trim();
     if (email.isEmpty || _password.text.isEmpty) {
+      Fx.error();
       setState(() => _error = 'Enter your email and password.');
       return;
     }
@@ -44,15 +47,20 @@ class _AuthScreenState extends State<AuthScreen> {
     try {
       if (_signup) {
         await app.signup(email, _password.text);
+        Fx.play(Sfx.welcome);
       } else {
         final challenge = await app.login(email, _password.text);
         if (challenge != null && mounted) {
           await Navigator.of(context).push(MaterialPageRoute(builder: (_) => TwoFactorScreen(challenge: challenge)));
+        } else if (challenge == null) {
+          Fx.play(Sfx.welcome);
         }
       }
     } on ApiException catch (e) {
+      Fx.error();
       if (mounted) setState(() => _error = e.detail);
     } catch (_) {
+      Fx.error();
       if (mounted) setState(() => _error = 'Something went wrong on this phone. Please try again.');
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -82,7 +90,7 @@ class _AuthScreenState extends State<AuthScreen> {
       final res = await app.api.postJson('/api/mobile/forgot', {'email': email});
       if (mounted) showSnack(context, res['message']?.toString());
     } on ApiException catch (e) {
-      if (mounted) showSnack(context, e.message);
+      if (mounted) showSnack(context, e.message, error: true);
     }
   }
 
@@ -91,20 +99,28 @@ class _AuthScreenState extends State<AuthScreen> {
     final c = context.c;
     return Scaffold(
       backgroundColor: c.bg,
-      body: SafeArea(
-        child: Center(
+      body: Aurora(
+       child: SafeArea(
+        child: Stack(children: [
+         Center(
           child: SingleChildScrollView(
             padding: const EdgeInsets.all(24),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
-              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
-                Center(child: Image.asset('assets/logo.png', width: 64, height: 64)),
-                const SizedBox(height: 18),
-                Text(_signup ? 'Create your atwebtech account' : 'Log in to atwebtech', textAlign: TextAlign.center, style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800, letterSpacing: -0.5, color: c.ink)),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.stretch, children: staggered([
+                const Center(child: Brand(size: 40)),
+                const SizedBox(height: 28),
+                AnimatedSwitcher(
+                  duration: const Duration(milliseconds: 240),
+                  child: Text(_signup ? 'Create your atwebtech account' : 'Log in to atwebtech', key: ValueKey(_signup), textAlign: TextAlign.center, style: TextStyle(fontFamily: displayFont, fontSize: 24, fontWeight: FontWeight.w600, letterSpacing: -0.2, wordSpacing: 1.5, color: c.ink)),
+                ),
                 const SizedBox(height: 6),
                 Text(_signup ? 'Free for up to 3 channels. No credit card.' : 'Plan, schedule and publish from your phone.', textAlign: TextAlign.center, style: TextStyle(color: c.muted)),
                 const SizedBox(height: 26),
-                if (_error != null) ...[Callout(_error!), const SizedBox(height: 14)],
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 220), curve: Curves.easeOut, alignment: Alignment.topCenter,
+                  child: _error == null ? const SizedBox(width: double.infinity) : Padding(padding: const EdgeInsets.only(bottom: 14), child: Callout(_error!)),
+                ),
                 TextField(
                   controller: _email, keyboardType: TextInputType.emailAddress, autocorrect: false, textInputAction: TextInputAction.next,
                   autofillHints: [_signup ? AutofillHints.newUsername : AutofillHints.username],
@@ -120,12 +136,15 @@ class _AuthScreenState extends State<AuthScreen> {
                     suffixIcon: IconButton(icon: Icon(_show ? Icons.visibility_off_outlined : Icons.visibility_outlined), onPressed: () => setState(() => _show = !_show), tooltip: _show ? 'Hide password' : 'Show password'),
                   ),
                 ),
-                if (_signup) ...[
-                  const SizedBox(height: 10),
-                  _Rule('At least 8 characters', _long),
-                  _Rule('1 uppercase letter', _upper),
-                  _Rule('1 number or symbol', _symbol),
-                ],
+                AnimatedSize(
+                  duration: const Duration(milliseconds: 240), curve: Curves.easeOut, alignment: Alignment.topCenter,
+                  child: !_signup
+                      ? const SizedBox(width: double.infinity)
+                      : Padding(
+                          padding: const EdgeInsets.only(top: 10),
+                          child: Column(children: [_Rule('At least 8 characters', _long), _Rule('1 uppercase letter', _upper), _Rule('1 number or symbol', _symbol)]),
+                        ),
+                ),
                 const SizedBox(height: 18),
                 FilledButton(
                   onPressed: _busy ? null : _submit,
@@ -136,7 +155,7 @@ class _AuthScreenState extends State<AuthScreen> {
                 const SizedBox(height: 6),
                 Row(mainAxisAlignment: MainAxisAlignment.center, children: [
                   Text(_signup ? 'Already have an account?' : 'New to atwebtech?', style: TextStyle(color: c.ink2)),
-                  TextButton(onPressed: () => setState(() { _signup = !_signup; _error = null; }), child: Text(_signup ? 'Log in' : 'Create an account')),
+                  TextButton(onPressed: () { Fx.tap(); setState(() { _signup = !_signup; _error = null; }); }, child: Text(_signup ? 'Log in' : 'Create an account')),
                 ]),
                 if (_signup)
                   Padding(
@@ -149,10 +168,13 @@ class _AuthScreenState extends State<AuthScreen> {
                       Text('.', style: TextStyle(color: c.muted, fontSize: 12.5)),
                     ]),
                   ),
-              ]),
+              ])),
             ),
           ),
-        ),
+         ),
+         const Positioned(top: 4, right: 8, child: ThemeToggle()),
+        ]),
+       ),
       ),
     );
   }
@@ -169,7 +191,11 @@ class _Rule extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(children: [
-        Icon(met ? Icons.check_circle : Icons.circle_outlined, size: 16, color: met ? c.greenInk : c.muted),
+        AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) => ScaleTransition(scale: animation, child: child),
+          child: Icon(met ? Icons.check_circle : Icons.circle_outlined, key: ValueKey(met), size: 16, color: met ? c.greenInk : c.muted),
+        ),
         const SizedBox(width: 8),
         Text(text, style: TextStyle(color: met ? c.ink : c.muted, fontSize: 13)),
       ]),
@@ -201,8 +227,10 @@ class _TwoFactorScreenState extends State<TwoFactorScreen> {
     setState(() { _busy = true; _error = null; });
     try {
       await context.read<AppState>().confirmCode(widget.challenge, _code.text.trim());
+      Fx.play(Sfx.welcome);
       if (mounted) Navigator.of(context).pop();
     } on ApiException catch (e) {
+      Fx.error();
       if (mounted) setState(() => _error = e.message);
     } finally {
       if (mounted) setState(() => _busy = false);

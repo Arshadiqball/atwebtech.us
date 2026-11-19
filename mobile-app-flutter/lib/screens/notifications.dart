@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../motion.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -105,7 +106,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 'weekly_digest' => Icons.insights_outlined,
                 _ => Icons.notifications_none_rounded,
               };
-              return AppCard(
+              return Appear(
+                key: ValueKey('n-${n['id']}'),
+                index: i,
+                child: AppCard(
                 accent: unread ? c.greenInk : null,
                 padding: const EdgeInsets.all(14),
                 onTap: () => _open(n),
@@ -121,7 +125,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ]),
                   ),
                 ]),
-              );
+              ));
             },
           );
         },

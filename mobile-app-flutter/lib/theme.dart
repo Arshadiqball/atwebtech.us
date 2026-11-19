@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart' show CupertinoPageTransitionsBuilder;
 import 'package:flutter/material.dart';
 
 /// Colors that mirror the website's theme tokens (public/assets/css/theme.css).
@@ -32,9 +33,24 @@ class AppColors extends ThemeExtension<AppColors> {
   @override
   AppColors copyWith() => this;
 
+  /// Blends every color, so switching between light and dark fades instead of snapping.
   @override
-  AppColors lerp(ThemeExtension<AppColors>? other, double t) => other is AppColors && t > 0.5 ? other : this;
+  AppColors lerp(ThemeExtension<AppColors>? other, double t) {
+    if (other is! AppColors) return this;
+    Color m(Color a, Color b) => Color.lerp(a, b, t)!;
+    return AppColors(
+      bg: m(bg, other.bg), canvas: m(canvas, other.canvas), panel: m(panel, other.panel), soft: m(soft, other.soft), line: m(line, other.line),
+      ink: m(ink, other.ink), ink2: m(ink2, other.ink2), muted: m(muted, other.muted),
+      green: m(green, other.green), brandInk: m(brandInk, other.brandInk), greenInk: m(greenInk, other.greenInk), greenSoft: m(greenSoft, other.greenSoft),
+      bad: m(bad, other.bad), badBg: m(badBg, other.badBg), badInk: m(badInk, other.badInk), warnBg: m(warnBg, other.warnBg), warnInk: m(warnInk, other.warnInk),
+      infoBg: m(infoBg, other.infoBg), infoInk: m(infoInk, other.infoInk),
+    );
+  }
 }
+
+/// The website panel's typefaces: Figtree for text, Plus Jakarta Sans for the wordmark and headings.
+const bodyFont = 'Figtree';
+const displayFont = 'Plus Jakarta Sans';
 
 extension AppTheme on BuildContext {
   AppColors get c => Theme.of(this).extension<AppColors>()!;
@@ -57,13 +73,19 @@ ThemeData buildTheme(Brightness brightness) {
   return ThemeData(
     useMaterial3: true,
     brightness: brightness,
+    fontFamily: bodyFont,
     colorScheme: scheme,
     scaffoldBackgroundColor: c.canvas,
     extensions: [c],
+    // Screens slide in the way each phone's own apps do (iOS keeps its swipe-back).
+    pageTransitionsTheme: const PageTransitionsTheme(builders: {
+      TargetPlatform.android: FadeForwardsPageTransitionsBuilder(),
+      TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+    }),
     dividerTheme: DividerThemeData(color: c.line, thickness: 1, space: 1),
     appBarTheme: AppBarTheme(
-      backgroundColor: c.panel, foregroundColor: c.ink, elevation: 0, scrolledUnderElevation: 0.5, centerTitle: false,
-      titleTextStyle: TextStyle(color: c.ink, fontSize: 20, fontWeight: FontWeight.w700, letterSpacing: -0.3),
+      backgroundColor: c.panel, foregroundColor: c.ink, elevation: 0, scrolledUnderElevation: 0.5, centerTitle: false, surfaceTintColor: Colors.transparent,
+      titleTextStyle: TextStyle(fontFamily: displayFont, color: c.ink, fontSize: 20, fontWeight: FontWeight.w600, letterSpacing: -0.4),
     ),
     navigationBarTheme: NavigationBarThemeData(
       backgroundColor: c.panel, indicatorColor: c.greenSoft, elevation: 0, height: 66,
@@ -105,6 +127,22 @@ ThemeData buildTheme(Brightness brightness) {
     bottomSheetTheme: BottomSheetThemeData(backgroundColor: c.panel, surfaceTintColor: Colors.transparent, showDragHandle: true),
     listTileTheme: ListTileThemeData(iconColor: c.ink2, textColor: c.ink),
     progressIndicatorTheme: ProgressIndicatorThemeData(color: c.greenInk),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? c.brandInk : c.muted),
+      trackColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? c.green : c.soft),
+      trackOutlineColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? c.green : c.line),
+    ),
+    segmentedButtonTheme: SegmentedButtonThemeData(
+      style: ButtonStyle(
+        backgroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? c.greenSoft : c.panel),
+        foregroundColor: WidgetStateProperty.resolveWith((s) => s.contains(WidgetState.selected) ? c.greenInk : c.ink2),
+        side: WidgetStatePropertyAll(BorderSide(color: c.line)),
+        textStyle: const WidgetStatePropertyAll(TextStyle(fontWeight: FontWeight.w600, fontSize: 13)),
+      ),
+    ),
+    datePickerTheme: DatePickerThemeData(backgroundColor: c.panel, surfaceTintColor: Colors.transparent),
+    timePickerTheme: TimePickerThemeData(backgroundColor: c.panel),
+    popupMenuTheme: PopupMenuThemeData(color: c.panel, surfaceTintColor: Colors.transparent),
   );
 }
 

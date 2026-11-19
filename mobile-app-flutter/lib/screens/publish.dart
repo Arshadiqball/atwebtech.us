@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../fx.dart';
+import '../motion.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -18,8 +20,13 @@ class _PublishScreenState extends State<PublishScreen> with SingleTickerProvider
   static const _tabs = ['queue', 'drafts', 'approvals', 'failed', 'sent'];
   static const _labels = ['Queue', 'Drafts', 'Approvals', 'Failed', 'Sent'];
   static const _countKeys = ['queue', 'drafts', 'review', 'failed', 'sent'];
-  late final TabController _controller = TabController(length: _tabs.length, vsync: this);
+  late final TabController _controller = TabController(length: _tabs.length, vsync: this)..addListener(_remember);
   int _rev = -1;
+
+  /// Keeps the shell's idea of the open tab in step with swipes and taps.
+  void _remember() {
+    if (!_controller.indexIsChanging) context.read<ShellNav>().publishTab = _tabs[_controller.index];
+  }
 
   @override
   void didChangeDependencies() {
@@ -28,7 +35,7 @@ class _PublishScreenState extends State<PublishScreen> with SingleTickerProvider
     if (nav.publishRev != _rev) {
       _rev = nav.publishRev;
       final index = _tabs.indexOf(nav.publishTab);
-      if (index >= 0 && index != _controller.index) _controller.index = index;
+      if (index >= 0 && index != _controller.index) _controller.animateTo(index);
     }
   }
 
@@ -48,6 +55,7 @@ class _PublishScreenState extends State<PublishScreen> with SingleTickerProvider
         color: c.panel,
         child: TabBar(
           controller: _controller,
+          onTap: (_) => Fx.tap(),
           isScrollable: true,
           tabAlignment: TabAlignment.start,
           tabs: [
@@ -56,7 +64,7 @@ class _PublishScreenState extends State<PublishScreen> with SingleTickerProvider
                 child: Row(mainAxisSize: MainAxisSize.min, children: [
                   Text(_labels[i]),
                   const SizedBox(width: 6),
-                  Pill('${app.count(_countKeys[i])}', tone: _tabs[i] == 'failed' && app.count('failed') > 0 ? Tone.bad : (_tabs[i] == 'approvals' && app.count('review') > 0 ? Tone.warn : Tone.neutral)),
+                  Pill('${app.count(_countKeys[i])}', key: ValueKey('count-${_tabs[i]}-${app.count(_countKeys[i])}'), tone: _tabs[i] == 'failed' && app.count('failed') > 0 ? Tone.bad : (_tabs[i] == 'approvals' && app.count('review') > 0 ? Tone.warn : Tone.neutral)),
                 ]),
               ),
           ],
@@ -91,10 +99,25 @@ class _PostListState extends State<_PostList> with AutomaticKeepAliveClientMixin
     return (res['posts'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
   }
 
+  int _dataRev = 0;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final rev = context.watch<ShellNav>().dataRev;
+    if (rev != _dataRev) {
+      _dataRev = rev;
+      _loader.currentState?.reload();
+    }
+  }
+
   Future<void> _after(bool ok) async {
     if (!ok || !mounted) return;
+    final nav = context.read<ShellNav>();
     await context.read<AppState>().refresh();
     await _loader.currentState?.reload();
+    _dataRev = nav.dataRev + 1; // this tab is already up to date
+    nav.postsChanged();
   }
 
   Future<void> _post(Map<String, dynamic> fields, {String path = '/app/posts'}) async {
@@ -132,7 +155,7 @@ class _PostListState extends State<_PostList> with AutomaticKeepAliveClientMixin
       await context.read<AppState>().refresh();
       if (mounted && id != null) await Shell.compose(context, postId: id);
     } catch (e) {
-      if (mounted) showSnack(context, e.toString());
+      if (mounted) showSnack(context, e.toString(), error: true);
     }
   }
 
@@ -176,7 +199,10 @@ class _PostListState extends State<_PostList> with AutomaticKeepAliveClientMixin
               ]);
             }
             final p = posts[index - (tab == 'failed' ? 1 : 0)];
-            return _PostCard(
+            return Appear(
+              key: ValueKey('post-${p['id']}'),
+              index: index,
+              child: _PostCard(
               post: p,
               tab: tab,
               actions: [
@@ -195,7 +221,7 @@ class _PostListState extends State<_PostList> with AutomaticKeepAliveClientMixin
                   ),
                 if (tab != 'sent' && (app.canSchedule || tab == 'drafts')) IconButton(tooltip: 'Delete', onPressed: () => _delete(p), icon: Icon(Icons.delete_outline, color: c.muted)),
               ],
-            );
+            ));
           },
         );
       },

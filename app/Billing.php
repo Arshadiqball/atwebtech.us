@@ -147,6 +147,12 @@ final class Billing
         self::store($updated);
     }
 
+    /** Ends a subscription at once (used when a person deletes their account), so Stripe stops charging. */
+    public static function cancelNow(array $sub): void
+    {
+        self::store(self::api('DELETE', '/v1/subscriptions/' . rawurlencode((string) $sub['stripe_subscription_id'])));
+    }
+
     /** Stripe customer portal: card, invoices, cancel. */
     public static function portalUrl(array $user): string
     {
@@ -405,6 +411,9 @@ final class Billing
             curl_setopt($ch, CURLOPT_URL, $url);
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($params));
+            if ($method !== 'POST') {
+                curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+            }
         }
         $body = curl_exec($ch);
         $status = (int) curl_getinfo($ch, CURLINFO_RESPONSE_CODE);

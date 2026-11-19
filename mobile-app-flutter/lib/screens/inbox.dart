@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../api.dart';
+import '../fx.dart';
+import '../motion.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -70,7 +72,7 @@ class _InboxScreenState extends State<InboxScreen> {
                     child: ChoiceChip(
                       label: Text('${e.value} ${counts[e.key] ?? 0}'),
                       selected: _state == e.key,
-                      onSelected: (_) { setState(() => _state = e.key); _loader.currentState?.reload(); },
+                      onSelected: (_) { Fx.tap(); setState(() => _state = e.key); _loader.currentState?.reload(); },
                     ),
                   ),
                 ActionChip(avatar: const Icon(Icons.refresh, size: 16), label: const Text('Check now'), onPressed: () => _do({'action': 'refresh'})),
@@ -80,8 +82,11 @@ class _InboxScreenState extends State<InboxScreen> {
             const SizedBox(height: 12),
             if (comments.isEmpty)
               SizedBox(height: 320, child: EmptyView(icon: Icons.check_circle_outline, title: _state == 'open' ? 'You’re all caught up' : 'Nothing here', text: _state == 'open' ? 'Nothing is waiting for an answer.' : null)),
-            for (final cm in comments)
-              Padding(
+            for (final (i, cm) in comments.indexed)
+              Appear(
+                key: ValueKey('comment-${cm['id']}-$_state'),
+                index: i,
+                child: Padding(
                 padding: const EdgeInsets.only(bottom: 10),
                 child: AppCard(
                   child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
@@ -112,7 +117,7 @@ class _InboxScreenState extends State<InboxScreen> {
                     ]),
                   ]),
                 ),
-              ),
+              )),
             if (data['more'] == true) Center(child: Text('Showing the latest 40. Answer some to see older ones.', style: TextStyle(color: c.muted, fontSize: 12.5))),
           ],
         );
@@ -170,9 +175,12 @@ class _ReplySheetState extends State<_ReplySheet> {
       if (!mounted) return;
       // The website reports a refused reply as a notice, keeping the text in the box.
       if (res['draft'] is Map || !message.startsWith('Reply sent')) {
+        Fx.error();
         setState(() => _error = message);
       } else {
-        showSnack(context, message);
+        Fx.send();
+        celebrate(context, 'Reply sent', icon: Icons.reply_rounded);
+        showSnack(context, message, quiet: true);
         Navigator.of(context).pop(true);
       }
     } on ApiException catch (e) {

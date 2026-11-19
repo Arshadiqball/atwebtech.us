@@ -5,6 +5,7 @@ import 'push.dart';
 import 'screens/auth.dart';
 import 'screens/notifications.dart';
 import 'screens/shell.dart';
+import 'screens/splash.dart';
 import 'state.dart';
 import 'theme.dart';
 
@@ -36,6 +37,7 @@ class _AtwebtechAppState extends State<AtwebtechApp> with WidgetsBindingObserver
 
   void _onState() {
     // Start push once someone is signed in.
+    if (!_app.signedIn) _nav.reset();
     if (_app.signedIn) {
       Push.start(_app, _messenger, () => _navigator.currentState?.push(MaterialPageRoute(builder: (_) => const NotificationsScreen())));
     }
@@ -67,27 +69,27 @@ class _AtwebtechAppState extends State<AtwebtechApp> with WidgetsBindingObserver
           theme: buildTheme(Brightness.light),
           darkTheme: buildTheme(Brightness.dark),
           themeMode: app.themeMode,
-          home: !app.ready
-              ? const _Splash()
-              : (!app.signedIn
-                  ? const AuthScreen()
-                  : (app.boot == null ? _Offline(message: app.loadError, onRetry: app.refresh, onLogout: app.logout) : const Shell())),
+          themeAnimationDuration: const Duration(milliseconds: 320),
+          themeAnimationCurve: Curves.easeInOut,
+          // Splash, sign-in and the app cross-fade into each other.
+          home: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 380),
+            switchInCurve: Curves.easeOut,
+            child: !app.ready
+                ? const SplashScreen(key: ValueKey('splash'))
+                : (!app.signedIn
+                    ? const AuthScreen(key: ValueKey('auth'))
+                    : (app.boot == null ? _Offline(key: const ValueKey('offline'), message: app.loadError, onRetry: app.refresh, onLogout: app.logout) : const Shell(key: ValueKey('shell')))),
+          ),
         ),
       ),
     );
   }
 }
 
-class _Splash extends StatelessWidget {
-  const _Splash();
-
-  @override
-  Widget build(BuildContext context) => Scaffold(backgroundColor: context.c.bg, body: Center(child: Image.asset('assets/logo.png', width: 72, height: 72)));
-}
-
 /// Signed in, but the first load failed (no connection, server down).
 class _Offline extends StatelessWidget {
-  const _Offline({required this.message, required this.onRetry, required this.onLogout});
+  const _Offline({super.key, required this.message, required this.onRetry, required this.onLogout});
   final String? message;
   final Future<void> Function() onRetry;
   final Future<void> Function() onLogout;

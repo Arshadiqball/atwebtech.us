@@ -203,4 +203,19 @@ $regenErrors = $regen['errors'] ?? [];
     </div>
 <?php endif; ?>
   </section>
+
+  <section class="set-block" id="delete" aria-labelledby="del-title">
+    <form class="set-row set-row--stack" action="/app/account/delete" method="post" autocomplete="off">
+      <input type="hidden" name="_token" value="<?= e($token) ?>">
+      <div>
+        <h2 id="del-title">Delete account</h2>
+        <p>This deletes your account, your workspace and any client workspaces, with every channel, post, photo, video, comment and report in them. A paid plan is cancelled first. It can’t be undone.</p>
+        <div class="rb-grid">
+          <label class="bio-field"><span>Your password</span><input class="idea-input" type="password" name="current" required autocomplete="current-password"></label>
+          <label class="bio-field"><span>Type DELETE to confirm</span><input class="idea-input" type="text" name="confirm" required maxlength="10" autocomplete="off" spellcheck="false"></label>
+        </div>
+      </div>
+      <button type="submit" class="ws-btn ws-btn--danger">Delete my account</button>
+    </form>
+  </section>
 </div>

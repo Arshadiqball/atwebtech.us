@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 import 'api.dart';
+import 'fx.dart';
 
 /// App-wide state: who is signed in, which workspace is open, and the data the shell shows.
 class AppState extends ChangeNotifier {
@@ -17,6 +18,7 @@ class AppState extends ChangeNotifier {
   bool ready = false;
   Map<String, dynamic>? boot;
   ThemeMode themeMode = ThemeMode.system;
+  bool sound = true;
   String? loadError;
 
   bool get signedIn => api.token != null;
@@ -43,16 +45,22 @@ class AppState extends ChangeNotifier {
   DateTime get workspaceNow => DateTime.now().toUtc().add(Duration(minutes: (workspace['tz_offset_minutes'] as num?)?.toInt() ?? 0));
 
   Future<void> start() async {
+    // The splash stays for a moment even when loading is instant, so it never just flashes by.
+    // Counted from the moment the splash is really on screen, not from when the app began loading.
+    final splash = WidgetsBinding.instance.waitUntilFirstFrameRasterized.then((_) => Future<void>.delayed(const Duration(milliseconds: 1600)));
     try {
       api.token = await _storage.read(key: 'token');
       final ws = await _storage.read(key: 'workspace');
       api.workspaceId = ws == null ? null : int.tryParse(ws);
       final theme = await _storage.read(key: 'theme');
       themeMode = switch (theme) { 'light' => ThemeMode.light, 'dark' => ThemeMode.dark, _ => ThemeMode.system };
+      sound = await _storage.read(key: 'sound') != 'off';
+      Fx.enabled = sound;
     } catch (_) {}
     if (signedIn) {
       await refresh(silent: true);
     }
+    await splash;
     ready = true;
     notifyListeners();
   }
@@ -121,6 +129,15 @@ class AppState extends ChangeNotifier {
     await _signedOut();
   }
 
+  /// Deletes the account for good (Account → Delete account). Throws an [ApiException] with the reason when
+  /// the server refuses (wrong password, a paid plan that could not be cancelled).
+  Future<String> deleteAccount(String password, String confirm) async {
+    final res = await api.postForm('/app/account/delete', {'current': password, 'confirm': confirm});
+    if (res['deleted'] != true) throw ApiException(422, (res['message'] ?? 'Nothing was deleted.').toString());
+    await _signedOut();
+    return (res['message'] ?? 'Your account was deleted.').toString();
+  }
+
   Future<void> _signedOut() async {
     if (api.token == null) return;
     api.token = null;
@@ -144,5 +161,13 @@ class AppState extends ChangeNotifier {
     themeMode = mode;
     notifyListeners();
     await _save('theme', switch (mode) { ThemeMode.light => 'light', ThemeMode.dark => 'dark', _ => 'system' });
+  }
+
+  /// Turns the app's sound effects on or off (More → Sound effects).
+  Future<void> setSound(bool on) async {
+    sound = on;
+    Fx.enabled = on;
+    notifyListeners();
+    await _save('sound', on ? 'on' : 'off');
   }
 }

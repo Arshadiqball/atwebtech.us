@@ -373,6 +373,7 @@ return [
     ['POST', '/app/feeds', [Feeds::class, 'handle']],
     ['POST', '/app/account/password', [Passwords::class, 'change']],
     ['POST', '/app/account/profile', [Passwords::class, 'profile']],
+    ['POST', '/app/account/delete', [Passwords::class, 'delete']],
     ['POST', '/app/account/notifications', [Notify::class, 'preferences']],
     ['GET', '/app/notifications', static function (): void {
         Workspace::render('notifications', 'workspace/notifications', 'Notifications', static fn (): array => Notify::page((array) Auth::person()));

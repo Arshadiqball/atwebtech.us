@@ -5,6 +5,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
 import '../api.dart';
+import '../fx.dart';
+import '../motion.dart';
 import '../state.dart';
 import '../theme.dart';
 import '../widgets.dart';
@@ -178,9 +180,12 @@ class _ComposerScreenState extends State<ComposerScreen> {
       final network = _picked.isEmpty ? '' : _picked.first['network'] as String;
       final res = await app.api.postForm('/app/ai/generate', {'prompt': prompt.text.trim(), 'network': network});
       final text = (res['text'] ?? '').toString();
-      if (mounted && text.isNotEmpty) setState(() => _body.text = _body.text.trim().isEmpty ? text : '${_body.text.trimRight()}\n\n$text');
+      if (mounted && text.isNotEmpty) {
+        Fx.success();
+        setState(() => _body.text = _body.text.trim().isEmpty ? text : '${_body.text.trimRight()}\n\n$text');
+      }
     } on ApiException catch (e) {
-      if (mounted) showSnack(context, e.message);
+      if (mounted) showSnack(context, e.message, error: true);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -207,6 +212,7 @@ class _ComposerScreenState extends State<ComposerScreen> {
   Future<void> _submit(String action) async {
     final app = context.read<AppState>();
     if (_targets.isEmpty) {
+      Fx.error();
       setState(() => _error = 'Choose at least one channel.');
       return;
     }
@@ -225,9 +231,12 @@ class _ComposerScreenState extends State<ComposerScreen> {
         'repeat': _repeat,
       });
       if (!mounted) return;
-      showSnack(context, res['message']?.toString());
-      Navigator.of(context).pop(true);
+      Fx.send();
+      celebrate(context, switch (action) { 'draft' => 'Draft saved', 'review' => 'Sent for approval', _ => 'Scheduled' }, icon: action == 'draft' ? Icons.edit_note_rounded : Icons.check_rounded);
+      showSnack(context, res['message']?.toString(), quiet: true);
+      Navigator.of(context).pop(action);
     } on ApiException catch (e) {
+      Fx.error();
       if (mounted) setState(() => _error = e.detail);
     } finally {
       if (mounted) setState(() => _busy = false);
@@ -251,12 +260,15 @@ class _ComposerScreenState extends State<ComposerScreen> {
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? const Skeleton(rows: 3)
           : SafeArea(
               child: Column(children: [
                 Expanded(
                   child: ListView(padding: const EdgeInsets.all(16), children: [
-                    if (_error != null) ...[Callout(_error!), const SizedBox(height: 12)],
+                    AnimatedSize(
+                      duration: const Duration(milliseconds: 220), curve: Curves.easeOut, alignment: Alignment.topCenter,
+                      child: _error == null ? const SizedBox(width: double.infinity) : Padding(padding: const EdgeInsets.only(bottom: 12), child: Callout(_error!)),
+                    ),
                     Text('Post to', style: TextStyle(color: c.ink2, fontWeight: FontWeight.w700, fontSize: 13)),
                     const SizedBox(height: 8),
                     if (app.channels.isEmpty)
@@ -269,6 +281,8 @@ class _ComposerScreenState extends State<ComposerScreen> {
                             label: Text(ch['name'].toString(), overflow: TextOverflow.ellipsis),
                             selected: _targets.contains('c:${ch['id']}'),
                             onSelected: (on) => setState(() {
+                              Fx.toggle();
+                              _error = null;
                               if (_editing) _targets.clear();
                               on ? _targets.add('c:${ch['id']}') : _targets.remove('c:${ch['id']}');
                             }),
@@ -288,7 +302,7 @@ class _ComposerScreenState extends State<ComposerScreen> {
                       decoration: const InputDecoration(hintText: 'What do you want to share?', alignLabelWithHint: true),
                     ),
                     const SizedBox(height: 6),
-                    Align(alignment: Alignment.centerRight, child: Text(left >= 0 ? '$left left' : '${-left} over the limit', style: TextStyle(color: left < 0 ? c.bad : c.muted, fontSize: 12.5, fontWeight: left < 0 ? FontWeight.w700 : FontWeight.w400))),
+                    Align(alignment: Alignment.centerRight, child: AnimatedDefaultTextStyle(duration: const Duration(milliseconds: 180), style: TextStyle(color: left < 0 ? c.bad : (left < 20 ? c.warnInk : c.muted), fontSize: 12.5, fontWeight: left < 20 ? FontWeight.w700 : FontWeight.w400), child: Text(left >= 0 ? '$left left' : '${-left} over the limit'))),
                     const SizedBox(height: 10),
                     if (uploading) ...[
                       LinearProgressIndicator(value: _progress == 0 ? null : _progress, borderRadius: BorderRadius.circular(4)),

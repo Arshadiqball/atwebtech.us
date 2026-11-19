@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import 'api.dart';
+import 'fx.dart';
+import 'motion.dart';
 import 'state.dart';
 import 'theme.dart';
 
 /// A card on the page canvas.
-class AppCard extends StatelessWidget {
+class AppCard extends StatefulWidget {
   const AppCard({super.key, required this.child, this.padding = const EdgeInsets.all(16), this.accent, this.onTap});
   final Widget child;
   final EdgeInsets padding;
@@ -14,8 +16,20 @@ class AppCard extends StatelessWidget {
   final VoidCallback? onTap;
 
   @override
+  State<AppCard> createState() => _AppCardState();
+}
+
+class _AppCardState extends State<AppCard> {
+  bool _pressed = false;
+
+  @override
   Widget build(BuildContext context) {
     final c = context.c;
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    final child = widget.child;
+    final padding = widget.padding;
+    final accent = widget.accent;
+    final onTap = widget.onTap;
     // A Material (not a colored Container) so list rows and taps inside the card can show their ink.
     // The colored edge needs the row to be as tall as the content; plain cards skip that extra layout pass.
     final content = accent == null
@@ -26,11 +40,72 @@ class AppCard extends StatelessWidget {
               Expanded(child: Padding(padding: padding, child: child)),
             ]),
           );
-    return Material(
-      color: c.panel,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: c.line)),
-      clipBehavior: Clip.antiAlias,
-      child: onTap == null ? content : InkWell(onTap: onTap, child: content),
+    final card = DecoratedBox(
+      // A soft lift in light mode. In dark mode the lighter panel on the darker canvas does that job.
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: dark ? null : [BoxShadow(color: c.ink.withValues(alpha: 0.05), blurRadius: 14, offset: const Offset(0, 4))],
+      ),
+      child: Material(
+        color: c.panel,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14), side: BorderSide(color: c.line)),
+        clipBehavior: Clip.antiAlias,
+        child: onTap == null
+            ? content
+            : InkWell(
+                onTap: () {
+                  Fx.tap();
+                  onTap();
+                },
+                onHighlightChanged: (down) => setState(() => _pressed = down),
+                child: content,
+              ),
+      ),
+    );
+    // Cards you can tap give a little under the finger.
+    return onTap == null ? card : AnimatedScale(scale: _pressed ? 0.975 : 1, duration: const Duration(milliseconds: 120), curve: Curves.easeOut, child: card);
+  }
+}
+
+/// The atwebtech logo as the website panel shows it: the mark with the wordmark beside it.
+class Brand extends StatelessWidget {
+  const Brand({super.key, this.size = 28, this.color});
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      label: 'atwebtech',
+      excludeSemantics: true,
+      child: Row(mainAxisSize: MainAxisSize.min, children: [
+        // On dark backgrounds the mark's dark half is drawn light, so the whole letter stays readable.
+        Image.asset(Theme.of(context).brightness == Brightness.dark ? 'assets/logo-dark.png' : 'assets/logo.png', width: size, height: size, filterQuality: FilterQuality.medium),
+        SizedBox(width: size * 0.27),
+        Text('atwebtech', style: TextStyle(fontFamily: displayFont, fontWeight: FontWeight.w600, fontSize: size * 0.77, letterSpacing: -size * 0.027, height: 1, color: color ?? context.c.ink)),
+      ]),
+    );
+  }
+}
+
+/// The atwebtech mark on a light tile, so its dark half stays visible on the dark theme.
+class LogoTile extends StatelessWidget {
+  const LogoTile({super.key, this.size = 76, this.glow = true});
+  final double size;
+  final bool glow;
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return Container(
+      width: size, height: size,
+      padding: EdgeInsets.all(size * 0.16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(size * 0.28),
+        boxShadow: glow ? [BoxShadow(color: context.c.green.withValues(alpha: dark ? 0.22 : 0.5), blurRadius: 28, offset: const Offset(0, 8))] : null,
+      ),
+      child: Image.asset('assets/logo.png'),
     );
   }
 }
@@ -129,11 +204,11 @@ class EmptyView extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
-          Container(width: 64, height: 64, decoration: BoxDecoration(color: c.greenSoft, borderRadius: BorderRadius.circular(18)), child: Icon(icon, color: c.greenInk, size: 30)),
+          Appear(scale: true, child: Container(width: 64, height: 64, decoration: BoxDecoration(color: c.greenSoft, borderRadius: BorderRadius.circular(18)), child: Icon(icon, color: c.greenInk, size: 30))),
           const SizedBox(height: 16),
-          Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: c.ink)),
-          if (text != null) ...[const SizedBox(height: 6), Text(text!, textAlign: TextAlign.center, style: TextStyle(color: c.muted, height: 1.4))],
-          if (action != null) ...[const SizedBox(height: 18), FilledButton(onPressed: onAction, child: Text(action!))],
+          Appear(index: 1, child: Text(title, textAlign: TextAlign.center, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: c.ink))),
+          if (text != null) ...[const SizedBox(height: 6), Appear(index: 2, child: Text(text!, textAlign: TextAlign.center, style: TextStyle(color: c.muted, height: 1.4)))],
+          if (action != null) ...[const SizedBox(height: 18), Appear(index: 3, child: FilledButton(onPressed: onAction, child: Text(action!)))],
         ]),
       ),
     );
@@ -163,6 +238,7 @@ class LoadedState<T> extends State<Loaded<T>> {
   T? _data;
   String? _error;
   bool _loading = true;
+  int _arrivals = 0;
 
   @override
   void initState() {
@@ -174,7 +250,12 @@ class LoadedState<T> extends State<Loaded<T>> {
     try {
       final data = await widget.load();
       if (!mounted) return;
-      setState(() { _data = data; _error = null; _loading = false; });
+      setState(() {
+        if (_data == null) _arrivals++; // the first content plays its entrance
+        _data = data;
+        _error = null;
+        _loading = false;
+      });
     } on ApiException catch (e) {
       if (!mounted) return;
       setState(() { _error = e.message; _loading = false; });
@@ -183,17 +264,47 @@ class LoadedState<T> extends State<Loaded<T>> {
 
   @override
   Widget build(BuildContext context) {
-    if (_loading && _data == null) return const Center(child: CircularProgressIndicator());
-    if (_error != null && _data == null) return ErrorView(message: _error!, onRetry: () { setState(() => _loading = true); reload(); });
-    return RefreshIndicator(onRefresh: reload, child: widget.builder(context, _data as T, reload));
+    final Widget child;
+    if (_loading && _data == null) {
+      child = const Skeleton(key: ValueKey('loading'));
+    } else if (_error != null && _data == null) {
+      child = ErrorView(key: const ValueKey('error'), message: _error!, onRetry: () { setState(() => _loading = true); reload(); });
+    } else {
+      child = AppearScope(
+        key: ValueKey(_arrivals),
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await reload();
+            Fx.pop();
+          },
+          child: widget.builder(context, _data as T, reload),
+        ),
+      );
+    }
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 260),
+      switchInCurve: Curves.easeOut,
+      layoutBuilder: (current, previous) => Stack(alignment: Alignment.topCenter, fit: StackFit.expand, children: [...previous, ?current]),
+      child: child,
+    );
   }
 }
 
-void showSnack(BuildContext context, String? message) {
+/// Shows what happened at the bottom of the screen, with a sound. [error] marks something that did not work.
+void showSnack(BuildContext context, String? message, {bool error = false, bool quiet = false}) {
   if (message == null || message.isEmpty || !context.mounted) return;
+  final c = context.c;
+  if (!quiet) error ? Fx.error() : Fx.success();
   ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
-    ..showSnackBar(SnackBar(content: Text(message)));
+    ..showSnackBar(SnackBar(
+      duration: Duration(milliseconds: error ? 4500 : 2800),
+      content: Row(children: [
+        Icon(error ? Icons.error_outline : Icons.check_circle_outline, color: error ? c.bad : c.green, size: 20),
+        const SizedBox(width: 10),
+        Expanded(child: Text(message)),
+      ]),
+    ));
 }
 
 /// Runs a server action, shows what the server said, and returns true when it went through.
@@ -203,7 +314,7 @@ Future<bool> act(BuildContext context, Future<Map<String, dynamic>> Function() a
     if (context.mounted) showSnack(context, done ?? res['message']?.toString());
     return true;
   } on ApiException catch (e) {
-    if (context.mounted) showSnack(context, e.detail);
+    if (context.mounted) showSnack(context, e.detail, error: true);
     return false;
   }
 }
@@ -271,4 +382,27 @@ class SectionTitle extends StatelessWidget {
           ?trailing,
         ]),
       );
+}
+
+/// Switches between the light and dark theme, like the sun and moon button on the website.
+class ThemeToggle extends StatelessWidget {
+  const ThemeToggle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final app = context.read<AppState>();
+    final dark = Theme.of(context).brightness == Brightness.dark;
+    return IconButton(
+      tooltip: dark ? 'Switch to light theme' : 'Switch to dark theme',
+      onPressed: () {
+        Fx.toggle();
+        app.setTheme(dark ? ThemeMode.light : ThemeMode.dark);
+      },
+      icon: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 320),
+        transitionBuilder: (child, animation) => RotationTransition(turns: Tween(begin: 0.6, end: 1.0).animate(animation), child: ScaleTransition(scale: animation, child: FadeTransition(opacity: animation, child: child))),
+        child: Icon(dark ? Icons.light_mode_outlined : Icons.dark_mode_outlined, key: ValueKey(dark)),
+      ),
+    );
+  }
 }

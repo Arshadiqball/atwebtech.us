@@ -21,6 +21,13 @@ Some setup pages open from the website **inside the app, already signed in** (`A
 
 **Payments** open `atwebtech.us/app/billing` in the phone's browser, signed in, where Stripe handles the card. See "Before the stores" below.
 
+## Look, motion and sound
+
+- **Themes**: light and dark use the same color tokens as the website panel (`lib/theme.dart` mirrors `public/assets/css/theme.css`). The sun/moon button in the top bar (and on the sign-in screen) switches; More → Theme also offers Auto, which follows the phone.
+- **Brand**: the logo mark and the two typefaces (Figtree, Plus Jakarta Sans) are the website panel's own files. The logo with its wordmark sits top-left on Home and on the sign-in screen, the app icon is the mark on white, and the app opens on a brand-green splash (`lib/screens/splash.dart`) that continues from the phone's own launch screen in the same green. On dark backgrounds `assets/logo-dark.png` is used, where the mark's dark half is drawn light.
+- **Motion** (`lib/motion.dart`): screens and list rows fade up in order the first time their content arrives, numbers count up, chart bars grow, loading shows shimmering placeholder cards, tappable cards give under the finger, and a check mark pops after a post is scheduled or a reply is sent. Everything is skipped when the phone has Reduce Motion on.
+- **Sound** (`lib/fx.dart`, `assets/sounds/`): short sounds with matching haptics for taps, switches, success, sending and errors. More → Sound effects turns them off. They stay quiet when the phone is on silent and never interrupt music. The sounds are synthesized (no third-party samples).
+
 ## Run it
 
 ```bash
@@ -37,7 +44,7 @@ Against a local server (`php -S localhost:8000 -t public public/index.php` in th
 
 The app builds and runs without push. To turn it on:
 
-1. Create a Firebase project, add an **Android app** (`us.atwebtech.atwebtech`) and an **iOS app** (same bundle id).
+1. Create a Firebase project, add an **Android app** (`us.atwebtech.atwebtech`) and an **iOS app** (`us.atwebtech.app`).
 2. iOS: in Apple Developer create an APNs key and upload it in Firebase → Project settings → Cloud Messaging. In Xcode open `ios/Runner.xcworkspace` → Signing & Capabilities → add **Push Notifications**.
 3. Build with the values from Firebase → Project settings:
 
@@ -51,15 +58,17 @@ Every notification the website creates (failed post, channel to reconnect, appro
 
 ## Tests
 
-`integration_test/app_test.dart` signs in and walks through every screen against a real server with a seeded test account, saving screenshots:
+`integration_test/app_test.dart` uses the whole app on a simulator against a real (local) server with a seeded test account: sign-in errors, forgot password, creating an account, every Publish tab and its actions (edit, delete, retry, approve, ask for changes, duplicate, recycle), the composer with the AI writer, repeat and date, the Community inbox (AI suggestion, saved reply, send, mark done), Insights, Notifications, Channels, Automations, Library, Account, Plan, switching workspace, sound, both themes and log out. It saves a screenshot of each screen.
 
 ```bash
-flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart --dart-define=API_BASE=http://localhost:8000 --dart-define=TEST_EMAIL=… --dart-define=TEST_PASSWORD=…
+flutter drive --driver=test_driver/integration_test.dart --target=integration_test/app_test.dart --dart-define=API_BASE=http://localhost:8000 --dart-define=TEST_EMAIL=… --dart-define=TEST_PASSWORD=… --dart-define=NEW_EMAIL=…
 ```
+
+Start the local server with `MAIL_ENABLED=false`, and with `OPENAI_TEST_BASE` and `NETWORK_TEST_BASE` pointing at a fake that answers every request, so nothing reaches OpenAI or a social network. `test/api_test.dart` covers the server calls (including photo upload) without a simulator.
 
 ## Before the stores
 
-- **App icon and splash**: still Flutter's defaults. Replace them (the `flutter_launcher_icons` package does it from one PNG).
+- **App icon**: made from the panel's logo mark (`assets/app-icon.png` is the 1024px master). Android uses a plain square icon. Add an adaptive icon if you want the system shapes.
 - **Signing**: set your Apple team in Xcode, and an upload keystore for Android (`android/app/build.gradle.kts`).
 - **Payments policy**: Apple and Google require their own in-app purchase for digital subscriptions bought inside an app, with exceptions that depend on the country (in the US, apps may link out to a website to pay). This app links out to Stripe on the website. Check the current App Store and Google Play rules for the countries you publish in before submitting; if needed, hide the upgrade button for those stores (`PlanScreen` in `lib/screens/more.dart`).
 - **Review account**: stores ask for a test login. Create one on the site.
