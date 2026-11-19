@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 
 import 'push.dart';
 import 'screens/auth.dart';
+import 'screens/more.dart';
 import 'screens/notifications.dart';
 import 'screens/shell.dart';
 import 'screens/splash.dart';
@@ -32,14 +33,44 @@ class _AtwebtechAppState extends State<AtwebtechApp> with WidgetsBindingObserver
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _app.addListener(_onState);
+    Push.onOpen = _openFromPush;
     _app.start();
   }
 
   void _onState() {
     // Start push once someone is signed in.
-    if (!_app.signedIn) _nav.reset();
-    if (_app.signedIn) {
-      Push.start(_app, _messenger, () => _navigator.currentState?.push(MaterialPageRoute(builder: (_) => const NotificationsScreen())));
+    if (!_app.signedIn) {
+      _nav.reset();
+      Push.reset();
+    }
+    // The Firebase values arrive with the first load, so wait for it.
+    if (_app.signedIn && _app.boot != null) Push.start(_app, _messenger);
+  }
+
+  /// A notification was tapped: go to the screen it is about.
+  void _openFromPush(String? url) {
+    final navigator = _navigator.currentState;
+    if (navigator == null || !_app.signedIn) return;
+    navigator.popUntil((route) => route.isFirst);
+    final to = url ?? '';
+    if (to.contains('tab=failed')) {
+      _nav.openPublish('failed');
+    } else if (to.contains('tab=approvals')) {
+      _nav.openPublish('approvals');
+    } else if (to.contains('tab=drafts')) {
+      _nav.openPublish('drafts');
+    } else if (to.startsWith('/app/publish')) {
+      _nav.openPublish('queue');
+    } else if (to.startsWith('/app/insights')) {
+      _nav.go(3);
+    } else if (to.startsWith('/app/community')) {
+      _nav.go(2);
+    } else if (to.startsWith('/app/channels')) {
+      navigator.push(MaterialPageRoute(builder: (_) => const ChannelsScreen()));
+    } else if (to == '/app') {
+      _nav.go(0);
+    } else {
+      navigator.push(MaterialPageRoute(builder: (_) => const NotificationsScreen()));
     }
   }
 

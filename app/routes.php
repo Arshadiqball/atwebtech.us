@@ -594,6 +594,16 @@ return [
             'admin' => true,
         ]);
     }],
+    ['GET', '/admin/push', static function (): void {
+        View::render('admin-push', ['user' => Auth::requireAdmin()] + Broadcasts::page(), [
+            'title' => 'Push updates | atwebtech',
+            'description' => 'Send an update to people using the atwebtech app.',
+            'layout' => 'app',
+            'noindex' => true,
+            'admin' => true,
+        ]);
+    }],
+    ['POST', '/admin/push', [Broadcasts::class, 'send']],
     ['GET', '/admin/knowledge', static function (): void {
         View::render('admin-knowledge', ['user' => Auth::requireAdmin(), 'knowledge' => Chatbot::knowledge()], [
             'title' => 'Chatbot knowledge | atwebtech',

@@ -42,19 +42,16 @@ Against a local server (`php -S localhost:8000 -t public public/index.php` in th
 
 ## Push notifications (Firebase)
 
-The app builds and runs without push. To turn it on:
+The app is built ready for push (iOS Push Notifications capability, background delivery, Android permission). It stays quiet until the server has a Firebase project to send through. Nothing in the app needs rebuilding to turn it on: the app gets the Firebase values from the server each time it starts.
 
-1. Create a Firebase project, add an **Android app** (`us.atwebtech.atwebtech`) and an **iOS app** (`us.atwebtech.app`).
-2. iOS: in Apple Developer create an APNs key and upload it in Firebase → Project settings → Cloud Messaging. In Xcode open `ios/Runner.xcworkspace` → Signing & Capabilities → add **Push Notifications**.
-3. Build with the values from Firebase → Project settings:
+1. Create a Firebase project. Add an **iOS app** with bundle ID `us.atwebtech.app` and an **Android app** with package `us.atwebtech.atwebtech`.
+2. iOS: in Apple Developer, create an APNs key (Keys, Apple Push Notifications service) and upload it in Firebase, Project settings, Cloud Messaging.
+3. Server `.env`, from Firebase, Project settings, General: `FIREBASE_API_KEY` (Web API key), `FIREBASE_SENDER_ID` (project number), `FIREBASE_IOS_APP_ID` and `FIREBASE_ANDROID_APP_ID` (each app's App ID).
+4. Server: Firebase, Project settings, Service accounts, **Generate new private key**. Upload the JSON to the server as `storage/firebase-service-account.json` (or set `FIREBASE_SERVICE_ACCOUNT` to its path). Keep it out of git.
 
-```bash
-flutter build apk --dart-define=API_BASE=https://atwebtech.us --dart-define=FIREBASE_API_KEY=… --dart-define=FIREBASE_PROJECT_ID=… --dart-define=FIREBASE_SENDER_ID=… --dart-define=FIREBASE_ANDROID_APP_ID=… --dart-define=FIREBASE_IOS_APP_ID=…
-```
+The admin panel's **Push** page (`/admin/push`) shows what is still missing, how many phones can be reached, and sends an update to everyone using the app, or only iPhone or Android. An update can also be added to each person's Notifications list in the app, which works even before push is set up.
 
-4. Server: Firebase → Project settings → Service accounts → **Generate new private key**. Upload the JSON to the server as `storage/firebase-service-account.json` (or set `FIREBASE_SERVICE_ACCOUNT` to its path in `.env`). Keep it out of git.
-
-Every notification the website creates (failed post, channel to reconnect, approval needed or decided, empty queue, Monday summary) is then also pushed to the person's phones. Tapping one opens Notifications.
+Every notification the website creates (failed post, channel to reconnect, approval needed or decided, empty queue, Monday summary) is pushed to the person's phones too. Tapping a notification opens the screen it is about.
 
 ## Tests
 

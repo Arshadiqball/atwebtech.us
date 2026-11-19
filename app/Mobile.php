@@ -218,6 +218,8 @@ final class Mobile
             'repeats' => Automations::REPEATS,
             'ai' => Assistant::enabled(),
             'push_ready' => Push::enabled(),
+            // Public Firebase identifiers the app registers its phone with, or null while push is not set up.
+            'push' => Push::clientConfig(),
         ]);
     }
 

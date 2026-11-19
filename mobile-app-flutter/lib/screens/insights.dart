@@ -54,7 +54,7 @@ class _InsightsScreenState extends State<InsightsScreen> {
             for (final i in issues) Padding(padding: const EdgeInsets.only(top: 10), child: Callout('${i['channel']}: ${i['message']}', tone: Tone.warn, icon: Icons.link_off)),
             const SizedBox(height: 12),
             GridView.count(
-              crossAxisCount: 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: 1.9,
+              crossAxisCount: MediaQuery.sizeOf(context).width >= 700 ? 3 : 2, shrinkWrap: true, physics: const NeverScrollableScrollPhysics(), crossAxisSpacing: 10, mainAxisSpacing: 10, childAspectRatio: MediaQuery.sizeOf(context).width >= 700 ? 2.3 : 1.9,
               children: [
                 for (final card in cards)
                   AppCard(

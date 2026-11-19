@@ -102,13 +102,13 @@ class Shell extends StatelessWidget {
       // Keyed by workspace so every tab reloads when the person switches workspace.
       body: KeyedSubtree(
         key: ValueKey(app.workspace['id']),
-        child: LazyTabs(index: nav.tab, builders: [
+        child: PageWidth(child: LazyTabs(index: nav.tab, builders: [
           (_) => const HomeScreen(),
           (_) => const PublishScreen(),
           (_) => const InboxScreen(),
           (_) => const InsightsScreen(),
           (_) => const MoreScreen(),
-        ]),
+        ])),
       ),
       floatingActionButton: nav.tab == 1
           ? FloatingActionButton.extended(onPressed: () { Fx.tap(); Shell.compose(context); }, icon: const Icon(Icons.add), label: const Text('New post', style: TextStyle(fontWeight: FontWeight.w700)))

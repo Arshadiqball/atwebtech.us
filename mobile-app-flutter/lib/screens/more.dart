@@ -157,7 +157,7 @@ class ChannelsScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Channels')),
       floatingActionButton: app.isAdmin ? FloatingActionButton.extended(onPressed: connect, icon: const Icon(Icons.add), label: const Text('Connect', style: TextStyle(fontWeight: FontWeight.w700))) : null,
-      body: RefreshIndicator(
+      body: PageWidth(child: RefreshIndicator(
         onRefresh: app.refresh,
         child: app.channels.isEmpty
             ? ListView(children: [SizedBox(height: 460, child: EmptyView(icon: Icons.hub_outlined, title: 'No channels yet', text: 'Connecting opens a secure browser, because each network asks you to sign in on its own page.', action: app.isAdmin ? 'Connect a channel' : null, onAction: connect))])
@@ -203,7 +203,7 @@ class ChannelsScreen extends StatelessWidget {
                     )),
                 ],
               ),
-      ),
+      )),
     );
   }
 }

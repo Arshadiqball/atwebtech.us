@@ -259,7 +259,7 @@ class _ComposerScreenState extends State<ComposerScreen> {
           const SizedBox(width: 6),
         ],
       ),
-      body: _loading
+      body: PageWidth(child: _loading
           ? const Skeleton(rows: 3)
           : SafeArea(
               child: Column(children: [
@@ -369,7 +369,7 @@ class _ComposerScreenState extends State<ComposerScreen> {
                   ]),
                 ),
               ]),
-            ),
+            )),
     );
   }
 }

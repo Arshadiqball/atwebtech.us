@@ -67,6 +67,17 @@ class _AppCardState extends State<AppCard> {
   }
 }
 
+/// Keeps a screen's content at a comfortable reading width on tablets (iPad), centered.
+/// On phones it changes nothing.
+class PageWidth extends StatelessWidget {
+  const PageWidth({super.key, required this.child, this.max = 760});
+  final Widget child;
+  final double max;
+
+  @override
+  Widget build(BuildContext context) => Align(alignment: Alignment.topCenter, child: ConstrainedBox(constraints: BoxConstraints(maxWidth: max), child: child));
+}
+
 /// The atwebtech logo as the website panel shows it: the mark with the wordmark beside it.
 class Brand extends StatelessWidget {
   const Brand({super.key, this.size = 28, this.color});
@@ -281,11 +292,13 @@ class LoadedState<T> extends State<Loaded<T>> {
         ),
       );
     }
-    return AnimatedSwitcher(
-      duration: const Duration(milliseconds: 260),
-      switchInCurve: Curves.easeOut,
-      layoutBuilder: (current, previous) => Stack(alignment: Alignment.topCenter, fit: StackFit.expand, children: [...previous, ?current]),
-      child: child,
+    return PageWidth(
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 260),
+        switchInCurve: Curves.easeOut,
+        layoutBuilder: (current, previous) => Stack(alignment: Alignment.topCenter, fit: StackFit.expand, children: [...previous, ?current]),
+        child: child,
+      ),
     );
   }
 }

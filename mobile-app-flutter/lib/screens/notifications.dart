@@ -104,6 +104,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 'approval_decided' => Icons.verified_outlined,
                 'queue_low' => Icons.calendar_today_outlined,
                 'weekly_digest' => Icons.insights_outlined,
+                'announcement' => Icons.campaign_outlined,
                 _ => Icons.notifications_none_rounded,
               };
               return Appear(
