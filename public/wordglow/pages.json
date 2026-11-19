@@ -1,402 +1,422 @@
 {
 "/wordglow/guides/": {
-"hash": "fe7b4c6d6281",
+"hash": "bcc9a06fdb8e",
 "lastmod": "2026-11-19"
 },
 "/wordglow/guides/best-starting-words/": {
-"hash": "830f58487368",
+"hash": "a90448ee32f2",
 "lastmod": "2026-11-19"
 },
 "/wordglow/guides/how-to-play/": {
-"hash": "f1b7460a604d",
+"hash": "88c3eef28ebb",
 "lastmod": "2026-11-19"
 },
 "/wordglow/guides/wordle-alternatives/": {
-"hash": "f1cc5c1fff0b",
+"hash": "1ac5565b6fbe",
+"lastmod": "2026-11-19"
+},
+"/wordglow/play/": {
+"hash": "275ee4a74716",
+"lastmod": "2026-11-19"
+},
+"/wordglow/tools/": {
+"hash": "77ed000b7dc9",
+"lastmod": "2026-11-19"
+},
+"/wordglow/tools/word-finder/": {
+"hash": "eeecb10083f1",
+"lastmod": "2026-11-19"
+},
+"/wordglow/tools/word-unscrambler/": {
+"hash": "32cf0690f80b",
+"lastmod": "2026-11-19"
+},
+"/wordglow/tools/wordle-solver/": {
+"hash": "171cca698958",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/": {
-"hash": "870a88a47055",
+"hash": "c1a7eaac266e",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-a/": {
-"hash": "d8897737883e",
+"hash": "34783bad3c16",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-b/": {
-"hash": "191d87dd2337",
+"hash": "48a24d70a862",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-c/": {
-"hash": "6616226c6d46",
+"hash": "773ae644f32f",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-d/": {
-"hash": "ac841be42bfc",
+"hash": "3b844e9ef235",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-e/": {
-"hash": "3c3365ad6e28",
+"hash": "4a582832932c",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-f/": {
-"hash": "72c9d4d4ccc5",
+"hash": "42c7822ecba2",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-g/": {
-"hash": "f4b3265ed3ca",
+"hash": "4f22468df5e4",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-h/": {
-"hash": "3268a38a33d1",
+"hash": "3ce56ecdec75",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-i/": {
-"hash": "4e2786d06c71",
+"hash": "c9ebee50c58f",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-j/": {
-"hash": "122d7a78ce7b",
+"hash": "3d0b7f6e722d",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-k/": {
-"hash": "afd125c26aec",
+"hash": "ce3a5151fe52",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-l/": {
-"hash": "6cf72db891d7",
+"hash": "190666e71b6f",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-m/": {
-"hash": "2645d9ac7dcd",
+"hash": "4590583a4d07",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-n/": {
-"hash": "b33dcceccc53",
+"hash": "4bfc280959b9",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-o/": {
-"hash": "ee4edb8d983c",
+"hash": "1a355ee0a753",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-p/": {
-"hash": "998ce2b3bee7",
+"hash": "ead14e26fb6e",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-r/": {
-"hash": "fff6bf52a2ac",
+"hash": "4bbcb4c331f9",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-s/": {
-"hash": "6a770eddfefb",
+"hash": "c5ebdd45c574",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-t/": {
-"hash": "3a46c4cd9c6c",
+"hash": "2443cf7b9fb6",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-v/": {
-"hash": "ed77cf631e71",
+"hash": "bc7f8e6f0302",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-w/": {
-"hash": "16245b23526f",
+"hash": "049016ea0504",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-y/": {
-"hash": "10b5fa34a53f",
+"hash": "a77a5d48d058",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words-starting-with-z/": {
-"hash": "1917ab50e518",
+"hash": "bf68bf870f9f",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/4-letter-words/": {
-"hash": "caeeec05a599",
+"hash": "689f849454c4",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-a/": {
-"hash": "e370f8ef8217",
+"hash": "34a45fc8f71d",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-b/": {
-"hash": "b910c116404c",
+"hash": "a643a1e75307",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-c/": {
-"hash": "1706cc04d7ef",
+"hash": "0520f1998341",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-d/": {
-"hash": "8691794a1bee",
+"hash": "c3e6bf33ea45",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-e/": {
-"hash": "2cd98c791cd4",
+"hash": "c9275598fe12",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-f/": {
-"hash": "b0f4a80a96e1",
+"hash": "ab7d65cb4dd7",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-g/": {
-"hash": "b3b53c4ec5cf",
+"hash": "a2689ee1fa71",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-h/": {
-"hash": "6e682af8bacf",
+"hash": "fe5825d52e75",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-i/": {
-"hash": "4ea05893a670",
+"hash": "6779b34b83cb",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-j/": {
-"hash": "b5e864f3b437",
+"hash": "2aed18966627",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-k/": {
-"hash": "435d914450f1",
+"hash": "4b5de6c70c2a",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-l/": {
-"hash": "a0adb2bfeda4",
+"hash": "5e1cf4ef3cd2",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-m/": {
-"hash": "238c3f89f773",
+"hash": "b0954ef0ce63",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-n/": {
-"hash": "5ef851fe7845",
+"hash": "ae72c7fa21a2",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-o/": {
-"hash": "eb19d7568b5a",
+"hash": "e2daee514cde",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-p/": {
-"hash": "8ff32e49a84b",
+"hash": "21ff6ee85099",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-q/": {
-"hash": "ec2b7229dd7c",
+"hash": "7f1b059ade07",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-r/": {
-"hash": "f59aeaccf870",
+"hash": "c802ceecfa9a",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-s/": {
-"hash": "66555a565760",
+"hash": "3b15db9e9888",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-t/": {
-"hash": "f620efe25259",
+"hash": "1e8e72f2b2a1",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-u/": {
-"hash": "b5fea253042c",
+"hash": "2df00aa946ff",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-v/": {
-"hash": "3ea65c8a6c49",
+"hash": "d3130a34299b",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words-starting-with-w/": {
-"hash": "2f105b91c0da",
+"hash": "42fa08b63928",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/5-letter-words/": {
-"hash": "fb2a3650617e",
+"hash": "13f8dfb9fafc",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-a/": {
-"hash": "c7df8136ce8f",
+"hash": "221179615ce4",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-b/": {
-"hash": "ccc1cf718cf0",
+"hash": "f95de57d9a77",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-c/": {
-"hash": "bb8ae1b6bfcb",
+"hash": "d04f7044890b",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-d/": {
-"hash": "cdb3455a0282",
+"hash": "8286b7f982c5",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-e/": {
-"hash": "65a20f3f4dda",
+"hash": "3703ed6ba464",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-f/": {
-"hash": "297b3631a92f",
+"hash": "9d592a905096",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-g/": {
-"hash": "b83c27cee8ba",
+"hash": "3e4d4e36bd66",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-h/": {
-"hash": "2fba6c263807",
+"hash": "0aa70f210609",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-i/": {
-"hash": "3c5a9e9aeafa",
+"hash": "ab1d022ecf8a",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-j/": {
-"hash": "8914e2deb123",
+"hash": "2935edce8d4c",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-k/": {
-"hash": "292baeac532b",
+"hash": "122a6e050a4b",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-l/": {
-"hash": "da247b440579",
+"hash": "2c143fa5af33",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-m/": {
-"hash": "f15bf19566e0",
+"hash": "2c7514064d1f",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-n/": {
-"hash": "636933ac9675",
+"hash": "06b15adcdd64",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-o/": {
-"hash": "9c148f90cba2",
+"hash": "add7d6b7021f",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-p/": {
-"hash": "6f9c92936a6d",
+"hash": "3f539d2b333b",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-r/": {
-"hash": "e685910106f6",
+"hash": "0a49c6e4b02c",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-s/": {
-"hash": "fe58fe36740c",
+"hash": "a9b19bce8d41",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-t/": {
-"hash": "e7edf3d3920b",
+"hash": "75cfd8ac544f",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-u/": {
-"hash": "37cbd36bd379",
+"hash": "51637400a476",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-v/": {
-"hash": "9720345af80e",
+"hash": "348776710cbd",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words-starting-with-w/": {
-"hash": "c10b12a1269c",
+"hash": "a3b6b9174b95",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/6-letter-words/": {
-"hash": "31cc339b4f21",
+"hash": "f9553f4b81a0",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-a/": {
-"hash": "9c0acd2c83f4",
+"hash": "52ce7e389d37",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-b/": {
-"hash": "af29b1c2c989",
+"hash": "06242469bb87",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-c/": {
-"hash": "2d0bfb7858c1",
+"hash": "e77761e98b0d",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-d/": {
-"hash": "22fbd0e2caf4",
+"hash": "cabbd32901cd",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-e/": {
-"hash": "d065c60a13df",
+"hash": "b861cf83b4f6",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-f/": {
-"hash": "6b0a0871e761",
+"hash": "7d06e92b0025",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-g/": {
-"hash": "98e7e16ef67e",
+"hash": "a3083e984345",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-h/": {
-"hash": "bd1ae70bf235",
+"hash": "9e50fcbbf310",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-i/": {
-"hash": "5d9b357f7a27",
+"hash": "ab4959de1b97",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-j/": {
-"hash": "f922df1349ad",
+"hash": "cb3a4371fd95",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-k/": {
-"hash": "5ba2df6b7e22",
+"hash": "1c50def1b8a5",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-l/": {
-"hash": "f99d5f902b99",
+"hash": "609e2d04440d",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-m/": {
-"hash": "43d28df75a8e",
+"hash": "4329522d7aae",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-n/": {
-"hash": "a2def2cf197e",
+"hash": "f5203b181271",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-o/": {
-"hash": "b3fa9e008298",
+"hash": "9a3ef6917703",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-p/": {
-"hash": "f23e8d01ff01",
+"hash": "b9a84c01383d",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-q/": {
-"hash": "59021ecafdbc",
+"hash": "97a470982d89",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-r/": {
-"hash": "90ba3d6b9882",
+"hash": "1c500f38d15f",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-s/": {
-"hash": "165af505dbc4",
+"hash": "5a8c7199d10b",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-t/": {
-"hash": "959d2ca4ae97",
+"hash": "b43d52a2ba14",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-u/": {
-"hash": "2064c46170a5",
+"hash": "dc607b4b7bfc",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-v/": {
-"hash": "1106c9182d58",
+"hash": "04cefe12406a",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words-starting-with-w/": {
-"hash": "bf68d6020121",
+"hash": "c20f9cd03560",
 "lastmod": "2026-11-19"
 },
 "/wordglow/word-lists/7-letter-words/": {
-"hash": "297c154af03d",
+"hash": "2b2793263574",
 "lastmod": "2026-11-19"
 }
 }
