@@ -632,7 +632,7 @@ return [
     }],
 
     ['GET', '/sitemap.xml', static function (): void {
-        $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/data-deletion', '/terms'];
+        $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/data-deletion', '/terms', '/wordglow/', '/wordglow-privacy.html'];
         foreach (array_keys(data('features')) as $slug) {
             $paths[] = '/features/' . $slug;
         }
@@ -654,7 +654,7 @@ return [
     ['GET', '/robots.txt', static function (): void {
         header('Content-Type: text/plain; charset=utf-8');
         if (is_public_site()) {
-            echo "User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /admin\nDisallow: /welcome\nDisallow: /login\nDisallow: /signup\nDisallow: /email\n\nSitemap: ", absolute_url('/sitemap.xml'), "\n";
+            echo "User-agent: *\nAllow: /\nDisallow: /app\nDisallow: /admin\nDisallow: /welcome\nDisallow: /login\nDisallow: /signup\nDisallow: /email\nDisallow: /wordglow/admin\n\nSitemap: ", absolute_url('/sitemap.xml'), "\n";
         } else {
             echo "User-agent: *\nDisallow: /\n";
         }
