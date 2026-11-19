@@ -633,6 +633,10 @@ return [
 
     ['GET', '/sitemap.xml', static function (): void {
         $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/data-deletion', '/terms', '/wordglow/', '/wordglow-privacy.html'];
+        $paths[] = '/wordglow/words/';
+        foreach (glob(BASE_PATH . '/public/wordglow/words/*/index.html') ?: [] as $f) {
+            $paths[] = '/wordglow/words/' . basename(dirname($f)) . '/';
+        }
         foreach (array_keys(data('features')) as $slug) {
             $paths[] = '/features/' . $slug;
         }
