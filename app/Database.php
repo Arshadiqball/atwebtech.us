@@ -35,6 +35,9 @@ final class Database
             config('db.name')
         );
         self::$pdo = new PDO($dsn, (string) config('db.user'), (string) config('db.pass'), $options);
+        // Some hosts ignore the charset in the connection string, and emoji then arrive as "????".
+        // Saying it again as a statement always takes effect.
+        self::$pdo->exec('SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci');
         return self::$pdo;
     }
 
