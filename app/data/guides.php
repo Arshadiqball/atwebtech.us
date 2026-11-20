@@ -1,0 +1,335 @@
+<?php
+
+declare(strict_types=1);
+
+// The guides shown under Guide in the panel. Written by docs/guides/record.py together with the videos,
+// screenshots and PDFs in public/assets/guides. Change the words there and run it again.
+return json_decode(<<<'JSON'
+[
+ {
+  "slug": "getting-started",
+  "title": "Create your account",
+  "summary": "Sign up, answer the welcome questions and find your way around.",
+  "level": "Start here",
+  "steps": [
+   {
+    "title": "Open atwebtech.us and choose Sign up",
+    "text": "Go to atwebtech.us and click **Start free** or **Sign up**. You only need an email address and a password. No credit card is asked for.",
+    "image": "step-01.jpg"
+   },
+   {
+    "title": "Press Sign Up",
+    "text": "Use a password with at least 8 characters, one uppercase letter and one number or symbol. Then press **Sign Up**.",
+    "image": "step-02.jpg"
+   },
+   {
+    "title": "Answer four quick questions, or skip them",
+    "text": "atwebtech asks what kind of work you do and which networks you care about, so it can suggest the right setup. Pick an answer, or press **Skip**.",
+    "image": "step-03.jpg"
+   },
+   {
+    "title": "Press Continue after each answer",
+    "text": "There are four questions in total. After the last one you land in your new workspace.",
+    "image": "step-04.jpg"
+   },
+   {
+    "title": "This is Home",
+    "text": "Home shows what needs you today, your numbers for the week, and the first steps for a new account. A one-question survey may appear the first time: answer it or close it.",
+    "image": "step-05.jpg"
+   },
+   {
+    "title": "The menu on the left takes you everywhere",
+    "text": "**Publish** is your queue of posts. **Community** is your comment inbox. **Insights** shows your results. **Guide** opens these instructions at any time.",
+    "image": "step-06.jpg"
+   },
+   {
+    "title": "Next: connect your first channel",
+    "text": "Nothing can be published until a social account is connected. Click **Connect Channel** to do that now. The next guide shows how.",
+    "image": "step-07.jpg"
+   }
+  ],
+  "seconds": 62,
+  "size": 706450
+ },
+ {
+  "slug": "connect-channels",
+  "title": "Connect your social accounts",
+  "summary": "Add Instagram, Facebook, LinkedIn and the rest, and set when each one posts.",
+  "level": "Start here",
+  "steps": [
+   {
+    "title": "Open Channels",
+    "text": "In the menu on the left, find **Channels** at the bottom and click the **+** button, or click **Connect a channel** on Home.",
+    "image": "step-01.jpg"
+   },
+   {
+    "title": "Your connected accounts are listed at the top",
+    "text": "Each connected account shows its network and how many posts a week you plan for it. **Open** changes its posting times. **Disconnect** removes it.",
+    "image": "step-02.jpg"
+   },
+   {
+    "title": "Pick the network you want to add",
+    "text": "Scroll to **Connect a New Channel** and click a network: Instagram, Facebook Page, LinkedIn, YouTube, Pinterest, Threads, Bluesky or Mastodon.",
+    "image": "step-03.jpg"
+   },
+   {
+    "title": "Sign in on the network's own page",
+    "text": "atwebtech sends you to that network to sign in and allow access. You never type your social password into atwebtech. Mastodon first asks which server you use.",
+    "image": "step-04.jpg"
+   },
+   {
+    "title": "Come back and the channel is ready",
+    "text": "After you allow access, the network returns you to atwebtech and the account appears in your list. Repeat for each account you want to post to.",
+    "image": "step-05.jpg"
+   },
+   {
+    "title": "Set when each channel posts",
+    "text": "Click **Open** on a channel to choose its posting days and times. New posts added to the queue take the next free time.",
+    "image": "step-06.jpg"
+   }
+  ],
+  "seconds": 41,
+  "size": 763503
+ },
+ {
+  "slug": "first-post",
+  "title": "Write and schedule your first post",
+  "summary": "Pick channels, write, add a photo, choose a time and schedule.",
+  "level": "Start here",
+  "steps": [
+   {
+    "title": "Click New Post",
+    "text": "Open **Publish** in the menu and click **New Post** in the top right corner. The green **New** button in the menu does the same from any page.",
+    "image": "step-01.jpg"
+   },
+   {
+    "title": "Choose where it goes",
+    "text": "Tick every channel this post should go to. One post can go to several networks at once.",
+    "image": "step-02.jpg"
+   },
+   {
+    "title": "Write your post",
+    "text": "Type your text. The counter shows how many characters are left for the channels you picked. **AI Assistant** can write a first draft from a short brief, and **Templates** gives you ideas.",
+    "image": "step-03.jpg"
+   },
+   {
+    "title": "Add a photo or video",
+    "text": "Click **Add image or video** and pick a file from your computer. Instagram always needs a photo.",
+    "image": "step-04.jpg"
+   },
+   {
+    "title": "Pick the day and time",
+    "text": "At the bottom, set the date and the time the post should go out. Times are in your own time zone.",
+    "image": "step-05.jpg"
+   },
+   {
+    "title": "Press Schedule Post",
+    "text": "**Schedule Post** puts it in the queue. **Save Draft** keeps it for later without a time. **Send for approval** asks a teammate to check it first.",
+    "image": "step-06.jpg"
+   },
+   {
+    "title": "It is now in your queue",
+    "text": "The post waits in **Queue** and atwebtech publishes it at the time you chose. You can close the page: it goes out without you.",
+    "image": "step-07.jpg"
+   }
+  ],
+  "seconds": 42,
+  "size": 669914
+ },
+ {
+  "slug": "manage-queue",
+  "title": "Manage your queue",
+  "summary": "Queue, Calendar, Drafts, Failed, Approvals and Sent, and what to do in each.",
+  "level": "Every day",
+  "steps": [
+   {
+    "title": "Queue: everything that is scheduled",
+    "text": "Posts are listed in the order they will go out. Click a post to change its text, photo or time.",
+    "image": "step-01.jpg"
+   },
+   {
+    "title": "Calendar: see your week",
+    "text": "Switch to **Calendar** for a week view. Click an empty day to write a post for that day.",
+    "image": "step-02.jpg"
+   },
+   {
+    "title": "Drafts: posts you have not finished",
+    "text": "Back in **List**, open **Drafts**. A draft has no time yet. Open one, finish it and schedule it.",
+    "image": "step-03.jpg"
+   },
+   {
+    "title": "Failed: fix it and retry",
+    "text": "If a network refuses a post, it lands in **Failed** with the reason in plain words. Fix what it asks for, then press **Retry**.",
+    "image": "step-04.jpg"
+   },
+   {
+    "title": "Approvals: check a teammate's post",
+    "text": "Posts sent for approval wait in **Approvals**. **Approve** schedules the post. **Request changes** sends it back to Drafts with your note.",
+    "image": "step-05.jpg"
+   },
+   {
+    "title": "Sent: what has been published",
+    "text": "**Sent** keeps every published post with its numbers. **Duplicate** copies a good post into a new draft.",
+    "image": "step-06.jpg"
+   }
+  ],
+  "seconds": 48,
+  "size": 1166586
+ },
+ {
+  "slug": "reply-comments",
+  "title": "Reply to comments from one inbox",
+  "summary": "Answer, use saved replies, get an AI suggestion and mark comments done.",
+  "level": "Every day",
+  "steps": [
+   {
+    "title": "Open Community",
+    "text": "Click **Community** in the menu. Comments from your connected accounts arrive here every 30 minutes. **Refresh** checks right now.",
+    "image": "step-01.jpg"
+   },
+   {
+    "title": "Unanswered comments come first",
+    "text": "Each comment shows who wrote it, on which network and under which post. The tabs sort them into **Unanswered**, **Answered** and **Done**.",
+    "image": "step-02.jpg"
+   },
+   {
+    "title": "Write a reply, or let AI suggest one",
+    "text": "Type your answer in the box. **Suggest a reply** writes a draft for you to edit.",
+    "image": "step-03.jpg"
+   },
+   {
+    "title": "Use a saved reply for common questions",
+    "text": "Pick a saved reply from the list to fill the box in one click. Add your own under **Saved replies** at the top.",
+    "image": "step-04.jpg"
+   },
+   {
+    "title": "Press Send reply",
+    "text": "The reply is posted on the network under your name, and the comment moves to **Answered**.",
+    "image": "step-05.jpg"
+   },
+   {
+    "title": "Mark done when no answer is needed",
+    "text": "**Mark done** clears a comment from Unanswered without replying, for example a simple thank-you.",
+    "image": "step-06.jpg"
+   }
+  ],
+  "seconds": 41,
+  "size": 694137
+ },
+ {
+  "slug": "insights",
+  "title": "See what is working",
+  "summary": "Totals, best times, hashtags, top posts and reports.",
+  "level": "Grow",
+  "steps": [
+   {
+    "title": "Open Insights",
+    "text": "Click **Insights** in the menu to see how your posts performed.",
+    "image": "step-01.jpg"
+   },
+   {
+    "title": "Choose the period",
+    "text": "Switch between **7 Days**, **30 Days**, **Month to Date** and **Last Month**. Each number shows how it changed against the period before.",
+    "image": "step-02.jpg"
+   },
+   {
+    "title": "Read the totals",
+    "text": "Posts, followers, reactions, comments, shares and views for all your channels together. The small **i** next to a number explains what it counts.",
+    "image": "step-03.jpg"
+   },
+   {
+    "title": "Find your best times and hashtags",
+    "text": "Scroll down for the hours when your posts did best and how each hashtag performed. **Use these times** applies them to a channel's schedule.",
+    "image": "step-04.jpg"
+   },
+   {
+    "title": "Learn from your top posts",
+    "text": "The posts with the most engagement are listed at the bottom. **View** opens the post on its network.",
+    "image": "step-05.jpg"
+   },
+   {
+    "title": "Export a report",
+    "text": "Back at the top, **Export** downloads the numbers as a file you can open in Excel or Google Sheets.",
+    "image": "step-06.jpg"
+   }
+  ],
+  "seconds": 36,
+  "size": 859503
+ },
+ {
+  "slug": "automations",
+  "title": "Let atwebtech do the weekly work",
+  "summary": "A weekly AI plan, blog to social and automatic replies.",
+  "level": "Grow",
+  "steps": [
+   {
+    "title": "Open Automations",
+    "text": "Click **Automations** in the menu. There are three kinds: blog to social, a weekly AI plan, and automatic replies.",
+    "image": "step-01.jpg"
+   },
+   {
+    "title": "Weekly plan: describe your business",
+    "text": "Open **Set up** on the weekly plan. Tell the AI Assistant what your business is and what customers ask about.",
+    "image": "step-02.jpg"
+   },
+   {
+    "title": "Choose channels and how many posts",
+    "text": "Tick the channels to write for, how many posts a week, and the tone. **Draft** means nothing is published until you have read it.",
+    "image": "step-03.jpg"
+   },
+   {
+    "title": "Your automations are listed below",
+    "text": "Every automation shows what it made so far. **Run now** starts it immediately, **Pause** stops it, **Delete** removes it.",
+    "image": "step-04.jpg"
+   },
+   {
+    "title": "Blog to social and automatic replies",
+    "text": "The first box turns new articles from your blog into posts. The third answers common questions, like prices, with a reply you write once.",
+    "image": "step-05.jpg"
+   }
+  ],
+  "seconds": 38,
+  "size": 708116
+ },
+ {
+  "slug": "account",
+  "title": "Your account and security",
+  "summary": "Name, password, email alerts, two-factor and deleting your account.",
+  "level": "Settings",
+  "steps": [
+   {
+    "title": "Open Account",
+    "text": "Click your name at the bottom of the menu, then **Account**. Here you change your name, password and email alerts.",
+    "image": "step-01.jpg"
+   },
+   {
+    "title": "Change your name",
+    "text": "Type the name teammates should see and press **Save**.",
+    "image": "step-02.jpg"
+   },
+   {
+    "title": "Change your password",
+    "text": "Enter your current password and a new one. Changing it signs you out on every other device, including the phone app.",
+    "image": "step-03.jpg"
+   },
+   {
+    "title": "Choose which emails you get",
+    "text": "Tick what you want to hear about: a failed post, a channel that needs reconnecting, approvals, an empty queue, and a Monday summary.",
+    "image": "step-04.jpg"
+   },
+   {
+    "title": "Turn on two-factor authentication",
+    "text": "For extra safety, **Set up authenticator** asks for a code from an app such as Google Authenticator every time you log in.",
+    "image": "step-05.jpg"
+   },
+   {
+    "title": "Delete your account",
+    "text": "At the very bottom, **Delete my account** removes your account and everything in it for good. It asks for your password and the word DELETE first.",
+    "image": "step-06.jpg"
+   }
+  ],
+  "seconds": 38,
+  "size": 519126
+ }
+]
+JSON, true);

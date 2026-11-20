@@ -24,6 +24,7 @@ return [
         'insights' => ['label' => 'Insights', 'icon' => 'chart-bar', 'href' => '/app/insights', 'group' => 'Grow'],
         'competitors' => ['label' => 'Competitors', 'icon' => 'chart-line-up', 'href' => '/app/competitors'],
         'automations' => ['label' => 'Automations', 'icon' => 'lightning', 'href' => '/app/automations'],
+        'guide' => ['label' => 'Guide', 'icon' => 'book-open', 'href' => '/app/guide', 'group' => 'Help'],
         'team' => ['label' => 'Team', 'icon' => 'user-plus', 'href' => '/app/team', 'nav' => false],
         'channels' => [
             'label' => 'Channels', 'icon' => 'plus', 'href' => '/app/channels', 'nav' => false,

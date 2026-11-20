@@ -380,6 +380,19 @@ return [
     }],
     ['POST', '/app/notifications', [Notify::class, 'handle']],
     ['GET', '/app/notifications/open/{id}', [Notify::class, 'open']],
+    ['GET', '/app/guide', static function (): void {
+        Workspace::render('guide', 'workspace/guides', 'Guide', static fn (): array => ['guides' => data('guides')]);
+    }],
+    ['GET', '/app/guide/{slug}', static function (string $slug): void {
+        $guides = data('guides');
+        $at = array_search($slug, array_column($guides, 'slug'), true);
+        if ($at === false) {
+            redirect('/app/guide');
+        }
+        Workspace::render('guide', 'workspace/guide', $guides[$at]['title'], static fn (): array => [
+            'guide' => $guides[$at], 'number' => $at + 1, 'previous' => $guides[$at - 1] ?? null, 'next' => $guides[$at + 1] ?? null,
+        ]);
+    }],
     ['GET', '/app/automations', static function (): void {
         Workspace::render('automations', 'workspace/automations', 'Automations', static fn (array $user): array => Automations::page($user));
     }],
