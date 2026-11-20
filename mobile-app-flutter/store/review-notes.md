@@ -4,7 +4,7 @@ The text between the lines is what goes into the Notes field (under 4,000 charac
 
 ---
 
-SCREEN RECORDING: attached to this submission (recorded on a physical iPhone, latest iOS). It shows: launch, account registration, login, the main flow, reporting and blocking a comment, the plan screen, and account deletion.
+SCREEN RECORDING: attached to this submission (recorded on a physical iPhone 13). It shows: launch, account registration, the app as a new account sees it (Community, connecting a channel, Home, Media Library, Account) and account deletion. The new account in the recording has no social accounts connected yet, so its inbox has no comments. To see comments with Report and Block, writing a post, and the plan screen, log in with the demo account in the Sign-In fields.
 
 1) PURPOSE AND AUDIENCE
 atwebtech is a social media scheduling tool for small businesses, creators and agencies. Problem: posting by hand to several networks takes time and posts get missed. Value: the user writes a post once, schedules it, and atwebtech publishes it on time to the social accounts the user has connected. It also gathers comments from those accounts into one inbox and shows basic statistics.
