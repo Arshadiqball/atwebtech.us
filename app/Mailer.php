@@ -27,11 +27,41 @@ final class Mailer
         }
         $safeSubject = '[atwebtech] ' . trim(preg_replace('/[\r\n]+/', ' ', $subject) ?? $subject);
 
-        try {
-            self::deliver($from, $to, $safeSubject, implode("\n", $lines));
-        } catch (Throwable $e) {
-            error_log('Mailer: ' . $e->getMessage());
+        // Sent after the page or the app has its answer: a slow mail server must never hold up a sign-up.
+        self::$later[] = [$from, $to, $safeSubject, implode("\n", $lines)];
+        if (count(self::$later) === 1) {
+            register_shutdown_function([self::class, 'sendLater']);
         }
+    }
+
+    /** Team notifications waiting to go out once the response has been sent. */
+    private static array $later = [];
+
+    /** Runs when the request ends: finishes the response first, then sends the waiting notifications. */
+    public static function sendLater(): void
+    {
+        if (session_status() === PHP_SESSION_ACTIVE) {
+            session_write_close();
+        }
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } elseif (function_exists('litespeed_finish_request')) {
+            litespeed_finish_request();
+        } else {
+            while (ob_get_level() > 0) {
+                @ob_end_flush();
+            }
+            flush();
+        }
+        ignore_user_abort(true);
+        foreach (self::$later as [$from, $to, $subject, $body]) {
+            try {
+                self::deliver($from, $to, $subject, $body);
+            } catch (Throwable $e) {
+                error_log('Mailer: ' . $e->getMessage());
+            }
+        }
+        self::$later = [];
     }
 
     /** Customer mail, with the HTML card and a plain-text copy. */
