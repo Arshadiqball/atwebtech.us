@@ -42,6 +42,9 @@ final class BillingHandler
     public static function checkout(): never
     {
         $user = Auth::member();
+        if (in_app_ios()) {
+            self::notice('/app', 'Plans can’t be changed in the app.');
+        }
         $intent = self::intent($_POST);
         $back = '/app/billing?' . http_build_query($intent);
         if (!Billing::enabled()) {

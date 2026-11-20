@@ -448,4 +448,6 @@ textarea.crm-input { width: 100%; resize: vertical; }
 .adm-push-history p { margin: 2px 0 6px; }
 .adm-push-history small { color: var(--muted); }
 @media (max-width: 640px) { .adm-push-reach, .adm-push-row { grid-template-columns: 1fr; } }
-
+.adm-report-act { margin-top: 8px; }
+.adm-report-act button { padding: 6px 12px; border: 1px solid var(--a-line-strong); border-radius: var(--a-radius); background: var(--a-panel); color: var(--ink); font: 600 13.5px/1 inherit; cursor: pointer; }
+.adm-report-done { display: block; margin-top: 6px; }

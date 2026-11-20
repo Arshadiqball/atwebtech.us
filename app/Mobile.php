@@ -150,7 +150,9 @@ final class Mobile
         $user = self::person();
         $next = Auth::safeNext((string) (self::input()['next'] ?? '')) ?? '/app';
         $ws = (int) (Auth::user()['id'] ?? $user['id']);
-        $code = self::code((int) $user['id'], 'handoff', 90, json_encode(['next' => $next, 'ws' => $ws]));
+        $platform = Database::connection()->prepare('SELECT platform FROM mobile_tokens WHERE id = :id');
+        $platform->execute(['id' => (int) Auth::tokenId()]);
+        $code = self::code((int) $user['id'], 'handoff', 90, json_encode(['next' => $next, 'ws' => $ws, 'app' => (string) $platform->fetchColumn()]));
         json_response(['status' => 'ok', 'url' => absolute_url('/m/open/' . $code)]);
     }
 
@@ -169,6 +171,12 @@ final class Mobile
             $_SESSION['_ws'] = $ws; // Auth checks membership on the next request.
         } else {
             unset($_SESSION['_ws']);
+        }
+        // Pages opened from the iPhone or iPad app show no plans, prices or upgrade links (App Store rules).
+        if (($data['app'] ?? '') === 'ios') {
+            $_SESSION['_in_app'] = 'ios';
+        } else {
+            unset($_SESSION['_in_app']);
         }
         header('Referrer-Policy: no-referrer');
         redirect(Auth::safeNext((string) ($data['next'] ?? '')) ?? '/app');
@@ -281,6 +289,8 @@ final class Mobile
         json_response([
             'status' => 'ok', 'comments' => $comments, 'counts' => $inbox['counts'], 'more' => $inbox['more'],
             'saved' => Community::savedReplies($uid), 'problems' => array_values(Community::problems($uid)), 'has_channels' => (bool) $inbox['channels'], 'ai' => Assistant::enabled(),
+            'report_reasons' => Community::REPORT_REASONS,
+            'blocked' => array_map(static fn (array $b): array => ['id' => (int) $b['id'], 'network' => $b['provider'], 'author' => $b['author_name']], Community::blocked($uid)),
         ]);
     }
 

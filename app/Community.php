@@ -128,6 +128,17 @@ final class Community
         return ['comments' => array_slice($rows, 0, self::PAGE), 'items' => $items, 'counts' => $counts, 'channels' => $channels, 'more' => $more];
     }
 
+    /** Why someone reports a comment. */
+    public const REPORT_REASONS = ['spam' => 'Spam or a scam', 'abuse' => 'Harassment or hate', 'sexual' => 'Sexual content', 'violence' => 'Violence or threats', 'other' => 'Something else'];
+
+    /** People this workspace has blocked: their comments no longer come into the inbox. */
+    public static function blocked(int $uid): array
+    {
+        $stmt = Database::connection()->prepare('SELECT id, provider, author_name, created_at FROM blocked_authors WHERE user_id = :uid ORDER BY id DESC');
+        $stmt->execute(['uid' => $uid]);
+        return $stmt->fetchAll();
+    }
+
     /** Saved replies allowed on the Free plan. Paid plans have no practical limit. */
     public const SAVED_FREE = 1;
     private const SAVED_MAX = 300;
@@ -194,9 +205,42 @@ final class Community
             self::done($back, 'Saved reply deleted.');
         }
 
+        if ($action === 'unblock') {
+            Database::connection()->prepare('DELETE FROM blocked_authors WHERE id = :id AND user_id = :uid')->execute(['id' => (int) ($_POST['blocked_id'] ?? 0), 'uid' => $uid]);
+            self::done($back, 'Unblocked. Their new comments will show up again.');
+        }
+
         $comment = self::find($uid, (int) ($_POST['id'] ?? 0));
         if ($comment === null) {
             self::done($back, 'That comment is no longer in your inbox.');
+        }
+
+        if ($action === 'report') {
+            $reason = array_key_exists((string) ($_POST['reason'] ?? ''), self::REPORT_REASONS) ? (string) $_POST['reason'] : 'other';
+            $pdo = Database::connection();
+            $pdo->prepare('INSERT INTO comment_reports (user_id, channel_id, external_id, network, author_name, body, item_url, reason, reported_by, created_at) VALUES (:uid, :cid, :ext, :net, :name, :body, :url, :reason, :by, :now)')
+                ->execute(['uid' => $uid, 'cid' => (int) $comment['channel_id'], 'ext' => (string) $comment['external_id'], 'net' => (string) $comment['provider'], 'name' => (string) $comment['author_name'],
+                    'body' => (string) $comment['body'], 'url' => $comment['item_url'], 'reason' => $reason, 'by' => (int) (Auth::person()['id'] ?? $uid), 'now' => Database::now()]);
+            // Out of the inbox at once, and it stays out when comments are read again.
+            $pdo->prepare('DELETE FROM comments WHERE id = :id AND user_id = :uid')->execute(['id' => (int) $comment['id'], 'uid' => $uid]);
+            $network = self::NETWORKS[$comment['provider']] ?? ucfirst((string) $comment['provider']);
+            $text = sprintf("A comment was reported in the atwebtech inbox.\n\nReason: %s\nNetwork: %s\nFrom: %s\nComment: %s\nLink: %s\nWorkspace: %d\n\nSee all reports: %s",
+                self::REPORT_REASONS[$reason], $network, (string) $comment['author_name'], mb_substr((string) $comment['body'], 0, 1000), (string) ($comment['item_url'] ?? '-'), $uid, absolute_url('/admin/reports'));
+            Mailer::send((string) config('contact.email'), 'Comment reported: ' . self::REPORT_REASONS[$reason], '<pre style="font:14px/1.5 sans-serif;white-space:pre-wrap">' . e($text) . '</pre>', $text);
+            self::done($back, 'Reported and removed from your inbox. Our team reviews reports within 24 hours.');
+        }
+        if ($action === 'block') {
+            $pdo = Database::connection();
+            $name = (string) $comment['author_name'];
+            $exists = $pdo->prepare('SELECT 1 FROM blocked_authors WHERE user_id = :uid AND provider = :p AND author_name = :n');
+            $exists->execute(['uid' => $uid, 'p' => (string) $comment['provider'], 'n' => $name]);
+            if (!$exists->fetchColumn()) {
+                $pdo->prepare('INSERT INTO blocked_authors (user_id, provider, author_name, created_at) VALUES (:uid, :p, :n, :now)')->execute(['uid' => $uid, 'p' => (string) $comment['provider'], 'n' => $name, 'now' => Database::now()]);
+            }
+            // Their comments leave the inbox now. New ones are skipped when comments are read.
+            $pdo->prepare('DELETE FROM comments WHERE user_id = :uid AND author_name = :n AND channel_id IN (SELECT id FROM channels WHERE user_id = :uid2 AND provider = :p)')
+                ->execute(['uid' => $uid, 'n' => $name, 'uid2' => $uid, 'p' => (string) $comment['provider']]);
+            self::done($back, 'Blocked ' . $name . '. Their comments won’t appear in your inbox.');
         }
         $back .= '#cm-' . (int) $comment['id'];
 
@@ -506,8 +550,18 @@ final class Community
         $update = $pdo->prepare('UPDATE comments SET body = :body, likes = :likes, replies = :replies, item_title = COALESCE(:title, item_title), fetched_at = :now WHERE id = :id');
         $insert = $pdo->prepare('INSERT INTO comments (user_id, channel_id, post_id, external_id, item_id, item_title, item_url, author_name, author_avatar, author_url, is_own, body, likes, replies, published_at, state, fetched_at)
             VALUES (:uid, :cid, :pid, :ext, :item, :title, :url, :name, :avatar, :aurl, :own, :body, :likes, :replies, :at, :state, :now)');
+        $blocked = $pdo->prepare('SELECT author_name FROM blocked_authors WHERE user_id = :uid AND provider = :p');
+        $blocked->execute(['uid' => (int) $channel['user_id'], 'p' => (string) $channel['provider']]);
+        $blocked = array_flip($blocked->fetchAll(PDO::FETCH_COLUMN));
+        $reported = $pdo->prepare('SELECT external_id FROM comment_reports WHERE channel_id = :cid');
+        $reported->execute(['cid' => (int) $channel['id']]);
+        $reported = array_flip($reported->fetchAll(PDO::FETCH_COLUMN));
         foreach ($comments as $c) {
             if ($c['external_id'] === '' || trim($c['body']) === '') {
+                continue;
+            }
+            // Blocked people and reported comments stay out of the inbox.
+            if (isset($blocked[$c['author_name']]) || isset($reported[$c['external_id']])) {
                 continue;
             }
             $at = strtotime($c['published_at']);

@@ -14,6 +14,8 @@
     <a href="/admin/subscribers"<?= $section === 'subscribers' ? ' aria-current="page"' : '' ?>>Subscribers</a>
     <a href="/admin/knowledge"<?= $section === 'knowledge' ? ' aria-current="page"' : '' ?>>Chatbot</a>
     <a href="/admin/push"<?= $section === 'push' ? ' aria-current="page"' : '' ?>>Push</a>
+<?php $openReports = (int) Database::connection()->query('SELECT COUNT(*) FROM comment_reports WHERE handled_at IS NULL')->fetchColumn(); ?>
+    <a href="/admin/reports"<?= $section === 'reports' ? ' aria-current="page"' : '' ?>>Reports<?php if ($openReports > 0): ?> <span class="adm-badge"><?= $openReports ?></span><?php endif; ?></a>
   </nav>
   <div class="adm-tools">
 <?php if ((int) ($user['id'] ?? 0) > 0): ?>

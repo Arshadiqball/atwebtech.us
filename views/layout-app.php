@@ -31,7 +31,7 @@ $theme = Auth::person()['theme'] ?? 'light';
   <script src="<?= e(asset('js/meta-pixel.js')) ?>" data-pixel="<?= e(Meta::pixelId()) ?>" data-pageview="0" defer></script>
 <?php endif; ?>
 </head>
-<body class="acct">
+<body class="acct<?= in_app_ios() ? ' in-app' : '' ?>">
   <a class="skip-link" href="#main">Skip to content</a>
 <?= $content ?>
 </body>

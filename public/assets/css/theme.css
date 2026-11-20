@@ -309,3 +309,7 @@ body.acct { background: var(--a-bg); color: var(--ink); }
   .ap-head-acts { justify-content: flex-start; }
   .ws-btn { white-space: nowrap; }
 }
+
+/* Pages opened from the iPhone or iPad app: no plans, prices or upgrade links (App Store rules). */
+.in-app a[href^="/app/billing"], .in-app a[href^="/upgrade"], .in-app a[href^="/pricing"], .in-app .ws-upgrade { display: none !important; }
+

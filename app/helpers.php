@@ -256,3 +256,10 @@ function safe_return_path(?string $path, string $fallback = '/'): string
     }
     return $path;
 }
+
+/** True for a website page opened from the iPhone or iPad app (it must not show plans, prices or upgrade links). */
+function in_app_ios(): bool
+{
+    return ($_SESSION['_in_app'] ?? '') === 'ios';
+}
+

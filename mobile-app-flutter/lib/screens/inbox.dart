@@ -34,6 +34,47 @@ class _InboxScreenState extends State<InboxScreen> {
     if (await act(context, () => api.postForm('/app/community', fields))) await _reload();
   }
 
+  /// Report a comment: pick a reason, then it leaves the inbox and goes to the atwebtech team.
+  Future<void> _report(Map<String, dynamic> comment, Map<String, dynamic> reasons) async {
+    final reason = await showModalBottomSheet<String>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: Column(mainAxisSize: MainAxisSize.min, children: [
+          const ListTile(title: Text('Report this comment', style: TextStyle(fontWeight: FontWeight.w700)), subtitle: Text('It is removed from your inbox and our team reviews it within 24 hours.')),
+          for (final e in reasons.entries) ListTile(leading: const Icon(Icons.flag_outlined), title: Text(e.value.toString()), onTap: () => Navigator.pop(ctx, e.key)),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+    if (reason != null) await _do({'action': 'report', 'id': comment['id'], 'reason': reason});
+  }
+
+  /// Block the person who wrote a comment: their comments stop coming into this inbox.
+  Future<void> _block(Map<String, dynamic> comment) async {
+    final ok = await confirm(context, 'Block ${comment['author']}?', 'Their comments are removed from your inbox and new ones won’t appear. You can unblock them later from “Blocked”.', yes: 'Block');
+    if (ok) await _do({'action': 'block', 'id': comment['id']});
+  }
+
+  void _showBlocked(List<Map<String, dynamic>> blocked) {
+    final app = context.read<AppState>();
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (ctx) => SafeArea(
+        child: ListView(shrinkWrap: true, children: [
+          const ListTile(title: Text('Blocked people', style: TextStyle(fontWeight: FontWeight.w700)), subtitle: Text('Their comments don’t come into your inbox.')),
+          for (final b in blocked)
+            ListTile(
+              leading: const Icon(Icons.block),
+              title: Text(b['author'].toString()),
+              subtitle: Text((app.network(b['network'].toString())['name'] ?? b['network']).toString()),
+              trailing: TextButton(onPressed: () { Navigator.pop(ctx); _do({'action': 'unblock', 'blocked_id': b['id']}); }, child: const Text('Unblock')),
+            ),
+          const SizedBox(height: 8),
+        ]),
+      ),
+    );
+  }
+
   Future<void> _reply(Map<String, dynamic> comment, List<Map<String, dynamic>> saved, bool ai) async {
     final sent = await showModalBottomSheet<bool>(
       context: context,
@@ -55,6 +96,8 @@ class _InboxScreenState extends State<InboxScreen> {
         final saved = (data['saved'] as List).map((e) => Map<String, dynamic>.from(e as Map)).toList();
         final counts = Map<String, dynamic>.from(data['counts'] as Map);
         final problems = (data['problems'] as List).map((e) => e.toString()).toList();
+        final reasons = Map<String, dynamic>.from(data['report_reasons'] as Map? ?? {'other': 'Something else'});
+        final blocked = (data['blocked'] as List? ?? []).map((e) => Map<String, dynamic>.from(e as Map)).toList();
         if (data['has_channels'] != true) {
           return ListView(children: [
             SizedBox(height: 460, child: EmptyView(icon: Icons.forum_outlined, title: 'Answer every comment from one inbox', text: 'Connect YouTube, a Facebook Page, Instagram, Threads, Bluesky or Mastodon. New comments arrive every 30 minutes.', action: 'Connect a channel', onAction: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const ChannelsScreen())))),
@@ -76,6 +119,7 @@ class _InboxScreenState extends State<InboxScreen> {
                     ),
                   ),
                 ActionChip(avatar: const Icon(Icons.refresh, size: 16), label: const Text('Check now'), onPressed: () => _do({'action': 'refresh'})),
+                if (blocked.isNotEmpty) Padding(padding: const EdgeInsets.only(left: 8), child: ActionChip(avatar: const Icon(Icons.block, size: 16), label: Text('Blocked ${blocked.length}'), onPressed: () => _showBlocked(blocked))),
               ]),
             ),
             for (final p in problems) Padding(padding: const EdgeInsets.only(top: 10), child: Callout(p, tone: Tone.warn, icon: Icons.link_off)),
@@ -100,6 +144,15 @@ class _InboxScreenState extends State<InboxScreen> {
                         ]),
                       ),
                       if (cm['url'] != null) IconButton(tooltip: 'Open on the network', icon: Icon(Icons.open_in_new, size: 19, color: c.muted), onPressed: () => app.api.openLink(cm['url'] as String)),
+                      PopupMenuButton<String>(
+                        tooltip: 'More',
+                        icon: Icon(Icons.more_horiz, color: c.muted),
+                        onSelected: (v) => v == 'report' ? _report(cm, reasons) : _block(cm),
+                        itemBuilder: (_) => [
+                          const PopupMenuItem(value: 'report', child: ListTile(dense: true, contentPadding: EdgeInsets.zero, leading: Icon(Icons.flag_outlined), title: Text('Report comment'))),
+                          PopupMenuItem(value: 'block', child: ListTile(dense: true, contentPadding: EdgeInsets.zero, leading: const Icon(Icons.block), title: Text('Block ${cm['author']}'))),
+                        ],
+                      ),
                     ]),
                     const SizedBox(height: 10),
                     Text(cm['text'].toString(), style: TextStyle(color: c.ink, fontSize: 14.5, height: 1.45)),

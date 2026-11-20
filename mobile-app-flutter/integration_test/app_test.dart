@@ -5,6 +5,7 @@
 // It expects the demo content described in the README (posts in every tab, two open comments, a saved
 // reply called "Pricing", one automation, a second workspace) and a server whose AI and networks are faked.
 import 'package:atwebtech/main.dart' as app;
+import 'package:atwebtech/widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
@@ -298,6 +299,24 @@ void main() {
     await waitFor(tester, find.text('Nothing here'));
     await tap(find.textContaining('Answered '));
     await waitFor(tester, find.textContaining('You replied: Thanks for asking'));
+
+    // Report one comment and block the person behind another, then unblock them.
+    Finder menuOf(String author) => find.descendant(of: find.ancestor(of: find.text(author), matching: find.byType(AppCard)), matching: find.byTooltip('More'));
+    await tap(menuOf('@mike_r'));
+    await tap(find.text('Report comment'));
+    await tap(find.text('Spam or a scam'));
+    await waitGone(tester, find.text('@mike_r'));
+    await rest(tester, 3200); // let the message clear
+    await tap(menuOf('@sara.designs'));
+    await tap(find.textContaining('Block @sara.designs'));
+    await tap(find.widgetWithText(TextButton, 'Block'));
+    await waitGone(tester, find.text('@sara.designs'));
+    await waitFor(tester, find.text('Blocked 1'));
+    await tester.ensureVisible(find.text('Blocked 1'));
+    await rest(tester, 400);
+    await tap(find.text('Blocked 1'));
+    await tap(find.text('Unblock'));
+    await waitGone(tester, find.text('Blocked 1'));
     await tester.ensureVisible(find.text('Check now'));
     await rest(tester, 400);
     await tap(find.text('Check now'));
@@ -356,7 +375,7 @@ void main() {
     await waitFor(tester, find.text('Your library is empty'));
     await back();
 
-    await tester.scrollUntilVisible(find.text('Plan & billing'), 200, scrollable: find.byType(Scrollable).last);
+    await tester.scrollUntilVisible(find.text('Your plan'), 200, scrollable: find.byType(Scrollable).last);
     await tap(find.text('Account'));
     await waitFor(tester, find.text('Change password'));
     await shot('account');
@@ -378,8 +397,8 @@ void main() {
     await back();
     await tester.scrollUntilVisible(find.text('Walk Tester'), -300, scrollable: find.byType(Scrollable).last);
 
-    await tester.scrollUntilVisible(find.text('Plan & billing'), 200, scrollable: find.byType(Scrollable).last);
-    await tap(find.text('Plan & billing'));
+    await tester.scrollUntilVisible(find.text('Your plan'), 200, scrollable: find.byType(Scrollable).last);
+    await tap(find.text('Your plan'));
     await waitFor(tester, find.text('Current plan'));
     await shot('plan');
     await back();

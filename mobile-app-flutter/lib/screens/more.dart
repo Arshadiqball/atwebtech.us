@@ -101,7 +101,7 @@ class MoreScreen extends StatelessWidget {
           const SectionTitle('You'),
           group([
             tile(Icons.person_outline, 'Account', 'Name, password, email alerts', () => push(const AccountScreen())),
-            tile(Icons.workspace_premium_outlined, 'Plan & billing', '${app.workspace['plan'] ?? 'Free'} plan', () => push(const PlanScreen())),
+            tile(Icons.workspace_premium_outlined, Platform.isIOS ? 'Your plan' : 'Plan & billing', '${app.workspace['plan'] ?? 'Free'} plan', () => push(const PlanScreen())),
             ListTile(
               leading: Container(width: 34, height: 34, decoration: BoxDecoration(color: c.soft, borderRadius: BorderRadius.circular(10)), child: Icon(Icons.volume_up_outlined, size: 19, color: c.ink2)),
               title: const Text('Sound effects', style: TextStyle(fontWeight: FontWeight.w600)),
@@ -240,11 +240,11 @@ class _AutomationsScreenState extends State<AutomationsScreen> {
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                   Text('Let atwebtech do the weekly work', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700, color: c.ink)),
                   const SizedBox(height: 4),
-                  Text(d['paid'] == true ? 'Turn your blog into posts, have the AI Assistant write next week’s plan, and answer common questions automatically.' : 'On Essentials and Team, your blog turns into posts, the AI Assistant writes next week’s plan, and common questions get answered.', style: TextStyle(color: c.ink2, height: 1.4)),
+                  Text(d['paid'] == true ? 'Turn your blog into posts, have the AI Assistant write next week’s plan, and answer common questions automatically.' : (Platform.isIOS ? 'Automations turn your blog into posts, have the AI Assistant write next week’s plan, and answer common questions. They aren’t part of your current plan.' : 'On Essentials and Team, your blog turns into posts, the AI Assistant writes next week’s plan, and common questions get answered.'), style: TextStyle(color: c.ink2, height: 1.4)),
                   const SizedBox(height: 14),
-                  if (d['paid'] != true)
+                  if (d['paid'] != true && !Platform.isIOS)
                     FilledButton(onPressed: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PlanScreen())), child: const Text('See plans'))
-                  else if (canEdit)
+                  else if (d['paid'] == true && canEdit)
                     FilledButton.icon(onPressed: () => openWebPage(context, '/app/automations'), icon: const Icon(Icons.add), label: const Text('Set up an automation')),
                 ]),
               ),
@@ -550,7 +550,7 @@ class PlanScreen extends StatelessWidget {
     final app = context.read<AppState>();
     final c = context.c;
     return Scaffold(
-      appBar: AppBar(title: const Text('Plan & billing')),
+      appBar: AppBar(title: Text(Platform.isIOS ? 'Your plan' : 'Plan & billing')),
       body: Loaded<Map<String, dynamic>>(
         load: () => app.api.get('/api/mobile/account'),
         builder: (context, d, reload) {
@@ -573,34 +573,49 @@ class PlanScreen extends StatelessWidget {
                   Text('${plan['channels_used']} of ${plan['source'] == 'admin' ? 'unlimited' : plan['channel_limit']} channels used', style: TextStyle(color: c.muted)),
                 ]),
               ),
-              const SectionTitle('Plans'),
-              for (final o in options)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: AppCard(
-                    accent: o['slug'] == plan['slug'] ? c.greenInk : null,
+              // Apple's rules: the iPhone and iPad app shows the plan you have and what it includes, and sells nothing.
+              if (Platform.isIOS) ...[
+                const SectionTitle('Included in your plan'),
+                for (final o in options.where((o) => o['slug'] == plan['slug']))
+                  AppCard(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      Row(children: [
-                        Expanded(child: Text(o['name'].toString(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: c.ink))),
-                        if (o['slug'] == plan['slug']) const Pill('Your plan', tone: Tone.ok) else if (o['badge'] != null) Pill(o['badge'].toString(), tone: Tone.info),
-                      ]),
-                      Text((o['rate'] as num) == 0 ? 'Free' : '\$${(o['rate'] as num).toStringAsFixed(0)} per channel a month · yearly billing saves ${12 - (plan['yearly_months'] as num).toInt()} months', style: TextStyle(color: c.ink2)),
-                      const SizedBox(height: 8),
-                      for (final f in (o['features'] as List).take(6))
+                      for (final f in (o['features'] as List))
                         Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 2),
+                          padding: const EdgeInsets.symmetric(vertical: 3),
                           child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(Icons.check, size: 16, color: c.greenInk), const SizedBox(width: 8), Expanded(child: Text(f.toString(), style: TextStyle(color: c.ink2, fontSize: 13.5)))]),
                         ),
                     ]),
                   ),
-                ),
-              const SizedBox(height: 6),
-              if (plan['billing_enabled'] == true) ...[
-                FilledButton.icon(onPressed: () => openWebPage(context, '/app/billing', external: true), icon: const Icon(Icons.open_in_new, size: 18), label: Text(plan['paid'] == true && plan['source'] != 'admin' ? 'Manage plan and payment' : 'Upgrade on atwebtech.us')),
-                const SizedBox(height: 8),
-                Text('Payments are handled on the atwebtech website by Stripe. It opens in your browser, already signed in. Pull down here afterwards to see your new plan.', style: TextStyle(color: c.muted, fontSize: 12.5, height: 1.4)),
-              ] else
-                const Callout('Paid plans aren’t open for purchase yet.', tone: Tone.info, icon: Icons.info_outline),
+              ] else ...[
+                const SectionTitle('Plans'),
+                for (final o in options)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 10),
+                    child: AppCard(
+                      accent: o['slug'] == plan['slug'] ? c.greenInk : null,
+                      child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                        Row(children: [
+                          Expanded(child: Text(o['name'].toString(), style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: c.ink))),
+                          if (o['slug'] == plan['slug']) const Pill('Your plan', tone: Tone.ok) else if (o['badge'] != null) Pill(o['badge'].toString(), tone: Tone.info),
+                        ]),
+                        Text((o['rate'] as num) == 0 ? 'Free' : '\$${(o['rate'] as num).toStringAsFixed(0)} per channel a month · yearly billing saves ${12 - (plan['yearly_months'] as num).toInt()} months', style: TextStyle(color: c.ink2)),
+                        const SizedBox(height: 8),
+                        for (final f in (o['features'] as List).take(6))
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 2),
+                            child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [Icon(Icons.check, size: 16, color: c.greenInk), const SizedBox(width: 8), Expanded(child: Text(f.toString(), style: TextStyle(color: c.ink2, fontSize: 13.5)))]),
+                          ),
+                      ]),
+                    ),
+                  ),
+                const SizedBox(height: 6),
+                if (plan['billing_enabled'] == true) ...[
+                  FilledButton.icon(onPressed: () => openWebPage(context, '/app/billing', external: true), icon: const Icon(Icons.open_in_new, size: 18), label: Text(plan['paid'] == true && plan['source'] != 'admin' ? 'Manage plan and payment' : 'Upgrade on atwebtech.us')),
+                  const SizedBox(height: 8),
+                  Text('Payments are handled on the atwebtech website by Stripe. It opens in your browser, already signed in. Pull down here afterwards to see your new plan.', style: TextStyle(color: c.muted, fontSize: 12.5, height: 1.4)),
+                ] else
+                  const Callout('Paid plans aren’t open for purchase yet.', tone: Tone.info, icon: Icons.info_outline),
+              ],
             ]),
           );
         },

@@ -395,6 +395,10 @@ return [
     ['POST', '/review/{token}', [Approvals::class, 'decide']],
     ['GET', '/upgrade', [BillingHandler::class, 'upgrade']],
     ['GET', '/app/billing', static function (): void {
+        if (in_app_ios()) {
+            flash('notice', 'Plans can’t be changed in the app.');
+            redirect('/app');
+        }
         Workspace::render('billing', 'workspace/billing', 'Billing', static fn (array $user): array => BillingHandler::pageState($user));
     }],
     ['POST', '/app/billing/checkout', [BillingHandler::class, 'checkout']],
@@ -604,6 +608,21 @@ return [
         ]);
     }],
     ['POST', '/admin/push', [Broadcasts::class, 'send']],
+    ['GET', '/admin/reports', static function (): void {
+        $user = Auth::requireAdmin();
+        $rows = Database::connection()->query('SELECT r.*, u.email AS workspace_email FROM comment_reports r LEFT JOIN users u ON u.id = r.user_id ORDER BY r.handled_at IS NOT NULL, r.id DESC LIMIT 100')->fetchAll();
+        View::render('admin-reports', ['user' => $user, 'rows' => $rows], [
+            'title' => 'Reported comments | atwebtech', 'description' => 'Comments people reported from their inbox.', 'layout' => 'app', 'noindex' => true, 'admin' => true,
+        ]);
+    }],
+    ['POST', '/admin/reports', static function (): void {
+        Auth::requireAdmin();
+        if (Security::verifyCsrf($_POST['_token'] ?? null)) {
+            Database::connection()->prepare('UPDATE comment_reports SET handled_at = :now WHERE id = :id AND handled_at IS NULL')->execute(['now' => Database::now(), 'id' => (int) ($_POST['id'] ?? 0)]);
+            flash('notice', 'Marked as handled.');
+        }
+        redirect('/admin/reports');
+    }],
     ['GET', '/admin/knowledge', static function (): void {
         View::render('admin-knowledge', ['user' => Auth::requireAdmin(), 'knowledge' => Chatbot::knowledge()], [
             'title' => 'Chatbot knowledge | atwebtech',
