@@ -97,6 +97,20 @@ return [
         ]);
     }],
 
+    ['GET', '/guide', static function (): void {
+        View::render('guides', ['guides' => data('guides')], ['title' => 'Video guides | atwebtech', 'description' => 'Short narrated videos with written steps and PDFs: create an account, connect your social accounts, schedule your first post, reply to comments and read your results.']);
+    }],
+    ['GET', '/guide/{slug}', static function (string $slug): void {
+        $guides = data('guides');
+        $at = array_search($slug, array_column($guides, 'slug'), true);
+        if ($at === false) {
+            not_found();
+        }
+        View::render('guide', ['guide' => $guides[$at], 'number' => $at + 1, 'previous' => $guides[$at - 1] ?? null, 'next' => $guides[$at + 1] ?? null], [
+            'title' => $guides[$at]['title'] . ': video guide | atwebtech', 'description' => $guides[$at]['summary'] . ' A ' . $guides[$at]['seconds'] . '-second video with ' . count($guides[$at]['steps']) . ' written steps.',
+        ]);
+    }],
+
     ['GET', '/faq', page('faq', 'Frequently asked questions | atwebtech', 'Answers about what atwebtech is, who it is for, the demo, integration status, launch updates, and how to contact the team.')],
     ['GET', '/about', page('about', 'About | atwebtech', 'atwebtech is built to make everyday social work simpler, with a focus on clarity, organization, and honest product status.')],
     ['GET', '/contact', page('contact', 'Contact | atwebtech', 'Send the atwebtech team a question, feedback, or partnership enquiry.')],
@@ -693,7 +707,7 @@ return [
     }],
 
     ['GET', '/sitemap.xml', static function (): void {
-        $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/faq', '/about', '/contact', '/privacy', '/data-deletion', '/terms', '/wordglow/', '/wordglow-privacy.html'];
+        $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/guide', '/faq', '/about', '/contact', '/privacy', '/data-deletion', '/terms', '/wordglow/', '/wordglow-privacy.html'];
         $paths[] = '/wordglow/words/';
         foreach (glob(BASE_PATH . '/public/wordglow/words/*/index.html') ?: [] as $f) {
             $paths[] = '/wordglow/words/' . basename(dirname($f)) . '/';
@@ -703,6 +717,9 @@ return [
         }
         foreach (array_keys(data('solutions')) as $slug) {
             $paths[] = '/solutions/' . $slug;
+        }
+        foreach (data('guides') as $g) {
+            $paths[] = '/guide/' . $g['slug'];
         }
         foreach (array_keys(data('articles')) as $slug) {
             $paths[] = '/resources/' . $slug;

@@ -16,7 +16,7 @@ Run it against a LOCAL server with a seeded demo account, never the live site:
 
 Needs: pip install playwright pillow, Google Chrome, ffmpeg.
 """
-import datetime, html, json, os, re, shutil, subprocess, sys, tempfile
+import datetime, html, json, os, re, shutil, subprocess, sys, tempfile, time
 
 from playwright.sync_api import sync_playwright
 
@@ -26,6 +26,7 @@ BASE = os.environ.get('GUIDE_BASE', 'http://localhost:8000')
 DEMO = (os.environ.get('GUIDE_EMAIL', 'demo@example.test'), os.environ.get('GUIDE_PASSWORD', 'DemoPass#123'))
 NEW = ('sara@example.test', 'GuidePass#123')
 W, H = 1280, 720
+VOICE = os.environ.get('GUIDE_VOICE', 'Samantha')  # a voice of the Mac's `say` command; empty for silent videos
 
 # The pointer, the highlight ring and the caption drawn over the page while recording.
 OVERLAY = r"""
@@ -71,7 +72,25 @@ class Recorder:
                                        storage_state=state, bypass_csp=True, color_scheme='light')
         self.ctx.add_init_script(OVERLAY)
         self.page = self.ctx.new_page()
+        self.started, self.clips, self.speaking_until = time.monotonic(), [], 0.0  # the video starts with the page
         self.page.set_default_timeout(15000)
+
+    # ---- Voice-over -----------------------------------------------------------------------------
+    def say(self, text):
+        """Speaks a line from now on in the video. The clips are mixed into the video at the end."""
+        if not VOICE:
+            return
+        spoken = re.sub(r'\*\*\+\*\*', 'plus', text).replace('**', '').replace('atwebtech.us', 'at web tech dot U S').replace('atwebtech', 'at web tech')
+        clip = os.path.join(self.tmp, 'say-%02d.aiff' % len(self.clips))
+        subprocess.run(['say', '-v', VOICE, '-r', '168', '-o', clip, spoken], check=True)
+        length = float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', clip], capture_output=True, text=True).stdout.strip() or 0)
+        now = time.monotonic()
+        self.clips.append((now - self.started, clip))
+        self.speaking_until = now + length
+
+    def listen(self, least):
+        """Waits until the current line has been spoken, and at least this long."""
+        self.wait(max(least, self.speaking_until - time.monotonic() + 0.45))
 
     # ---- What a step can do ----------------------------------------------------------------------
     def js(self, call):
@@ -141,11 +160,12 @@ class Recorder:
     # ---- Steps -----------------------------------------------------------------------------------
     def step(self, title, text, action=None, caption_top=False, read=1.6):
         self.js('caption(%s, %s)' % (json.dumps(title), 'true' if caption_top else 'false'))
+        self.say(text)
         self.wait(0.9)
         if action:
             action(self)
         self.js('caption(%s, %s)' % (json.dumps(title), 'true' if caption_top else 'false'))  # a new page starts without it
-        self.wait(read)
+        self.listen(read)
         name = 'step-%02d.jpg' % (len(self.steps) + 1)
         self.js('clean(true)')
         self.page.screenshot(path=os.path.join(self.dir, name), type='jpeg', quality=84)
@@ -153,20 +173,29 @@ class Recorder:
         self.steps.append({'title': title, 'text': text, 'image': name})
         self.js('ring(0)')
 
-    def title_card(self, title, sub, seconds=2.2):
+    def title_card(self, title, sub, seconds=2.2, say=None):
         self.js('caption("")')
         self.js('card(%s, %s)' % (json.dumps(title), json.dumps(sub)))
-        self.wait(seconds)
+        self.say(say or title)
+        self.listen(seconds)
         self.js('card("")')
 
     def finish(self):
-        self.title_card('That\'s it.', 'More guides: atwebtech.us, then Guide in the menu', 2.4)
+        self.title_card('That\'s it.', 'More guides: atwebtech.us, then Guide in the menu', 2.4, say='That\'s it. You will find more guides under Guide, in the menu.')
         video = self.page.video
         self.ctx.close()
         src = video.path()
         out = os.path.join(self.dir, 'video.mp4')
-        subprocess.run(['ffmpeg', '-v', 'error', '-y', '-i', src, '-vf', 'fps=24,format=yuv420p', '-c:v', 'libx264', '-preset', 'slow', '-crf', '27',
-                        '-movflags', '+faststart', '-an', out], check=True)
+        cmd = ['ffmpeg', '-v', 'error', '-y', '-i', src]
+        for _, clip in self.clips:
+            cmd += ['-i', clip]
+        if self.clips:  # every line starts where it was spoken during the recording
+            delays = ';'.join('[%d:a]adelay=%d:all=1[a%d]' % (i + 1, int(at * 1000), i) for i, (at, _) in enumerate(self.clips))
+            mix = ''.join('[a%d]' % i for i in range(len(self.clips))) + 'amix=inputs=%d:normalize=0,loudnorm=I=-17:TP=-1.5[voice]' % len(self.clips)
+            cmd += ['-filter_complex', '[0:v]fps=24,format=yuv420p[v];' + delays + ';' + mix, '-map', '[v]', '-map', '[voice]', '-c:a', 'aac', '-b:a', '80k', '-ac', '1', '-ar', '44100']
+        else:
+            cmd += ['-vf', 'fps=24,format=yuv420p', '-an']
+        subprocess.run(cmd + ['-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-movflags', '+faststart', out], check=True)
         subprocess.run(['ffmpeg', '-v', 'error', '-y', '-ss', '1', '-i', out, '-frames:v', '1', '-q:v', '3', os.path.join(self.dir, 'poster.jpg')], check=True)
         seconds = float(subprocess.run(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', out], capture_output=True, text=True).stdout.strip() or 0)
         shutil.rmtree(self.tmp, ignore_errors=True)

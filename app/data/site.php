@@ -20,6 +20,7 @@ return [
     ],
     'resources' => [
         ['label' => 'Getting started', 'desc' => 'Set up your workspace and first posts', 'href' => '/resources/getting-started', 'icon' => 'rocket-launch'],
+        ['label' => 'Video guides', 'desc' => 'Short videos with step-by-step instructions', 'href' => '/guide', 'icon' => 'play'],
         ['label' => 'Guides', 'desc' => 'Practical articles for everyday social work', 'href' => '/resources', 'icon' => 'book-open'],
         ['label' => 'FAQ', 'desc' => 'Answers about plans, channels, and features', 'href' => '/faq', 'icon' => 'question'],
         ['label' => 'Contact', 'desc' => 'Send the team a question or feedback', 'href' => '/contact', 'icon' => 'envelope-simple'],
@@ -44,6 +45,7 @@ return [
         ],
         'Resources' => [
             ['All guides', '/resources'],
+            ['Video guides', '/guide'],
             ['Getting started', '/resources/getting-started'],
             ['Weekly content calendar', '/resources/weekly-content-calendar'],
             ['Adapting ideas by channel', '/resources/adapting-ideas-for-each-channel'],

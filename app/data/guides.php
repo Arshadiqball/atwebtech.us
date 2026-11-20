@@ -48,8 +48,8 @@ return json_decode(<<<'JSON'
     "image": "step-07.jpg"
    }
   ],
-  "seconds": 62,
-  "size": 706450
+  "seconds": 94,
+  "size": 1614020
  },
  {
   "slug": "connect-channels",
@@ -88,8 +88,8 @@ return json_decode(<<<'JSON'
     "image": "step-06.jpg"
    }
   ],
-  "seconds": 41,
-  "size": 763503
+  "seconds": 70,
+  "size": 1522386
  },
  {
   "slug": "first-post",
@@ -133,8 +133,8 @@ return json_decode(<<<'JSON'
     "image": "step-07.jpg"
    }
   ],
-  "seconds": 42,
-  "size": 669914
+  "seconds": 72,
+  "size": 1421274
  },
  {
   "slug": "manage-queue",
@@ -173,8 +173,8 @@ return json_decode(<<<'JSON'
     "image": "step-06.jpg"
    }
   ],
-  "seconds": 48,
-  "size": 1166586
+  "seconds": 64,
+  "size": 1782469
  },
  {
   "slug": "reply-comments",
@@ -213,8 +213,8 @@ return json_decode(<<<'JSON'
     "image": "step-06.jpg"
    }
   ],
-  "seconds": 41,
-  "size": 694137
+  "seconds": 60,
+  "size": 1232836
  },
  {
   "slug": "insights",
@@ -253,8 +253,8 @@ return json_decode(<<<'JSON'
     "image": "step-06.jpg"
    }
   ],
-  "seconds": 36,
-  "size": 859503
+  "seconds": 62,
+  "size": 1441306
  },
  {
   "slug": "automations",
@@ -288,8 +288,8 @@ return json_decode(<<<'JSON'
     "image": "step-05.jpg"
    }
   ],
-  "seconds": 38,
-  "size": 708116
+  "seconds": 60,
+  "size": 1319294
  },
  {
   "slug": "account",
@@ -328,8 +328,8 @@ return json_decode(<<<'JSON'
     "image": "step-06.jpg"
    }
   ],
-  "seconds": 38,
-  "size": 519126
+  "seconds": 64,
+  "size": 1088241
  }
 ]
 JSON, true);
