@@ -1,0 +1,537 @@
+# atwebtech social calendar: 21 Nov to 20 Dec 2026
+
+One post a day. Images are 1080 x 1350 (feed posts on Instagram, Facebook, LinkedIn, Threads, Bluesky). Videos are 1080 x 1920 with no sound, for Reels, Shorts and TikTok: add a trending sound in the app when you post, it helps reach.
+
+**Black Friday offer in these posts:** 50% off your first 3 months on Essentials or Team, 23 Nov to 1 Dec, code `BLACKFRIDAY50`. Create this promo code in Stripe before 23 Nov or the posts promise something checkout cannot give.
+
+## Day 1 · Sat 21 Nov · Relatable · video
+
+File: `videos/day01-you-don-t-need-to-post-every-day.mp4`
+
+You don't need to post every day. You need a queue.
+
+The people who look "always online" usually aren't. They sit down once, write the week, schedule it, and get on with their work.
+
+Try it this Sunday: 30 minutes, five posts, all scheduled.
+
+Save this for Sunday. 📌
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #contentplanning #batchcontent
+
+---
+
+## Day 2 · Sun 22 Nov · Black Friday · image
+
+File: `images/day02-something-is-coming-tomorrow.png`
+
+Tomorrow. 👀
+
+If you've been meaning to get your social media under control before the new year, this is the week.
+
+Turn on post notifications so you don't miss it.
+
+#blackfriday #blackfridaydeals #cybermonday #smallbusiness #socialmediamarketing #marketingtools
+
+---
+
+## Day 3 · Mon 23 Nov · Black Friday · image
+
+File: `images/day03-black-friday.png`
+
+Black Friday is open. 🖤
+
+50% off your first 3 months of atwebtech, on Essentials or Team.
+
+What you get:
+✅ One queue for Instagram, Facebook, LinkedIn, YouTube, Pinterest, Threads, Bluesky and Mastodon
+✅ Write a post once, publish it everywhere
+✅ An AI assistant for captions when you're stuck
+✅ Every comment in one inbox
+
+Use code BLACKFRIDAY50 at checkout. Ends 1 December.
+
+👉 atwebtech.us
+
+#blackfriday #blackfridaydeals #cybermonday #smallbusiness #socialmediamarketing #marketingtools
+
+---
+
+## Day 4 · Tue 24 Nov · How-to · image
+
+File: `images/day04-plan-a-week-of-posts-in-20-minutes.png`
+
+A week of posts in 20 minutes. Here's the routine:
+
+1. Pick 5 topics your customers ask about
+2. Write one short post per topic (3 or 4 lines is enough)
+3. Add a photo you already have on your phone
+4. Schedule one per day
+5. Close the app
+
+That's it. No daily scramble.
+
+Save this, and try it before Monday. 📌
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #contentplanning #contentcalendar
+
+---
+
+## Day 5 · Wed 25 Nov · Black Friday · video
+
+File: `videos/day05-half-price-three-months.mp4`
+
+Half price for three months. 🖤
+
+One place to plan, schedule and publish to every network you use. Write once, publish everywhere, and answer every comment from one inbox.
+
+Code BLACKFRIDAY50 · Essentials or Team · ends 1 December
+
+👉 atwebtech.us
+
+#blackfriday #blackfridaydeals #cybermonday #smallbusiness #socialmediamarketing #marketingtools
+
+---
+
+## Day 6 · Thu 26 Nov · Engagement · image
+
+File: `images/day06-how-do-you-post.png`
+
+Be honest. 😅
+
+A: I batch my posts once a week
+B: I open the app every morning and hope for an idea
+
+Comment A or B. (No judgement. We've all been B.)
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #contentcreation
+
+---
+
+## Day 7 · Fri 27 Nov · Black Friday · image
+
+File: `images/day07-black-friday.png`
+
+It's Black Friday. 🖤
+
+50% off your first 3 months of atwebtech.
+
+If "be more consistent on social" is on your list for 2027, this is the cheapest it will be to start.
+
+Code: BLACKFRIDAY50
+Plans: Essentials or Team
+Ends: 1 December
+
+👉 atwebtech.us
+
+#blackfriday #blackfridaydeals #cybermonday #smallbusiness #socialmediamarketing #marketingtools
+
+---
+
+## Day 8 · Sat 28 Nov · Product · image
+
+File: `images/day08-your-whole-week-already-scheduled.png`
+
+This is what a calm Monday looks like.
+
+Every post for the week, lined up and waiting. No "what do I post today?" at 8am.
+
+Black Friday: 50% off your first 3 months with code BLACKFRIDAY50. Ends 1 December.
+
+👉 atwebtech.us
+
+#blackfriday #blackfridaydeals #cybermonday #smallbusiness #socialmediamarketing #marketingtools #contentcalendar
+
+---
+
+## Day 9 · Sun 29 Nov · How-to · video
+
+File: `videos/day09-3-posts-any-small-business-can-write-t.mp4`
+
+Out of ideas? Here are 3 posts any small business can write today:
+
+1. Answer the question customers ask you most
+2. Show how something is made, packed or prepared
+3. Introduce a real person on your team (or yourself)
+
+Write all three now, schedule them across the week, and you're covered.
+
+Which one are you posting first? 👇
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #contentideas #postideas
+
+---
+
+## Day 10 · Mon 30 Nov · Black Friday · image
+
+File: `images/day10-cyber-monday.png`
+
+Cyber Monday. Two days left. ⏳
+
+50% off your first 3 months of atwebtech, on Essentials or Team.
+
+Plan December now and walk into the holidays with your posts already scheduled.
+
+Code: BLACKFRIDAY50 · Ends tomorrow night
+
+👉 atwebtech.us
+
+#blackfriday #blackfridaydeals #cybermonday #smallbusiness #socialmediamarketing #marketingtools
+
+---
+
+## Day 11 · Tue 1 Dec · Black Friday · image
+
+File: `images/day11-last-day.png`
+
+Last day. ⏰
+
+50% off your first 3 months of atwebtech ends tonight.
+
+Code: BLACKFRIDAY50
+Plans: Essentials or Team
+
+After today it's back to full price.
+
+👉 atwebtech.us
+
+#blackfriday #blackfridaydeals #cybermonday #smallbusiness #socialmediamarketing #marketingtools
+
+---
+
+## Day 12 · Wed 2 Dec · Relatable · image
+
+File: `images/day12-posting-on-social-media.png`
+
+Same business. Same hours in the day. Very different week.
+
+The difference isn't talent or time. It's deciding once, in advance, instead of deciding every morning.
+
+Which side are you on right now? 👇
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #contentplanning
+
+---
+
+## Day 13 · Thu 3 Dec · Product · image
+
+File: `images/day13-every-comment-one-inbox.png`
+
+A comment you never answered is a customer you never met.
+
+atwebtech pulls the comments from your connected accounts into one inbox. Reply, mark as done, move on. No more opening five apps to check.
+
+👉 atwebtech.us
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #communitymanagement #customerservice
+
+---
+
+## Day 14 · Fri 4 Dec · How-to · video
+
+File: `videos/day14-stop-doing-this-on-social-media.mp4`
+
+3 things quietly hurting your social media:
+
+1. Only posting when you have something to sell
+2. Leaving comments unanswered
+3. Disappearing for weeks, then posting five times in a day
+
+The fix for all three is boring and it works: plan ahead, show up regularly, reply to people.
+
+Which one are you guilty of? 😅
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #socialmediamistakes
+
+---
+
+## Day 15 · Sat 5 Dec · Relatable · image
+
+File: `images/day15-consistency-beats-going-viral.png`
+
+Going viral once is luck.
+
+Showing up every week is how people come to know you, trust you and buy from you.
+
+You don't need a hit. You need a habit.
+
+Send this to someone who needs to hear it. 💚
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #consistency #entrepreneurmindset
+
+---
+
+## Day 16 · Sun 6 Dec · How-to · image
+
+File: `images/day16-the-30-minute-content-reset.png`
+
+The Sunday content reset. 30 minutes, once a week:
+
+☑️ Look at last week. What got replies?
+☑️ Write 5 posts for the week ahead
+☑️ Reuse one older post that did well
+☑️ Schedule everything
+☑️ Answer every open comment
+
+Do this four Sundays in a row and you'll never go back.
+
+Save for Sunday. 📌
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #sundayreset #contentplanning
+
+---
+
+## Day 17 · Mon 7 Dec · Product · image
+
+File: `images/day17-stuck-on-the-caption-start-with-a-brie.png`
+
+Staring at an empty caption box is the worst part of posting.
+
+In atwebtech you write one line about the post ("our new autumn menu, friendly, ask a question") and the AI assistant drafts it. You edit, you schedule, you're done.
+
+It's a starting point, not a robot voice. You always have the last word.
+
+👉 atwebtech.us
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #aitools #captionideas
+
+---
+
+## Day 18 · Tue 8 Dec · Engagement · image
+
+File: `images/day18-which-one-is-harder.png`
+
+Quick question for everyone who runs their own social media:
+
+A: Coming up with ideas
+B: Actually posting consistently
+
+Comment A or B. We'll make a post that helps with whichever wins. 👇
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips
+
+---
+
+## Day 19 · Wed 9 Dec · How-to · video
+
+File: `videos/day19-turn-one-idea-into-5-posts.mp4`
+
+You don't need 5 ideas a week. You need 1 idea, told 5 ways:
+
+1. The tip itself
+2. The story of how you learned it
+3. The mistake people make without it
+4. A question about it for your audience
+5. A before and after
+
+One idea. A full week of posts.
+
+Save this for the next time you're stuck. 📌
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #contentrepurposing #contentideas
+
+---
+
+## Day 20 · Thu 10 Dec · Relatable · image
+
+File: `images/day20-you-have-to-be-on-every-platform.png`
+
+Myth: you have to be everywhere.
+
+Truth: pick the one or two places your customers actually are, and do those well.
+
+If you want to be on the others too, write the post once and let a scheduler publish it there. Same effort, more reach.
+
+Where do your customers hang out? 👇
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #marketingmyths
+
+---
+
+## Day 21 · Fri 11 Dec · Product · image
+
+File: `images/day21-know-what-worked-do-more-of-it.png`
+
+Guessing is expensive.
+
+atwebtech shows you what happened after you posted: followers, views, reactions, comments, and which posts did best. So next week you can do more of what worked and less of what didn't.
+
+👉 atwebtech.us
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #socialmediaanalytics
+
+---
+
+## Day 22 · Sat 12 Dec · How-to · image
+
+File: `images/day22-10-post-ideas-for-december.png`
+
+December post ideas, ready to steal:
+
+1. Your year in 3 photos
+2. A customer question, answered
+3. Your holiday opening hours
+4. A gift idea from your shop
+5. A thank-you to your customers
+6. One thing you learned this year
+7. A behind-the-scenes moment
+8. Your plan for next year
+9. Your most popular product of the year
+10. A "see you in January" post
+
+Schedule them now and enjoy your holidays. 🎄
+
+Save this. 📌
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #decembercontent #postideas #holidaymarketing
+
+---
+
+## Day 23 · Sun 13 Dec · Product · video
+
+File: `videos/day23-run-your-socials-from-one-place.mp4`
+
+Everything you need to run your social media, in one place:
+
+📅 Plan and schedule your week
+💬 Reply to comments from one inbox
+📈 See what worked
+
+Free for up to 3 channels. No credit card.
+
+👉 atwebtech.us
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #socialmediatools
+
+---
+
+## Day 24 · Mon 14 Dec · Product · image
+
+File: `images/day24-post-once-publish-everywhere.png`
+
+Copy. Paste. Resize. Repeat. Five times.
+
+Or: write it once, pick your channels, press schedule.
+
+atwebtech publishes to Instagram, Facebook, LinkedIn, YouTube, Pinterest, Threads, Bluesky and Mastodon from one composer.
+
+👉 atwebtech.us
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #socialmediascheduler
+
+---
+
+## Day 25 · Tue 15 Dec · Relatable · image
+
+File: `images/day25-where-your-posting-time-goes.png`
+
+Posting isn't hard. Remembering to post, every day, on every app, is.
+
+That's the part worth handing off.
+
+How long does posting take you each week? 👇
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #productivitytips #timemanagement
+
+---
+
+## Day 26 · Wed 16 Dec · Engagement · image
+
+File: `images/day26-when-do-you-write-your-captions.png`
+
+No wrong answers. (There is one wrong answer.) 😄
+
+A: Calmly, in advance
+B: In a panic, at midnight
+
+Comment A or B. 👇
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips
+
+---
+
+## Day 27 · Thu 17 Dec · How-to · video
+
+File: `videos/day27-4-hooks-that-stop-the-scroll.mp4`
+
+The first line decides if anyone reads the second.
+
+4 opening lines that earn attention:
+
+1. "Nobody tells you this about ___"
+2. "I was wrong about ___"
+3. "Do this before you ___"
+4. "The mistake I see every week: ___"
+
+Fill in the blank with something true about your business.
+
+Save this and use one today. 📌
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #hooks #copywritingtips #contentcreation
+
+---
+
+## Day 28 · Fri 18 Dec · Product · image
+
+File: `images/day28-nothing-goes-out-until-it-s-approved.png`
+
+For teams and agencies: a post shouldn't go live because someone hit the wrong button.
+
+In atwebtech, teammates write and send for approval. You approve it, or send it back with a note. Clients can have their own workspace too.
+
+👉 atwebtech.us
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #socialmediamanager #agencylife #teamwork
+
+---
+
+## Day 29 · Sat 19 Dec · How-to · image
+
+File: `images/day29-schedule-now-log-off-for-the-holidays.png`
+
+You deserve a real break. Your social media can keep going without you.
+
+☑️ Write your holiday hours post
+☑️ Schedule a thank-you to your customers
+☑️ Queue 3 posts for the quiet week
+☑️ Plan your first post of January
+☑️ Keep notifications on for comments only
+
+An hour today buys you two weeks off.
+
+Save this. 📌
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #holidaymarketing #worklifebalance
+
+---
+
+## Day 30 · Sun 20 Dec · Product · image
+
+File: `images/day30-free-for-3-channels-start-your-queue-t.png`
+
+If you've read this far into our month of posts, here's the short version:
+
+Plan your posts once a week. Schedule them. Reply to people. Repeat.
+
+atwebtech is free for up to 3 channels, with no credit card.
+
+Start your queue today. 👉 atwebtech.us
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #socialmediascheduler
+
+---
+
+## Bonus · When the iPhone app is approved · Launch · image
+
+File: `images/bonus-app-launch-atwebtech-is-on-the-iphone.png`
+
+It's here. 📱
+
+atwebtech is now on the App Store for iPhone and iPad.
+
+Plan your week, publish to every network, and answer comments from your phone.
+
+Search "atwebtech" on the App Store. Free for up to 3 channels.
+
+#socialmediamarketing #smallbusiness #contentcreator #socialmediatips #marketingtips #newapp #iosapp #appstore
+
+---
