@@ -28,13 +28,12 @@ $font = 'Figtree, ui-sans-serif, -apple-system, "Segoe UI", Roboto, Helvetica, A
 <?php if (!empty($brandLogo)): ?>
             <img src="<?= e($brandLogo) ?>" height="40" alt="<?= e((string) ($brandName ?? '')) ?>" style="display:block;margin:0 auto 10px;border:0;outline:none;height:40px;max-width:200px;">
 <?php endif; ?>
-<?php if (!empty($brandName)): ?>
+<?php if (empty($brandLogo) && !empty($brandName)): ?>
             <span style="font-family:<?= e($font) ?>;font-size:18px;font-weight:600;letter-spacing:-0.02em;color:#213130;"><?= e($brandName) ?></span>
 <?php endif; ?>
 <?php else: ?>
             <a href="<?= e(absolute_url('/')) ?>" style="text-decoration:none;color:#213130;">
-              <img src="<?= e($logoUrl) ?>" width="36" height="36" alt="atwebtech" style="display:block;margin:0 auto 10px;border:0;outline:none;width:36px;height:36px;">
-              <span style="font-family:<?= e($font) ?>;font-size:18px;font-weight:600;letter-spacing:-0.02em;color:#213130;">atwebtech</span>
+              <img src="<?= e($logoUrl) ?>" width="44" height="44" alt="atwebtech" style="display:block;margin:0 auto;border:0;outline:none;width:44px;height:44px;">
             </a>
 <?php endif; ?>
           </td>

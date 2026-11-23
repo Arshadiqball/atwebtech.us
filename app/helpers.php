@@ -35,7 +35,13 @@ function public_origin(): string
     if ($host === 'atwebtech.us' || $host === 'www.atwebtech.us') {
         return 'https://atwebtech.us';
     }
-    return rtrim((string) config('app.url'), '/');
+    $url = rtrim((string) config('app.url'), '/');
+    // Cron jobs have no Host header. If APP_URL was left on a local address, their emails would carry
+    // localhost links and a logo no inbox can load, so those fall back to the live site.
+    if (PHP_SAPI === 'cli' && preg_match('#^https?://(localhost|127\.0\.0\.1|\[::1\])(:\d+)?$#i', $url)) {
+        return 'https://atwebtech.us';
+    }
+    return $url;
 }
 
 function is_public_site(): bool
