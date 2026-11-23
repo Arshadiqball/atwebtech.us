@@ -743,6 +743,8 @@ return [
     }],
 
     ['GET', '/robots.txt', static function (): void {
+        // TEMPORARY: log robots.txt fetches next to the app-ads.txt hits (see public/app-ads-serve.php).
+        @file_put_contents(__DIR__ . '/../storage/logs/app-ads-hits.log', sprintf("%s | %s | robots.txt | %s\n", gmdate('c'), $_SERVER['REMOTE_ADDR'] ?? '-', $_SERVER['HTTP_USER_AGENT'] ?? '-'), FILE_APPEND | LOCK_EX);
         header('Content-Type: text/plain; charset=utf-8');
         if (is_public_site()) {
             echo "User-agent: *\nAllow: /\nAllow: /app-ads.txt\nAllow: /ads.txt\nDisallow: /app/\nDisallow: /app$\nDisallow: /admin\nDisallow: /welcome\nDisallow: /login\nDisallow: /signup\nDisallow: /email\nDisallow: /wordglow/admin\nDisallow: /zz-robots-probe\n\nSitemap: ", absolute_url('/sitemap.xml'), "\n";
