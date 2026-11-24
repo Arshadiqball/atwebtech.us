@@ -42,6 +42,7 @@ return [
         ['IndieLineup', 'https://indielineup.com/product/atwebtech?ref=badge', 'https://indielineup.com/badge/atwebtech.svg'],
         ['TheSaaSDir', 'https://thesaasdir.com/product/atwebtech?ref=badge', 'https://thesaasdir.com/badge/atwebtech.svg'],
         ['TheAIToolsDir', 'https://theaitoolsdir.com/product/atwebtech?ref=badge', 'https://theaitoolsdir.com/badge/atwebtech.svg'],
+        ['TasteDir', 'https://tastedir.com/p/atwebtech-us', 'https://tastedir.com/badge.svg?theme=light'],
     ],
     'footer' => [
         'Product' => [
