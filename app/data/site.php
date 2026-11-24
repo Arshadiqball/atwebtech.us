@@ -29,6 +29,7 @@ return [
     // [name, link, image]. An image host must also be allowed in img-src in app/Security.php.
     'featured' => [
         ['StartupBase', 'https://startupbase.io/products/atwebtech?utm_source=startupbase&utm_medium=badge&utm_campaign=featured-badge-light', 'https://statics.startupbase.io/site/badges/featured-on-sb.svg'],
+        ['Fazier', 'https://fazier.com/launches/atwebtech.us', 'https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=light'],
     ],
     'footer' => [
         'Product' => [
