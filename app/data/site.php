@@ -37,7 +37,7 @@ return [
         ['IndieTool', 'https://www.indietool.io', 'https://www.indietool.io/badge.svg'],
         ['Aura++', 'https://auraplusplus.com/projects/atwebtech', 'https://auraplusplus.com/images/badges/featured-on-light.svg'],
         ['LaunchBoard', 'https://launchboard.dev', 'https://launchboard.dev/launchboard-badge.png'],
-        ['Dofollow.Tools', 'https://dofollow.tools', 'https://dofollow.tools/badge/badge_light.svg'],
+        ['ufind.best', 'https://ufind.best/products/atwebtech', 'https://ufind.best/badges/ufind-best-badge-light.svg'],
     ],
     'footer' => [
         'Product' => [
