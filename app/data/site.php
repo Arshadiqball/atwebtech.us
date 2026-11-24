@@ -38,6 +38,8 @@ return [
         ['Aura++', 'https://auraplusplus.com/projects/atwebtech', 'https://auraplusplus.com/images/badges/featured-on-light.svg'],
         ['LaunchBoard', 'https://launchboard.dev', 'https://launchboard.dev/launchboard-badge.png'],
         ['ufind.best', 'https://ufind.best/products/atwebtech', 'https://ufind.best/badges/ufind-best-badge-light.svg'],
+        ['SaaSCity', 'https://saascity.io', 'https://saascity.io/badges/featured-light.svg'],
+        ['IndieLineup', 'https://indielineup.com/product/atwebtech?ref=badge', 'https://indielineup.com/badge/atwebtech.svg'],
     ],
     'footer' => [
         'Product' => [
