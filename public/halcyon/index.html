@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halcyon: Calm Puzzle Games · 80 free brain games for Android</title>
+<link rel="canonical" href="https://atwebtech.us/halcyon/">
+<meta name="description" content="Eighty brain games and calm puzzles in one beautiful glass app. Sudoku, Chess, Mahjong, Solitaire, Jigsaw and more. Free on Google Play, no account needed.">
+<meta property="og:title" content="Halcyon: Calm Puzzle Games">
+<meta property="og:description" content="Eighty brain games, one quiet place. Free on Google Play. No account.">
+<meta property="og:image" content="https://atwebtech.us/halcyon/og-image.png">
+<meta property="og:url" content="https://atwebtech.us/halcyon/">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<style>
+  @font-face { font-family:"Plus Jakarta Sans"; src:url(PlusJakartaSans-SemiBold.ttf); font-weight:600; }
+  :root { --bg:#0C100F; --text:#EEF1EE; --mute:#8D9793; --accent:#B0EC9C; --cobalt:#7FD6A0; --violet:#2F8F5B; --ember:#F4DDA6; --onaccent:#10281A; --panel:#181E1D; --line:#283130; }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:17px/1.6 -apple-system, "Segoe UI", Roboto, sans-serif; overflow-x:hidden; }
+  .sky { position:fixed; inset:0; z-index:-1; background:
+      radial-gradient(900px 560px at 50% 0%, #B0EC9C2E, transparent 70%),
+      radial-gradient(800px 600px at 10% 100%, #2F8F5B22, transparent 70%),
+      linear-gradient(#131A18, #0C100F 55%); animation: drift 24s ease-in-out infinite alternate; }
+  @keyframes drift { to { transform:scale(1.06); } }
+  @media (prefers-reduced-motion: reduce) { .sky, .float { animation:none !important; } }
+  .wrap { max-width:1080px; margin:0 auto; padding:0 20px; }
+  header { display:flex; align-items:center; gap:12px; padding:22px 0; }
+  header img { width:40px; height:40px; border-radius:10px; }
+  header b { font-family:"Plus Jakarta Sans", -apple-system, sans-serif; letter-spacing:-0.03em; font-size:24px; font-weight:600; }
+  header nav { margin-left:auto; } header nav a { color:var(--mute); text-decoration:none; margin-left:18px; font-size:15px; }
+  .hero { display:grid; grid-template-columns:1.1fr 0.9fr; gap:40px; align-items:center; padding:48px 0 72px; }
+  h1 { font-family:"Plus Jakarta Sans", -apple-system, sans-serif; letter-spacing:-0.03em; font-weight:600; font-size:clamp(40px, 6vw, 68px); line-height:1.02; margin:0 0 18px; letter-spacing:-0.02em; }
+  .grad { background:linear-gradient(120deg, #CDF6BC, var(--accent) 50%, var(--cobalt)); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .lead { color:#C3CAC6; font-size:19px; max-width:520px; }
+  .badges { display:flex; gap:12px; flex-wrap:wrap; margin-top:28px; }
+  .badge { display:inline-flex; align-items:center; gap:10px; padding:13px 20px; border-radius:16px; color:var(--text); text-decoration:none; font-weight:700;
+    background:linear-gradient(135deg,#ffffff24,#ffffff0a); border:1px solid #ffffff33; box-shadow:0 10px 30px #0006; transition:transform .2s; }
+  .badge:hover { transform:translateY(-2px) scale(1.02); }
+  .badge.primary { background:var(--accent); color:var(--onaccent); border-color:var(--accent); }
+  .note { color:var(--mute); font-size:14px; margin-top:14px; }
+  .phone { justify-self:center; width:min(340px, 80vw); border-radius:44px; padding:10px; background:linear-gradient(135deg,#ffffff30,#ffffff08); border:1px solid #ffffff3a; box-shadow:0 40px 80px #000a, 0 0 80px #B0EC9C26; }
+  .phone img { width:100%; display:block; border-radius:36px; }
+  .float { animation: float 7s ease-in-out infinite; }
+  @keyframes float { 50% { transform: translateY(-10px) rotate(-1deg); } }
+  section h2 { font-family:"Plus Jakarta Sans", -apple-system, sans-serif; letter-spacing:-0.03em; font-weight:600; font-size:36px; margin:0 0 24px; }
+  .grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .card { padding:22px; border-radius:24px; background:linear-gradient(135deg,#ffffff16,#ffffff06); border:1px solid #ffffff22; backdrop-filter:blur(14px); }
+  .card h3 { margin:12px 0 6px; font-size:18px; } .card p { margin:0; color:#C3CAC6; font-size:15px; }
+  .orb { width:44px; height:44px; border-radius:50%; display:grid; place-items:center; font-size:22px; box-shadow:0 8px 20px #0006; }
+  .shots { display:flex; gap:16px; overflow-x:auto; padding:8px 0 24px; scroll-snap-type:x mandatory; }
+  .shots img { height:520px; border-radius:28px; scroll-snap-align:start; box-shadow:0 20px 50px #0008; }
+  .list { columns:4; color:#C3CAC6; font-size:15px; }
+  footer { padding:56px 0; color:var(--mute); font-size:14px; display:flex; gap:20px; flex-wrap:wrap; }
+  footer a { color:var(--mute); }
+  section { padding:40px 0; }
+  @media (max-width:820px) { .hero { grid-template-columns:1fr; padding-top:16px; } .grid { grid-template-columns:1fr; } .list { columns:2; } .shots img { height:420px; } header nav { display:none; } }
+</style>
+</head>
+<body>
+<div class="sky"></div>
+<div class="wrap">
+  <header>
+    <img src="icon.png" alt="">
+    <b>Halcyon</b>
+    <nav><a href="#games">Games</a><a href="#features">Features</a><a href="/halcyon-privacy.html">Privacy</a></nav>
+  </header>
+
+  <div class="hero">
+    <div>
+      <h1>Eighty brain games,<br><span class="grad">one quiet place.</span></h1>
+      <p class="lead">Sudoku, Kakuro, Nonogram, Bridges, Crossword, Chess, Mahjong, Solitaire and 70 more, set in a calm 3D glass world. A new featured puzzle every day.</p>
+      <div class="badges">
+        <a class="badge primary play" href="https://play.google.com/store/apps/details?id=com.halcyon.puzzles.halcyon" rel="noopener">Get it on Google Play</a>
+      </div>
+      <p class="note">Free · No account · Android · Ages 13+</p>
+    </div>
+    <div class="phone float"><img src="shots/home.jpg" alt="The Halcyon library with today's featured puzzle"></div>
+  </div>
+
+  <section id="features">
+    <h2>Made to feel calm</h2>
+    <div class="grid">
+      <div class="card"><div class="orb" style="background:radial-gradient(circle at 30% 30%,#F0FFE8,#B6F0A0 45%,#3E8F5A)">✦</div><h3>A puzzle every day</h3><p>A featured puzzle each day, plus "Today" deals that are the same for everyone.</p></div>
+      <div class="card"><div class="orb" style="background:radial-gradient(circle at 30% 30%,#D9FFF0,#8FE3C8 45%,#1C6E5C)">◆</div><h3>3D glass design</h3><p>Frosted panels, a drifting aurora sky and buttons that tilt and spring under your finger.</p></div>
+      <div class="card"><div class="orb" style="background:radial-gradient(circle at 30% 30%,#FFF6D8,#F4DDA6 45%,#94742B)">★</div><h3>Level up</h3><p>Earn points for every solve, raise your level and unlock harder grids.</p></div>
+      <div class="card"><div class="orb" style="background:radial-gradient(circle at 30% 30%,#E0FFEA,#7FD6A0 45%,#1C6B41)">∞</div><h3>Endless boards</h3><p>Fresh puzzles every time, from Easy to Hard and from tiny grids to large ones.</p></div>
+      <div class="card"><div class="orb" style="background:radial-gradient(circle at 30% 30%,#F6FBD8,#DDEE9A 45%,#66812A)">?</div><h3>Help built in</h3><p>Undo, hints and clear rules for every game whenever you need them.</p></div>
+      <div class="card"><div class="orb" style="background:radial-gradient(circle at 30% 30%,#FFF0DD,#EBCFA9 45%,#85613E)">⌂</div><h3>No account needed</h3><p>No account, no sign-in. Your progress stays on your phone.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Take a look</h2>
+    <div class="shots">
+      <img src="shots/home.jpg" alt="The Halcyon library" loading="lazy">
+      <img src="shots/chess.jpg" alt="Chess" loading="lazy">
+      <img src="shots/mahjong.jpg" alt="Mahjong Solitaire" loading="lazy">
+      <img src="shots/klondike.jpg" alt="Klondike Solitaire" loading="lazy">
+      <img src="shots/jigsaw.jpg" alt="Jigsaw" loading="lazy">
+      <img src="shots/gems.jpg" alt="Gem Swap" loading="lazy">
+      <img src="shots/sudoku.jpg" alt="Sudoku" loading="lazy">
+      <img src="shots/won.jpg" alt="Solved puzzle with points earned" loading="lazy">
+    </div>
+  </section>
+
+  <section id="games">
+    <h2>All 80 games</h2>
+    <div class="list">
+      Sudoku<br>Sudoku X<br>Killer Sudoku<br>Futoshiki<br>Kakuro<br>Calcudoku<br>Suguru<br>Binairo<br>Straights<br>Numbrix<br>Nonogram<br>Queens<br>Star Battle<br>Hitori<br>Lights Out<br>
+      Block Fit<br>Hex Fit<br>Tangram<br>Jigsaw<br>Flow<br>One Line<br>Slither Fill<br>Loops<br>Pipes<br>Mirrors<br>Paint Roll<br>Arrows Out<br>Bridges<br>Masyu<br>Shikaku<br>Four Winds<br>Sokoban<br>Mines<br>Peg Solitaire<br>Tower of Hanoi<br>Slide<br>Parking<br>SameGame<br>Liquid Sort<br>
+      Mahjong Solitaire<br>Triple Tiles<br>Tile Link<br>Gem Swap<br>Bubble Pop<br>Color Lines<br>Bolts &amp; Nuts<br>
+      Chess<br>Checkers<br>Reversi<br>Four in a Row<br>Ultimate Tic Tac Toe<br>Tic Tac Toe<br>Gomoku<br>Dominoes<br>Ludo<br>Fleet<br>
+      Klondike<br>Spider<br>FreeCell<br>Tri Peaks<br>
+      Crossword<br>Word Ladder<br>Word Solitaire<br>Word Search<br>Word Hunt<br>Word Connect<br>Letter Scramble<br>Hangman<br>
+      Spot the Difference<br>Hidden Objects<br>Brain Teasers<br>
+      Doubles<br>Number Drop<br>Five Dice<br>Quick Math<br>Higher or Lower<br>Tap in Order<br>Mastermind<br>Simon<br>Memory
+    </div>
+  </section>
+
+  <section style="text-align:center">
+    <h2>Ready for five calm minutes?</h2>
+    <p><a class="badge primary play" href="https://play.google.com/store/apps/details?id=com.halcyon.puzzles.halcyon" rel="noopener">Get it free on Google Play</a></p>
+    <p class="note">Free with ads. iPhone version coming later.</p>
+  </section>
+
+  <footer>
+    <span>© 2026 Halcyon</span>
+    <a href="/halcyon-privacy.html">Privacy Policy</a>
+    <a href="mailto:arshadiqbal.d@gmail.com">Contact</a>
+  </footer>
+</div>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@type":"MobileApplication","name":"Halcyon: Calm Puzzle Games","operatingSystem":"Android","applicationCategory":"GameApplication","offers":{"@type":"Offer","price":"0","priceCurrency":"USD"},"url":"https://atwebtech.us/halcyon/","installUrl":"https://play.google.com/store/apps/details?id=com.halcyon.puzzles.halcyon","image":"https://atwebtech.us/halcyon/icon.png","description":"Eighty brain games and calm puzzles in one app: Sudoku, Chess, Mahjong, Solitaire, Jigsaw, Crossword and more."}
+</script>
+<script>
+// Tag the Play link with where the visitor came from: /halcyon/?s=reddit → utm_source=reddit in Play Console.
+(function () {
+  var m = /[?&]s=([a-z0-9_-]{1,30})/i.exec(location.search);
+  var src = m ? m[1].toLowerCase() : 'website';
+  var ref = encodeURIComponent('utm_source=' + src + '&utm_medium=referral&utm_campaign=launch');
+  document.querySelectorAll('a.play').forEach(function (a) { a.href += '&referrer=' + ref; });
+})();
+</script>
+</body>
+</html>

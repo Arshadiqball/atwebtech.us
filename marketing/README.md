@@ -32,3 +32,27 @@ python make.py
 ```
 
 ffmpeg is needed for the videos.
+
+## The 60-second promo video
+
+`promo/atwebtech-promo-60s.mp4` is a 1920 x 1080, 60 second video with a soundtrack: hook, problem, the five things atwebtech does (plan, create, publish, engage, grow), the free plan, and the call to action.
+
+It is an animated web page captured frame by frame, so every word can be changed:
+
+```bash
+pip install playwright pillow numpy
+python promo/build.py                 # writes promo/promo.html from the text in build.py
+python promo/render.py 0 1800         # captures 1800 frames into promo/frames/ (slow: run a few ranges at once)
+python promo/music.py                 # synthesizes promo/music.wav (no samples, nothing to license)
+ffmpeg -framerate 30 -i promo/frames/%05d.jpg -i promo/music.wav -c:v libx264 -crf 17 -pix_fmt yuv420p -c:a aac -b:a 192k -shortest -movflags +faststart promo/atwebtech-promo-60s.mp4
+```
+
+For the vertical version (`promo/atwebtech-promo-60s-9x16.mp4`, 1080 x 1920, for Reels, TikTok and Shorts) add `v`: `python promo/build.py v`, `python promo/render.py 0 1800 v`, then the same ffmpeg command with `promo/frames-v/%05d.jpg`. It keeps the top 250 px and bottom 320 px clear of text, where the apps draw their own buttons.
+
+The calendar in the "Plan" scene is a real screenshot of a sample workspace (`promo/shots/calendar.jpg`); the other screens are drawn to match the product. Needs Google Chrome and ffmpeg.
+
+### Second promo: "From trend to post"
+
+`promo/atwebtech-trend-to-post-60s.mp4` (1920 x 1080) and `promo/atwebtech-trend-to-post-60s-9x16.mp4` (1080 x 1920) follow one workflow: pick a trend, let the AI Assistant write the draft, preview it on each network, schedule it at the best time. It has its own look (colour blocks, thick outlines, wipes) and its own 96 BPM soundtrack.
+
+Built the same way, from `promo/build2.py` and `promo/music2.py`: `python promo/build2.py` (add `v` for vertical), `python promo/render.py 0 1800 2` (add `v`), `python promo/music2.py`, then ffmpeg with `promo/frames2/%05d.jpg` (or `frames2-v`) and `promo/music2.wav`. The trends and the best-times grid are samples, and say so on screen.
