@@ -16,7 +16,7 @@ Everything to paste when submitting atwebtech to directories, communities and so
 | Price | Free for up to 3 channels. Essentials from $6 per channel a month, Team from $12 per channel a month. |
 | Networks | Instagram, Facebook, LinkedIn, YouTube, Pinterest, Threads, Bluesky, Mastodon |
 | Alternatives to name | Buffer, Hootsuite, Later, Metricool |
-| Contact | info@atwebtech.us |
+| Contact | info@atwebtech.us (use this on forms that reject Gmail, such as SourceForge) |
 
 **Tagline (60 characters):** Plan, schedule and publish your social media in one place
 
@@ -174,10 +174,16 @@ Video: `marketing/promo/atwebtech-promo-60s-9x16.mp4` for Reels, TikTok and Shor
 | Place | Status | Link | Date |
 |---|---|---|---|
 | Product Hunt | Not submitted | | |
-| AlternativeTo | Not submitted | | |
-| SaaSHub | Not submitted | | |
-| BetaList | Not submitted | | |
-| Softonic | Not submitted | | |
+| AlternativeTo | Submitted, waiting in the free review queue (several thousand apps) | https://alternativeto.net/my-submissions/ | 2026-11-24 |
+| SaaSHub | Not submitted: the site asks that a person, not an AI agent, submits. Do this one by hand | https://www.saashub.com/services/submit | |
+| BetaList | Draft saved, not published: paid only ($39 to $299) | https://betalist.com/submissions/204613/wizard/submit | 2026-11-24 |
+| Softonic | Not submitted: developer.softonic.com did not load | | |
+| Launching Next | Submitted (free queue; they email if published) | https://www.launchingnext.com/thanks/?i=186662 | 2026-11-24 |
+| SourceForge | Submitted, request received (contact: info@atwebtech.us) | https://sourceforge.net/software/vendors/new_submitted | 2026-11-24 |
+| StartupBase | Listing complete and saved as a draft. Free launch needs their badge on atwebtech.us (then about 4 to 5 weeks); otherwise $39 | https://startupbase.io/submissions/atwebtech/launch | 2026-11-24 |
+| Fazier | Skipped: the free plan requires their badge link on the atwebtech homepage | https://fazier.com/submit | |
+| SaaSworthy | Blocked by a bot check | https://www.saasworthy.com/add-product | |
+| Uneed | Page did not load | https://www.uneed.best/submit-a-tool | |
 | Show HN | Not posted | | |
 | Indie Hackers | Not posted | | |
 | Quora | Not posted | | |
