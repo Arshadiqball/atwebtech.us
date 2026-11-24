@@ -31,6 +31,10 @@ return [
         ['StartupBase', 'https://startupbase.io/products/atwebtech?utm_source=startupbase&utm_medium=badge&utm_campaign=featured-badge-light', 'https://statics.startupbase.io/site/badges/featured-on-sb.svg'],
         ['Fazier', 'https://fazier.com/launches/atwebtech.us', 'https://fazier.com/api/v1//public/badges/launch_badges.svg?badge_type=featured&theme=light'],
         ['Twelve Tools', 'https://twelve.tools', 'https://twelve.tools/badge0-white.svg'],
+        ['Launchit', 'https://www.launchit.site/launches/atwebtech', 'https://www.launchit.site/badges/launchit-light.svg'],
+        ['Smol Launch', 'https://smollaunch.com', 'https://smollaunch.com/badges/featured.svg'],
+        ['LaunchVault', 'https://www.launchvault.dev', 'https://www.launchvault.dev/images/badges/launch-valut-badge.svg'],
+        ['IndieTool', 'https://www.indietool.io', 'https://www.indietool.io/badge.svg'],
     ],
     'footer' => [
         'Product' => [
