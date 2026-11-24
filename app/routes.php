@@ -32,7 +32,7 @@ return [
         }
         View::render('home', [], [
             'title' => 'atwebtech | Plan your social content in one workspace',
-            'description' => 'Meet atwebtech: a simpler way to plan social content, organize ideas, and build a more consistent online presence. Join the waitlist.',
+            'description' => 'atwebtech is a social media scheduler for small businesses, creators and agencies: one calendar for eight networks, an AI assistant for drafts and one inbox for comments. Free for 3 channels.',
             'schema' => [$org, [
                 '@context' => 'https://schema.org',
                 '@type' => 'WebSite',
