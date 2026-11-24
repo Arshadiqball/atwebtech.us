@@ -47,6 +47,7 @@ It runs in the browser and on iPhone and iPad. It is free for up to 3 channels w
 | iPhone screenshots (6) | `mobile-app-flutter/store/screenshots/` |
 | iPad screenshots (6) | `mobile-app-flutter/store/screenshots-ipad/` |
 | Share image, 1200 x 630 | `public/assets/img/og-default.png` |
+| Long description (1,450 characters, for sites with a minimum length) | `marketing/launch/long-description.md` |
 | Promo video, 16:9 | `marketing/promo/atwebtech-promo-60s.mp4`, `marketing/promo/atwebtech-trend-to-post-60s.mp4` |
 | Promo video, 9:16 | `marketing/promo/atwebtech-promo-60s-9x16.mp4`, `marketing/promo/atwebtech-trend-to-post-60s-9x16.mp4` |
 
@@ -180,10 +181,48 @@ Video: `marketing/promo/atwebtech-promo-60s-9x16.mp4` for Reels, TikTok and Shor
 | Softonic | Not submitted: developer.softonic.com did not load | | |
 | Launching Next | Submitted (free queue; they email if published) | https://www.launchingnext.com/thanks/?i=186662 | 2026-11-24 |
 | SourceForge | Submitted, request received (contact: info@atwebtech.us) | https://sourceforge.net/software/vendors/new_submitted | 2026-11-24 |
-| StartupBase | Listing complete and saved as a draft. Free launch needs their badge on atwebtech.us (then about 4 to 5 weeks); otherwise $39 | https://startupbase.io/submissions/atwebtech/launch | 2026-11-24 |
-| Fazier | Skipped: the free plan requires their badge link on the atwebtech homepage | https://fazier.com/submit | |
+| StartupBase | Submitted on the free plan: badge verified, product pending review (free queue is about 4 to 5 weeks). Keep the footer badge in place | https://startupbase.io/products/atwebtech | 2026-11-24 |
+| PeerPush | Submitted to the free queue: position 14,304, estimated wait about 4 months 24 days | https://peerpush.com/p/atwebtech | 2026-11-24 |
+| TinyLaunch | Submitted on the free plan: launch week of Monday 2027-01-04, pending review. Profile handle arshadiqbal_awt | https://www.tinylaunch.com/dashboard/startups | 2026-11-24 |
+| Firsto | Draft saved, not published: free slots are full, paid only (from $9.90) | https://firsto.co/dashboard | 2026-11-24 |
+| twelve.tools | LIVE. Badge verified and listed at once. Keep the footer badge in place | https://twelve.tools | 2026-11-24 |
+| Open Launch | Submitted on the free plan: launch scheduled for 2027-05-23 (first free slot) | https://openlaunch.ai/projects/atwebtech | 2026-11-24 |
+| Turbo0 | Details submitted, not published. Free plan needs an Ahrefs domain rating above 10 plus their badge; their rating check was "temporarily unavailable". Otherwise $29.90 | https://turbo0.com/dashboard | 2026-11-24 |
+| LaunchIgniter | Skipped (decided 2026-11-24). The product exists there as pending, unscheduled: a free launch needs their badge at the top of the homepage, which we chose not to add. Paid from $12 | https://launchigniter.com/product/schedule/atwebtech | 2026-11-24 |
+| Tiny Startups | Draft saved, not published: going live costs £69 | https://www.tinystartups.com/submit | 2026-11-24 |
+| MicroLaunch | Not submitted: only a paid Pro launch is offered now | https://microlaunch.net | |
+| SoloPush | Not submitted: its Google sign-in page failed to load | https://solopush.com | |
+| SideProjectors | Skipped: mainly a marketplace for selling projects, and an ad blocked the sign-in | https://www.sideprojectors.com | |
+| Fazier | Submitted on the free plan: badge verified, launch scheduled for 2026-12-08 (goes live 12:00 am Pacific). Keep the footer badge in place | https://fazier.com/launches/atwebtech | 2026-11-24 |
 | SaaSworthy | Blocked by a bot check | https://www.saasworthy.com/add-product | |
-| Uneed | Page did not load | https://www.uneed.best/submit-a-tool | |
+| Uneed | Submitted on the free waiting line; launch date 2027-06-14 (their next free slot). Needs an upvote score of 10 on the day to stay published | https://www.uneed.best/tool/atwebtech | 2026-11-24 |
+| IndieLineup | LIVE. Badge verified and listed at once. Keep the footer badge in place (removed after 21 days without it). Contact: info@atwebtech.us | https://indielineup.com/product/atwebtech/ | 2026-11-24 |
+| TheSaaSDir | LIVE. Badge verified and listed at once. Keep the footer badge in place. Contact: info@atwebtech.us | https://thesaasdir.com/product/atwebtech/ | 2026-11-24 |
+| TheAIToolsDir | LIVE. Badge verified and listed at once. Keep the footer badge in place. Contact: info@atwebtech.us | https://theaitoolsdir.com/product/atwebtech/ | 2026-11-24 |
+| LaunchBoard | Approved on the free plan: launches 2026-11-30 (week 49). Badge verified; keep the footer badge in place | https://www.launchboard.dev/dashboard/my-products | 2026-11-24 |
+| Smol Startup | Submitted on the free plan: launches 2026-11-26. No badge needed (nofollow link) | https://smolstartup.com/projects/atwebtech | 2026-11-24 |
+| Smol Saas | Submitted on the free plan: launches 2026-11-27. No badge needed (nofollow link) | https://smolsaas.com/projects/atwebtech | 2026-11-24 |
+| Launchit | Submitted for review on the free plan: goes live on a Monday after review (they say 7 to 14+ days). Badge verified; keep the footer badge in place | https://www.launchit.site/launches/atwebtech | 2026-11-24 |
+| Ftify | Submitted, in review: free launch day 2027-01-07. No badge needed (link is nofollow without their badge) | https://ftify.com/dashboard | 2026-11-24 |
+| IndieTool | Submitted on the free plan (earliest free slot they quote: 2027-02-01). Badge verified; keep the footer badge in place | https://www.indietool.io/indietool/dashboard | 2026-11-24 |
+| Smol Launch | Submitted on the free verified plan: launch week of 2027-02-22, in review. Badge verified; keep the footer badge in place | https://smollaunch.com/dashboard | 2026-11-24 |
+| LaunchRanked | Submitted on the free plan: week 12, 2027-03-22 to 28. No badge (link stays nofollow until their badge is added) | https://launchranked.com/products/atwebtech | 2026-11-24 |
+| ufind.best | Booked on the free plan: launches 2027-03-22. Badge verified; keep the footer badge in place | https://ufind.best/products/atwebtech | 2026-11-24 |
+| Aura++ | Scheduled on the free plan: free queue opens from 2027-06-12 (they assign the date). Backlink verified; keep the footer badge in place | https://auraplusplus.com/projects/atwebtech | 2026-11-24 |
+| Launch Vault | Submitted on the free plan: launch week of 2027-07-05. Badge verified; keep the footer badge in place | https://www.launchvault.dev/dashboard?tab=upcoming | 2026-11-24 |
+| SaaSCity | Submitted for review on the free plan: launch week 2027-08-09 to 15. Badge verified; keep the footer badge in place | https://saascity.io/saascity | 2026-11-24 |
+| Startup Stash | Free listing applied for with info@atwebtech.us. NOT confirmed yet: open the email they sent to that inbox and click the confirm link, or they will not review it | https://startupstash.com/get-listed/ | 2026-11-24 |
+| ProofStories | Submitted, but the free queue's estimated launch date is 2029-01-10; effectively paid only ($9.99) | https://proofstories.io/directory/products/atwebtech/ | 2026-11-24 |
+| Dofollow.Tools | Not submitted: form filled, but the 5 free slots a day were gone. Retry early in the day at /submit; needs their badge (`https://dofollow.tools/badge/badge_light.svg`, link `https://dofollow.tools`) back in the footer first | https://dofollow.tools/submit | |
+| Directree | LIVE (free quick listing, no badge). The page is written by their AI and labelled as such; its "biggest weakness" line says pricing for paid plans and integrations is hard to see. Claim the listing (email, DNS or meta tag) to edit it and get a dofollow link | https://www.directree.io/tool/atwebtech | 2026-11-24 |
+| launch.cab | Not submitted: it runs an "are you a person" check at the last step. Free 48-hour slot; do it by hand | https://launch.cab | |
+| TasteDir | Not submitted: needs an account with a password (no Google sign-in) plus a homepage badge | https://tastedir.com/submit | |
+| benchmark.directory, amaze.directory, BuildVoyage | Not submitted: free, but they sign in with an emailed code or a human check. Do these by hand | | |
+| SaasHunt, Launch01, Smol Hunt and the rest of the DirEasy network | SaasHunt has no free slot for 90 days. The network allows 2 free submissions a day per account (used on Smol Saas and Smol Startup on 2026-11-24); Launch01's form is filled, earliest free Monday 2027-03-29 | https://launch01.com/projects/submit | |
+| SaaSFame, ToolFame, ProductFame, Findly.tools | Not possible yet: the free plan needs an Ahrefs domain rating of 10 (atwebtech.us is 0). Same rule as Turbo0 | | |
+| IndieHunt | Skipped: free queue is 71 weeks long and needs a badge the whole time | https://indiehunt.io/submit | |
+| FiveTaco | Not submitted: its Google sign-up opens in a popup the browser tool cannot reach | https://fivetaco.com/submit | |
+| Startups.fm, FindYourSaaS | Paid only (£49, $9 a month) | | |
 | Show HN | Not posted | | |
 | Indie Hackers | Not posted | | |
 | Quora | Not posted | | |
