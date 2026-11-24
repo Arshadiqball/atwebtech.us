@@ -40,6 +40,8 @@ return [
         ['ufind.best', 'https://ufind.best/products/atwebtech', 'https://ufind.best/badges/ufind-best-badge-light.svg'],
         ['SaaSCity', 'https://saascity.io', 'https://saascity.io/badges/featured-light.svg'],
         ['IndieLineup', 'https://indielineup.com/product/atwebtech?ref=badge', 'https://indielineup.com/badge/atwebtech.svg'],
+        ['TheSaaSDir', 'https://thesaasdir.com/product/atwebtech?ref=badge', 'https://thesaasdir.com/badge/atwebtech.svg'],
+        ['TheAIToolsDir', 'https://theaitoolsdir.com/product/atwebtech?ref=badge', 'https://theaitoolsdir.com/badge/atwebtech.svg'],
     ],
     'footer' => [
         'Product' => [
