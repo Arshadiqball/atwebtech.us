@@ -19,8 +19,6 @@ SetEnvIf Authorization "(.*)" HTTP_AUTHORIZATION=$1
     RewriteCond %{REQUEST_FILENAME}/index.php -f
     RewriteRule ^(.+?)/?$ $1/index.php [L]
 
-    # TEMPORARY: log fetches of app-ads.txt (see app-ads-serve.php).
-    RewriteRule ^app-ads\.txt$ app-ads-serve.php [L]
 
     # Serve existing static files directly; send every other request to the front controller.
     RewriteCond %{REQUEST_FILENAME} -f
