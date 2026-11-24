@@ -35,6 +35,9 @@ return [
         ['Smol Launch', 'https://smollaunch.com', 'https://smollaunch.com/badges/featured.svg'],
         ['LaunchVault', 'https://www.launchvault.dev', 'https://www.launchvault.dev/images/badges/launch-valut-badge.svg'],
         ['IndieTool', 'https://www.indietool.io', 'https://www.indietool.io/badge.svg'],
+        ['Aura++', 'https://auraplusplus.com/projects/atwebtech', 'https://auraplusplus.com/images/badges/featured-on-light.svg'],
+        ['LaunchBoard', 'https://launchboard.dev', 'https://launchboard.dev/launchboard-badge.png'],
+        ['Dofollow.Tools', 'https://dofollow.tools', 'https://dofollow.tools/badge/badge_light.svg'],
     ],
     'footer' => [
         'Product' => [
