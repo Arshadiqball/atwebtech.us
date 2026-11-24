@@ -27,5 +27,12 @@
         <span aria-hidden="true">|</span> <a href="/contact">Contact</a>
       </p>
     </div>
+<?php if (!empty($site['featured'])): ?>
+    <ul class="footer-featured" role="list" aria-label="Featured on">
+<?php foreach ($site['featured'] as [$name, $href, $img]): ?>
+      <li><a href="<?= e($href) ?>" target="_blank" rel="noopener noreferrer"><img src="<?= e($img) ?>" alt="Featured on <?= e($name) ?>" height="44" loading="lazy" decoding="async"></a></li>
+<?php endforeach; ?>
+    </ul>
+<?php endif; ?>
   </div>
 </footer>

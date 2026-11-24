@@ -25,6 +25,11 @@ return [
         ['label' => 'FAQ', 'desc' => 'Answers about plans, channels, and features', 'href' => '/faq', 'icon' => 'question'],
         ['label' => 'Contact', 'desc' => 'Send the team a question or feedback', 'href' => '/contact', 'icon' => 'envelope-simple'],
     ],
+    // "Featured on" badges in the footer. Some launch directories list a product for free only while their badge is on the site.
+    // [name, link, image]. An image host must also be allowed in img-src in app/Security.php.
+    'featured' => [
+        ['StartupBase', 'https://startupbase.io/products/atwebtech?utm_source=startupbase&utm_medium=badge&utm_campaign=featured-badge-light', 'https://statics.startupbase.io/site/badges/featured-on-sb.svg'],
+    ],
     'footer' => [
         'Product' => [
             ['Content Planner', '/features/content-planner'],
