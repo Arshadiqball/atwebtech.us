@@ -709,6 +709,8 @@ return [
     ['GET', '/sitemap.xml', static function (): void {
         $paths = ['/', '/join', '/demo', '/features', '/integrations', '/solutions', '/pricing', '/resources', '/guide', '/faq', '/about', '/contact', '/privacy', '/data-deletion', '/terms', '/wordglow/', '/wordglow-privacy.html'];
         $paths[] = '/halcyon/';
+        $paths[] = '/halcyon/press/';
+        $paths[] = '/wordglow/press/';
         $paths[] = '/wordglow/words/';
         foreach (glob(BASE_PATH . '/public/wordglow/words/*/index.html') ?: [] as $f) {
             $paths[] = '/wordglow/words/' . basename(dirname($f)) . '/';

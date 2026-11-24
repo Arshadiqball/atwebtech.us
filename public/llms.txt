@@ -36,6 +36,7 @@ Key facts:
 - [Wordle solver](https://atwebtech.us/wordglow/tools/wordle-solver/): free tool; enter green, yellow and grey letters to list every 4 to 7-letter word that fits, best guesses first
 - [Word unscrambler](https://atwebtech.us/wordglow/tools/word-unscrambler/): free tool; make 4 to 7-letter words from a set of letters (? = blank), with meanings
 - [Word finder](https://atwebtech.us/wordglow/tools/word-finder/): free tool; words that start with, end with or contain given letters
+- [WordGlow press kit](https://atwebtech.us/wordglow/press/): fact sheet, screenshots, trailer and logo
 - [Privacy policy](https://atwebtech.us/wordglow-privacy.html)
 
 # Halcyon: Calm Puzzle Games
@@ -60,6 +61,7 @@ Key facts:
 ## Halcyon links
 - [Halcyon home page](https://atwebtech.us/halcyon/): features, screenshots, full list of games, FAQ
 - [Halcyon on Google Play](https://play.google.com/store/apps/details?id=com.halcyon.puzzles.halcyon): install on Android
+- [Halcyon press kit](https://atwebtech.us/halcyon/press/): fact sheet, screenshots and logo
 - [Halcyon privacy policy](https://atwebtech.us/halcyon-privacy.html)
 
 ## Also on this site
