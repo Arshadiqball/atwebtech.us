@@ -36,6 +36,9 @@ $ogImage = str_starts_with($meta['og_image'], 'http') ? $meta['og_image'] : abso
   <link rel="preload" href="/assets/fonts/plus-jakarta-sans-latin-500-normal.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="<?= e(asset('css/app.css')) ?>">
   <script src="<?= e(asset('js/app.js')) ?>" defer></script>
+<?php if (config('google.tag_id') !== ''): ?>
+  <script src="<?= e(asset('js/google-tag.js')) ?>" data-google-tag="<?= e(config('google.tag_id')) ?>" defer></script>
+<?php endif; ?>
 <?php if (Meta::enabled()): ?>
   <script type="application/json" id="meta-events"><?= json_encode(Meta::takeBrowserEvents(), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?></script>
   <script src="<?= e(asset('js/meta-pixel.js')) ?>" data-pixel="<?= e(Meta::pixelId()) ?>" data-pageview="1" defer></script>

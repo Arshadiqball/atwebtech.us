@@ -52,6 +52,10 @@ return [
         'user' => (string) Env::get('ADMIN_USER', 'admin'),
         'password_hash' => (string) Env::get('ADMIN_PASSWORD_HASH', '$2y$12$5GGD/Z5cJISTdInsdI4Q4eULMhAMEFeMw3FSXk7.BVYUYeGDMwF2e'),
     ],
+    // Google tag for Google Analytics (property "atwebtech.us"). The ID is public; set GOOGLE_TAG_ID= (empty) to turn it off.
+    'google' => [
+        'tag_id' => trim((string) Env::get('GOOGLE_TAG_ID', 'GTM-W9Z7S6WL')),
+    ],
     'meta' => [
         'pixel_id' => trim((string) Env::get('META_PIXEL_ID', '')),
         'capi_token' => trim((string) Env::get('META_CAPI_TOKEN', '')),
