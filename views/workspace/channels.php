@@ -32,7 +32,7 @@ $token = Security::csrfToken();
 
   <section class="chl" id="connect" aria-labelledby="connect-page-title">
     <h2 id="connect-page-title">Connect a New Channel</h2>
-    <p class="wsp-muted">Connecting lets atwebtech read your channel's name and picture. Publishing, comments and analytics aren't built yet, so nothing is posted or collected.</p>
+    <p class="wsp-muted">Connecting lets atwebtech publish the posts you schedule to that channel and show you how they did. Nothing is posted unless you write or approve it.</p>
 <?php partial('workspace/connect-grid', ['connectedCount' => count($connected), 'linked' => array_column($connected, 'provider')]); ?>
   </section>
 </div>
