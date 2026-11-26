@@ -50,6 +50,11 @@ jobs:
             grep -vE '\] (sent|evergreen|stats|inbox|competitors|reports|webhooks)' storage/logs/publish.log | tail -n 15 | redact
           fi
 
+          echo "== crontab -l (exit code and error only):"
+          crontab -l >/dev/null 2>/tmp/ce; echo "   exit $?: $(head -c 200 /tmp/ce)"
+          echo "   crontab command: $(command -v crontab || echo none); cron spool readable: $(ls /var/spool/cron 2>&1 | head -c 120)"
+          echo "== last 12 lines of php-error.log, cleaned:"
+          tail -n 12 storage/logs/php-error.log 2>/dev/null | redact
           echo "== due posts in the database:"
           PHP=$(command -v php8.3 || command -v php8.2 || command -v php)
           $PHP -r '
@@ -60,6 +65,7 @@ jobs:
             $q = $pdo->prepare("SELECT c.provider, p.status, COUNT(*) n, MIN(p.planned_at) oldest FROM posts p JOIN channels c ON c.id = p.channel_id WHERE p.status IN (\"planned\",\"publishing\") AND p.planned_at <= ? AND c.paused_at IS NULL GROUP BY c.provider, p.status");
             $q->execute([$now]);
             foreach ($q as $r) { echo "   {$r["provider"]} {$r["status"]}: {$r["n"]} (oldest {$r["oldest"]})\n"; }
+            foreach ($pdo->query("SELECT id, status, attempts, planned_at, updated_at, LEFT(COALESCE(error, \"\"), 120) e FROM posts WHERE status = \"publishing\"") as $r) { echo "   publishing post {$r["id"]}: attempts {$r["attempts"]}, planned {$r["planned_at"]}, updated {$r["updated_at"]}, error {$r["e"]}\n"; }
             $s = $pdo->query("SELECT MAX(sent_at) FROM posts WHERE status = \"sent\"")->fetchColumn();
             echo "   last sent: $s\n";
           ' 2>&1 | redact
