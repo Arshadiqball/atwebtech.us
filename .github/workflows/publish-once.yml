@@ -1,7 +1,6 @@
 name: Publish once (temporary)
 
-# Temporary: runs bin/publish.php once by hand. Prints a cleaned summary only,
-# because this repository's Actions logs are public. Remove after use.
+# Temporary read-only check of which PHP the scheduled runs use. Remove after use.
 
 on:
   workflow_dispatch:
@@ -15,7 +14,7 @@ jobs:
   run:
     runs-on: ubuntu-latest
     environment: production
-    timeout-minutes: 10
+    timeout-minutes: 5
     steps:
       - name: Set up SSH
         run: |
@@ -25,27 +24,19 @@ jobs:
           printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Run the publisher once
+      - name: Which PHP
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH=$DEPLOY_PATH bash -s" <<'EOF'
           cd "$DEPLOY_PATH"
-          redact() { sed -E 's#(token|secret|key|password|code)=[^&" ]+#\1=<hidden>#Ig; s#[A-Za-z0-9_-]{32,}#<long>#g; s#/home/[^/ ]+#~#g' | grep -v "i360.so" | cut -c1-200; }
-          PHP=$(command -v php8.3 || command -v php8.2 || command -v php)
-
-          echo "== is the publish lock held right now?"
-          if flock -n storage/logs/publish.lock true; then echo "   free"; else echo "   HELD by another process"; fi
-          echo "== php processes for this user (pid, elapsed, script):"
-          for d in /proc/[0-9]*; do c=$(tr '\0' ' ' < $d/cmdline 2>/dev/null); case "$c" in *php*) echo "   ${d#/proc/} $(ps -o etime= -p ${d#/proc/} 2>/dev/null) $(echo "$c" | grep -oE 'bin/[a-z]+\.php|public/index\.php' | head -1)";; esac; done
-          echo "== put the stuck test post (335) back in the queue:"
-          $PHP -r 'require "app/bootstrap.php"; $n = Database::connection()->exec("UPDATE posts SET status = \"planned\" WHERE id = 335 AND status = \"publishing\""); echo "   rows: $n\n";' 2>&1 | redact
-
-          echo "== run bin/publish.php (limit 4 minutes):"
-          start=$(date +%s); timeout 240 $PHP bin/publish.php > /tmp/pub.out 2>&1; code=$?; end=$(date +%s)
-          echo "   exit $code after $((end-start))s"
-          redact < /tmp/pub.out | tail -n 25
-
-          echo "== test post afterwards:"
-          $PHP -r 'require "app/bootstrap.php"; $r = Database::connection()->query("SELECT status, attempts, sent_at, external_url, LEFT(COALESCE(error, \"\"), 160) e FROM posts WHERE id = 335")->fetch(); echo "   status {$r["status"]}, attempts {$r["attempts"]}, sent {$r["sent_at"]}, url {$r["external_url"]}, error {$r["e"]}\n";' 2>&1 | redact
-          echo "== new php-error.log lines from this run, cleaned:"
-          awk -v s="$(date -u -d @$start '+%d-%b-%Y %H:%M')" 'index($0, s) || f {f=1; print}' storage/logs/php-error.log 2>/dev/null | tail -n 15 | redact
+          for b in /usr/local/bin/php /usr/bin/php $(command -v php) $(command -v php8.2) $(command -v php8.3) /usr/local/php82/bin/php; do
+            [ -x "$b" ] && echo "   $b -> $($b -v 2>/dev/null | head -1 | cut -c1-40)"
+          done | sort -u
+          echo "== scheduled publish.php runs seen over 70 seconds (pid, php binary):"
+          end=$(( $(date +%s) + 70 ))
+          while [ $(date +%s) -lt $end ]; do
+            for d in /proc/[0-9]*; do
+              grep -q 'bin/publish.php' $d/cmdline 2>/dev/null && echo "   ${d#/proc/} $(readlink $d/exe 2>/dev/null) $(tr '\0' ' ' < $d/cmdline | grep -oE '(-[a-z] [^ ]+ )*' | head -c 60)"
+            done
+            sleep 1
+          done | sort -u | head -10
           EOF
