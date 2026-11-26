@@ -11,3 +11,7 @@ storage/firebase-service-account.json
 
 # App Review screen recordings (large, and they show a real account)
 /mobile-app-flutter/store/recording/
+
+# Admin panel login (kept on this Mac only)
+/admin-credentials.txt
+/storage/sessions/

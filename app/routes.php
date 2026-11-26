@@ -680,6 +680,14 @@ return [
             'admin' => true,
         ]);
     }],
+    ['GET', '/admin/users', [AdminAccounts::class, 'usersPage']],
+    ['GET', '/admin/users/{id}', [AdminAccounts::class, 'userPage']],
+    ['GET', '/admin/channels', [AdminAccounts::class, 'channelsPage']],
+    ['POST', '/admin/channels/{id}/pause', [AdminAccounts::class, 'togglePause']],
+    ['GET', '/admin/posts', [AdminAccounts::class, 'postsPage']],
+    ['GET', '/admin/posts/{id}', [AdminAccounts::class, 'postPage']],
+    ['POST', '/admin/posts/{id}', [AdminAccounts::class, 'save']],
+    ['POST', '/admin/posts/{id}/delete', [AdminAccounts::class, 'delete']],
     ['POST', '/admin/subscribers/{id}/plan', static function (string $id): void {
         if (!ctype_digit($id)) {
             not_found();
