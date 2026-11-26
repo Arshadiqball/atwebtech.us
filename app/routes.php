@@ -531,7 +531,7 @@ return [
     ['POST', '/account/theme', [AccountHandler::class, 'theme']],
 
     ['GET', '/admin/login', static function (): void {
-        if (Auth::staff() || Auth::isAdmin()) {
+        if (Auth::staff()) {
             redirect('/admin');
         }
         View::render('admin-login', [], [

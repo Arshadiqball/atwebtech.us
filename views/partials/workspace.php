@@ -146,7 +146,7 @@ $notice = flash('notice');
           <a href="/app/developers"<?= aria_current('/app/developers') ?>><?= icon('link-simple') ?>API &amp; webhooks</a>
           <a href="/app/account"<?= aria_current('/app/account') ?>><?= icon('user') ?>Account</a>
           <a href="/app/billing"<?= aria_current('/app/billing') ?>><?= icon('tag') ?>Plan &amp; billing</a>
-<?php if (Auth::isAdmin()): ?>
+<?php if (Auth::staff()): ?>
           <a href="/admin"><?= icon('chart-bar') ?>Admin CRM</a>
           <a href="/admin/subscribers"><?= icon('envelope-simple') ?>Subscribers</a>
 <?php endif; ?>

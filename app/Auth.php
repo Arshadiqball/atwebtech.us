@@ -134,7 +134,8 @@ final class Auth
     {
         session_regenerate_id(true);
         $_SESSION['_uid'] = $userId;
-        unset($_SESSION['_csrf'], $_SESSION['_ws']);
+        // A workspace sign-in in this browser ends any admin session.
+        unset($_SESSION['_csrf'], $_SESSION['_ws'], $_SESSION['_staff']);
         $stamp = Database::connection()->prepare('SELECT password_changed_at FROM users WHERE id = :id');
         $stamp->execute(['id' => $userId]);
         $_SESSION['_pwat'] = $stamp->fetchColumn() ?: null;
@@ -224,15 +225,13 @@ final class Auth
         return ['id' => 0, 'email' => (string) config('admin.user'), 'display_name' => 'Admin'];
     }
 
-    /** Logged-in admin. Anyone else is sent to the admin login. */
+    /** Signed in with the admin login. Anyone else is sent to the admin login. */
     public static function requireAdmin(): array
     {
+        // Only the admin username and password open the admin panel. A workspace sign-in never does,
+        // whatever its email address.
         if (self::staff()) {
             return self::staffUser();
-        }
-        $user = self::user();
-        if ($user !== null && self::isAdmin()) {
-            return $user;
         }
         redirect('/admin/login');
     }
