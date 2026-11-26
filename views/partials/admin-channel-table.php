@@ -2,14 +2,19 @@
 /** @var list<array> $channels */
 /** @var string $back the page to return to after an action */
 /** @var bool $showOwner */
+/** @var ?string $bulk bulk form id; adds a checkbox column */
 $showOwner ??= true;
+$bulk ??= null;
 ?>
 <div class="crm-table-wrap crm-card">
   <table class="crm-table">
-    <thead><tr><th>Channel</th><?php if ($showOwner): ?><th>Owner</th><?php endif; ?><th>Scheduled</th><th>Sent</th><th>Health</th><th>Publishing</th></tr></thead>
+    <thead><tr><?php if ($bulk): ?><th class="crm-check"><span class="sr-only">Select</span></th><?php endif; ?><th>Channel</th><?php if ($showOwner): ?><th>Owner</th><?php endif; ?><th>Scheduled</th><th>Sent</th><th>Health</th><th>Publishing</th></tr></thead>
     <tbody>
 <?php foreach ($channels as $c): ?>
       <tr>
+<?php if ($bulk): ?>
+        <td class="crm-check"><input type="checkbox" name="ids[]" value="<?= (int) $c['id'] ?>" form="<?= e($bulk) ?>" data-bulk-item aria-label="Select <?= e((string) $c['name']) ?>"></td>
+<?php endif; ?>
         <td><a class="crm-who" href="/admin/posts?channel=<?= (int) $c['id'] ?>"><b><?= e((string) $c['name']) ?></b><small><?= e(ucfirst((string) $c['provider'])) ?><?= $c['kind'] ? ' · ' . e((string) $c['kind']) : '' ?> · #<?= (int) $c['id'] ?></small></a></td>
 <?php if ($showOwner): ?>
         <td><a href="/admin/users/<?= (int) $c['user_id'] ?>"><?= e((string) $c['email']) ?></a></td>

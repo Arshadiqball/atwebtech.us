@@ -2,11 +2,13 @@
 /** @var list<array> $posts */
 /** @var string $back the page to return to after an action */
 /** @var bool $showOwner */
+/** @var ?string $bulk bulk form id; adds a checkbox column */
 $showOwner ??= true;
+$bulk ??= null;
 ?>
 <div class="crm-table-wrap crm-card">
   <table class="crm-table">
-    <thead><tr><th>Post</th><th>Channel</th><?php if ($showOwner): ?><th>Owner</th><?php endif; ?><th>Status</th><th>Time (owner's zone)</th><th></th></tr></thead>
+    <thead><tr><?php if ($bulk): ?><th class="crm-check"><span class="sr-only">Select</span></th><?php endif; ?><th>Post</th><th>Channel</th><?php if ($showOwner): ?><th>Owner</th><?php endif; ?><th>Status</th><th>Time (owner's zone)</th><th></th></tr></thead>
     <tbody>
 <?php foreach ($posts as $p):
     $tz = AdminAccounts::zone($p);
@@ -14,6 +16,9 @@ $showOwner ??= true;
     $text = trim((string) ($p['title'] ?: $p['body']));
 ?>
       <tr>
+<?php if ($bulk): ?>
+        <td class="crm-check"><input type="checkbox" name="ids[]" value="<?= (int) $p['id'] ?>" form="<?= e($bulk) ?>" data-bulk-item aria-label="Select post #<?= (int) $p['id'] ?>"></td>
+<?php endif; ?>
         <td><a class="crm-who" href="/admin/posts/<?= (int) $p['id'] ?>"><b><?= e($text !== '' ? mb_strimwidth($text, 0, 90, '…') : '(no text)') ?></b><small>#<?= (int) $p['id'] ?><?= $p['error'] ? ' · ' . e(mb_strimwidth((string) $p['error'], 0, 80, '…')) : '' ?></small></a></td>
         <td><?php if ($p['channel_id']): ?><?= e((string) $p['channel_name']) ?><small><?= e(ucfirst((string) $p['provider'])) ?><?= $p['paused_at'] !== null ? ' · paused' : '' ?></small><?php else: ?><small><?= e(ucfirst((string) ($p['channel'] ?: 'none'))) ?> (plan only)</small><?php endif; ?></td>
 <?php if ($showOwner): ?>

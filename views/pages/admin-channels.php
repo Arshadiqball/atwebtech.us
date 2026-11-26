@@ -24,7 +24,16 @@ $paused = count(array_filter($channels, static fn ($c) => $c['paused_at'] !== nu
 <?php if ($q !== ''): ?><a class="crm-link" href="/admin/channels">Clear</a><?php endif; ?>
     </form>
 <?php if ($channels): ?>
-    <?php partial('partials/admin-channel-table', ['channels' => $channels, 'back' => $self]); ?>
+    <?php partial('partials/admin-bulk-bar', [
+        'id' => 'bulk-channels', 'action' => '/admin/channels/bulk', 'back' => $self, 'total' => count($channels), 'noun' => 'channels',
+        'filters' => ['f_q' => $q],
+        'actions' => [
+        ['pause', 'Pause', 'Pause the selected channels? Nothing is published to them until they are resumed.'],
+        ['resume', 'Resume', 'Resume the selected channels? Their due posts go out on the next publishing run.'],
+        ['delete', 'Delete', 'Delete the selected channels? Their owners will have to connect them again. Posts are kept without a channel.'],
+    ],
+    ]); ?>
+    <?php partial('partials/admin-channel-table', ['channels' => $channels, 'back' => $self, 'bulk' => 'bulk-channels']); ?>
 <?php else: ?>
     <p class="crm-empty">No channels found.</p>
 <?php endif; ?>

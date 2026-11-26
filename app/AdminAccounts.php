@@ -15,7 +15,7 @@ final class AdminAccounts
     /** @return list<array> */
     public static function users(string $q = ''): array
     {
-        $sql = "SELECT u.id, u.email, u.display_name, u.timezone, u.created_at, u.last_login_at, u.parent_id,
+        $sql = "SELECT u.id, u.email, u.display_name, u.timezone, u.created_at, u.last_login_at, u.parent_id, u.disabled_at,
                 (SELECT COUNT(*) FROM channels c WHERE c.user_id = u.id) AS channels,
                 (SELECT COUNT(*) FROM channels c WHERE c.user_id = u.id AND c.paused_at IS NOT NULL) AS paused,
                 (SELECT COUNT(*) FROM posts p WHERE p.user_id = u.id) AS posts,
@@ -35,7 +35,7 @@ final class AdminAccounts
 
     public static function user(int $id): ?array
     {
-        $stmt = Database::connection()->prepare('SELECT id, email, display_name, timezone, created_at, last_login_at, parent_id FROM users WHERE id = :id');
+        $stmt = Database::connection()->prepare('SELECT id, email, display_name, timezone, created_at, last_login_at, parent_id, disabled_at FROM users WHERE id = :id');
         $stmt->execute(['id' => $id]);
         return $stmt->fetch() ?: null;
     }
@@ -43,21 +43,14 @@ final class AdminAccounts
     /** @return list<array> */
     public static function channels(?int $userId = null, string $q = ''): array
     {
-        $sql = 'SELECT c.id, c.user_id, c.provider, c.name, c.kind, c.paused_at, c.created_at, c.stats_error, c.inbox_error, u.email,
+        [$where, $params] = self::channelWhere($userId, $q);
+        $stmt = Database::connection()->prepare(
+            'SELECT c.id, c.user_id, c.provider, c.name, c.kind, c.paused_at, c.created_at, c.stats_error, c.inbox_error, u.email,
                 (SELECT COUNT(*) FROM posts p WHERE p.channel_id = c.id AND p.status = \'planned\') AS scheduled,
                 (SELECT COUNT(*) FROM posts p WHERE p.channel_id = c.id AND p.status = \'sent\') AS sent
-            FROM channels c JOIN users u ON u.id = c.user_id WHERE 1 = 1';
-        $params = [];
-        if ($userId !== null) {
-            $sql .= ' AND c.user_id = :uid';
-            $params['uid'] = $userId;
-        }
-        if ($q !== '') {
-            $sql .= ' AND (c.name LIKE :q OR u.email LIKE :q2 OR c.provider LIKE :q3)';
-            $params += ['q' => '%' . $q . '%', 'q2' => '%' . $q . '%', 'q3' => '%' . $q . '%'];
-        }
-        $sql .= ' ORDER BY c.paused_at IS NULL, u.email, c.provider, c.name LIMIT 1000';
-        $stmt = Database::connection()->prepare($sql);
+             FROM channels c JOIN users u ON u.id = c.user_id WHERE ' . $where
+            . ' ORDER BY c.paused_at IS NULL, u.email, c.provider, c.name LIMIT 1000'
+        );
         $stmt->execute($params);
         return $stmt->fetchAll();
     }
@@ -67,6 +60,28 @@ final class AdminAccounts
      * @return array{rows:list<array>, total:int, page:int, pages:int}
      */
     public static function posts(array $filter): array
+    {
+        [$where, $params] = self::postWhere($filter);
+        $from = self::POST_FROM . $where;
+        $count = Database::connection()->prepare('SELECT COUNT(*)' . $from);
+        $count->execute($params);
+        $total = (int) $count->fetchColumn();
+        $pages = max(1, (int) ceil($total / self::PAGE));
+        $page = min($pages, max(1, (int) ($filter['page'] ?? 1)));
+        $stmt = Database::connection()->prepare(
+            'SELECT p.id, p.user_id, p.channel, p.channel_id, p.body, p.title, p.status, p.planned_at, p.sent_at, p.external_url, p.error, p.updated_at,
+                    u.email, u.timezone, c.provider, c.name AS channel_name, c.paused_at'
+            . $from . ' ORDER BY CASE p.status WHEN \'failed\' THEN 0 WHEN \'publishing\' THEN 1 WHEN \'planned\' THEN 2 ELSE 3 END, p.planned_at DESC, p.id DESC'
+            . ' LIMIT ' . self::PAGE . ' OFFSET ' . (($page - 1) * self::PAGE)
+        );
+        $stmt->execute($params);
+        return ['rows' => $stmt->fetchAll(), 'total' => $total, 'page' => $page, 'pages' => $pages];
+    }
+
+    private const POST_FROM = ' FROM posts p JOIN users u ON u.id = p.user_id LEFT JOIN channels c ON c.id = p.channel_id WHERE ';
+
+    /** @return array{0:string, 1:array} SQL condition and parameters for a posts filter. */
+    private static function postWhere(array $filter): array
     {
         $where = ['1 = 1'];
         $params = [];
@@ -88,20 +103,23 @@ final class AdminAccounts
             $where[] = '(p.body LIKE :q OR u.email LIKE :q2)';
             $params += ['q' => '%' . $q . '%', 'q2' => '%' . $q . '%'];
         }
-        $from = ' FROM posts p JOIN users u ON u.id = p.user_id LEFT JOIN channels c ON c.id = p.channel_id WHERE ' . implode(' AND ', $where);
-        $count = Database::connection()->prepare('SELECT COUNT(*)' . $from);
-        $count->execute($params);
-        $total = (int) $count->fetchColumn();
-        $pages = max(1, (int) ceil($total / self::PAGE));
-        $page = min($pages, max(1, (int) ($filter['page'] ?? 1)));
-        $stmt = Database::connection()->prepare(
-            'SELECT p.id, p.user_id, p.channel, p.channel_id, p.body, p.title, p.status, p.planned_at, p.sent_at, p.external_url, p.error, p.updated_at,
-                    u.email, u.timezone, c.provider, c.name AS channel_name, c.paused_at'
-            . $from . ' ORDER BY CASE p.status WHEN \'failed\' THEN 0 WHEN \'publishing\' THEN 1 WHEN \'planned\' THEN 2 ELSE 3 END, p.planned_at DESC, p.id DESC'
-            . ' LIMIT ' . self::PAGE . ' OFFSET ' . (($page - 1) * self::PAGE)
-        );
-        $stmt->execute($params);
-        return ['rows' => $stmt->fetchAll(), 'total' => $total, 'page' => $page, 'pages' => $pages];
+        return [implode(' AND ', $where), $params];
+    }
+
+    /** @return array{0:string, 1:array} SQL condition and parameters for a channels search. */
+    private static function channelWhere(?int $userId, string $q): array
+    {
+        $where = ['1 = 1'];
+        $params = [];
+        if ($userId !== null) {
+            $where[] = 'c.user_id = :uid';
+            $params['uid'] = $userId;
+        }
+        if ($q !== '') {
+            $where[] = '(c.name LIKE :q OR u.email LIKE :q2 OR c.provider LIKE :q3)';
+            $params += ['q' => '%' . $q . '%', 'q2' => '%' . $q . '%', 'q3' => '%' . $q . '%'];
+        }
+        return [implode(' AND ', $where), $params];
     }
 
     public static function post(int $id): ?array
@@ -294,6 +312,240 @@ final class AdminAccounts
             $back = '/admin/posts';
         }
         self::done($back, $stmt->rowCount() > 0 ? 'Post deleted.' : 'That post could not be deleted. It may be sending right now, or already deleted.');
+    }
+
+    /**
+     * POST /admin/posts/bulk: delete, disable (back to draft) or schedule the ticked posts,
+     * or every post matching the current filter when "all matching" is ticked.
+     */
+    public static function bulkPosts(): never
+    {
+        Auth::requireAdmin();
+        $back = self::back('/admin/posts');
+        self::checkToken($back);
+        $action = (string) ($_POST['action'] ?? '');
+        if (self::scopeAll()) {
+            [$where, $params] = self::postWhere([
+                'status' => $_POST['f_status'] ?? '', 'q' => $_POST['f_q'] ?? '',
+                'user' => (int) ($_POST['f_user'] ?? 0), 'channel' => (int) ($_POST['f_channel'] ?? 0),
+            ]);
+            $stmt = Database::connection()->prepare('SELECT p.id' . self::POST_FROM . $where);
+            $stmt->execute($params);
+            $ids = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        } else {
+            $ids = self::ids();
+        }
+        if ($ids === []) {
+            self::done($back, 'Tick at least one post first.');
+        }
+        $done = 0;
+        foreach (array_chunk($ids, 500) as $chunk) {
+            $in = implode(',', $chunk);
+            $sql = match ($action) {
+                'delete' => "DELETE FROM posts WHERE id IN ($in) AND status <> 'publishing'",
+                'disable' => "UPDATE posts SET status = 'draft', updated_at = :now WHERE id IN ($in) AND status IN ('planned', 'review', 'failed')",
+                'schedule' => "UPDATE posts SET status = 'planned', error = NULL, attempts = 0, updated_at = :now WHERE id IN ($in)
+                               AND status IN ('draft', 'review', 'failed') AND planned_at IS NOT NULL AND channel_id IS NOT NULL",
+                default => self::done($back, 'Pick an action.'),
+            };
+            $stmt = Database::connection()->prepare($sql);
+            $stmt->execute($action === 'delete' ? [] : ['now' => Database::now()]);
+            $done += $stmt->rowCount();
+        }
+        $skipped = count($ids) - $done;
+        $verb = ['delete' => 'deleted', 'disable' => 'disabled (moved to drafts)', 'schedule' => 'scheduled'][$action];
+        self::done($back, sprintf('%d %s %s.', $done, $done === 1 ? 'post' : 'posts', $verb)
+            . ($skipped > 0 ? sprintf(' %d skipped: %s.', $skipped, match ($action) {
+                'delete' => 'they were sending right now',
+                'disable' => 'already drafts, sending or sent',
+                'schedule' => 'already scheduled or sent, or no time or connected channel',
+            }) : ''));
+    }
+
+    /** POST /admin/channels/bulk: pause, resume or delete the ticked channels, or all matching the search. */
+    public static function bulkChannels(): never
+    {
+        Auth::requireAdmin();
+        $back = self::back('/admin/channels');
+        self::checkToken($back);
+        $action = (string) ($_POST['action'] ?? '');
+        $pdo = Database::connection();
+        if (self::scopeAll()) {
+            $uid = (int) ($_POST['f_user'] ?? 0);
+            [$where, $params] = self::channelWhere($uid > 0 ? $uid : null, trim((string) ($_POST['f_q'] ?? '')));
+            $stmt = $pdo->prepare('SELECT c.id FROM channels c JOIN users u ON u.id = c.user_id WHERE ' . $where);
+            $stmt->execute($params);
+            $ids = array_map('intval', $stmt->fetchAll(PDO::FETCH_COLUMN));
+        } else {
+            $ids = self::ids();
+        }
+        if ($ids === []) {
+            self::done($back, 'Tick at least one channel first.');
+        }
+        $done = 0;
+        foreach (array_chunk($ids, 500) as $chunk) {
+            $in = implode(',', $chunk);
+            if ($action === 'pause' || $action === 'resume') {
+                $stmt = $pdo->prepare("UPDATE channels SET paused_at = :at, updated_at = :now WHERE id IN ($in) AND paused_at IS " . ($action === 'pause' ? 'NULL' : 'NOT NULL'));
+                $stmt->execute(['at' => $action === 'pause' ? Database::now() : null, 'now' => Database::now()]);
+                $done += $stmt->rowCount();
+            } elseif ($action === 'delete') {
+                $rows = $pdo->query("SELECT id, user_id, provider, access_token, refresh_token FROM channels WHERE id IN ($in)")->fetchAll();
+                $pdo->exec("DELETE FROM channels WHERE id IN ($in)");
+                $done += count($rows);
+                self::revokeOrphans($rows);
+            } else {
+                self::done($back, 'Pick an action.');
+            }
+        }
+        $verb = ['pause' => 'paused', 'resume' => 'resumed', 'delete' => 'deleted'][$action];
+        self::done($back, sprintf('%d %s %s.', $done, $done === 1 ? 'channel' : 'channels', $verb)
+            . ($action === 'delete' && $done > 0 ? ' Their posts were kept as plans without a channel.' : ''));
+    }
+
+    /**
+     * POST /admin/users/bulk: disable, enable or delete the ticked accounts, or all matching the search.
+     * A disabled account is signed out everywhere, can't sign in, and its channels are paused.
+     * Admin accounts (ADMIN_EMAILS) are never touched here.
+     */
+    public static function bulkUsers(): never
+    {
+        Auth::requireAdmin();
+        $back = self::back('/admin/users');
+        self::checkToken($back);
+        $action = (string) ($_POST['action'] ?? '');
+        $pdo = Database::connection();
+        if (self::scopeAll()) {
+            $q = trim((string) ($_POST['f_q'] ?? ''));
+            $ids = array_map(static fn ($r) => (int) $r['id'], self::users($q));
+        } else {
+            $ids = self::ids();
+        }
+        $rows = [];
+        foreach (array_chunk($ids, 500) as $chunk) {
+            $rows = array_merge($rows, $pdo->query('SELECT id, email, parent_id, disabled_at FROM users WHERE id IN (' . implode(',', $chunk) . ')')->fetchAll());
+        }
+        $protected = 0;
+        $rows = array_values(array_filter($rows, static function (array $r) use (&$protected): bool {
+            if (self::isAdminEmail((string) $r['email'])) {
+                $protected++;
+                return false;
+            }
+            return true;
+        }));
+        if ($rows === []) {
+            self::done($back, $protected > 0 ? 'Admin accounts can’t be disabled or deleted here.' : 'Tick at least one user first.');
+        }
+        $done = 0;
+        $failed = 0;
+        foreach ($rows as $r) {
+            $id = (int) $r['id'];
+            if ($action === 'disable' && $r['disabled_at'] === null) {
+                $at = Database::now();
+                $pdo->prepare('UPDATE users SET disabled_at = :at, updated_at = :at2 WHERE (id = :id OR parent_id = :pid) AND disabled_at IS NULL')
+                    ->execute(['at' => $at, 'at2' => $at, 'id' => $id, 'pid' => $id]);
+                // Same timestamp, so enabling resumes exactly the channels this paused.
+                $pdo->prepare('UPDATE channels SET paused_at = :at, updated_at = :at2 WHERE paused_at IS NULL AND user_id IN (SELECT id FROM users WHERE id = :id OR parent_id = :pid)')
+                    ->execute(['at' => $at, 'at2' => $at, 'id' => $id, 'pid' => $id]);
+                $pdo->prepare('DELETE FROM mobile_tokens WHERE user_id = :id')->execute(['id' => $id]);
+                $done++;
+            } elseif ($action === 'enable' && $r['disabled_at'] !== null) {
+                $pdo->prepare('UPDATE channels SET paused_at = NULL, updated_at = :now WHERE paused_at = :at AND user_id IN (SELECT id FROM users WHERE id = :id OR parent_id = :pid)')
+                    ->execute(['now' => Database::now(), 'at' => $r['disabled_at'], 'id' => $id, 'pid' => $id]);
+                $pdo->prepare('UPDATE users SET disabled_at = NULL, updated_at = :now WHERE (id = :id OR parent_id = :pid) AND disabled_at = :at')
+                    ->execute(['now' => Database::now(), 'id' => $id, 'pid' => $id, 'at' => $r['disabled_at']]);
+                $done++;
+            } elseif ($action === 'delete') {
+                self::deleteAccount($id, (string) $r['email']) ? $done++ : $failed++;
+            } elseif (!in_array($action, ['disable', 'enable', 'delete'], true)) {
+                self::done($back, 'Pick an action.');
+            }
+        }
+        $verb = ['disable' => 'disabled', 'enable' => 'enabled', 'delete' => 'deleted'][$action];
+        if ($action === 'delete' && str_starts_with($back, '/admin/users/')) {
+            $back = '/admin/users';
+        }
+        self::done($back, sprintf('%d %s %s.', $done, $done === 1 ? 'account' : 'accounts', $verb)
+            . ($failed > 0 ? sprintf(' %d not deleted because their paid plan couldn’t be cancelled; try again.', $failed) : '')
+            . ($protected > 0 ? sprintf(' %d admin %s skipped.', $protected, $protected === 1 ? 'account was' : 'accounts were') : ''));
+    }
+
+    /** Delete one account the same way its owner would from Account settings (Passwords::delete). */
+    private static function deleteAccount(int $uid, string $email): bool
+    {
+        $pdo = Database::connection();
+        if (($sub = Billing::current($uid)) !== null) {
+            try {
+                Billing::cancelNow($sub);
+            } catch (Throwable $e) {
+                error_log(sprintf('[%s] admin delete: could not cancel plan for user %d: %s', gmdate('c'), $uid, $e->getMessage()));
+                return false;
+            }
+        }
+        $kids = $pdo->prepare('SELECT id FROM users WHERE parent_id = :id');
+        $kids->execute(['id' => $uid]);
+        $in = implode(',', array_merge([$uid], array_map('intval', $kids->fetchAll(PDO::FETCH_COLUMN))));
+        foreach ($pdo->query("SELECT * FROM media WHERE user_id IN ($in)")->fetchAll() as $media) {
+            Media::discard($media);
+        }
+        foreach ($pdo->query("SELECT logo_file FROM report_settings WHERE user_id IN ($in) AND logo_file IS NOT NULL AND logo_file <> ''")->fetchAll(PDO::FETCH_COLUMN) as $logo) {
+            @unlink(BASE_PATH . '/storage/branding/' . basename((string) $logo));
+        }
+        $pdo->exec("DELETE FROM users WHERE parent_id = $uid");
+        $pdo->prepare('DELETE FROM users WHERE id = :id')->execute(['id' => $uid]);
+        $pdo->prepare('DELETE FROM waitlist_signups WHERE email = :e')->execute(['e' => $email]);
+        $pdo->prepare('DELETE FROM team_invites WHERE email = :e')->execute(['e' => $email]);
+        error_log(sprintf('[%s] account %d deleted by an admin', gmdate('c'), $uid));
+        return true;
+    }
+
+    /** Revoke atwebtech's access for deleted channels when the owner has no other channel on that network. */
+    private static function revokeOrphans(array $rows): void
+    {
+        $left = Database::connection()->prepare('SELECT COUNT(*) FROM channels WHERE user_id = :uid AND provider = :p');
+        $seen = [];
+        foreach ($rows as $c) {
+            $key = $c['user_id'] . '|' . $c['provider'];
+            if (isset($seen[$key])) {
+                continue;
+            }
+            $seen[$key] = true;
+            $left->execute(['uid' => (int) $c['user_id'], 'p' => $c['provider']]);
+            if ((int) $left->fetchColumn() > 0) {
+                continue;
+            }
+            try {
+                Channels::revoke(Security::unseal($c['refresh_token']) ?? Security::unseal($c['access_token']), (string) $c['provider']);
+            } catch (Throwable $e) {
+                error_log(sprintf('[%s] admin channel revoke failed: %s', gmdate('c'), $e->getMessage()));
+            }
+        }
+    }
+
+    /** Accounts listed in ADMIN_EMAILS can't be disabled or deleted from the admin panel. */
+    public static function isAdminEmail(string $email): bool
+    {
+        $admins = array_filter(array_map(static fn (string $e): string => strtolower(trim($e)), explode(',', (string) config('admin.emails'))));
+        return in_array(strtolower(trim($email)), $admins, true);
+    }
+
+    private static function scopeAll(): bool
+    {
+        return ($_POST['scope'] ?? '') === 'all';
+    }
+
+    /** @return list<int> */
+    private static function ids(): array
+    {
+        $ids = array_filter((array) ($_POST['ids'] ?? []), static fn ($v) => is_string($v) && ctype_digit($v));
+        return array_values(array_unique(array_map('intval', $ids)));
+    }
+
+    private static function checkToken(string $back): void
+    {
+        if (!Security::verifyCsrf($_POST['_token'] ?? null)) {
+            self::done($back, 'Your session expired. Refresh the page and try again.');
+        }
     }
 
     /** Return to the admin page the form came from. */

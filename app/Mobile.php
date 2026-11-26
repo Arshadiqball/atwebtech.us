@@ -36,7 +36,7 @@ final class Mobile
             self::fail(429, 'Too many failed attempts. Please wait 15 minutes and try again.');
         }
         $pdo = Database::connection();
-        $stmt = $pdo->prepare('SELECT id, password_hash, totp_confirmed_at FROM users WHERE email = :email AND parent_id IS NULL');
+        $stmt = $pdo->prepare('SELECT id, password_hash, totp_confirmed_at, disabled_at FROM users WHERE email = :email AND parent_id IS NULL');
         $stmt->execute(['email' => $email]);
         $user = $stmt->fetch();
         // Unknown emails still pay for one hash so timing doesn't reveal which accounts exist.
@@ -45,6 +45,9 @@ final class Mobile
             RateLimiter::hit('login', $ipKey);
             RateLimiter::hit('login-email', $emailKey);
             self::fail(401, 'That email and password combination is incorrect.');
+        }
+        if ($user['disabled_at'] !== null) {
+            self::fail(403, 'This account has been disabled. Contact ' . config('contact.email') . ' if you think this is a mistake.');
         }
         if ($user['totp_confirmed_at'] !== null) {
             json_response(['status' => 'two_factor', 'challenge' => self::code((int) $user['id'], '2fa', 600, json_encode(['device' => self::deviceName($in), 'platform' => self::platform($in)]))]);

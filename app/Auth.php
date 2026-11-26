@@ -70,11 +70,15 @@ final class Auth
             return self::$user = null;
         }
         try {
-            $stmt = Database::connection()->prepare('SELECT id, email, display_name, theme, timezone, workspace_seeded_at, created_at, password_changed_at FROM users WHERE id = :id');
+            $stmt = Database::connection()->prepare('SELECT id, email, display_name, theme, timezone, workspace_seeded_at, created_at, password_changed_at, disabled_at FROM users WHERE id = :id');
             $stmt->execute(['id' => $id]);
             self::$person = $stmt->fetch() ?: null;
         } catch (Throwable $e) {
             error_log(sprintf('[%s] auth lookup failed: %s', gmdate('c'), $e->getMessage()));
+            self::$person = null;
+        }
+        if (self::$person !== null && self::$person['disabled_at'] !== null) {
+            // Disabled by an admin: signed out everywhere, the mobile app included.
             self::$person = null;
         }
         if (self::$person === null) {
@@ -88,7 +92,7 @@ final class Auth
             self::$person = null;
             return self::$user = null;
         }
-        unset(self::$person['password_changed_at']);
+        unset(self::$person['password_changed_at'], self::$person['disabled_at']);
         self::$user = self::$person;
         $ws = $_SESSION['_ws'] ?? null;
         if (self::$tokenId !== null) {

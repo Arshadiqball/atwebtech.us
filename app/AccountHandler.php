@@ -351,6 +351,12 @@ final class AccountHandler
 
     private static function finishLogin(int $userId, ?string $next, ?string $rehash): never
     {
+        $disabled = Database::connection()->prepare('SELECT disabled_at FROM users WHERE id = :id');
+        $disabled->execute(['id' => $userId]);
+        if ($disabled->fetchColumn()) {
+            flash('form', ['form' => 'login', 'status' => 'error', 'message' => 'This account has been disabled. Contact ' . config('contact.email') . ' if you think this is a mistake.', 'errors' => [], 'old' => []]);
+            redirect('/login');
+        }
         try {
             $update = ['id' => $userId, 'login' => Database::now()];
             $sql = 'UPDATE users SET last_login_at = :login';

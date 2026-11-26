@@ -891,6 +891,38 @@
     });
   }
 
+  /* Admin listings: select rows, or everything matching, then act on them in bulk */
+  document.querySelectorAll('form[data-bulk]').forEach((form) => {
+    const items = () => Array.from(document.querySelectorAll(`input[data-bulk-item][form="${form.id}"]`));
+    const toggle = form.querySelector('[data-bulk-toggle]');
+    const scope = form.querySelector('[data-bulk-scope]');
+    const count = form.querySelector('[data-bulk-count]');
+    const buttons = form.querySelectorAll('button[name="action"]');
+    const total = scope ? scope.parentElement.textContent.trim() : '';
+    const sync = () => {
+      const all = items();
+      const n = all.filter((i) => i.checked).length;
+      if (toggle) {
+        toggle.checked = all.length > 0 && n === all.length;
+        toggle.indeterminate = n > 0 && n < all.length;
+      }
+      const everything = scope && scope.checked;
+      count.textContent = everything ? total.replace(/^All/, 'All') : (n ? `${n} selected` : 'None selected');
+      buttons.forEach((b) => { b.disabled = !everything && n === 0; });
+      form.classList.toggle('is-active', everything || n > 0);
+    };
+    if (toggle) toggle.addEventListener('change', () => { items().forEach((i) => { i.checked = toggle.checked; }); sync(); });
+    if (scope) scope.addEventListener('change', sync);
+    document.addEventListener('change', (e) => { if (e.target.matches(`input[data-bulk-item][form="${form.id}"]`)) sync(); });
+    form.addEventListener('submit', (e) => {
+      const btn = e.submitter;
+      if (!btn || !btn.dataset.bulkConfirm) return;
+      const n = scope && scope.checked ? total.replace(/ matching this view$/, '').replace(/^All /, 'all ') : `${items().filter((i) => i.checked).length} selected`;
+      if (!window.confirm(`${btn.textContent.trim()} ${n}?\n\n${btn.dataset.bulkConfirm}`)) e.preventDefault();
+    });
+    sync();
+  });
+
   /* Workspace: confirmations and notices -------------------------------- */
   document.addEventListener('click', (e) => {
     const btn = e.target.closest('button[data-confirm]');

@@ -41,7 +41,16 @@ $self = rtrim($self, '?');
 <?php endif; ?>
     </form>
 <?php if ($result['rows']): ?>
-    <?php partial('partials/admin-post-table', ['posts' => $result['rows'], 'back' => $self]); ?>
+    <?php partial('partials/admin-bulk-bar', [
+        'id' => 'bulk-posts', 'action' => '/admin/posts/bulk', 'back' => $self, 'total' => $result['total'], 'noun' => 'posts',
+        'filters' => ['f_status' => $val('status'), 'f_q' => $val('q'), 'f_user' => $val('user'), 'f_channel' => $val('channel')],
+        'actions' => [
+        ['disable', 'Disable', 'Move the selected posts back to drafts? They will not be published until scheduled again.'],
+        ['schedule', 'Schedule', 'Schedule the selected posts at their saved times? Posts whose time has passed go out on the next publishing run.'],
+        ['delete', 'Delete', 'Delete the selected posts? This cannot be undone. Posts already published stay on the networks.'],
+    ],
+    ]); ?>
+    <?php partial('partials/admin-post-table', ['posts' => $result['rows'], 'back' => $self, 'bulk' => 'bulk-posts']); ?>
 <?php if ($result['pages'] > 1): ?>
     <nav class="crm-pages" aria-label="Pages">
 <?php if ($result['page'] > 1): ?><a class="crm-btn" href="<?= e($pageUrl($result['page'] - 1)) ?>">Previous</a><?php endif; ?>

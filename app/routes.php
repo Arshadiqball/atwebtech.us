@@ -681,10 +681,13 @@ return [
         ]);
     }],
     ['GET', '/admin/users', [AdminAccounts::class, 'usersPage']],
+    ['POST', '/admin/users/bulk', [AdminAccounts::class, 'bulkUsers']],
     ['GET', '/admin/users/{id}', [AdminAccounts::class, 'userPage']],
     ['GET', '/admin/channels', [AdminAccounts::class, 'channelsPage']],
+    ['POST', '/admin/channels/bulk', [AdminAccounts::class, 'bulkChannels']],
     ['POST', '/admin/channels/{id}/pause', [AdminAccounts::class, 'togglePause']],
     ['GET', '/admin/posts', [AdminAccounts::class, 'postsPage']],
+    ['POST', '/admin/posts/bulk', [AdminAccounts::class, 'bulkPosts']],
     ['GET', '/admin/posts/{id}', [AdminAccounts::class, 'postPage']],
     ['POST', '/admin/posts/{id}', [AdminAccounts::class, 'save']],
     ['POST', '/admin/posts/{id}/delete', [AdminAccounts::class, 'delete']],
