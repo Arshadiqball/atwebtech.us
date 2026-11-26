@@ -24,17 +24,16 @@ jobs:
           printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: PHP 8.5 check
+      - name: PHP limits
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH=$DEPLOY_PATH bash -s" <<'EOF'
           cd "$DEPLOY_PATH"
-          P=/usr/local/php85/bin/php
-          echo "== $($P -v 2>/dev/null | head -1 | cut -c1-30); curl loaded: $($P -m 2>/dev/null | grep -cx curl); pdo_mysql: $($P -m 2>/dev/null | grep -cx pdo_mysql); sodium: $($P -m 2>/dev/null | grep -cx sodium)"
-          echo "== files PHP 8.5 refuses to compile:"
-          for f in app/*.php app/**/*.php bin/*.php; do [ -f "$f" ] && $P -l "$f" 2>&1 | grep -v '^No syntax errors' | grep -v 'i360.so' | sed -E 's#/home/[^/ ]+#~#g' | cut -c1-200; done
-          echo "== load every class under 8.5:"
-          $P -d display_errors=1 -d error_reporting=E_ALL -r 'require "app/bootstrap.php"; foreach (glob("app/*.php") as $f) { $c = basename($f, ".php"); if (!class_exists($c)) { echo "   not a class: $c\n"; } } echo "   done\n";' 2>&1 | grep -v 'i360.so' | grep -vE 'Deprecated' | sed -E 's#/home/[^/ ]+#~#g' | cut -c1-220 | head -20
-          echo "== deprecations under 8.5 (first 8):"
-          $P -d display_errors=1 -d error_reporting=E_ALL -r 'require "app/bootstrap.php"; foreach (glob("app/*.php") as $f) { class_exists(basename($f, ".php")); }' 2>&1 | grep -E 'Deprecated' | sed -E 's#/home/[^/ ]+#~#g' | sort -u | cut -c1-220 | head -8
-          echo "== error log settings under 8.5: display_errors=$($P -r 'echo ini_get("display_errors");') log_errors=$($P -r 'echo ini_get("log_errors");') error_log=$($P -r 'echo ini_get("error_log") ?: "(stderr)";' | sed -E 's#/home/[^/ ]+#~#g')"
+          for P in /usr/local/php82/bin/php /usr/local/php85/bin/php; do
+            echo "== $P"
+            $P -r 'foreach (["max_execution_time","memory_limit","disable_functions","open_basedir","default_socket_timeout","error_log","log_errors"] as $k) { $v = (string) ini_get($k); echo "   $k = " . (strlen($v) > 160 ? substr($v, 0, 160) . "..." : $v) . "\n"; } echo "   ini file = " . php_ini_loaded_file() . "\n";' 2>/dev/null | sed -E 's#/home/[^/ ]+#~#g'
+          done
+          echo "== run the publisher under PHP 8.5 by hand, nothing is due (limit 90s):"
+          start=$(date +%s); timeout 90 /usr/local/php85/bin/php -d display_errors=1 bin/publish.php > /tmp/p85.out 2>&1; code=$?; end=$(date +%s)
+          echo "   exit $code after $((end-start))s"
+          grep -v 'i360.so' /tmp/p85.out | sed -E 's#/home/[^/ ]+#~#g; s#[A-Za-z0-9_-]{32,}#<long>#g' | cut -c1-200 | tail -n 15
           EOF
