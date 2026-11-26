@@ -32,6 +32,10 @@ jobs:
           redact() { sed -E 's#(token|secret|key|password|code)=[^&" ]+#\1=<hidden>#Ig; s#[A-Za-z0-9_-]{32,}#<long>#g; s#/home/[^/ ]+#~#g' | grep -v "i360.so" | cut -c1-200; }
           PHP=$(command -v php8.3 || command -v php8.2 || command -v php)
 
+          echo "== is the publish lock held right now?"
+          if flock -n storage/logs/publish.lock true; then echo "   free"; else echo "   HELD by another process"; fi
+          echo "== php processes for this user (pid, elapsed, script):"
+          for d in /proc/[0-9]*; do c=$(tr '\0' ' ' < $d/cmdline 2>/dev/null); case "$c" in *php*) echo "   ${d#/proc/} $(ps -o etime= -p ${d#/proc/} 2>/dev/null) $(echo "$c" | grep -oE 'bin/[a-z]+\.php|public/index\.php' | head -1)";; esac; done
           echo "== put the stuck test post (335) back in the queue:"
           $PHP -r 'require "app/bootstrap.php"; $n = Database::connection()->exec("UPDATE posts SET status = \"planned\" WHERE id = 335 AND status = \"publishing\""); echo "   rows: $n\n";' 2>&1 | redact
 
