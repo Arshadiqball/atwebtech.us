@@ -1,0 +1,4 @@
+<IfModule LiteSpeed>
+SpdyEnabled http2
+QuicEnable off
+</IfModule>
