@@ -1,0 +1,66 @@
+name: Server check (temporary)
+
+# Temporary: shows why scheduled posts are not being sent. Prints a cleaned summary only,
+# because this repository's Actions logs are public. Remove once publishing works again.
+
+on:
+  workflow_dispatch:
+
+env:
+  DEPLOY_HOST: vda2000.is.cc
+  DEPLOY_USER: atwebtec
+  DEPLOY_PATH: domains/atwebtech.us/public_html
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Check the publishing job
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH=$DEPLOY_PATH bash -s" <<'EOF'
+          cd "$DEPLOY_PATH"
+          redact() { sed -E 's#(token|secret|key|password|code)=[^&" ]+#\1=<hidden>#Ig; s#[A-Za-z0-9_-]{32,}#<long>#g; s#/home/[^/ ]+#~#g' | cut -c1-200; }
+
+          echo "== server time: $(date -u '+%F %T') UTC"
+          echo "== cron lines that run this app's scripts (schedule and script only):"
+          crontab -l 2>/dev/null | grep -E 'bin/(publish|feeds|trends)\.php' | sed -E 's#^(([^ ]+ +){5}).*(bin/[a-z]+\.php).*$#\1... \3#' || true
+          echo "   (crontab lines in total: $(crontab -l 2>/dev/null | grep -cvE '^\s*(#|$)'))"
+          echo "== cron's php binary(s):"
+          crontab -l 2>/dev/null | grep -E 'bin/publish\.php' | grep -oE '(/[^ ]*php[0-9.]*)( |$)' | head -2 | while read -r p; do [ -x "$p" ] && echo "   $p -> $("$p" -v | head -1)" || echo "   $p -> MISSING"; done
+
+          echo "== publish.php processes running now (pid, elapsed):"
+          ps -u "$(id -un)" -o pid=,etime=,args= | grep -E '[b]in/publish\.php' | awk '{print "   "$1, $2}' || true
+
+          echo "== storage/logs:"
+          ls -la --time-style=+'%F %T' storage/logs 2>/dev/null | awk 'NR>1 {print "   "$6, $7, $5, $8}'
+
+          if [ -f storage/logs/publish.log ]; then
+            echo "== last 15 summary lines of publish.log:"
+            grep -E '^\[[0-9]{4}-' storage/logs/publish.log | grep -E '(sent|evergreen|stats|inbox|competitors|reports|webhooks)' | tail -n 15 | redact
+            echo "== last 15 other lines (errors), cleaned:"
+            grep -vE '\] (sent|evergreen|stats|inbox|competitors|reports|webhooks)' storage/logs/publish.log | tail -n 15 | redact
+          fi
+
+          echo "== due posts in the database:"
+          PHP=$(command -v php8.3 || command -v php8.2 || command -v php)
+          $PHP -r '
+            require "app/bootstrap.php";
+            $pdo = Database::connection();
+            $now = Database::now();
+            echo "   db now: $now\n";
+            $q = $pdo->prepare("SELECT c.provider, p.status, COUNT(*) n, MIN(p.planned_at) oldest FROM posts p JOIN channels c ON c.id = p.channel_id WHERE p.status IN (\"planned\",\"publishing\") AND p.planned_at <= ? AND c.paused_at IS NULL GROUP BY c.provider, p.status");
+            $q->execute([$now]);
+            foreach ($q as $r) { echo "   {$r["provider"]} {$r["status"]}: {$r["n"]} (oldest {$r["oldest"]})\n"; }
+            $s = $pdo->query("SELECT MAX(sent_at) FROM posts WHERE status = \"sent\"")->fetchColumn();
+            echo "   last sent: $s\n";
+          ' 2>&1 | redact
+          EOF
