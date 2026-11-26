@@ -2165,9 +2165,9 @@
   }
 })();
 
-// Installable app: register the service worker (offline page only; workspace pages are never cached).
-if ('serviceWorker' in navigator && window.isSecureContext) {
-  window.addEventListener('load', () => { navigator.serviceWorker.register('/sw.js').catch(() => {}); });
+// The service worker is retired: some browsers' page loads hung behind it. Remove any copy still installed.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then((regs) => regs.forEach((r) => r.unregister())).catch(() => {});
 }
 
 // Community: picking a saved reply fills the reply box.
