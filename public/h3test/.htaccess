@@ -1,4 +1,0 @@
-<IfModule mod_headers.c>
-Header always unset Alt-Svc
-Header unset Alt-Svc
-</IfModule>
