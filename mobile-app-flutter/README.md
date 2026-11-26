@@ -40,6 +40,14 @@ flutter run --dart-define=API_BASE=https://atwebtech.us
 
 Against a local server (`php -S localhost:8000 -t public public/index.php` in the repo root): use `--dart-define=API_BASE=http://localhost:8000` on the iOS simulator and `http://10.0.2.2:8000` on the Android emulator.
 
+## Analytics (Firebase, iOS)
+
+The iPhone and iPad app reports to the Google Analytics property "atwebtech.us" through the Firebase project `atwebtechus-91c72` (Google account atwebtech.us@gmail.com). `ios/Runner/GoogleService-Info.plist` holds that project's identifiers and `lib/main.dart` starts Firebase from it at launch. Android is skipped until an Android app is added to the same project.
+
+Because Firebase now starts from that file, push notifications on iOS use the same project: set the server's `FIREBASE_*` values from `atwebtechus-91c72`, not from another project.
+
+When releasing a version with analytics, update the App Store privacy label (App Privacy) to declare the data Firebase Analytics collects.
+
 ## Push notifications (Firebase)
 
 The app is built ready for push (iOS Push Notifications capability, background delivery, Android permission). It stays quiet until the server has a Firebase project to send through. Nothing in the app needs rebuilding to turn it on: the app gets the Firebase values from the server each time it starts.

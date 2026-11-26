@@ -1,3 +1,8 @@
+import 'dart:io' show Platform;
+
+import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
@@ -10,9 +15,21 @@ import 'screens/splash.dart';
 import 'state.dart';
 import 'theme.dart';
 
-void main() {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await _startAnalytics();
   runApp(const AtwebtechApp());
+}
+
+/// Google Analytics for the iPhone and iPad app. Firebase reads ios/Runner/GoogleService-Info.plist,
+/// and its Analytics SDK then records app opens, sessions and screen time on its own. Android has no
+/// Firebase config file yet, so it is skipped there. A failure here must never stop the app starting.
+Future<void> _startAnalytics() async {
+  if (kIsWeb || !Platform.isIOS) return;
+  try {
+    if (Firebase.apps.isEmpty) await Firebase.initializeApp();
+    await FirebaseAnalytics.instance.setAnalyticsCollectionEnabled(true);
+  } catch (_) {}
 }
 
 class AtwebtechApp extends StatefulWidget {
