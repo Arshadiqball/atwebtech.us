@@ -24,19 +24,17 @@ jobs:
           printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
           chmod 644 ~/.ssh/known_hosts
 
-      - name: Which PHP
+      - name: PHP 8.5 check
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH=$DEPLOY_PATH bash -s" <<'EOF'
           cd "$DEPLOY_PATH"
-          for b in /usr/local/bin/php /usr/bin/php $(command -v php) $(command -v php8.2) $(command -v php8.3) /usr/local/php82/bin/php; do
-            [ -x "$b" ] && echo "   $b -> $($b -v 2>/dev/null | head -1 | cut -c1-40)"
-          done | sort -u
-          echo "== scheduled publish.php runs seen over 70 seconds (pid, php binary):"
-          end=$(( $(date +%s) + 70 ))
-          while [ $(date +%s) -lt $end ]; do
-            for d in /proc/[0-9]*; do
-              grep -q 'bin/publish.php' $d/cmdline 2>/dev/null && echo "   ${d#/proc/} $(readlink $d/exe 2>/dev/null) $(tr '\0' ' ' < $d/cmdline | grep -oE '(-[a-z] [^ ]+ )*' | head -c 60)"
-            done
-            sleep 1
-          done | sort -u | head -10
+          P=/usr/local/php85/bin/php
+          echo "== $($P -v 2>/dev/null | head -1 | cut -c1-30); curl loaded: $($P -m 2>/dev/null | grep -cx curl); pdo_mysql: $($P -m 2>/dev/null | grep -cx pdo_mysql); sodium: $($P -m 2>/dev/null | grep -cx sodium)"
+          echo "== files PHP 8.5 refuses to compile:"
+          for f in app/*.php app/**/*.php bin/*.php; do [ -f "$f" ] && $P -l "$f" 2>&1 | grep -v '^No syntax errors' | grep -v 'i360.so' | sed -E 's#/home/[^/ ]+#~#g' | cut -c1-200; done
+          echo "== load every class under 8.5:"
+          $P -d display_errors=1 -d error_reporting=E_ALL -r 'require "app/bootstrap.php"; foreach (glob("app/*.php") as $f) { $c = basename($f, ".php"); if (!class_exists($c)) { echo "   not a class: $c\n"; } } echo "   done\n";' 2>&1 | grep -v 'i360.so' | grep -vE 'Deprecated' | sed -E 's#/home/[^/ ]+#~#g' | cut -c1-220 | head -20
+          echo "== deprecations under 8.5 (first 8):"
+          $P -d display_errors=1 -d error_reporting=E_ALL -r 'require "app/bootstrap.php"; foreach (glob("app/*.php") as $f) { class_exists(basename($f, ".php")); }' 2>&1 | grep -E 'Deprecated' | sed -E 's#/home/[^/ ]+#~#g' | sort -u | cut -c1-220 | head -8
+          echo "== error log settings under 8.5: display_errors=$($P -r 'echo ini_get("display_errors");') log_errors=$($P -r 'echo ini_get("log_errors");') error_log=$($P -r 'echo ini_get("error_log") ?: "(stderr)";' | sed -E 's#/home/[^/ ]+#~#g')"
           EOF
