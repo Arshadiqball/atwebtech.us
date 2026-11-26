@@ -13,6 +13,8 @@ $token = Security::csrfToken();
       <form action="/app/channels/connect/<?= e($pending['provider']) ?>" method="post">
         <input type="hidden" name="_token" value="<?= e($token) ?>">
         <input type="hidden" name="switch" value="1">
+<?php if (!empty($pending['pages'])): ?>        <input type="hidden" name="as" value="page">
+<?php endif; ?>
         <button type="submit" class="cc-switch">Switch Account</button>
       </form>
       <span class="cc-logos" aria-hidden="true">
@@ -42,7 +44,9 @@ $token = Security::csrfToken();
 <?php endforeach; ?>
       </fieldset>
       <p class="cc-fine"><?= match ($pending['provider']) {
-          'linkedin' => 'atwebtech can create posts on this LinkedIn Profile. It can’t see your messages, and Company Pages aren’t available yet. You can disconnect at any time.',
+          'linkedin' => !empty($pending['pages'])
+              ? 'atwebtech can publish the posts you schedule to each LinkedIn Page you select, as the Page. It can’t see your messages. You can disconnect at any time.'
+              : 'atwebtech can create posts on this LinkedIn Profile. It can’t see your messages. To post as a Company Page, connect “LinkedIn Page”. You can disconnect at any time.',
           'tiktok' => 'atwebtech can read this TikTok account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
           'facebook' => 'atwebtech can publish the posts you schedule to each Facebook Page you select. It can’t read your messages. You can disconnect at any time.',
           'instagram' => 'atwebtech can publish photos you schedule to this Instagram account. A post needs a photo. It can’t read your messages. You can disconnect at any time.',

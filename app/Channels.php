@@ -2,13 +2,17 @@
 
 declare(strict_types=1);
 
-/** Connected social channels. YouTube, LinkedIn Profiles, Instagram professional accounts, Facebook Pages, Threads and Pinterest can publish; TikTok connects for name and picture. */
+/** Connected social channels. YouTube, LinkedIn Profiles and Pages, Instagram professional accounts, Facebook Pages, Threads and Pinterest can publish; TikTok connects for name and picture. */
 final class Channels
 {
     public const YOUTUBE_SCOPE = 'https://www.googleapis.com/auth/youtube.readonly';
     public const UPLOAD_SCOPE = 'https://www.googleapis.com/auth/youtube.upload';
     public const LINKEDIN_SIGNIN = 'openid profile email';
     public const LINKEDIN_SHARE = 'w_member_social';
+    /** Posting as a LinkedIn Company Page (Community Management API). */
+    public const LINKEDIN_PAGE_SHARE = 'w_organization_social';
+    /** A Page's external_id is this prefix plus the organization id, so it never clashes with a member id. */
+    public const LINKEDIN_PAGE_PREFIX = 'org-';
     public const TIKTOK_BASIC = 'user.info.basic';
     public const TIKTOK_PUBLISH = 'video.publish';
     public const FACEBOOK_SCOPES = 'pages_show_list,pages_manage_posts';
@@ -52,6 +56,27 @@ final class Channels
         };
     }
 
+    /** True once the separate LinkedIn app for Company Pages has its keys. */
+    public static function linkedinPagesReady(): bool
+    {
+        return config('oauth.linkedin_pages.client_id') !== '' && config('oauth.linkedin_pages.client_secret') !== '';
+    }
+
+    /** The LinkedIn app a token belongs to: the Pages app when its scopes include Page posting. */
+    public static function linkedinCreds(string $scopes): array
+    {
+        return str_contains($scopes, self::LINKEDIN_PAGE_SHARE) ? config('oauth.linkedin_pages') : config('oauth.linkedin');
+    }
+
+    /** urn:li:organization:… for a Page channel, urn:li:person:… for a Profile. */
+    public static function linkedinAuthor(string $externalId): string
+    {
+        if (str_starts_with($externalId, self::LINKEDIN_PAGE_PREFIX)) {
+            return 'urn:li:organization:' . substr($externalId, strlen(self::LINKEDIN_PAGE_PREFIX));
+        }
+        return 'urn:li:person:' . $externalId;
+    }
+
     public static function forUser(int $uid): array
     {
         $stmt = Database::connection()->prepare('SELECT id, provider, external_id, name, kind, avatar_url, posting_goal, schedule, scopes, queue_intro_closed_at, paused_at, stats_checked_at, stats_error, inbox_checked_at, inbox_error, recycle_days, created_at FROM channels WHERE user_id = :uid ORDER BY id');
@@ -79,7 +104,7 @@ final class Channels
         $scopes = (string) ($row['scopes'] ?? '');
         $row['can_publish'] = match ($row['provider']) {
             'youtube' => self::youtubeCanPublish($scopes),
-            'linkedin' => str_contains($scopes, self::LINKEDIN_SHARE),
+            'linkedin' => str_contains($scopes, self::LINKEDIN_SHARE) || str_contains($scopes, self::LINKEDIN_PAGE_SHARE),
             'instagram' => str_contains($scopes, 'instagram_business_content_publish'),
             'facebook' => ($row['kind'] ?? '') === 'Page' && str_contains($scopes, 'pages_manage_posts'),
             'threads' => str_contains($scopes, 'threads_content_publish'),
@@ -170,7 +195,7 @@ final class Channels
             throw new ChannelAuthException($network . ' access expired. Reconnect the channel to keep publishing.');
         }
         $creds = match ($channel['provider']) {
-            'linkedin' => config('oauth.linkedin'),
+            'linkedin' => self::linkedinCreds((string) ($channel['scopes'] ?? '')),
             'tiktok' => config('oauth.tiktok'),
             default => config('oauth.google'),
         };
@@ -293,6 +318,8 @@ final class Channels
                 'assets' => $test !== '' ? $test . '/v2/assets' : 'https://api.linkedin.com/v2/assets',
                 'ugc' => $test !== '' ? $test . '/v2/ugcPosts' : 'https://api.linkedin.com/v2/ugcPosts',
                 'social' => $test !== '' ? $test . '/v2/socialActions' : 'https://api.linkedin.com/v2/socialActions',
+                'acls' => $test !== '' ? $test . '/v2/organizationAcls' : 'https://api.linkedin.com/v2/organizationAcls',
+                'organizations' => $test !== '' ? $test . '/v2/organizations' : 'https://api.linkedin.com/v2/organizations',
             };
         }
         return match ($name) {
@@ -303,9 +330,19 @@ final class Channels
         };
     }
 
-    public static function authorizeUrl(string $provider, string $state, string $verifier, bool $switchAccount = false, ?string $redirectUri = null, bool $fresh = false): string
+    public static function authorizeUrl(string $provider, string $state, string $verifier, bool $switchAccount = false, ?string $redirectUri = null, bool $fresh = false, bool $linkedinPages = false): string
     {
         $redirectUri = $redirectUri ?: self::redirectUri($provider);
+        if ($provider === 'linkedin' && $linkedinPages) {
+            // Company Pages: the separate Community Management API app, which asks for Page admin and posting rights.
+            return 'https://www.linkedin.com/oauth/v2/authorization?' . http_build_query([
+                'response_type' => 'code',
+                'client_id' => config('oauth.linkedin_pages.client_id'),
+                'redirect_uri' => $redirectUri,
+                'scope' => config('oauth.linkedin_pages.scopes'),
+                'state' => $state,
+            ], '', '&', PHP_QUERY_RFC3986);
+        }
         if ($provider === 'pinterest') {
             return 'https://www.pinterest.com/oauth/?' . http_build_query([
                 'client_id' => config('oauth.pinterest.client_id'),
@@ -410,10 +447,10 @@ final class Channels
     }
 
     /** Swap an authorization code for tokens. */
-    public static function exchange(string $provider, string $code, string $verifier, ?string $redirectUri = null): array
+    public static function exchange(string $provider, string $code, string $verifier, ?string $redirectUri = null, bool $linkedinPages = false): array
     {
         $creds = match ($provider) {
-            'linkedin' => config('oauth.linkedin'),
+            'linkedin' => $linkedinPages ? config('oauth.linkedin_pages') : config('oauth.linkedin'),
             'tiktok' => config('oauth.tiktok'),
             'facebook' => config('oauth.facebook'),
             'instagram' => config('oauth.instagram'),
@@ -460,7 +497,7 @@ final class Channels
             throw new RuntimeException('Token response had no access token.');
         }
         $fallback = match ($provider) {
-            'linkedin' => self::LINKEDIN_SIGNIN . ' ' . self::LINKEDIN_SHARE,
+            'linkedin' => $linkedinPages ? (string) config('oauth.linkedin_pages.scopes') : self::LINKEDIN_SIGNIN . ' ' . self::LINKEDIN_SHARE,
             'tiktok' => self::TIKTOK_BASIC,
             default => self::YOUTUBE_SCOPE,
         };
@@ -598,7 +635,43 @@ final class Channels
         return is_array($inner) && isset($inner['access_token']) ? $inner : $data;
     }
 
-    /** The signed-in member's personal LinkedIn Profile. Company Pages are not available yet. */
+    /**
+     * LinkedIn Company Pages the signed-in member can post for: they are a Page admin or content admin.
+     * Needs the Community Management API app (rw_organization_admin to list them).
+     */
+    public static function linkedinPages(string $accessToken): array
+    {
+        $url = self::endpoint('linkedin', 'acls') . '?' . http_build_query(['q' => 'roleAssignee', 'state' => 'APPROVED', 'count' => 100]);
+        $data = self::request('GET', $url, null, $accessToken);
+        $ids = [];
+        foreach ((array) ($data['elements'] ?? []) as $acl) {
+            $role = (string) ($acl['role'] ?? '');
+            $org = (string) ($acl['organization'] ?? $acl['organizationTarget'] ?? '');
+            if (in_array($role, ['ADMINISTRATOR', 'CONTENT_ADMINISTRATOR', 'DIRECT_SPONSORED_CONTENT_POSTER'], true)
+                && preg_match('/^urn:li:organization:(\d{1,20})$/', $org, $m)) {
+                $ids[$m[1]] = true;
+            }
+        }
+        $pages = [];
+        foreach (array_slice(array_keys($ids), 0, 50) as $id) {
+            $name = 'LinkedIn Page';
+            $avatar = null;
+            try {
+                $org = self::request('GET', self::endpoint('linkedin', 'organizations') . '/' . $id . '?projection=' . rawurlencode('(id,localizedName,logoV2(original~:playableStreams))'), null, $accessToken);
+                $name = trim((string) ($org['localizedName'] ?? '')) ?: $name;
+                $streams = (array) ($org['logoV2']['original~']['elements'] ?? []);
+                $last = end($streams);
+                $logo = is_array($last) ? (string) ($last['identifiers'][0]['identifier'] ?? '') : '';
+                $avatar = self::safeAvatar($logo);
+            } catch (Throwable $e) {
+                error_log(sprintf('[%s] linkedin organization %s lookup failed: %s', gmdate('c'), $id, $e->getMessage()));
+            }
+            $pages[] = ['id' => self::LINKEDIN_PAGE_PREFIX . $id, 'name' => mb_substr($name, 0, 190), 'avatar' => $avatar, 'kind' => 'Page'];
+        }
+        return $pages;
+    }
+
+    /** The signed-in member's personal LinkedIn Profile. Company Pages come from linkedinPages(). */
     public static function linkedinProfile(string $accessToken): array
     {
         // OpenID sign-in does not include permission for /v2/me. Name and id come from userinfo.
@@ -646,13 +719,13 @@ final class Channels
     }
 
     /**
-     * Publish a text or image post to a personal LinkedIn Profile.
+     * Publish a text or image post to a LinkedIn Profile, or to a Company Page (external_id org-…).
      * Returns the post URN (used as the public feed URL).
      */
     /** @param array<int, array{0:string, 1:string}> $more extra images as [path, mime]: LinkedIn shows them as a multi-image post */
-    public static function linkedinShare(string $token, string $personId, string $text, ?string $imagePath, ?string $imageMime, array $more = []): string
+    public static function linkedinShare(string $token, string $externalId, string $text, ?string $imagePath, ?string $imageMime, array $more = []): string
     {
-        $author = 'urn:li:person:' . $personId;
+        $author = self::linkedinAuthor($externalId);
         $content = [
             'com.linkedin.ugc.ShareContent' => [
                 'shareCommentary' => ['text' => $text],
@@ -685,13 +758,13 @@ final class Channels
     }
 
     /** Post a first comment on a LinkedIn share the member just published. */
-    public static function linkedinComment(string $token, string $personId, string $shareUrn, string $text): void
+    public static function linkedinComment(string $token, string $externalId, string $shareUrn, string $text): void
     {
         if (!preg_match('/^urn:li:[a-zA-Z0-9:]+$/', $shareUrn)) {
             throw new RuntimeException('The LinkedIn post id was not valid.');
         }
         self::requestJson('POST', self::endpoint('linkedin', 'social') . '/' . rawurlencode($shareUrn) . '/comments', [
-            'actor' => 'urn:li:person:' . $personId,
+            'actor' => self::linkedinAuthor($externalId),
             'message' => ['text' => $text],
         ], $token);
     }
@@ -744,6 +817,14 @@ final class Channels
             if ($provider === 'linkedin') {
                 $form['client_id'] = config('oauth.linkedin.client_id');
                 $form['client_secret'] = config('oauth.linkedin.client_secret');
+                if (self::linkedinPagesReady()) {
+                    // The token may belong to the Pages app; LinkedIn refuses a revoke from the other app.
+                    try {
+                        self::request('POST', self::endpoint('linkedin', 'revoke'), ['token' => $token, 'client_id' => config('oauth.linkedin_pages.client_id'), 'client_secret' => config('oauth.linkedin_pages.client_secret')]);
+                    } catch (Throwable $e) {
+                        // Not a Pages token: the profile app below handles it.
+                    }
+                }
             }
             if ($provider === 'tiktok') {
                 $form = [

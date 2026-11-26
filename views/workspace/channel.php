@@ -79,6 +79,7 @@ $next = $queue['next'] ?? null;
           <form action="/app/channels/connect/<?= e($channel['provider']) ?>" method="post">
             <input type="hidden" name="_token" value="<?= e($token) ?>">
             <input type="hidden" name="reconnect" value="1">
+            <?php if (str_starts_with((string) $channel['external_id'], Channels::LINKEDIN_PAGE_PREFIX)): ?><input type="hidden" name="as" value="page"><?php endif; ?>
             <button type="submit" class="ws-menu-item"<?= Channels::connectable($channel['provider']) ? '' : ' disabled' ?>><?= icon('arrows-clockwise') ?>Reconnect channel</button>
           </form>
           <form action="<?= e($self) ?>/disconnect" method="post">
@@ -99,7 +100,9 @@ $next = $queue['next'] ?? null;
   <div class="ch-banner" role="status">
     <?= icon('warning-circle') ?>
     <p><b>Reconnect to publish.</b> <?= match ($channel['provider']) {
-        'linkedin' => 'Allow atwebtech to create posts on your LinkedIn Profile (the “Share on LinkedIn” permission) so scheduled posts can go out.',
+        'linkedin' => str_starts_with((string) $channel['external_id'], Channels::LINKEDIN_PAGE_PREFIX)
+            ? 'Allow atwebtech to post on behalf of this LinkedIn Page so scheduled posts can go out.'
+            : 'Allow atwebtech to create posts on your LinkedIn Profile (the “Share on LinkedIn” permission) so scheduled posts can go out.',
         'instagram' => 'Content publishing wasn’t granted, so these posts stay as plans and are not sent. Reconnect and allow Instagram content publishing.',
         'facebook' => 'Posting permission wasn’t granted for this Page. Reconnect and allow atwebtech to create posts on it.',
         'threads' => 'Publishing wasn’t granted, so these posts stay as plans. Reconnect and allow Threads content publishing.',
@@ -109,6 +112,7 @@ $next = $queue['next'] ?? null;
     <form action="/app/channels/connect/<?= e($channel['provider']) ?>" method="post">
       <input type="hidden" name="_token" value="<?= e($token) ?>">
       <input type="hidden" name="reconnect" value="1">
+      <?php if (str_starts_with((string) $channel['external_id'], Channels::LINKEDIN_PAGE_PREFIX)): ?><input type="hidden" name="as" value="page"><?php endif; ?>
       <button type="submit" class="ws-btn ws-btn--sm ws-btn--dark"<?= Channels::connectable($channel['provider']) ? '' : ' disabled' ?>>Reconnect</button>
     </form>
   </div>

@@ -85,6 +85,12 @@ return [
             'client_id' => (string) Env::get('LINKEDIN_CLIENT_ID', ''),
             'client_secret' => (string) Env::get('LINKEDIN_CLIENT_SECRET', ''),
         ],
+        // Company Pages need LinkedIn's Community Management API, which LinkedIn only grants to a separate app.
+        'linkedin_pages' => [
+            'client_id' => (string) Env::get('LINKEDIN_PAGES_CLIENT_ID', ''),
+            'client_secret' => (string) Env::get('LINKEDIN_PAGES_CLIENT_SECRET', ''),
+            'scopes' => (string) Env::get('LINKEDIN_PAGES_SCOPES', 'rw_organization_admin w_organization_social r_organization_social'),
+        ],
         'facebook' => [
             'client_id' => (string) Env::get('FACEBOOK_CLIENT_ID', ''),
             'client_secret' => (string) Env::get('FACEBOOK_CLIENT_SECRET', ''),

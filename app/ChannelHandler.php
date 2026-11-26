@@ -32,12 +32,16 @@ final class ChannelHandler
         if ($provider === 'pinterest' && !Channels::pinterestOAuthReady()) {
             self::connectPinterestSandbox();
         }
+        $pages = $provider === 'linkedin' && ($_POST['as'] ?? '') === 'page';
+        if ($pages && !Channels::linkedinPagesReady()) {
+            self::notice('/app/channels', 'LinkedIn Company Pages aren’t available yet. LinkedIn is still reviewing atwebtech’s access to Pages. You can connect your LinkedIn Profile now.');
+        }
 
         $state = bin2hex(random_bytes(24));
         $verifier = rtrim(strtr(base64_encode(random_bytes(48)), '+/', '-_'), '=');
         $redirectUri = Channels::redirectUri($provider);
-        $_SESSION['_oauth'] = ['provider' => $provider, 'state' => $state, 'verifier' => $verifier, 'redirect' => $redirectUri, 'reconnect' => $reconnect, 'at' => time()];
-        redirect(Channels::authorizeUrl($provider, $state, $verifier, ($_POST['switch'] ?? '') === '1', $redirectUri, $reconnect));
+        $_SESSION['_oauth'] = ['provider' => $provider, 'state' => $state, 'verifier' => $verifier, 'redirect' => $redirectUri, 'reconnect' => $reconnect, 'pages' => $pages, 'at' => time()];
+        redirect(Channels::authorizeUrl($provider, $state, $verifier, ($_POST['switch'] ?? '') === '1', $redirectUri, $reconnect, $pages));
     }
 
     public static function callback(string $provider): never
@@ -72,12 +76,17 @@ final class ChannelHandler
 
         try {
             $redirectUri = is_string($flow['redirect'] ?? null) ? $flow['redirect'] : null;
-            $tokens = Channels::exchange($provider, $code, (string) $flow['verifier'], $redirectUri);
+            $pages = !empty($flow['pages']);
+            $tokens = Channels::exchange($provider, $code, (string) $flow['verifier'], $redirectUri, $pages);
+            if ($pages && !str_contains($tokens['scope'], Channels::LINKEDIN_PAGE_SHARE)) {
+                Channels::revoke($tokens['access_token'], $provider);
+                self::notice('/app/channels', 'LinkedIn Page posting wasn’t granted. Allow atwebtech to post on behalf of your Pages, then try again.');
+            }
             if ($provider === 'youtube' && !str_contains($tokens['scope'], Channels::YOUTUBE_SCOPE)) {
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'YouTube access wasn’t granted. Tick the YouTube permission on the Google screen to connect.');
             }
-            if ($provider === 'linkedin' && !str_contains($tokens['scope'], 'profile') && !str_contains($tokens['scope'], 'openid')) {
+            if ($provider === 'linkedin' && !$pages && !str_contains($tokens['scope'], 'profile') && !str_contains($tokens['scope'], 'openid')) {
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'LinkedIn profile access wasn’t granted. Tick the profile permission to connect.');
             }
@@ -101,8 +110,8 @@ final class ChannelHandler
                 Channels::revoke($tokens['access_token'], $provider);
                 self::notice('/app/channels', 'Pinterest account access wasn’t granted. Allow the account permission, then try again.');
             }
-            $accounts = Channels::accounts($provider, $tokens['access_token']);
-            if (!$accounts && $provider === 'linkedin') {
+            $accounts = $pages ? Channels::linkedinPages($tokens['access_token']) : Channels::accounts($provider, $tokens['access_token']);
+            if (!$accounts && $provider === 'linkedin' && !$pages) {
                 $accounts = Channels::profileFromIdToken((string) ($tokens['id_token'] ?? ''));
             }
             unset($tokens['id_token']);
@@ -117,7 +126,9 @@ final class ChannelHandler
         if (!$accounts) {
             Channels::revoke($tokens['access_token'], $provider);
             self::notice('/app/channels', match ($provider) {
-                'linkedin' => 'We couldn’t read this LinkedIn Profile. Try another account, or try again in a few minutes.',
+                'linkedin' => !empty($flow['pages'])
+                    ? 'This LinkedIn account isn’t an admin of any Company Page. Ask a Page super admin to make you an admin or content admin, then try again.'
+                    : 'We couldn’t read this LinkedIn Profile. Try another account, or try again in a few minutes.',
                 'tiktok' => 'We couldn’t read this TikTok account. Try the same TikTok login again in a few minutes.',
                 'pinterest' => 'We couldn’t read this Pinterest account. Try again in a few minutes.',
                 'facebook' => 'This Facebook account doesn’t manage a Page we can read. Create a Page, or sign in with an account that manages one, then try again. (Facebook no longer lets apps post to Groups.)',
@@ -132,6 +143,7 @@ final class ChannelHandler
             'tokens' => Security::seal(json_encode($tokens, JSON_THROW_ON_ERROR)),
             'accounts' => $accounts,
             'reconnect' => !empty($flow['reconnect']),
+            'pages' => !empty($flow['pages']),
             'at' => time(),
         ];
         redirect('/app/channels/confirm');

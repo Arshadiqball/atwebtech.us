@@ -28,6 +28,26 @@ $linked = $linked ?? [];
     </div>
 <?php endif; ?>
   </li>
+<?php if ($ch['slug'] === 'linkedin'): $pagesLive = $live && Channels::linkedinPagesReady(); ?>
+  <li id="connect-linkedin-page">
+<?php if ($pagesLive && !$full): ?>
+    <form action="/app/channels/connect/linkedin" method="post">
+      <input type="hidden" name="_token" value="<?= e($token) ?>">
+      <input type="hidden" name="as" value="page">
+      <button type="submit" class="cg-card">
+        <span class="cg-icon" style="--c: <?= e($ch['color']) ?>"><?= brand_mark($ch['icon'], $ch['name'], true) ?></span>
+        <b>LinkedIn Page</b><small>Company Page</small>
+      </button>
+    </form>
+<?php else: ?>
+    <div class="cg-card is-disabled" aria-disabled="true" title="<?= $pagesLive ? '' : 'LinkedIn is reviewing atwebtech’s access to Company Pages.' ?>">
+      <span class="ws-chip cg-chip"><?= $pagesLive ? 'Limit reached' : 'Soon' ?></span>
+      <span class="cg-icon" style="--c: <?= e($ch['color']) ?>"><?= brand_mark($ch['icon'], $ch['name'], true) ?></span>
+      <b>LinkedIn Page</b><small>Company Page</small>
+    </div>
+<?php endif; ?>
+  </li>
+<?php endif; ?>
 <?php endforeach; ?>
   <li>
     <a class="cg-card" href="/app/link-in-bio">
