@@ -27,10 +27,11 @@
         <span aria-hidden="true">|</span> <a href="/contact">Contact</a>
       </p>
     </div>
-<?php if (!empty($site['featured'])): ?>
+<?php // Directory badges load from 15 other websites, so they appear on the home page only: that is the page the directories check.
+if (!empty($site['featured']) && current_path() === '/'): ?>
     <ul class="footer-featured" role="list" aria-label="Featured on">
 <?php foreach ($site['featured'] as [$name, $href, $img]): ?>
-      <li><a href="<?= e($href) ?>" target="_blank" rel="noopener noreferrer"><img src="<?= e($img) ?>" alt="Featured on <?= e($name) ?>" height="44" loading="lazy" decoding="async"></a></li>
+      <li><a href="<?= e($href) ?>" target="_blank" rel="noopener noreferrer"><img src="<?= e($img) ?>" alt="Featured on <?= e($name) ?>" height="44" loading="lazy" decoding="async" fetchpriority="low" referrerpolicy="no-referrer"></a></li>
 <?php endforeach; ?>
     </ul>
 <?php endif; ?>
