@@ -41,9 +41,11 @@ $linked = $linked ?? [];
     </form>
 <?php else: ?>
     <div class="cg-card is-disabled" aria-disabled="true" title="<?= $pagesLive ? '' : 'LinkedIn is reviewing atwebtech’s access to Company Pages.' ?>">
-      <span class="ws-chip cg-chip"><?= $pagesLive ? 'Limit reached' : 'Soon' ?></span>
+<?php if ($pagesLive): ?>
+      <span class="ws-chip cg-chip">Limit reached</span>
+<?php endif; ?>
       <span class="cg-icon" style="--c: <?= e($ch['color']) ?>"><?= brand_mark($ch['icon'], $ch['name'], true) ?></span>
-      <b>LinkedIn Page</b><small>Company Page</small>
+      <b>LinkedIn Page</b><small><?= $pagesLive ? 'Company Page' : 'Awaiting LinkedIn approval' ?></small>
     </div>
 <?php endif; ?>
   </li>
