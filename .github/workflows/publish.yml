@@ -1,0 +1,49 @@
+name: Publish due posts
+
+# Backup for the server's every-minute cron. The hosting panel's cron runs bin/publish.php with
+# PHP 8.5, and those runs were dying partway through a send (Nov 2026). This runs the same script
+# with PHP 8.2 every 5 minutes over SSH. The work happens on the server; GitHub only starts it.
+# GitHub may start scheduled runs late, so a post can go out a few minutes after its time.
+# Output goes to the server's own storage/logs/publish.log, never to this public Actions log.
+# The publisher's lock means this and the server cron never send the same post twice.
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+concurrency:
+  group: publish-production
+  cancel-in-progress: false
+
+env:
+  DEPLOY_HOST: vda2000.is.cc
+  DEPLOY_USER: atwebtec
+  DEPLOY_PATH: domains/atwebtech.us/public_html
+
+jobs:
+  publish:
+    name: Send due posts
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 4
+    steps:
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Run bin/publish.php on the server
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes -o ServerAliveInterval=30 "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH=$DEPLOY_PATH bash -s" <<'EOF'
+          cd "$DEPLOY_PATH"
+          PHP=/usr/local/php82/bin/php
+          [ -x "$PHP" ] || PHP=$(command -v php8.2 || command -v php)
+          timeout 200 "$PHP" bin/publish.php >> storage/logs/publish.log 2>&1
+          code=$?
+          echo "publish.php exit $code"
+          exit 0
+          EOF
