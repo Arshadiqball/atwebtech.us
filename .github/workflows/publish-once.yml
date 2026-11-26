@@ -1,0 +1,47 @@
+name: Publish once (temporary)
+
+# Temporary: runs bin/publish.php once by hand. Prints a cleaned summary only,
+# because this repository's Actions logs are public. Remove after use.
+
+on:
+  workflow_dispatch:
+
+env:
+  DEPLOY_HOST: vda2000.is.cc
+  DEPLOY_USER: atwebtec
+  DEPLOY_PATH: domains/atwebtech.us/public_html
+
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    environment: production
+    timeout-minutes: 10
+    steps:
+      - name: Set up SSH
+        run: |
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' "${{ secrets.DEPLOY_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      - name: Run the publisher once
+        run: |
+          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH=$DEPLOY_PATH bash -s" <<'EOF'
+          cd "$DEPLOY_PATH"
+          redact() { sed -E 's#(token|secret|key|password|code)=[^&" ]+#\1=<hidden>#Ig; s#[A-Za-z0-9_-]{32,}#<long>#g; s#/home/[^/ ]+#~#g' | grep -v "i360.so" | cut -c1-200; }
+          PHP=$(command -v php8.3 || command -v php8.2 || command -v php)
+
+          echo "== put the stuck test post (335) back in the queue:"
+          $PHP -r 'require "app/bootstrap.php"; $n = Database::connection()->exec("UPDATE posts SET status = \"planned\" WHERE id = 335 AND status = \"publishing\""); echo "   rows: $n\n";' 2>&1 | redact
+
+          echo "== run bin/publish.php (limit 4 minutes):"
+          start=$(date +%s); timeout 240 $PHP bin/publish.php > /tmp/pub.out 2>&1; code=$?; end=$(date +%s)
+          echo "   exit $code after $((end-start))s"
+          redact < /tmp/pub.out | tail -n 25
+
+          echo "== test post afterwards:"
+          $PHP -r 'require "app/bootstrap.php"; $r = Database::connection()->query("SELECT status, attempts, sent_at, external_url, LEFT(COALESCE(error, \"\"), 160) e FROM posts WHERE id = 335")->fetch(); echo "   status {$r["status"]}, attempts {$r["attempts"]}, sent {$r["sent_at"]}, url {$r["external_url"]}, error {$r["e"]}\n";' 2>&1 | redact
+          echo "== new php-error.log lines from this run, cleaned:"
+          awk -v s="$(date -u -d @$start '+%d-%b-%Y %H:%M')" 'index($0, s) || f {f=1; print}' storage/logs/php-error.log 2>/dev/null | tail -n 15 | redact
+          EOF
