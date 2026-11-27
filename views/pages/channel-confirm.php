@@ -53,7 +53,7 @@ $token = Security::csrfToken();
           'threads' => 'atwebtech can publish the posts you schedule to this Threads profile and read their stats. It can’t read your messages. You can disconnect at any time.',
           'pinterest' => !empty($pending['sandbox'])
               ? 'This is the Pinterest sandbox account. atwebtech can read its name and picture. Publishing isn’t available yet, and this is not a live Pinterest profile. You can disconnect at any time.'
-              : 'atwebtech can read this Pinterest account’s name and picture. Publishing isn’t available yet, so nothing is posted. You can disconnect at any time.',
+              : 'atwebtech can publish the photo Pins you schedule to a board on this Pinterest account. It can’t see your messages. You can disconnect at any time.',
           default => 'atwebtech can read this channel and upload videos you schedule. It can’t delete videos or reply to comments. You can disconnect at any time.',
       } ?></p>
     </form>
