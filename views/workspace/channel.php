@@ -143,7 +143,11 @@ $next = $queue['next'] ?? null;
 <?php endif; ?>
 
 <?php if ($tab === 'queue' && $view === 'list'): ?>
-<?php if ($goal): ?>
+<?php $queued = $queue ? count(array_filter(array_merge(...array_column($queue['days'], 'items')), static fn (array $i): bool => $i['type'] !== 'slot')) + count($queue['overdue'] ?? []) : 0; ?>
+<?php if (!$goal && $queued > 0): ?>
+  <p class="wsp-note"><?= icon('info') ?><span>No posting goal yet, so your queue shows only the posts you’ve scheduled. <a href="<?= e($self) ?>?setup=goal">Set a posting goal</a> to add posting times.</span></p>
+<?php endif; ?>
+<?php if ($goal || $queued > 0): ?>
 <?php partial('workspace/queue-list', ['user' => $user, 'queue' => $queue, 'filter' => '', 'endless' => $next && $days < ChannelHandler::QUEUE_DAYS ? [
     'src' => $self . '/queue?from=' . $next->format('Y-m-d'),
     'href' => $self . '?days=' . min(ChannelHandler::QUEUE_DAYS, $days + 28),

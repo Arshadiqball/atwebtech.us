@@ -15,3 +15,4 @@ storage/firebase-service-account.json
 # Admin panel login (kept on this Mac only)
 /admin-credentials.txt
 /storage/sessions/
+/docs/*.mp4
