@@ -420,7 +420,7 @@ Also for every plan:
 | `* * * * *` | `php bin/publish.php` | Recycle evergreen posts, publish due posts, then refresh network stats, competitors and the Community inbox, email due branded reports, deliver webhooks, and run automations |
 | `15 * * * *` | `php bin/feeds.php` | Check followed feeds |
 | `0 14 * * 1` | `php bin/trends.php` | Refresh the Trending list (run by GitHub Actions, `trends.yml`, no server cron needed) |
-| `*/5 * * * *` | `php bin/publish.php` | Backup for the minute cron, run by GitHub Actions (`publish.yml`) with PHP 8.2 over SSH. Added Nov 2026 because the hosting panel's cron uses PHP 8.5 and those runs died mid-send. Output goes to the server's `storage/logs/publish.log`. Remove it once the panel cron uses PHP 8.2 and posts go out on time. GitHub pauses scheduled workflows in a public repo after 60 days without a commit. |
+| `* * * * *` | `/usr/local/php82/bin/php bin/publish.php` | The publisher, as a DirectAdmin cron job (set Nov 2026). Each run stamps `storage/logs/publish.heartbeat` (start) and `publish.finished` (end); the admin Posts page warns when the last run is over 5 minutes old. The earlier GitHub Actions backup was removed because GitHub ran it only every few hours. |
 
 ## AI Assistant
 
