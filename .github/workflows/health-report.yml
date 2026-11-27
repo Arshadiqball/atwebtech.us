@@ -75,6 +75,8 @@ jobs:
           foreach ($db->query("SELECT provider, stats_error, inbox_error FROM channels WHERE stats_error IS NOT NULL OR inbox_error IS NOT NULL") as $r) { $h[$r["provider"] . ": " . $clean((string) ($r["stats_error"] ?: $r["inbox_error"]))] = ($h[$r["provider"] . ": " . $clean((string) ($r["stats_error"] ?: $r["inbox_error"]))] ?? 0) + 1; }
           foreach ($h ?? [] as $k => $n) { echo "   $n x $k\n"; }
           ' 2>&1 | sed -E 's#/home/[^ ]+#~#g; s/[A-Za-z0-9_-]{32,}/<long>/g' | grep -v "i360.so"
+          echo "== account deletions and channel revokes in php-error.log (timestamps only)"
+          grep -hE "deleted by (an admin|its owner)|token revoke failed|admin channel revoke" storage/logs/php-error.log 2>/dev/null | sed -E 's/^\[([^]]+)\].*(deleted by an admin|deleted by its owner|token revoke failed|admin channel revoke failed).*/\1 \2/' | tail -n 40
           echo "== crontab (programs only, all lines)"
           crontab -l 2>&1 | sed -E 's#/home/[^ ]+#~#g; s/[A-Za-z0-9_-]{24,}/<long>/g' | cut -c1-160
           EOF
