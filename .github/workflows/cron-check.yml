@@ -26,9 +26,10 @@ jobs:
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=yes "$DEPLOY_USER@$DEPLOY_HOST" "DEPLOY_PATH=$DEPLOY_PATH bash -s" <<'EOF'
           cd "$DEPLOY_PATH"
-          echo "now $(date -u +%FT%TZ) heartbeat: $(cat storage/logs/publish.heartbeat 2>/dev/null || echo none)"
+          echo "now $(date -u +%FT%TZ) started: $(cat storage/logs/publish.heartbeat 2>/dev/null || echo none) finished: $(cat storage/logs/publish.finished 2>/dev/null || echo none)"
           sleep 75
-          echo "now $(date -u +%FT%TZ) heartbeat: $(cat storage/logs/publish.heartbeat 2>/dev/null || echo none)"
+          echo "now $(date -u +%FT%TZ) started: $(cat storage/logs/publish.heartbeat 2>/dev/null || echo none) finished: $(cat storage/logs/publish.finished 2>/dev/null || echo none)"
+          echo "== php82 path reports: $(/usr/local/php82/bin/php -r 'echo PHP_VERSION;' 2>/dev/null)"
           echo "== new publish.log lines today"
           grep -h "^\[$(date -u +%F)" storage/logs/publish.log 2>/dev/null | tail -n 5 | cut -c1-160
           echo "== last PHP errors mentioning publish or fatal"

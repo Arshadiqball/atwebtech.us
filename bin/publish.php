@@ -74,3 +74,5 @@ if ($autoLock && flock($autoLock, LOCK_EX | LOCK_NB)) {
     }
     flock($autoLock, LOCK_UN);
 }
+// Finished: a start stamp without a matching finish means the run died partway.
+@file_put_contents(BASE_PATH . '/storage/logs/publish.finished', gmdate('c') . "\n");
