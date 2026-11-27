@@ -37,6 +37,7 @@ jobs:
           /usr/local/php82/bin/php -r '
           require "app/bootstrap.php";
           $db = Database::connection();
+          echo "== raw counts: users ", $db->query("SELECT COUNT(*) FROM users")->fetchColumn(), ", channels ", $db->query("SELECT COUNT(*) FROM channels")->fetchColumn(), ", posts ", $db->query("SELECT COUNT(*) FROM posts")->fetchColumn(), ", posts planned ", $db->query("SELECT COUNT(*) FROM posts WHERE status=\"planned\"")->fetchColumn(), ", posts sent ", $db->query("SELECT COUNT(*) FROM posts WHERE status=\"sent\"")->fetchColumn(), "\n";
           $clean = static fn (string $s): string => mb_substr(preg_replace(["#https?://\S+#", "/\d{3,}/", "/[A-Za-z0-9_-]{20,}/"], ["<url>", "<n>", "<id>"], $s), 0, 110);
           echo "== connect available (keys configured)\n";
           foreach (["facebook","instagram","threads","linkedin","youtube","pinterest","tiktok","bluesky","mastodon"] as $p) {
@@ -73,5 +74,7 @@ jobs:
           echo "== channel health errors (stats/inbox)\n";
           foreach ($db->query("SELECT provider, stats_error, inbox_error FROM channels WHERE stats_error IS NOT NULL OR inbox_error IS NOT NULL") as $r) { $h[$r["provider"] . ": " . $clean((string) ($r["stats_error"] ?: $r["inbox_error"]))] = ($h[$r["provider"] . ": " . $clean((string) ($r["stats_error"] ?: $r["inbox_error"]))] ?? 0) + 1; }
           foreach ($h ?? [] as $k => $n) { echo "   $n x $k\n"; }
-          ' 2>/dev/null
+          ' 2>&1 | sed -E 's#/home/[^ ]+#~#g; s/[A-Za-z0-9_-]{32,}/<long>/g' | grep -v "i360.so"
+          echo "== crontab (programs only, all lines)"
+          crontab -l 2>&1 | sed -E 's#/home/[^ ]+#~#g; s/[A-Za-z0-9_-]{24,}/<long>/g' | cut -c1-160
           EOF
