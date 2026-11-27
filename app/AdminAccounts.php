@@ -226,6 +226,22 @@ final class AdminAccounts
         ]);
     }
 
+    /** @return array{at:?DateTimeImmutable, minutes:?int, php:string} when bin/publish.php last ran */
+    public static function heartbeat(): array
+    {
+        $raw = @file_get_contents(BASE_PATH . '/storage/logs/publish.heartbeat');
+        if (!is_string($raw) || trim($raw) === '') {
+            return ['at' => null, 'minutes' => null, 'php' => ''];
+        }
+        [$when, $php] = array_pad(explode(' ', trim($raw), 2), 2, '');
+        try {
+            $at = new DateTimeImmutable($when);
+        } catch (Throwable $e) {
+            return ['at' => null, 'minutes' => null, 'php' => ''];
+        }
+        return ['at' => $at, 'minutes' => intdiv(max(0, time() - $at->getTimestamp()), 60), 'php' => $php];
+    }
+
     /** POST /admin/channels/{id}/pause: pause or resume one channel. */
     public static function togglePause(string $id): never
     {

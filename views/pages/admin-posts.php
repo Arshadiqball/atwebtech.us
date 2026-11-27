@@ -22,6 +22,12 @@ $self = rtrim($self, '?');
         <p><?= number_format($result['total']) ?> <?= $result['total'] === 1 ? 'post' : 'posts' ?><?= $owner ? ' by ' . e((string) $owner['email']) : '' ?><?= $channel ? ' on ' . e((string) $channel['name']) : '' ?>. Failed and sending posts are listed first.</p>
       </div>
     </header>
+<?php $beat = AdminAccounts::heartbeat(); ?>
+<?php if ($beat['minutes'] === null || $beat['minutes'] > 5): ?>
+    <p class="crm-notice crm-notice--warn" role="alert"><b>Scheduled posts aren’t going out.</b> The publisher <?= $beat['at'] ? 'last ran ' . e(Admin::when($beat['at']->format('Y-m-d H:i:s'))->format('j M, g:i A')) . ' UTC' : 'has not run yet' ?>. Check the every-minute cron job in DirectAdmin (it runs bin/publish.php with PHP 8.2).</p>
+<?php else: ?>
+    <p class="crm-fine">Publisher last ran <?= $beat['minutes'] === 0 ? 'less than a minute' : (int) $beat['minutes'] . ' min' ?> ago (PHP <?= e($beat['php']) ?>).</p>
+<?php endif; ?>
 <?php if (is_string($notice) && $notice !== ''): ?>
     <p class="crm-notice" role="status"><?= e($notice) ?></p>
 <?php endif; ?>

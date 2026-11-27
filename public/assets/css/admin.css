@@ -463,3 +463,5 @@ textarea.crm-input { width: 100%; resize: vertical; }
 .crm-btn--danger { color: #B42318; }
 :root[data-theme="dark"] .crm-btn--danger { color: #FF8A80; }
 @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .crm-btn--danger { color: #FF8A80; } }
+.crm-notice--warn { background: #FDE4E1; color: #A3241A; }
+:root[data-theme="dark"] .crm-notice--warn { background: #3A1C1A; color: #FFB4A9; }

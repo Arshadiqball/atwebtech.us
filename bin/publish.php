@@ -15,6 +15,8 @@ $lock = fopen(BASE_PATH . '/storage/logs/publish.lock', 'c');
 if (!$lock || !flock($lock, LOCK_EX | LOCK_NB)) {
     exit(0);
 }
+// Heartbeat: when this last ran, shown on the admin Posts page so a stopped cron is noticed.
+@file_put_contents(BASE_PATH . '/storage/logs/publish.heartbeat', gmdate('c') . ' ' . PHP_VERSION . "\n");
 
 $recycled = Evergreen::run();
 if ($recycled > 0) {
